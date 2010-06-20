@@ -1,0 +1,9 @@
+{
+	"id": "com.thewbman.webmyth",
+	"version": "0.0.1",
+	"vendor": "thewbman",
+	"type": "web",
+	"main": "index.html",
+	"title": "webmyth",
+	"icon": "icon.png"
+}

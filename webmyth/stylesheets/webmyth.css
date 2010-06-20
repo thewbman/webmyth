@@ -1,0 +1,51 @@
+/* TODO: put your application-specific CSS here */
+
+.buttonClass {
+	height: 30px;
+	width: 75px;
+	margin: 5px;
+	
+	border-style: solid;
+	border-color: #000000;
+	border-radius: 10px;
+	
+	background-color: #111111;
+	
+	text-align: center;
+	vertical-align: middle;
+	color: white
+}
+
+.italics {
+	font-style: italic
+}
+
+.noButton {
+	height: 30px;
+	width: 75px;
+	margin: 5px;
+}
+
+.buttonRow {
+	width: 100%;
+	margin: 0 15px 0 15px;
+	height: 50px
+}
+
+.column1 {
+	float: left;
+	width: 33%;
+	margin: 10
+}
+
+.column2 {
+	float: left;
+	width: 33%;
+	margin: 10
+}
+
+.column3 {
+	float: left;
+	width: 33%;
+	margin: 10
+}
