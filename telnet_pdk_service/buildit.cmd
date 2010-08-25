@@ -33,6 +33,8 @@ echo %DEVICEOPTS%
 
 arm-none-linux-gnueabi-gcc %DEVICEOPTS% -o %OUTFILE% %SRC% "-I%PALMPDK%\include" "-I%PALMPDK%\include\SDL" "-L%PALMPDK%\device\lib" -Wl,--allow-shlib-undefined %LIBS%
 
+copy /Y %OUTFILE% ..\WebMyth
+
 goto :EOF
 
 :END
