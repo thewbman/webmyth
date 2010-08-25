@@ -62,7 +62,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="SDLmain.lib SDL.lib dglesv2.lib SDL_net.lib pdl.lib"
+				AdditionalDependencies="ws2_32.lib SDLmain.lib SDL.lib dglesv2.lib SDL_net.lib pdl.lib"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="$(PalmPDK)\host\lib"
 				GenerateDebugInformation="true"

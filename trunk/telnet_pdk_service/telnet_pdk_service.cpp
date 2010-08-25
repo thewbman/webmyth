@@ -4,137 +4,190 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <math.h>
 #include <iostream>
+//#include <unistd.h>
+
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <netdb.h>
 
 #include "SDL.h"
-#include "SDL_net.h"
-#include "pdl.h"
+//#include "SDL_net.h"
+#include "PDL.h"
+
 
 //Global variables
-int quit;
 char hostName, ipChar;
-Uint16 portNumber;
-IPaddress ip;
-TCPsocket sd;
 
-PDL_bool OpenTelnetConnection(PDL_MojoParameters *parms)
+int sockfd, portNum, n, haveMessage;
+struct sockaddr_in serv_addr;
+struct hostent *server;
+
+const char *jsMessage[1];
+
+char buffer[256];
+
+
+PDL_bool OpenTelnetConnection(PDL_JSParameters *parms)
 {
 
-	hostName = *PDL_GetMojoParamString(parms, 0);
-	portNumber = (int)PDL_GetMojoParamInt(parms, 1);
+	hostName = *PDL_GetJSParamString(parms, 0);
+	portNum = PDL_GetJSParamInt(parms, 1);
 
- 
-	//Resolve host
-	if (SDLNet_ResolveHost(&ip, &hostName, portNumber) < 0)
-	{
-		fprintf(stderr, "SDLNet_ResolveHost: %s\n", SDLNet_GetError());
-		exit(EXIT_FAILURE);
+	
+	//Open socket 
+	sockfd = socket(AF_INET, SOCK_STREAM, 0);
+    if (sockfd < 0) {
+        jsMessage[0]="Failed to open socket";
+		haveMessage = 1;
+		return PDL_FALSE;
 	}
-
-	//Maybe convert hostname to IP address?  Might just return hostname
-	ipChar = ip.host;
- 
-	//Start TCP connection
-	if (!(sd = SDLNet_TCP_Open(&ip)))
-	{
-		fprintf(stderr, "SDLNet_TCP_Open: %s\n", SDLNet_GetError());
-		exit(EXIT_FAILURE);
+	
+	//Hostname resolution
+	server = gethostbyname(PDL_GetJSParamString(parms, 0));
+	if (server == NULL) {
+        jsMessage[0]="Failed to get hostname";
+		haveMessage = 1;
+		return PDL_FALSE;
+    }
+	
+	//Setup for connection
+	bzero((char *) &serv_addr, sizeof(serv_addr));
+    serv_addr.sin_family = AF_INET;
+    bcopy((char *)server->h_addr, 
+         (char *)&serv_addr.sin_addr.s_addr,
+         server->h_length);
+    serv_addr.sin_port = htons(portNum);
+	
+	//Connect to remote host
+    if (connect(sockfd,(struct sockaddr *)&serv_addr,sizeof(serv_addr)) < 0) {
+        jsMessage[0]="Could not connect";
+		haveMessage = 1;
+		return PDL_FALSE;
 	}
 
 	//Hopefully all went well
-	PDL_MojoReply(parms, (const char *)ipChar);
+	//PDL_JSReply(parms, (const char *)ipChar);
 	
-	exit(EXIT_SUCCESS);
-}
+	return PDL_TRUE;
+};
 
 
-PDL_bool SendTelnetWithReply(PDL_MojoParameters *parms)
+PDL_bool SendTelnetWithReply(PDL_JSParameters *parms)
 {
-	const int MAXLEN = 1024;
-	int len, result;
-	char *response;
+	const char command = *PDL_GetJSParamString(parms, 0);
+	//const char* command = "key down\n";
 
-	const char *command = PDL_GetMojoParamString(parms, 0);
- 
-	len = strlen(command) + 1;
-
-	if (SDLNet_TCP_Send(sd, (void *)command, len) < len)
-	{
-		fprintf(stderr, "SDLNet_TCP_Send: %command\n", SDLNet_GetError());
-		exit(EXIT_FAILURE);
+    //Send command to open socket
+    n = write(sockfd,&command,strlen(&command));
+    if (n < 0) {
+        jsMessage[0]="Failed to send last command";
+		haveMessage = 1;
+		return PDL_FALSE;
 	}
-
-	result = SDLNet_TCP_Recv(sd, (void *)response,MAXLEN-1);
-
-	PDL_MojoReply(parms, response);
- 
-	exit(EXIT_SUCCESS);
-
-}
-
-
-PDL_bool SendTelnet(PDL_MojoParameters *parms)
-{
-	int len;
-
-	const char *command = PDL_GetMojoParamString(parms, 0);
- 
-	len = strlen(command) + 1;
-
-	if (SDLNet_TCP_Send(sd, (void *)command, len) < len)
-	{
-		fprintf(stderr, "SDLNet_TCP_Send: %command\n", SDLNet_GetError());
-		exit(EXIT_FAILURE);
+	
+	
+	//Read response
+    bzero(buffer,256);
+    n = read(sockfd,buffer,255);
+	if (n < 0) {
+        jsMessage[0]="No reponse from server";
+		haveMessage = 1;
+		return PDL_FALSE;
 	}
+	PDL_JSReply(parms, buffer);   
  
-	exit(EXIT_SUCCESS);
 
-}
+	return PDL_TRUE;
+
+};
 
 
-PDL_bool CloseTelnetConnection(PDL_MojoParameters *parms)
+PDL_bool SendTelnet(PDL_JSParameters *parms)
 {
-	SDLNet_TCP_Close(sd);
+	const char command = *PDL_GetJSParamString(parms, 0);
+	//const char* command = "key down\n";
 
-	exit(EXIT_SUCCESS);
-}
+    //Send command to open socket
+    n = write(sockfd,&command,strlen(&command));
+    if (n < 0) {
+        jsMessage[0]="Failed to send last command";
+		haveMessage = 1;
+		return PDL_FALSE;
+	}
+	
+	/*
+	//Read response
+    bzero(buffer,256);
+    n = read(sockfd,buffer,255);
+	if (n < 0) {
+        jsMessage[0]="No reponse from server";
+		haveMessage = 1;
+		return PDL_FALSE;
+	}
+	PDL_JSReply(parms, buffer);   
+	*/
+
+	return PDL_TRUE;
+
+};
+
+
+PDL_bool CloseTelnetConnection(PDL_JSParameters *parms)
+{
+	//Close telnet socket
+	close(sockfd);
+	
+	return PDL_TRUE;
+};
 
 
 int main(int argc, char **argv)
 {
-	//SDL init
-	SDL_Init(SDL_INIT_VIDEO);
+	// Initialize the SDL library with the Video subsystem
+    int result = SDL_Init(SDL_INIT_VIDEO);
+    
+    if ( result != 0 )
+    {
+        printf("Could not init SDL: %s\n", SDL_GetError());
+        exit(1);
+    }
+	
+	
+	PDL_Init(0);
+	
 	
 	//Register PDL functions
-	PDL_Err errOpen = PDL_RegisterMojoHandler("PDLOpenTelnetConnection", OpenTelnetConnection); 
-	PDL_Err errSendWith = PDL_RegisterMojoHandler("PDLSendTelnetWithReply", SendTelnetWithReply); 
-	PDL_Err errSend = PDL_RegisterMojoHandler("PDLSendTelnet", SendTelnet); 
-	PDL_Err errClose = PDL_RegisterMojoHandler("PDLCloseTelnetConnection", CloseTelnetConnection); 
+	PDL_RegisterJSHandler("OpenTelnetConnection", OpenTelnetConnection); 
+	PDL_RegisterJSHandler("SendTelnetWithReply", SendTelnetWithReply); 
+	PDL_RegisterJSHandler("SendTelnet", SendTelnet); 
+	PDL_RegisterJSHandler("CloseTelnetConnection", CloseTelnetConnection); 
 	
-	PDL_MojoRegistrationComplete();
+	PDL_JSRegistrationComplete();
+
 	
 	//Add SDL event to monitor
 	SDL_Event Event;
 	
-	printf("Starting program ...");
-	
-	
-	if (SDLNet_Init() < 0)
-	{
-		fprintf(stderr, "SDLNet_Init: %s\n", SDLNet_GetError());
-		exit(EXIT_FAILURE);
-	}
+	//Initialize variables
+	haveMessage = 0;
 
 	do
 	{
-		//Run program commands as needed
+		SDL_Delay(100); //Wait 0.1 seconds to reduce CPU usage
+		
+		//For sending messages back to JS app
+		if(haveMessage == 1) {
+			PDL_CallJS("pluginMessageFunc", jsMessage, 1);
+			haveMessage = 0;
+			jsMessage[0] = "";
+		}
+		
 	} while (Event.type != SDL_QUIT);
 	
-	SDLNet_Quit();
-
 	PDL_Quit();
-
 	SDL_Quit();
 
 	return EXIT_SUCCESS;

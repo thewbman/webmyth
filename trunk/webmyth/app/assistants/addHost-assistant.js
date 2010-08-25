@@ -1,3 +1,24 @@
+/*
+ *   WebMyth - An open source webOS app for controlling a MythTV frontend. 
+ *   http://code.google.com/p/webmyth/
+ *   Copyright (C) 2010  Wes Brown
+ *
+ *   This program is free software; you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation; either version 2 of the License, or
+ *   (at your option) any later version.
+ *
+ *   This program is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
+ *
+ *   You should have received a copy of the GNU General Public License along
+ *   with this program; if not, write to the Free Software Foundation, Inc.,
+ *   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+
 function AddHostAssistant(origdb) {
 	/* this is the creator function for your scene assistant object. It will be passed all the 
 	   additional parameters (after the scene name) that were passed to pushScene. The reference
@@ -9,11 +30,14 @@ function AddHostAssistant(origdb) {
 
 AddHostAssistant.prototype.setup = function() {
 	/* this function is for setup tasks that have to happen when the scene is first created */
+
 		
-	/* use Mojo.View.render to render view templates and add them to the scene, if needed */
 	
-	/* setup widgets here */
+	//App menu widget
+	this.controller.setupWidget(Mojo.Menu.appMenu, appMenuAttr, appMenuModel);
 	
+	
+	//Widgets
 	this.hostTextModel = {
              value: "",
              disabled: false

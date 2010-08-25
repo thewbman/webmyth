@@ -20,6 +20,11 @@
 	font-style: italic
 }
 
+.centered {
+	text-align: center;
+	vertical-align: middle;
+}
+
 .noButton {
 	height: 30px;
 	width: 75px;
@@ -48,4 +53,15 @@
 	float: left;
 	width: 33%;
 	margin: 10
+}
+
+#header-menu-button {
+	position: absolute;
+	right: -18px;
+	top: 6px;
+	border-width: -8px 16px -8px 16px;
+	height: 23px;
+	font-size: 8px;
+	-webkit-border-radius: 15px;
+	text-transform: none;
 }
