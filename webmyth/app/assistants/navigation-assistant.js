@@ -19,13 +19,12 @@
  */
 
 
-function NavigationAssistant(activeHostIn) {
+function NavigationAssistant() {
 	/* this is the creator function for your scene assistant object. It will be passed all the 
 	   additional parameters (after the scene name) that were passed to pushScene. The reference
 	   to the scene controller (this.controller) has not be established yet, so any initialization
 	   that needs the scene controller should be done in the setup function below. */
-	  
-	  this.activeHost = activeHostIn;
+
 }
 
 NavigationAssistant.prototype.setup = function() {
@@ -35,62 +34,14 @@ NavigationAssistant.prototype.setup = function() {
 	//App menu widget
 	this.controller.setupWidget(Mojo.Menu.appMenu, appMenuAttr, appMenuModel);
 	
-	//View menu button
-	this.controller.setupWidget("header-menu-button",
-         this.attributes = {
-             },
-         this.model = {
-             label : "...",
-			 buttonClass:'small-button',
-             disabled: false
-         }
-     );
+	//Bottom of remote page command menu widget
+	this.controller.setupWidget( Mojo.Menu.commandMenu, {}, remoteCommandMenuModel );
+	remoteCommandMenuModel.items[1].toggleCmd = 'go-navigation';  //fix this
+	this.controller.modelChanged(remoteCommandMenuModel);
 	
-	/*
-	//Header menu widget
-	this.viewMenuAttribs = {
-            spacerHeight: 0,
-            menuClass: 'no-fade'
-	};
-	var viewMenuIcon = {
-		iconPath: 'icon-32x32.png',
-		label: " ",
-		command: 'do-viewMenuMain',
-		//width: 35
-	};
-	var viewMenuMoreIcon = {
-		label: "...",
-		command: 'do-viewMenuMore',
-		//width: 35
-	};
-	this.viewMenuModel = {
-		visible: true,
-		items: [ {
-			items: [
-				viewMenuIcon, 
-				{ label: "Remote: " + this.activeHost, width: 200 },
-				viewMenuMoreIcon
-			]
-		} ]
-	};
-	this.controller.setupWidget( Mojo.Menu.viewMenu, this.viewMenuAttibs , this.viewMenuModel );
-	*/
-		
-	//Bottom of page menu widget
-	this.bottomMenuModel = {
-		visible: true,
-		items: [{},{
-			toggleCmd: 'go-navigation',
-			items: [
-				{label: "Nav", command: 'go-navigation', width: 90},
-				{label: "Play", command: 'go-playback', width: 70},
-				{label: "Music", command: 'go-music', width: 90}
-			]
-			},
-		{}
-		]
-	};
-	this.controller.setupWidget( Mojo.Menu.commandMenu, {}, this.bottomMenuModel );
+	//Header menu button
+	this.controller.setupWidget('header-menu-button', {} , headerMenuButtonModel );
+	Mojo.Event.listen(this.controller.get('header-menu-button'), Mojo.Event.tap, this.sceneGoHeaderButton.bind(this));
 	
 	
 	//Keypress event
@@ -124,7 +75,8 @@ NavigationAssistant.prototype.activate = function(event) {
 	/* put in event handlers here that should only be in effect when this scene is active. For
 	   example, key handlers that are observing the document */
 	   
-	$('scene-title').innerHTML = 'Remote: '+this.activeHost;
+	$('scene-title').innerHTML = 'Remote: '+activeHost;
+	
 	
 };
 
@@ -136,26 +88,6 @@ NavigationAssistant.prototype.deactivate = function(event) {
 NavigationAssistant.prototype.cleanup = function(event) {
 	/* this function should do any cleanup needed before the scene is destroyed as 
 	   a result of being popped off the scene stack */
-};
-
-// Handlers to go to next and previous stories
-NavigationAssistant.prototype.handleCommand = function(event) {
-  if(event.type == Mojo.Event.command) {
-    switch (event.command) {
-		case 'go-navigation':
-			//Mojo.Controller.stageController.swapScene("navigation", this.activeHost);
-			Mojo.Log.info("Already on navigation");
-			break;
-		case 'go-playback':
-			Mojo.Controller.stageController.swapScene("playback", this.activeHost);
-			//Mojo.Log.info("Already on playback");
-			break;
-		case 'go-music':
-			Mojo.Controller.stageController.swapScene("music", this.activeHost);
-			//Mojo.Log.info("Already on music");
-			break;
-	}
-  }
 };
 
 
@@ -367,7 +299,21 @@ NavigationAssistant.prototype.sendTelnetKey = function(value, event){
 
 NavigationAssistant.prototype.sendTelnet = function(value, event){
 	//$('telnetPlug').SendTelnet(value);
-	this.controller.stageController.parentSceneAssistant(this).sendTelnet(value, this.activeHost); 
+	this.controller.stageController.parentSceneAssistant(this).sendTelnet(value, activeHost); 
 		
 	Mojo.Log.info("Sending command '%s' to host", value);
+};
+
+NavigationAssistant.prototype.sceneGoHeaderButton = function(event){
+
+	this.controller.showAlertDialog({
+                onChoose: function(value) {},
+                title: "WebMyth - v" + Mojo.Controller.appInfo.version,
+                message: "More features coming soon ...",
+                choices: [{
+                    label: "OK",
+                    value: ""
+                }],
+                allowHTMLMessage: true
+            });
 };

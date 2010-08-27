@@ -1,11 +1,11 @@
 {
 	"id": "com.thewbman.webmyth",
-	"version": "0.1.0",
+	"version": "0.1.1",
 	"vendor": "thewbman",
 	"type": "web",
 	"main": "index.html",
 	"title": "WebMyth",
 	"icon": "icon.png",
-	"plug-ins": "true",
+	"plug-ins": "false",
 	"skipPDK": "true"
 }

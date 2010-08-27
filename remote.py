@@ -1,4 +1,7 @@
 #!/usr/bin/python
+#
+# Original script (C) Kyle Stoneman from http://www.legatissimo.info/node/355
+# Modified and inlcuded as part of WebMyth app with permission
 
 import cgi
 import cgitb
@@ -14,12 +17,8 @@ connection = Telnet(host, 6546)
 connection.read_until('#', 0.5)
 connection.write(command + '\r\n')
 
-result = connection.read_until('#', 0.5)
+result = connection.read_until('\r', 0.5)
 
-if form.has_key('addr'):
-	print "Location: " + form['addr'].value
-	print ""
-else:
-	print "Content-type: text/plain"
-	print ""
-	print result
+print "Content-type: text/plain"
+print ""
+print result

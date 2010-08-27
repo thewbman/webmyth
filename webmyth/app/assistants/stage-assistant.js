@@ -46,6 +46,32 @@ StageAssistant.prototype.setup = function() {
 		]
  	};
 	
+	//Setup remote commandmenu
+	remoteCommandMenuModel = {
+		visible: true,
+		items: [{},{
+			items: [
+				{label: "Nav", command: 'go-navigation', width: 90},
+				{label: "Play", command: 'go-playback', width: 70},
+				{label: "Music", command: 'go-music', width: 90}
+			]
+			},
+		{}
+		]
+	};
+	
+	//Setup header menu button
+	headerMenuButtonModel = {
+		 label : "...",
+		 buttonClass:'small-button',
+         disabled: false, 
+		 command: 'go-headerMenu'
+    };
+	
+	//Current frontend host
+	var activeHost = 'Undefined';
+	var activePort = '6546';
+	
 	//Cookie for preferences
 	prefsCookie = new Mojo.Model.Cookie('prefs');
 	prefsCookieObject = prefsCookie.get();
@@ -83,12 +109,35 @@ StageAssistant.prototype.handleCommand = function(event) {
                 allowHTMLMessage: true
             });
 
-      break;
+       break;
+	   
 	  case 'do-prefsApp':
-        
 			this.controller.pushScene("preferences");
-
-      break;
+       break;
+	   
+	  case 'go-navigation':
+			if(currentScene == 'navigation'){
+				Mojo.Log.info("Already on navigation");
+			} else {
+				Mojo.Controller.stageController.swapScene("navigation", activeHost);
+			}
+	   break;
+	   
+	  case 'go-playback':
+			if(currentScene == 'playback'){
+				Mojo.Log.info("Already on playback");
+			} else {
+				Mojo.Controller.stageController.swapScene("playback", activeHost);
+			}
+	   break;
+	   
+	  case 'go-music':
+			if(currentScene == 'music'){
+				Mojo.Log.info("Already on music");
+			} else {
+				Mojo.Controller.stageController.swapScene("music", activeHost);
+			}
+	   break;
     }
   }
 };
