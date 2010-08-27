@@ -1,0 +1,34 @@
+[
+    {"source": "app/assistants/stage-assistant.js"},
+    {"source": "app/models/webmythCommands.js"},
+    {"source": "app/models/metrix.js"},
+    {"source": "app/models/asyncWrappers.js"},
+    {
+        "scenes": "hostSelector",
+        "source": "app/assistants/hostSelector-assistant.js"
+    },
+    {
+        "scenes": "navigation",
+        "source": "app/assistants/navigation-assistant.js"
+    },
+    {
+        "scenes": "addHost",
+        "source": "app/assistants/addHost-assistant.js"
+    },
+    {
+        "scenes": "music",
+        "source": "app/assistants/music-assistant.js"
+    },
+    {
+        "scenes": "playback",
+        "source": "app/assistants/playback-assistant.js"
+    },
+    {
+        "scenes": "about",
+        "source": "app/assistants/about-assistant.js"
+    },
+    {
+        "scenes": "preferences",
+        "source": "app/assistants/preferences-assistant.js"
+    }
+]
