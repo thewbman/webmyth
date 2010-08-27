@@ -233,9 +233,8 @@ HostSelectorAssistant.prototype.deleteHost = function(event) {
 HostSelectorAssistant.prototype.startCommunication = function(event) {
 	Mojo.Log.info("Selected host.  Starting communication ...");
 	 
-	//var activeHost = "wes-htpc";
-	var activeHost = event.item.hostname;
-	var activePort = event.item.port;
+	activeHost = event.item.hostname;
+	activePort = event.item.port;
 	 
 	
 	//Start telnet communication with selected host
@@ -260,6 +259,7 @@ HostSelectorAssistant.prototype.startCommunication = function(event) {
 
 
 HostSelectorAssistant.prototype.sendTelnet = function(value, activeHost){
+	var reply;
 	
 	if (Mojo.appInfo.skipPDK == "true") {
 		//Mojo.Controller.getAppController().showBanner("Sending command to telnet", {source: 'notification'});
@@ -270,13 +270,15 @@ HostSelectorAssistant.prototype.sendTelnet = function(value, activeHost){
 	
 		var request = new Ajax.Request(requestURL, {
 			method: 'get',
-			onSuccess: function(){
-				Mojo.Log.info("Success AJAX: '%s'", requestURL);
+			onSuccess: function(transport){
+				reply = transport.responseText;
+				Mojo.Log.info("Success AJAX: '%s'", reply);
 			},
 			onFailure: function() {
 				Mojo.Log.info("Failed AJAX: '%s'", requestURL);
 			}
 		});
+		
 	}
 	else {
 		$('telnetPlug').SendTelnet(value);
