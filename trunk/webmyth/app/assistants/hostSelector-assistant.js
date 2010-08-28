@@ -1,6 +1,6 @@
 /*
  *   WebMyth - An open source webOS app for controlling a MythTV frontend. 
- *   http://code.google.com/p/webmyth/
+ *   http://code.google.com/p/WebMyth/
  *   Copyright (C) 2010  Wes Brown
  *
  *   This program is free software; you can redistribute it and/or modify
@@ -19,14 +19,13 @@
  */
 
 
-function HostSelectorAssistant(origdb) {
+function HostSelectorAssistant() {
 	/* this is the creator function for your scene assistant object. It will be passed all the 
 	   additional parameters (after the scene name) that were passed to pushScene. The reference
 	   to the scene controller (this.controller) has not be established yet, so any initialization
 	   that needs the scene controller should be done in the setup function below. */
 	  
 	  this.nullHandleCount = 0;
-	  this.db = origdb; 
 	 
 	  
 	  this.resultList = [];
@@ -35,7 +34,7 @@ function HostSelectorAssistant(origdb) {
 HostSelectorAssistant.prototype.setup = function() {
 	
 	//App menu widget
-	this.controller.setupWidget(Mojo.Menu.appMenu, appMenuAttr, appMenuModel);
+	this.controller.setupWidget(Mojo.Menu.appMenu, WebMyth.appMenuAttr, WebMyth.appMenuModel);
 	
 	
 	//Bottom of page menu widget
@@ -71,16 +70,9 @@ HostSelectorAssistant.prototype.setup = function() {
 	
 	if(Mojo.appInfo.skipPDK == "true")
 	{
-		if (prefsCookieObject) {
-			Mojo.Controller.getAppController().showBanner("Using "+prefsCookieObject.webserverName+" webserver", {source: 'notification'});
-			if (prefsCookieObject.allowMetrix == true) {
-				Mojo.Log.info("Submitting data to Metrix");
-				//Metrix command
-				webmyth.Metrix.postDeviceData();
-			}
-			
-		} 
-		else {
+		if (WebMyth.prefsCookieObject) {
+			Mojo.Controller.getAppController().showBanner("Using "+WebMyth.prefsCookieObject.webserverName+" webserver", {source: 'notification'});
+		} else {
 			Mojo.Controller.getAppController().showBanner("Setup server in preferences", {source: 'notification'});
 		}
 	}
@@ -109,7 +101,7 @@ HostSelectorAssistant.prototype.activate = function(event) {
 	
 	// Query `hosts` table
 	var mytext = 'select * from hosts;'
-    this.db.transaction( 
+    WebMyth.db.transaction( 
         (function (transaction) { 
             transaction.executeSql(mytext, [], this.queryDataHandler.bind(this), this.errorHandler.bind(this)); 
         }).bind(this) 
@@ -130,10 +122,10 @@ HostSelectorAssistant.prototype.cleanup = function(event) {
 	  
 	//Close out any open telnet connection
 	if (Mojo.appInfo.skipPDK == "true") {
-		Mojo.Controller.getAppController().showBanner("Closing out telnet", {source: 'notification'});
+		//Mojo.Controller.getAppController().showBanner("Closing out telnet", {source: 'notification'});
 	}
 	else {
-		$('telnetPlug').CloseTelnetConnection();
+		//$('telnetPlug').CloseTelnetConnection();
 	}
 };
 
@@ -141,7 +133,7 @@ HostSelectorAssistant.prototype.handleCommand = function(event) {
   if(event.type == Mojo.Event.command) {
     switch(event.command) {
       case 'go-addHost':
-        Mojo.Controller.stageController.pushScene("addHost", this.db);
+        Mojo.Controller.stageController.pushScene("addHost");
         break;
     }
   }
@@ -185,11 +177,11 @@ HostSelectorAssistant.prototype.errorHandler = function(transaction, error) {
     return true;
 };
 
-HostSelectorAssistant.prototype.truncateDb = function() {
+HostSelectorAssistant.prototype.truncatedb = function() {
 	 
 	var sql = "DELETE FROM 'hosts' WHERE 1";
  
-	this.db.transaction( function (transaction) {
+	WebMyth.db.transaction( function (transaction) {
 	  transaction.executeSql(sql,  [], 
                          function(transaction, results) {    // success handler
                            //Mojo.Log.info("Successfully truncated table"); 
@@ -215,7 +207,7 @@ HostSelectorAssistant.prototype.deleteHost = function(event) {
 	
 	var sql = "DELETE FROM hosts WHERE id = ?";
 	
-	this.db.transaction( function (transaction) {
+	WebMyth.db.transaction( function (transaction) {
 	  transaction.executeSql(sql,  [hostId], 
                          function(transaction, results) {    // success handler
                            Mojo.Log.info("Successfully deleted record"); 
@@ -233,8 +225,8 @@ HostSelectorAssistant.prototype.deleteHost = function(event) {
 HostSelectorAssistant.prototype.startCommunication = function(event) {
 	Mojo.Log.info("Selected host.  Starting communication ...");
 	 
-	activeHost = event.item.hostname;
-	activePort = event.item.port;
+	WebMyth.activeHost = event.item.hostname;
+	WebMyth.activePort = event.item.port;
 	 
 	
 	//Start telnet communication with selected host
@@ -242,10 +234,10 @@ HostSelectorAssistant.prototype.startCommunication = function(event) {
 		//Do nothing if on emulator
 	}
 	else {
-		Mojo.Log.info("Opened telnet connection to %s", activeHost);
+		Mojo.Log.info("Opened telnet connection to %s", WebMyth.activeHost);
 		//Mojo.Controller.getAppController().showBanner("Opened telnet connection",{source: 'notification'});
 		
-		$('telnetPlug').OpenTelnetConnection(activeHost, activePort);
+		$('telnetPlug').OpenTelnetConnection(WebMyth.activeHost, WebMyth.activePort);
 	
 		$('telnetPlug').SendTelnet("asdf");
 		$('telnetPlug').SendTelnet("asdf");
@@ -253,12 +245,12 @@ HostSelectorAssistant.prototype.startCommunication = function(event) {
 
 	
 	//Open initial communication scene
-	Mojo.Controller.stageController.pushScene("navigation", activeHost);
+	Mojo.Controller.stageController.pushScene("navigation");
 	
 };
 
 
-HostSelectorAssistant.prototype.sendTelnet = function(value, activeHost){
+HostSelectorAssistant.prototype.sendTelnet = function(value){
 	var reply;
 	
 	if (Mojo.appInfo.skipPDK == "true") {
@@ -266,7 +258,7 @@ HostSelectorAssistant.prototype.sendTelnet = function(value, activeHost){
 		
 		//Using cgi-bin on server
 		var cmdvalue = encodeURIComponent(value);
-		var requestURL="http://"+prefsCookieObject.webserverName+"/cgi-bin/remote.py?host="+activeHost+"&cmd="+cmdvalue;
+		var requestURL="http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webserverRemoteFile+"?host="+WebMyth.activeHost+"&cmd="+cmdvalue;
 	
 		var request = new Ajax.Request(requestURL, {
 			method: 'get',
@@ -278,11 +270,8 @@ HostSelectorAssistant.prototype.sendTelnet = function(value, activeHost){
 				Mojo.Log.info("Failed AJAX: '%s'", requestURL);
 			}
 		});
-		
 	}
 	else {
 		$('telnetPlug').SendTelnet(value);
 	}
-	
-	
 };

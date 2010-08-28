@@ -1,6 +1,6 @@
 /*
  *   WebMyth - An open source webOS app for controlling a MythTV frontend. 
- *   http://code.google.com/p/webmyth/
+ *   http://code.google.com/p/WebMyth/
  *   Copyright (C) 2010  Wes Brown
  *
  *   This program is free software; you can redistribute it and/or modify
@@ -32,16 +32,12 @@ PlaybackAssistant.prototype.setup = function() {
 	
 	
 	//App menu widget
-	this.controller.setupWidget(Mojo.Menu.appMenu, appMenuAttr, appMenuModel);
+	this.controller.setupWidget(Mojo.Menu.appMenu, WebMyth.appMenuAttr, WebMyth.appMenuModel);
 	
 	//Bottom of remote page command menu widget
-	this.controller.setupWidget( Mojo.Menu.commandMenu, {}, remoteCommandMenuModel );
-	remoteCommandMenuModel.items[1].toggleCmd = 'go-playback';  //fix this
-	this.controller.modelChanged( remoteCommandMenuModel );
-	
-	//Header menu button
-	this.controller.setupWidget("header-menu-button", {} , headerMenuButtonModel );
-	Mojo.Event.listen(this.controller.get('header-menu-button'), Mojo.Event.tap, this.sceneGoHeaderButton.bind(this));
+	this.controller.setupWidget( Mojo.Menu.commandMenu, {}, WebMyth.remoteCommandMenuModel );
+	WebMyth.remoteCommandMenuModel.items[1].toggleCmd = 'go-playback';  
+	this.controller.modelChanged( WebMyth.remoteCommandMenuModel );
 	
 	
 	
@@ -76,7 +72,7 @@ PlaybackAssistant.prototype.activate = function(event) {
 	/* put in event handlers here that should only be in effect when this scene is active. For
 	   example, key handlers that are observing the document */
 	   
-	 $('scene-title').innerHTML = 'Remote: '+activeHost;  
+	 $('scene-title').innerHTML = 'Remote: '+WebMyth.activeHost;  
 	  
 };
 
@@ -300,21 +296,7 @@ PlaybackAssistant.prototype.sendTelnetKey = function(value, event){
 
 PlaybackAssistant.prototype.sendTelnet = function(value, event){
 	//$('telnetPlug').SendTelnet(value);
-	this.controller.stageController.parentSceneAssistant(this).sendTelnet(value, activeHost); 
+	this.controller.stageController.parentSceneAssistant(this).sendTelnet(value); 
 	
 	Mojo.Log.info("Sending command '%s' to host", value);
-};
-
-PlaybackAssistant.prototype.sceneGoHeaderButton = function(event){
-
-	this.controller.showAlertDialog({
-                onChoose: function(value) {},
-                title: "WebMyth - v" + Mojo.Controller.appInfo.version,
-                message: "More features coming soon ...",
-                choices: [{
-                    label: "OK",
-                    value: ""
-                }],
-                allowHTMLMessage: true
-            });
 };
