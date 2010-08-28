@@ -1,6 +1,6 @@
 /*
  *   WebMyth - An open source webOS app for controlling a MythTV frontend. 
- *   http://code.google.com/p/webmyth/
+ *   http://code.google.com/p/WebMyth/
  *   Copyright (C) 2010  Wes Brown
  *
  *   This program is free software; you can redistribute it and/or modify
@@ -19,13 +19,12 @@
  */
 
 
-function AddHostAssistant(origdb) {
+function AddHostAssistant() {
 	/* this is the creator function for your scene assistant object. It will be passed all the 
 	   additional parameters (after the scene name) that were passed to pushScene. The reference
 	   to the scene controller (this.controller) has not be established yet, so any initialization
 	   that needs the scene controller should be done in the setup function below. */
 	  
-	  this.db = origdb;
 }
 
 AddHostAssistant.prototype.setup = function() {
@@ -34,7 +33,7 @@ AddHostAssistant.prototype.setup = function() {
 		
 	
 	//App menu widget
-	this.controller.setupWidget(Mojo.Menu.appMenu, appMenuAttr, appMenuModel);
+	this.controller.setupWidget(Mojo.Menu.appMenu, WebMyth.appMenuAttr, WebMyth.appMenuModel);
 	
 	
 	//Widgets
@@ -42,12 +41,6 @@ AddHostAssistant.prototype.setup = function() {
              value: "",
              disabled: false
     };
-	
-	this.portTextModel = {
-             value: "",
-             disabled: false
-    };
-		 
 	this.controller.setupWidget("hostTextFieldId",
         {
             hintText: $L(""),
@@ -58,6 +51,11 @@ AddHostAssistant.prototype.setup = function() {
          this.hostTextModel
     ); 
 	
+	
+	this.portTextModel = {
+             value: "6546",
+             disabled: false
+    };
 	this.controller.setupWidget("portTextFieldId",
          {
             hintText: $L("default 6546"),
@@ -67,6 +65,7 @@ AddHostAssistant.prototype.setup = function() {
          },
          this.portTextModel
     );
+	
 	
 	this.controller.setupWidget("submitHostButtonId",
          {},
@@ -105,14 +104,14 @@ AddHostAssistant.prototype.submitNewHost = function(event) {
 	
 	//TODO: verify port is integer
 	
-	//TODO: resolve IP address to add into DB
+	//TODO: resolve IP address to add into WebMyth.db
 	
 	Mojo.Log.info("New hostname is %s", this.hostTextModel.value);
 	Mojo.Log.info("New hostname is %s", newHost.hostname);
 	 
 	var sql = "INSERT INTO 'hosts' (hostname, port) VALUES (?, ?)";
  
-	this.db.transaction( function (transaction) {
+	WebMyth.db.transaction( function (transaction) {
 	  transaction.executeSql(sql,  [newHost.hostname, newHost.port], 
                          function(transaction, results) {    // success handler
                            Mojo.Log.info("Successfully inserted record"); 

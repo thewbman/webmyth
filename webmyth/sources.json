@@ -30,5 +30,13 @@
     {
         "scenes": "preferences",
         "source": "app/assistants/preferences-assistant.js"
+    },
+    {
+        "scenes": "recorded",
+        "source": "app/assistants/recorded-assistant.js"
+    },
+    {
+        "scenes": "welcome",
+        "source": "app/assistants/welcome-assistant.js"
     }
 ]

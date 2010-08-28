@@ -1,6 +1,6 @@
 /*
  *   WebMyth - An open source webOS app for controlling a MythTV frontend. 
- *   http://code.google.com/p/webmyth/
+ *   http://code.google.com/p/WebMyth/
  *   Copyright (C) 2010  Wes Brown
  *
  *   This program is free software; you can redistribute it and/or modify
@@ -25,16 +25,16 @@ var telnetClass = Class.create({
 
 
 function createHostnameDb() {
-	//Create DB or open it is exists.
+	//Create WebMyth.db or open it is exists.
 	
-	var newDb = openDatabase('hostnames', "0.1", "Hostname DB");
+	var newdb = openDatabase('hostnames', "0.1", "Hostname db");
 	
-	newDb.transaction(function(tx1) {
+	newdb.transaction(function(tx1) {
     tx1.executeSql('CREATE TABLE IF NOT EXISTS hosts(id INTEGER PRIMARY KEY, hostname TEXT, port INTEGER, ipChar TEXT)', 
       []);
     });
 	
-	return newDb;
+	return newdb;
 	
 };
 
@@ -83,6 +83,8 @@ function closeTelnet(telnetPlug) {
 function defaultCookie() {
 	var newCookieObject = {
 		webserverName: '',
+		webserverRemoteFile: '/cgi-bin/remote.py',
+		webMysqlFile: '/webmyth-mysql.php',
 		allowMetrix: true
 	};
 	
