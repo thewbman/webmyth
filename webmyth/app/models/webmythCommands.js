@@ -25,12 +25,21 @@ var telnetClass = Class.create({
 
 
 function createHostnameDb() {
+	
 	//Create WebMyth.db or open it is exists.
 	
 	var newdb = openDatabase('hostnames', "0.1", "Hostname db");
 	
-	newdb.transaction(function(tx1) {
-    tx1.executeSql('CREATE TABLE IF NOT EXISTS hosts(id INTEGER PRIMARY KEY, hostname TEXT, port INTEGER, ipChar TEXT)', 
+	//Host (frontends) table
+	newdb.transaction(function(transaction) {
+    transaction.executeSql('CREATE TABLE IF NOT EXISTS hosts(id INTEGER PRIMARY KEY, hostname TEXT, port INTEGER, ipChar TEXT)', 
+      []);
+    });
+	
+	
+	//Recorded table
+	newdb.transaction(function(transaction) {
+    transaction.executeSql('CREATE TABLE IF NOT EXISTS recorded(id INTEGER PRIMARY KEY, chanid INTEGER, starttime TEXT, endtime TEXT, title TEXT, subtitle TEXT, description TEXT, category TEXT, hostname TEXT, bookmark INTEGER, editing INTEGER, cutlist INTEGER, autoexpire INTEGER, commflagged INTEGER, recgroup TEXT, recordid INTEGER, seriesid TEXT, programid TEXT, lastmodified TEXT, filesize INTEGER, stars REAL, previouslyshown INTEGER, originalairdate TEXT, preserve INTEGER, findid INTEGER, deletepending INTEGER, transcoder INTEGER, timestretch REAL, recpriority INTEGER, basename TEXT, progstart TEXT, progend TEXT, playgroup TEXT, profile TEXT, duplicate INTEGER, transcoded INTEGER, watched INTEGER, storagegroup TEXT, bookmarkupdate TEXT)', 
       []);
     });
 	
@@ -89,4 +98,26 @@ function defaultCookie() {
 	};
 	
 	return newCookieObject;
+};
+
+
+var sort_by = function(field, reverse, primer){
+
+   reverse = (reverse) ? -1 : 1;
+
+   return function(a,b){
+
+       a = a[field];
+       b = b[field];
+
+       if (typeof(primer) != 'undefined'){
+           a = primer(a);
+           b = primer(b);
+       }
+
+       if (a<b) return reverse * -1;
+       if (a>b) return reverse * 1;
+       return 0;
+
+   }
 };

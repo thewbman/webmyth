@@ -112,14 +112,14 @@ AddHostAssistant.prototype.submitNewHost = function(event) {
 	var sql = "INSERT INTO 'hosts' (hostname, port) VALUES (?, ?)";
  
 	WebMyth.db.transaction( function (transaction) {
-	  transaction.executeSql(sql,  [newHost.hostname, newHost.port], 
-                         function(transaction, results) {    // success handler
-                           Mojo.Log.info("Successfully inserted record"); 
-                         },
-                         function(transaction, error) {      // error handler
-                           Mojo.Log.error("Could not insert record: " + error.message);
-                         }
- 	 );
+		transaction.executeSql(sql,  [newHost.hostname, newHost.port], 
+			function(transaction, results) {    // success handler
+				Mojo.Log.info("Successfully inserted record"); 
+            },
+            function(transaction, error) {      // error handler
+                Mojo.Log.error("Could not insert record: " + error.message);
+            }
+		);
 	});
 	
 	

@@ -177,25 +177,6 @@ HostSelectorAssistant.prototype.errorHandler = function(transaction, error) {
     return true;
 };
 
-HostSelectorAssistant.prototype.truncatedb = function() {
-	 
-	var sql = "DELETE FROM 'hosts' WHERE 1";
- 
-	WebMyth.db.transaction( function (transaction) {
-	  transaction.executeSql(sql,  [], 
-                         function(transaction, results) {    // success handler
-                           //Mojo.Log.info("Successfully truncated table"); 
-                         },
-                         function(transaction, error) {      // error handler
-                           Mojo.Log.error("Could not truncate table: " + error.message);
-                         }
- 	 );
-	});
-	
-	//Mojo.Log.info("leaving truncate");
-	
-};
-
 
 HostSelectorAssistant.prototype.deleteHost = function(event) {
 	
