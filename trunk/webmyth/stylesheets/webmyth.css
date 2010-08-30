@@ -65,3 +65,7 @@
 	-webkit-border-radius: 15px;
 	text-transform: none;
 }
+
+.filter-field-container-height {
+  height: 96px;
+}

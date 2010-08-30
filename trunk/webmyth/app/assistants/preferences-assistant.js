@@ -164,12 +164,6 @@ PreferencesAssistant.prototype.saveWebserver = function(event) {
 	WebMyth.prefsCookieObject.allowMetrix = this.metrixToggleModel.value;
 	WebMyth.prefsCookie.put(WebMyth.prefsCookieObject);
 	
-	/*
-	
-		webserverName: '',
-		webserverRemoteFile: '/cgi-bin/remote.py',
-		webMysqlFile: '/webmyth-mysql.php',
-		allowMetrix: true
-	*/
+
 	Mojo.Controller.stageController.popScene();
 };

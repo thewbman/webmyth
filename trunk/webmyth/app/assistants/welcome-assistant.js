@@ -86,8 +86,9 @@ WelcomeAssistant.prototype.goRemote = function(event) {
 WelcomeAssistant.prototype.goRecorded = function(event) {
 	//Start recorded scene
 	
-	//Mojo.Controller.stageController.pushScene("recorded");
+	Mojo.Controller.stageController.pushScene("recorded");
 	
+	/*
 	this.controller.showAlertDialog({
         onChoose: function(value) {},
         title: "WebMyth - v" + Mojo.Controller.appInfo.version,
@@ -98,4 +99,5 @@ WelcomeAssistant.prototype.goRecorded = function(event) {
 		}],
 		allowHTMLMessage: true
     });
+	*/
 };
