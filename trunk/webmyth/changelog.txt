@@ -23,3 +23,7 @@ Release 0.1.4:
  - Full recorded table gets saved locally for future use
  - Falls back to locally saved recorded data when cannot get remote data
  - Fixed bug of upgrades from earlier verions not getting default server scripts in setting
+ - Script files now have basic information on where to install
+ 
+Release 0.1.5:
+ - Fixed typo in About screen linking to homepage

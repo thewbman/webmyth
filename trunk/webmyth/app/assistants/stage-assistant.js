@@ -99,10 +99,10 @@ StageAssistant.prototype.handleCommand = function(event) {
     switch(event.command) {
       case 'do-aboutApp':
         
-			aboutinfo = "<a href='http://code.google.com/p/WebMyth/'>WebMyth Homepage</a><hr/>";
+			aboutinfo = "<a href='http://code.google.com/p/webmyth/'>WebMyth Homepage</a><hr/>";
 			
 			aboutinfo += "An open source webOS app for controlling a MythTV frontend.<br>";  
-			aboutinfo += "Please see the homepage for system requirements.<hr/>"
+			aboutinfo += "Please see the homepage for system requirements and setup instructions.<hr/>"
 			
 			aboutinfo += "Licensed under <a href='http://www.gnu.org/licenses/gpl-2.0.html'>GPLv2</a>."
 
