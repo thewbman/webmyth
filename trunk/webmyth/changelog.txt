@@ -16,3 +16,10 @@ Release 0.1.3:
  - Displays all shows (included deleted ones)
  - (Details of shows still work in progress) 
  - (Should add in more error checking)
+ 
+Release 0.1.4:
+ - List of recorded now sorts by date and title, and deleted items have strikethrough
+ - Spinner widget on recorded list while waiting for data
+ - Full recorded table gets saved locally for future use
+ - Falls back to locally saved recorded data when cannot get remote data
+ - Fixed bug of upgrades from earlier verions not getting default server scripts in setting

@@ -1,4 +1,16 @@
 <?php
+# Original script from http://www.webos-internals.org/wiki/Tutorials_webOS_Getting_JSON_From_An_External_MySQL_Database
+# Added modifications specifc to mythtv setup
+#
+# This file needs to be saved on a local webserver 
+# On my system running Ubuntu 9.10 (Karmic) the file is saved in /var/www/ and is accessable as http://my-server/webmyth-mysql.php
+# This files needs to be accesible without authentication on the webserver
+# You need to change the hard coded values below to match your system
+#
+# You will also need to have a working copy of php installed on the server
+
+
+
 header('Content-type: application/json');  // this is the magic that sets responseJSON
 
 //Hard coded values

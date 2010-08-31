@@ -2,6 +2,12 @@
 #
 # Original script (C) Kyle Stoneman from http://www.legatissimo.info/node/355
 # Modified and inlcuded as part of WebMyth app with permission
+#
+# This file needs to be saved on a local webserver in the 'cgi-bin' folder
+# On my system running Ubuntu 9.10 (Karmic) the file is saved in /usr/lib/cgi-bin/ and is accessable as http://my-server/cgi-bin/remote.py
+# This files needs to be accesible without authentication on the webserver
+#
+# You will also need to have a working copy of python installed on the server
 
 import cgi
 import cgitb
