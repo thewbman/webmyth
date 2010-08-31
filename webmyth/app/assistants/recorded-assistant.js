@@ -28,10 +28,32 @@
 	  this.nullHandleCount = 0;
 	 
 	  this.resultList = [];
-	  //this.resultList = [ { title: 'FAKE', subtitle: 'sub' } ];
+	  
 }
 
 RecordedAssistant.prototype.setup = function() {
+	
+	//Show and start the animated spinner
+	this.spinnerAttr= {
+		spinnerSize: "large"
+	}; this.spinnerModel= {
+		spinning: true
+	}; 
+	this.controller.setupWidget('spinner', this.spinnerAttr, this.spinnerModel);
+	
+	if(Mojo.appInfo.skipPDK == "true")
+	{
+		if (WebMyth.prefsCookieObject) {
+			//Setup default files if missing
+			if (WebMyth.prefsCookieObject.webserverRemoteFile == null) WebMyth.prefsCookieObject.webserverRemoteFile = defaultCookie().webserverRemoteFile;
+			if (WebMyth.prefsCookieObject.webMysqlFile == null) WebMyth.prefsCookieObject.webMysqlFile = defaultCookie().webMysqlFile;
+			
+			Mojo.Controller.getAppController().showBanner("Using "+WebMyth.prefsCookieObject.webserverName+" webserver", {source: 'notification'});
+		
+		} else {
+			Mojo.Controller.getAppController().showBanner("Setup server in preferences", {source: 'notification'});
+		}
+	};
 	
 	//App menu widget
 	this.controller.setupWidget(Mojo.Menu.appMenu, WebMyth.appMenuAttr, WebMyth.appMenuModel);
@@ -67,39 +89,25 @@ RecordedAssistant.prototype.setup = function() {
 	this.controller.listen(this.controller.get( "recordedList" ), Mojo.Event.listTap, this.goRecordedDetails.bind(this));
 	this.controller.listen(this.controller.get( "recordedList" ), Mojo.Event.filter, this.searchFilter.bind(this));
 		
-		
-	//Populate recorded table from mysql script
-	//this.populateRecorded();
-	//Get remote data
-	Mojo.Log.info('Starting mysql readout');
+	
+	
+	//Update list from mysql script
+	Mojo.Log.info('Starting remote data gathering');
 	
 	var requestUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webMysqlFile;
  
     try {
         var request = new Ajax.Request(requestUrl,{
             method: 'post',
-            parameters: {'op': 'getAllRecords', 'table': 'recorded'},
+            parameters: {'op': 'getAllRecords', 'table': 'recorded', 'sort': 'starttime'},
             evalJSON: 'true',
             onSuccess: this.readRemoteDbTableSuccess.bind(this),
-            onFailure: function(){
-                //Stuff to do if the request fails, ie. display error
-                Mojo.Log.error('Failed to get Ajax response');
-            }
+            onFailure: this.useLocalDataTable.bind(this)  
         });
     }
     catch(e) {
         Mojo.Log.error(e);
     }
-	
-	/*
-	//Display local data
-	   var mytext = 'select * from recorded;'
-			WebMyth.db.transaction( 
-				(function (transaction) { 
-					transaction.executeSql(mytext, [], this.queryDataHandler.bind(this), this.errorHandler.bind(this)); 
-				}).bind(this) 
-			);
-	   */
 	   
 	
 };
@@ -124,93 +132,48 @@ RecordedAssistant.prototype.cleanup = function(event) {
 };
 
 
-RecordedAssistant.prototype.readRemoteDbTableSuccess = function(response) {
- 
-    Mojo.Log.error('Got Ajax response: ' + response.responseText);
-		//update the list widget
-		this.resultList.clear();
-		Object.extend(this.resultList,response.responseJSON);
-		this.resultList.sort(sort_by('starttime', false));		//sort by date first
-		this.resultList.sort(sort_by('title', false));			//then by show title 
-		
-		var listWidget = this.controller.get('recordedList');
-		this.filterListFunction('', listWidget, 0, this.resultList.length);
-		
-    var json = response.responseJSON;
-	var title;
-	var subtitle;
- 
- 
-	//Clear out old data
-	WebMyth.db.transaction( function (transaction) {
-		transaction.executeSql("DELETE FROM recorded",  [], 
-				function(transaction, results) {    // success handler
-					Mojo.Log.error("Successfully truncated");
-					
-		//Nest parsing actions here	to be sure we truncated		
-		for(var i = 0; i < json.length; i++){
-			title = json[i].title;
-			subtitle = json[i].subtitle
-			
-			insertRecordedRow(json[i]);
-
-            //Mojo.Log.error('Row: ' + i + ' Title: ' + title + ' Subtitle: ' + subtitle);			
-        }
-		//end nesting
-		
-		
-					
-				},
-				function(transaction, error) {      // error handler
-					Mojo.Log.error("Could not truncate because" + error.message);
-				}
-		);
-	});
+RecordedAssistant.prototype.useLocalDataTable = function(event) {
+	//Fall back to local data if cannot connect to remote server
+	Mojo.Controller.getAppController().showBanner("Failed to get new data, using saved", {source: 'notification'});
+	Mojo.Log.error('Failed to get Ajax response - using previoius saved data');
+	
+	// Query recorded table
+	var mytext = 'SELECT * FROM recorded ORDER BY starttime;'
+	WebMyth.db.transaction( 
+		(function (transaction) { 
+			transaction.executeSql(mytext, [], 
+				this.queryDataHandler.bind(this), 
+				this.queryErrorHandler.bind(this)
+			); 
+		} 
+		).bind(this)
+	);
+							
 };
 
-function insertRecordedRow(newRow){
-			
-	var sql = "INSERT INTO 'recorded' (title, subtitle) VALUES (?, ?);";
-			
-			//Insert into WebMyth.db
-			WebMyth.db.transaction( function (transaction) {
-				transaction.executeSql(sql,  [newRow.title, newRow.subtitle], 
-					function(transaction, results) {    // success handler
-						//Mojo.Log.error('Entered Row - Title: ' + newRow.title + ' Subtitle: ' + newRow.subtitle);
-					},
-					function(transaction, error) {      // error handler
-						Mojo.Log.error("Could not insert record: " + error.message);
-					}
-				);
-	});
-};
-
-
-RecordedAssistant.prototype.showRecordedList = function() {
-
-	Mojo.Log.error('Now populating display');
-			// Query recorded table
-			var mytext = 'select * from recorded;'
-			WebMyth.db.transaction( 
-				(function (transaction) { 
-					transaction.executeSql(mytext, [], this.queryDataHandler, this.errorHandler); 
-				}) 
-			);
-};
 
 RecordedAssistant.prototype.queryDataHandler = function(transaction, results) { 
     // Handle the results 
     var string = ""; 
 	
-	//Mojo.Log.error("inside queryData with '%s' rows", results.rows.length);
+	Mojo.Log.info("inside queryData with '%s' rows", results.rows.length);
     
 	try {
 		var list = [];
 		for (var i = 0; i < results.rows.length; i++) {
 			var row = results.rows.item(i);
 						
-			string = { id: row.id, title: row.title, subtitle: row.subtitle };
-
+			string = {
+				chanid: row.chanid, starttime: row.starttime, endtime: row.endtime, title: row.title, subtitle: row.subtitle, 
+				description: row.description, category: row.category, hostname: row.hostname, bookmark: row.bookmark, editing: row.editing, 
+				cutlist: row.cutlist, autoexpire: row.autoexpire, commflagged: row.commflagged, recgroup: row.recgroup, recordid: row.recordid, 
+				seriesid: row.seriesid, programid: row.programid, lastmodified: row.lastmodified, filesize: row.filesize, stars: row.stars, 
+				previouslyshown: row.previouslyshown, originalairdate: row.originalairdate, preserve: row.preserve, findid: row.findid,	deletepending: row.deletepending, 
+				transcoder: row.transcoder, timestretch: row.timestretch, recpriority: row.recpriority, basename: row.basename,	progstart: row.progstart, 
+				progend: row.progend, playgroup: row.playgroup, profile: row.profile, duplicate: row.duplicate, transcoded: row.transcoded, 
+				watched: row.watched, storagegroup: row.storagegroup, bookmarkupdate: row.bookmarkupdate
+			 };
+			 
 			list.push( string );
 			//this.hostListModel.items.push( string );
 			//Mojo.Log.error("Just added '%s' to list", string);
@@ -218,9 +181,19 @@ RecordedAssistant.prototype.queryDataHandler = function(transaction, results) {
 		//update the list widget
 		this.resultList.clear();
 		Object.extend(this.resultList,list);
-		this.controller.modelChanged(this.recordedListModel);
+		//this.resultList.sort(sort_by('starttime', false));		//sort by date first
+		//this.resultList.sort(sort_by('title', false));			//then by show title
+		this.resultList.sort(double_sort_by('title', 'starttime', false));
 		
-		Mojo.Log.error("Done with data query");
+		var listWidget = this.controller.get('recordedList');
+		this.filterListFunction('', listWidget, 0, this.resultList.length);
+		
+		Mojo.Log.info("Done with data query");
+		
+		//Stop spinner and hide
+		this.spinnerModel.spinning = false;
+		this.controller.modelChanged(this.spinnerModel, this);
+		$('myScrim').hide()
 	}
 	catch (err)
 	{
@@ -232,17 +205,84 @@ RecordedAssistant.prototype.queryDataHandler = function(transaction, results) {
 };
 
 
-RecordedAssistant.prototype.errorHandler = function(transaction, error) { 
+RecordedAssistant.prototype.queryErrorHandler = function(transaction, errors) { 
     Mojo.Log.error('Error was '+error.message+' (Code '+error.code+')'); 
-    return true;
 };
+
+
+RecordedAssistant.prototype.readRemoteDbTableSuccess = function(response) {
+	//return true;  //can escape this function for testing purposes
+    
+	//Mojo.Log.error('Got Ajax response: ' + response.responseText);
+	
+	//Update the list widget
+	this.resultList.clear();
+	Object.extend(this.resultList,response.responseJSON);
+	this.resultList.sort(double_sort_by('title', 'starttime', false));	
+	var listWidget = this.controller.get('recordedList');
+	this.filterListFunction('', listWidget, 0, this.resultList.length);
+	Mojo.Controller.getAppController().showBanner("Updated with latest data", {source: 'notification'});
+	
+	//Stop spinner and hide
+	this.spinnerModel.spinning = false;
+	this.controller.modelChanged(this.spinnerModel, this);
+	$('myScrim').hide()
+		
+	//Save new values back to DB
+    var json = response.responseJSON;
+	var title;
+	var subtitle;
+ 
+ 
+	//Replace out old data
+	WebMyth.db.transaction( function (transaction) {
+		transaction.executeSql("DELETE FROM recorded",  [], 
+				function(transaction, results) {    // success handler
+					Mojo.Log.info("Successfully truncated");
+					
+					//Nest parsing actions here	to be sure we truncated		
+					for(var i = 0; i < json.length; i++){
+						title = json[i].title;
+						subtitle = json[i].subtitle;
+						insertRecordedRow(json[i]);
+						//Mojo.Log.error('Row: ' + i + ' Title: ' + title + ' Subtitle: ' + subtitle);	
+					}
+					
+				},
+				function(transaction, error) {      // error handler
+					Mojo.Log.error("Could not truncate because" + error.message);
+				}
+		);
+	});
+};
+
+function insertRecordedRow(newline){
+	//return true;		
+	var sql = "INSERT INTO 'recorded' (chanid, starttime, endtime, title, subtitle, description, category, hostname, bookmark, editing, cutlist, autoexpire, commflagged, recgroup, recordid, seriesid, programid, lastmodified, filesize, stars, previouslyshown, originalairdate, preserve, findid, deletepending, transcoder, timestretch, recpriority, basename, progstart, progend, playgroup, profile, duplicate, transcoded, watched, storagegroup, bookmarkupdate) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
+			
+	//Insert into WebMyth.db
+	WebMyth.db.transaction( function (transaction) {
+		transaction.executeSql(sql,  [newline.chanid, newline.starttime, newline.endtime, newline.title, newline.subtitle, newline.description, newline.category, newline.hostname, newline.bookmark, newline.editing,
+									newline.cutlist, newline.autoexpire, newline.commflagged, newline.recgroup, newline.recordid, newline.seriesid, newline.programid, newline.lastmodified, newline.filesize, newline.stars, 
+									newline.previouslyshown, newline.originalairdate, newline.preserve, newline.findid, newline.deletepending, newline.transcoder, newline.timestretch, newline.recpriority, newline.basename, newline.progstart, 
+									newline.progend, newline.playgroup, newline.profile, newline.duplicate, newline.transcoded, newline.watched, newline.storagegroup, newline.bookmarkupdate], 
+			function(transaction, results) {    // success handler
+				//Mojo.Log.error('Entered Row - Title: ' + newRow.title + ' Subtitle: ' + newRow.subtitle);
+			},
+			function(transaction, error) {      // error handler
+				Mojo.Log.error("Could not insert record: " + error.message);
+			}
+		);
+	});
+};
+
 
 RecordedAssistant.prototype.goRecordedDetails = function(event) {
 	 
 	this.controller.showAlertDialog({
         onChoose: function(value) {},
         title: "WebMyth - v" + Mojo.Controller.appInfo.version,
-        message: "More features comming soon ... <br>",
+        message: "Details screen comming soon ... <br>",
         choices: [{
             label: "OK",
 			value: ""
@@ -324,9 +364,9 @@ RecordedAssistant.prototype.recorderDividerFunction = function(itemModel) {
 RecordedAssistant.prototype.searchFilter = function(event)    { 
 	//Shows or hides default list
     if (event.filterString !== "")    { 
-        //$("defaultList").hide(); 
+		//Showing filtered list is handled elsewhere
     }    else    { 
-	
+		//Shows default list with no searching
 		var listWidget = this.controller.get('recordedList');
 		this.filterListFunction('', listWidget, 0, this.resultList.length);
     } 

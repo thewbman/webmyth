@@ -69,3 +69,17 @@
 .filter-field-container-height {
   height: 96px;
 }
+
+
+/*  Recorded scene items  */
+.palm-row.multi-line.Deleted {
+	text-decoration: line-through;
+}
+
+.palm-row.multi-line.Default {
+
+}
+
+.hidden {
+	visibility:hidden;
+}

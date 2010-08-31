@@ -99,9 +99,7 @@ PreferencesAssistant.prototype.setup = function() {
 };
 
 PreferencesAssistant.prototype.activate = function(event) {
-	/* put in event handlers here that should only be in effect when this scene is active. For
-	   example, key handlers that are observing the document */
-	   
+
 		if (WebMyth.prefsCookieObject) {	
 			Mojo.Log.info("Existing webserverName is %s", WebMyth.prefsCookieObject.webserverName);
 			
@@ -109,22 +107,22 @@ PreferencesAssistant.prototype.activate = function(event) {
 			this.webserverTextModel.value = WebMyth.prefsCookieObject.webserverName;
 			this.controller.modelChanged(this.webserverTextModel);
 			
-			//Update filenames on web server
-			try {
-				this.webserverRemoteFileTextModel.value = WebMyth.prefsCookieObject.webserverRemoteFile;
-			} catch(e1) {
-				this.webserverRemoteFileTextModel.value = '/cgi-cin/remote.py';
-				Mojo.Log.error("Did not find remote file in cookie");
-			}
-			this.controller.modelChanged(this.webserverRemoteFileTextModel);
 			
-			try {
-				this.webMysqlFileTextModel.value = WebMyth.prefsCookieObject.webMysqlFile;
-			} catch(e2) {
-				this.webMysqlFileTextModel.value = '/webmyth-mysql.php';
-				Mojo.Log.error("Did not find mysql file in cookie");
+			//Update filenames on web server if set
+			if ( WebMyth.prefsCookieObject.webserverRemoteFile == null ) {
+				Mojo.Log.error("Did not find remote file in cookie");
+			} else {
+				Mojo.Log.error("Found remote file in cookie '%s'", WebMyth.prefsCookieObject.webserverRemoteFile);
+				this.webserverRemoteFileTextModel.value = WebMyth.prefsCookieObject.webserverRemoteFile;
+				this.controller.modelChanged(this.webserverRemoteFileTextModel);
 			}
-			this.controller.modelChanged(this.webMysqlFileTextModel);
+			if ( WebMyth.prefsCookieObject.webMysqlFile == null ) {
+				Mojo.Log.error("Did not find mysql file in cookie");
+			} else {
+				Mojo.Log.error("Found mysql file in cookie '%s'", WebMyth.prefsCookieObject.webMysqlFile);
+				this.webMysqlFileTextModel.value = WebMyth.prefsCookieObject.webMysqlFile;
+				this.controller.modelChanged(this.webMysqlFileTextModel);
+			}
 			
 			//Update metrix toggle from cookie
 			this.metrixToggleModel.value = WebMyth.prefsCookieObject.allowMetrix;
@@ -145,10 +143,10 @@ PreferencesAssistant.prototype.cleanup = function(event) {
 
 PreferencesAssistant.prototype.saveWebserver = function(event) {
 	
-	Mojo.Log.error("New webserverName is %s", this.webserverTextModel.value);
-	Mojo.Log.error("New remote file is %s", this.webserverRemoteFileTextModel.value);
-	Mojo.Log.error("New mysql file is %s", this.webMysqlFileTextModel.value);
-	Mojo.Log.error("Metrix value is %s", this.metrixToggleModel.value);
+	Mojo.Log.info("New webserverName is %s", this.webserverTextModel.value);
+	Mojo.Log.info("New remote file is %s", this.webserverRemoteFileTextModel.value);
+	Mojo.Log.info("New mysql file is %s", this.webMysqlFileTextModel.value);
+	Mojo.Log.info("Metrix value is %s", this.metrixToggleModel.value);
 
 	if (WebMyth.prefsCookieObject) {
 		//Nothing

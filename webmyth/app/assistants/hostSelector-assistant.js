@@ -71,11 +71,16 @@ HostSelectorAssistant.prototype.setup = function() {
 	if(Mojo.appInfo.skipPDK == "true")
 	{
 		if (WebMyth.prefsCookieObject) {
+			//Setup default files if missing
+			if (WebMyth.prefsCookieObject.webserverRemoteFile == null) WebMyth.prefsCookieObject.webserverRemoteFile = defaultCookie().webserverRemoteFile;
+			if (WebMyth.prefsCookieObject.webMysqlFile == null) WebMyth.prefsCookieObject.webMysqlFile = defaultCookie().webMysqlFile;
+			
 			Mojo.Controller.getAppController().showBanner("Using "+WebMyth.prefsCookieObject.webserverName+" webserver", {source: 'notification'});
+		
 		} else {
 			Mojo.Controller.getAppController().showBanner("Setup server in preferences", {source: 'notification'});
 		}
-	}
+	};
 	
 	
 	/* add event handlers to listen to events from widgets */

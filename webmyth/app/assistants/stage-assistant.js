@@ -69,7 +69,8 @@ WebMyth.activePort = '6546';
 //Cookie for preferences
 WebMyth.prefsCookie = new Mojo.Model.Cookie('prefs');
 WebMyth.prefsCookieObject = WebMyth.prefsCookie.get();
-
+//WebMyth.prefsCookieObject = checkCookieDefaults(WebMyth.prefsCookie.get());
+//WebMyth.prefsCookie.put(WebMyth.prefsCookieObject);
 
 
 
