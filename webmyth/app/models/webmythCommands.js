@@ -30,18 +30,28 @@ function createHostnameDb() {
 	
 	var newdb = openDatabase('hostnames', "0.1", "Hostname db");
 	
-	//Host (frontends) table
-	newdb.transaction(function(transaction) {
-    transaction.executeSql('CREATE TABLE IF NOT EXISTS hosts(id INTEGER PRIMARY KEY, hostname TEXT, port INTEGER, ipChar TEXT)', 
+	try {
+	//Hosts (frontends) table
+	newdb.transaction(function(tx1) {
+    tx1.executeSql('CREATE TABLE IF NOT EXISTS hosts(id INTEGER PRIMARY KEY, hostname TEXT, port INTEGER, ipChar TEXT)', 
       []);
     });
-	
 	
 	//Recorded table
-	newdb.transaction(function(transaction) {
-    transaction.executeSql('CREATE TABLE IF NOT EXISTS recorded(id INTEGER PRIMARY KEY, chanid INTEGER, starttime TEXT, endtime TEXT, title TEXT, subtitle TEXT, description TEXT, category TEXT, hostname TEXT, bookmark INTEGER, editing INTEGER, cutlist INTEGER, autoexpire INTEGER, commflagged INTEGER, recgroup TEXT, recordid INTEGER, seriesid TEXT, programid TEXT, lastmodified TEXT, filesize INTEGER, stars REAL, previouslyshown INTEGER, originalairdate TEXT, preserve INTEGER, findid INTEGER, deletepending INTEGER, transcoder INTEGER, timestretch REAL, recpriority INTEGER, basename TEXT, progstart TEXT, progend TEXT, playgroup TEXT, profile TEXT, duplicate INTEGER, transcoded INTEGER, watched INTEGER, storagegroup TEXT, bookmarkupdate TEXT)', 
+	newdb.transaction(function(tx2) {
+    tx2.executeSql('CREATE TABLE IF NOT EXISTS recorded(id INTEGER PRIMARY KEY, chanid INTEGER, starttime TEXT, endtime TEXT, title TEXT, subtitle TEXT, description TEXT, category TEXT, hostname TEXT, bookmark INTEGER, editing INTEGER, cutlist INTEGER, autoexpire INTEGER, commflagged INTEGER, recgroup TEXT, recordid INTEGER, seriesid TEXT, programid TEXT, lastmodified TEXT, filesize INTEGER, stars REAL, previouslyshown INTEGER, originalairdate TEXT, preserve INTEGER, findid INTEGER, deletepending INTEGER, transcoder INTEGER, timestretch REAL, recpriority INTEGER, basename TEXT, progstart TEXT, progend TEXT, playgroup TEXT, profile TEXT, duplicate INTEGER, transcoded INTEGER, watched INTEGER, storagegroup TEXT, bookmarkupdate TEXT)', 
       []);
     });
+	
+	//Recgroup table for filtering of recorded table
+	newdb.transaction(function(tx3) {
+    tx3.executeSql('CREATE TABLE IF NOT EXISTS recgroup(groupname TEXT PRIMARY KEY, displayname TEXT)', 
+    //tx3.executeSql('DROP TABLE IF EXISTS recgroup', 
+      []);
+    });
+	} catch (err) {
+		Mojo.Log.error('DB error: ' + err.message);
+	}
 	
 	return newdb;
 	
@@ -90,11 +100,17 @@ function closeTelnet(telnetPlug) {
 };
 
 function defaultCookie() {
+
+	//These values are initiated in 'welcome' scene if not set
+
 	var newCookieObject = {
 		webserverName: '',							//included in initial cookie version
 		allowMetrix: true,							//included in initial cookie version
 		webserverRemoteFile: '/cgi-bin/remote.py',
-		webMysqlFile: '/webmyth-mysql.php'
+		webMysqlFile: '/webmyth-mysql.php',
+		currentRecgroup: 'Default',
+		currentFrontend: 'frontend',
+		currentRemotePort: '6546'
 	};
 	
 	return newCookieObject;
@@ -138,7 +154,41 @@ var double_sort_by = function(field1, field2, reverse, primer){
 
        if (a<b) return reverse * -1;
        if (a>b) return reverse * 1;
-       return 0;
+       
+	   return 0;
 
    }
 };
+
+
+var trimByRecgroup = function(fullList, myRecgroup) {
+	
+	//Check for keyword for no filtering
+	if (myRecgroup == 'AllRecgroupsOn') {
+		return fullList;
+	} else {
+	
+		var trimmedList = [];
+		var i, s;
+	
+		for (i = 0; i < fullList.length; i++) {
+	
+			s = fullList[i];
+			if (s.recgroup == myRecgroup) {
+				//Matches selected recgroup
+				trimmedList.push(s);
+			} else {
+				//Does not match recgroup
+			}
+		}
+		return trimmedList;
+	}
+};
+
+
+var isEmpty = function(object) { 
+	for(var i in object) { 
+		return false; 
+	};
+	return true; 
+} ;

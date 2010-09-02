@@ -54,12 +54,34 @@ WelcomeAssistant.prototype.setup = function() {
 	
 	
 	
-	//Do Metrx submission if allowed
+		
+	
+	if(Mojo.appInfo.skipPDK == "true")
+	{
+		if (WebMyth.prefsCookieObject) {
+			//Setup default files if missing
+			if (WebMyth.prefsCookieObject.webserverRemoteFile == null) WebMyth.prefsCookieObject.webserverRemoteFile = defaultCookie().webserverRemoteFile;
+			if (WebMyth.prefsCookieObject.webMysqlFile == null) WebMyth.prefsCookieObject.webMysqlFile = defaultCookie().webMysqlFile;
+			if (WebMyth.prefsCookieObject.currentRecgroup == null) WebMyth.prefsCookieObject.currentRecgroup = defaultCookie().currentRecgroup;
+			if (WebMyth.prefsCookieObject.currentFrontend == null) WebMyth.prefsCookieObject.currentFrontend = defaultCookie().currentFrontend;
+			if (WebMyth.prefsCookieObject.currentRemotePort == null) WebMyth.prefsCookieObject.currentRemotePort = defaultCookie().currentRemotePort;
+			
+			Mojo.Controller.getAppController().showBanner("Using "+WebMyth.prefsCookieObject.webserverName+" webserver", {source: 'notification'});
+		
+		} else {
+			Mojo.Controller.getAppController().showBanner("Setup server in preferences", {source: 'notification'});
+		}
+	};
+	
+	
+	
+	//Do Metrix submission if allowed
 	if (WebMyth.prefsCookieObject.allowMetrix == true) {
 		Mojo.Log.info("Submitting data to Metrix");
 		//Metrix command
 		WebMyth.Metrix.postDeviceData();
-	}
+	};
+	
 };
 
 WelcomeAssistant.prototype.activate = function(event) {

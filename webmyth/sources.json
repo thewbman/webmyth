@@ -38,5 +38,9 @@
     {
         "scenes": "welcome",
         "source": "app/assistants/welcome-assistant.js"
+    },
+    {
+        "scenes": "recordedDetails",
+        "source": "app/assistants/recordedDetails-assistant.js"
     }
 ]
