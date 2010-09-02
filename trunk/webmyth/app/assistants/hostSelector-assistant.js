@@ -68,21 +68,6 @@ HostSelectorAssistant.prototype.setup = function() {
 	
 	
 	
-	if(Mojo.appInfo.skipPDK == "true")
-	{
-		if (WebMyth.prefsCookieObject) {
-			//Setup default files if missing
-			if (WebMyth.prefsCookieObject.webserverRemoteFile == null) WebMyth.prefsCookieObject.webserverRemoteFile = defaultCookie().webserverRemoteFile;
-			if (WebMyth.prefsCookieObject.webMysqlFile == null) WebMyth.prefsCookieObject.webMysqlFile = defaultCookie().webMysqlFile;
-			
-			Mojo.Controller.getAppController().showBanner("Using "+WebMyth.prefsCookieObject.webserverName+" webserver", {source: 'notification'});
-		
-		} else {
-			Mojo.Controller.getAppController().showBanner("Setup server in preferences", {source: 'notification'});
-		}
-	};
-	
-	
 	/* add event handlers to listen to events from widgets */
 	
 	//Tap a host from list
@@ -210,20 +195,21 @@ HostSelectorAssistant.prototype.deleteHost = function(event) {
 
 HostSelectorAssistant.prototype.startCommunication = function(event) {
 	Mojo.Log.info("Selected host.  Starting communication ...");
-	 
-	WebMyth.activeHost = event.item.hostname;
-	WebMyth.activePort = event.item.port;
+	
+	WebMyth.prefsCookieObject.currentFrontend = event.item.hostname;
+	WebMyth.prefsCookieObject.currentRemotePort = event.item.port;
+	WebMyth.prefsCookie.put(WebMyth.prefsCookieObject);
 	 
 	
 	//Start telnet communication with selected host
 	if (Mojo.appInfo.skipPDK == "true") {
-		//Do nothing if on emulator
+		//Do nothing if not using plug-in
 	}
 	else {
-		Mojo.Log.info("Opened telnet connection to %s", WebMyth.activeHost);
+		Mojo.Log.info("Opened telnet connection to %s", WebMyth.prefsCookieObject.currentFrontend);
 		//Mojo.Controller.getAppController().showBanner("Opened telnet connection",{source: 'notification'});
 		
-		$('telnetPlug').OpenTelnetConnection(WebMyth.activeHost, WebMyth.activePort);
+		$('telnetPlug').OpenTelnetConnection(WebMyth.prefsCookieObject.currentFrontend, WebMyth.prefsCookieObject.currentRemotePort);
 	
 		$('telnetPlug').SendTelnet("asdf");
 		$('telnetPlug').SendTelnet("asdf");
@@ -244,7 +230,7 @@ HostSelectorAssistant.prototype.sendTelnet = function(value){
 		
 		//Using cgi-bin on server
 		var cmdvalue = encodeURIComponent(value);
-		var requestURL="http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webserverRemoteFile+"?host="+WebMyth.activeHost+"&cmd="+cmdvalue;
+		var requestURL="http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webserverRemoteFile+"?host="+WebMyth.prefsCookieObject.currentFrontend+"&cmd="+cmdvalue;
 	
 		var request = new Ajax.Request(requestURL, {
 			method: 'get',

@@ -27,3 +27,8 @@ Release 0.1.4:
  
 Release 0.1.5:
  - Fixed typo in About screen linking to homepage
+ 
+Relase 0.1.6:
+ - Moved server setup checking to first scene
+ - Added filtering by recgroup to 'recorded' scene
+ - New details scene for recorded programs - can start playback directly from scene

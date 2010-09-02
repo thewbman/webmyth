@@ -27,7 +27,8 @@
 	   
 	  this.nullHandleCount = 0;
 	 
-	  this.resultList = [];
+	  this.fullResultList = [];		//Full raw data 
+	  this.resultList = [];			//Filtered down based on 'recgroup'
 	  
 }
 
@@ -41,33 +42,10 @@ RecordedAssistant.prototype.setup = function() {
 	}; 
 	this.controller.setupWidget('spinner', this.spinnerAttr, this.spinnerModel);
 	
-	if(Mojo.appInfo.skipPDK == "true")
-	{
-		if (WebMyth.prefsCookieObject) {
-			//Setup default files if missing
-			if (WebMyth.prefsCookieObject.webserverRemoteFile == null) WebMyth.prefsCookieObject.webserverRemoteFile = defaultCookie().webserverRemoteFile;
-			if (WebMyth.prefsCookieObject.webMysqlFile == null) WebMyth.prefsCookieObject.webMysqlFile = defaultCookie().webMysqlFile;
-			
-			Mojo.Controller.getAppController().showBanner("Using "+WebMyth.prefsCookieObject.webserverName+" webserver", {source: 'notification'});
-		
-		} else {
-			Mojo.Controller.getAppController().showBanner("Setup server in preferences", {source: 'notification'});
-		}
-	};
 	
 	//App menu widget
 	this.controller.setupWidget(Mojo.Menu.appMenu, WebMyth.appMenuAttr, WebMyth.appMenuModel);
 	
-	// filter field
-	this.controller.setupWidget( 'recordedFilterFieldId' ,
-        this.attributes = {
-            delay: 350,
-            //filterFieldHeight: 100
-        }, 
-        this.model = {
-            disabled: false
-        }
-    );
 	
 	// 'recorded' widget filter list
 	this.recordedListAttribs = {
@@ -83,11 +61,29 @@ RecordedAssistant.prototype.setup = function() {
 		disabled: false
     };
 	this.controller.setupWidget( "recordedList" , this.recordedListAttribs, this.recordedListModel);
+	
+	
+	//Recgroup filter widget
+	this.selectorsModel = {currentRecgroup: WebMyth.prefsCookieObject.currentRecgroup};
+	this.groups = [
+		{label:$L('All'), value:"AllRecgroupsOn"},
+		{label:$L('Default'), value:"Default"},
+		{label:$L('Deleted'), value:"Deleted"} ];
+	this.recgroupFilterAttr = {label: $L(''),
+                             choices: [
+								{label:$L('All'), value:"AllRecgroupsOn"},
+								{label:$L('Default'), value:"Default"},
+								{label:$L('Deleted'), value:"Deleted"} 
+							],
+                             modelProperty:'currentRecgroup'};
+	this.controller.setupWidget('recorded-header-menu-button', this.recgroupFilterAttr, this.selectorsModel);
 
 
-	//Tap a host from list
+	//Event listeners
+	
+	this.controller.listen('recorded-header-menu-button', Mojo.Event.propertyChange, this.recgroupChanged.bindAsEventListener(this));
 	this.controller.listen(this.controller.get( "recordedList" ), Mojo.Event.listTap, this.goRecordedDetails.bind(this));
-	this.controller.listen(this.controller.get( "recordedList" ), Mojo.Event.filter, this.searchFilter.bind(this));
+	//this.controller.listen(this.controller.get( "recordedList" ), Mojo.Event.filter, this.searchFilter.bind(this));
 		
 	
 	
@@ -131,6 +127,35 @@ RecordedAssistant.prototype.cleanup = function(event) {
 	   
 };
 
+RecordedAssistant.prototype.recgroupChanged = function(propertyChangeEvent) {
+	Mojo.Log.info("The current recgroup has changed to "+this.selectorsModel.currentRecgroup);
+	
+	//Update results list from filter
+	this.resultList.clear();
+	Object.extend(this.resultList, trimByRecgroup(this.fullResultList, this.selectorsModel.currentRecgroup));
+	
+	var listWidget = this.controller.get('recordedList');
+	this.filterListFunction('', listWidget, 0, this.resultList.length);
+	
+	//Save selection back to cookie
+	WebMyth.prefsCookieObject.currentRecgroup = this.selectorsModel.currentRecgroup;
+	WebMyth.prefsCookie.put(WebMyth.prefsCookieObject);
+
+	
+	/*
+	this.controller.showAlertDialog({
+        onChoose: function(value) {},
+        title: "WebMyth - v" + Mojo.Controller.appInfo.version,
+        message: "Filtering of list not yet implimented<br>",
+        choices: [{
+            label: "OK",
+			value: ""
+		}],
+		allowHTMLMessage: true
+    });
+	*/
+	   
+};
 
 RecordedAssistant.prototype.useLocalDataTable = function(event) {
 	//Fall back to local data if cannot connect to remote server
@@ -156,7 +181,7 @@ RecordedAssistant.prototype.queryDataHandler = function(transaction, results) {
     // Handle the results 
     var string = ""; 
 	
-	Mojo.Log.info("inside queryData with '%s' rows", results.rows.length);
+	//Mojo.Log.error("Inside queryData with '%s' rows", results.rows.length);
     
 	try {
 		var list = [];
@@ -176,17 +201,37 @@ RecordedAssistant.prototype.queryDataHandler = function(transaction, results) {
 			 
 			list.push( string );
 			//this.hostListModel.items.push( string );
-			//Mojo.Log.error("Just added '%s' to list", string);
+			//Mojo.Log.error("Just added '%j' to list", string);
 		}
-		//update the list widget
-		this.resultList.clear();
-		Object.extend(this.resultList,list);
-		//this.resultList.sort(sort_by('starttime', false));		//sort by date first
-		//this.resultList.sort(sort_by('title', false));			//then by show title
-		this.resultList.sort(double_sort_by('title', 'starttime', false));
 		
+		//Update the list widget
+		this.fullResultList.clear();
+		Object.extend(this.fullResultList,list);
+		this.fullResultList.sort(double_sort_by('title', 'starttime', false));
+		
+		this.resultList.clear();
+		Object.extend(this.resultList, trimByRecgroup(this.fullResultList, this.selectorsModel.currentRecgroup));
+		
+		
+		//Initial display
 		var listWidget = this.controller.get('recordedList');
 		this.filterListFunction('', listWidget, 0, this.resultList.length);
+		
+		//Update the recgroup filter
+		var recgroupSql = "SELECT * FROM recgroup ORDER BY groupname;";
+		var string = "";
+		WebMyth.db.transaction( 
+			(function (transaction) {
+				transaction.executeSql( recgroupSql,  [], 
+					this.updateRecgroupList.bind(this),
+					function(transaction, error) {      // error handler
+						Mojo.Log.error("Could not get list of recgroup: " + error.message + " ... ");
+					}
+				);
+			}
+			).bind(this)
+		);
+		
 		
 		Mojo.Log.info("Done with data query");
 		
@@ -215,13 +260,35 @@ RecordedAssistant.prototype.readRemoteDbTableSuccess = function(response) {
     
 	//Mojo.Log.error('Got Ajax response: ' + response.responseText);
 	
+		
 	//Update the list widget
+	this.fullResultList.clear();
+	Object.extend(this.fullResultList,response.responseJSON);
+	this.fullResultList.sort(double_sort_by('title', 'starttime', false));
+	
 	this.resultList.clear();
-	Object.extend(this.resultList,response.responseJSON);
-	this.resultList.sort(double_sort_by('title', 'starttime', false));	
+	Object.extend(this.resultList, trimByRecgroup(this.fullResultList, this.selectorsModel.currentRecgroup));
+
+	//Initial display
 	var listWidget = this.controller.get('recordedList');
 	this.filterListFunction('', listWidget, 0, this.resultList.length);
-	Mojo.Controller.getAppController().showBanner("Updated with latest data", {source: 'notification'});
+	//Mojo.Controller.getAppController().showBanner("Updated with latest data", {source: 'notification'});
+	
+	//Update the recgroup filter
+	var recgroupSql = "SELECT * FROM recgroup ORDER BY groupname;";
+	var string = "";
+    WebMyth.db.transaction( 
+		(function (transaction) {
+			transaction.executeSql( recgroupSql,  [], 
+				this.updateRecgroupList.bind(this),
+				function(transaction, error) {      // error handler
+					Mojo.Log.error("Could not get list of recgroup: " + error.message + " ... ");
+				}
+			);
+		}
+		).bind(this)
+	);
+	
 	
 	//Stop spinner and hide
 	this.spinnerModel.spinning = false;
@@ -236,11 +303,31 @@ RecordedAssistant.prototype.readRemoteDbTableSuccess = function(response) {
  
 	//Replace out old data
 	WebMyth.db.transaction( function (transaction) {
-		transaction.executeSql("DELETE FROM recorded",  [], 
+		transaction.executeSql("DELETE FROM 'recorded'; ",  [], 
+			function(transaction, results) {    // success handler
+				Mojo.Log.info("Successfully truncated recorded");
+			},
+			function(transaction, error) {      // error handler
+				Mojo.Log.error("Could not truncate recorded because " + error.message);
+			}
+		);
+	});
+	WebMyth.db.transaction( function (transaction) {
+		transaction.executeSql("DELETE FROM 'recgroup'; ",  [], 
+			function(transaction, results) {    // success handler
+				Mojo.Log.info("Successfully truncated recgroup");
+			},
+			function(transaction, error) {      // error handler
+				Mojo.Log.error("Could not truncate recgroup because " + error.message);
+			}
+		);
+	});
+	WebMyth.db.transaction( function (transaction) {
+		transaction.executeSql("INSERT INTO 'recgroup' (groupname, displayname) VALUES ('AllRecgroupsOn', 'All');",  [], 
 				function(transaction, results) {    // success handler
-					Mojo.Log.info("Successfully truncated");
+					Mojo.Log.info("Successfully inserted AllRecgroupsOn");
 					
-					//Nest parsing actions here	to be sure we truncated		
+					//Nest parsing actions here		
 					for(var i = 0; i < json.length; i++){
 						title = json[i].title;
 						subtitle = json[i].subtitle;
@@ -250,35 +337,56 @@ RecordedAssistant.prototype.readRemoteDbTableSuccess = function(response) {
 					
 				},
 				function(transaction, error) {      // error handler
-					Mojo.Log.error("Could not truncate because" + error.message);
+					Mojo.Log.error("Could not insert AllRecgroupsOn because " + error.message);
 				}
 		);
 	});
 };
 
 function insertRecordedRow(newline){
-	//return true;		
-	var sql = "INSERT INTO 'recorded' (chanid, starttime, endtime, title, subtitle, description, category, hostname, bookmark, editing, cutlist, autoexpire, commflagged, recgroup, recordid, seriesid, programid, lastmodified, filesize, stars, previouslyshown, originalairdate, preserve, findid, deletepending, transcoder, timestretch, recpriority, basename, progstart, progend, playgroup, profile, duplicate, transcoded, watched, storagegroup, bookmarkupdate) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
-			
+
+	var recorded_sql = "INSERT INTO 'recorded' (chanid, starttime, endtime, title, subtitle, description, category, hostname, bookmark, editing, cutlist, autoexpire, commflagged, recgroup, recordid, seriesid, programid, lastmodified, filesize, stars, previouslyshown, originalairdate, preserve, findid, deletepending, transcoder, timestretch, recpriority, basename, progstart, progend, playgroup, profile, duplicate, transcoded, watched, storagegroup, bookmarkupdate) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
+	var recgroup_sql = "REPLACE INTO 'recgroup' (groupname, displayname) VALUES (?, ?);";
+	
+	var linerecgroup = newline.recgroup;
+	
 	//Insert into WebMyth.db
 	WebMyth.db.transaction( function (transaction) {
-		transaction.executeSql(sql,  [newline.chanid, newline.starttime, newline.endtime, newline.title, newline.subtitle, newline.description, newline.category, newline.hostname, newline.bookmark, newline.editing,
+		transaction.executeSql(recorded_sql,  [newline.chanid, newline.starttime, newline.endtime, newline.title, newline.subtitle, newline.description, newline.category, newline.hostname, newline.bookmark, newline.editing,
 									newline.cutlist, newline.autoexpire, newline.commflagged, newline.recgroup, newline.recordid, newline.seriesid, newline.programid, newline.lastmodified, newline.filesize, newline.stars, 
 									newline.previouslyshown, newline.originalairdate, newline.preserve, newline.findid, newline.deletepending, newline.transcoder, newline.timestretch, newline.recpriority, newline.basename, newline.progstart, 
 									newline.progend, newline.playgroup, newline.profile, newline.duplicate, newline.transcoded, newline.watched, newline.storagegroup, newline.bookmarkupdate], 
 			function(transaction, results) {    // success handler
-				//Mojo.Log.error('Entered Row - Title: ' + newRow.title + ' Subtitle: ' + newRow.subtitle);
+				//Mojo.Log.info('Entered Row - Title: ' + newline.title + ' Subtitle: ' + newline.subtitle);
 			},
 			function(transaction, error) {      // error handler
-				Mojo.Log.error("Could not insert record: " + error.message);
+				Mojo.Log.error("Could not insert in recorded: " + error.message);
+			}
+		);	
+	});
+	
+	//Update recgroups table
+	WebMyth.db.transaction( function (transaction) {
+		transaction.executeSql(recgroup_sql,  [newline.recgroup, linerecgroup], 
+			function(transaction, results) {    // success handler
+				//Mojo.Log.info('Entered new recgroup: ' + newline.recgroup);
+			},
+			function(transaction, error) {      // error handler
+				Mojo.Log.error("Could not insert in recgroup: " + error.message + " ... ");
 			}
 		);
 	});
+	
 };
 
 
 RecordedAssistant.prototype.goRecordedDetails = function(event) {
-	 
+	var recorded_chanid = event.item.chanid;
+	var recorded_starttime = event.item.starttime;
+	
+	Mojo.Log.info("Selected individual recording: '%s' + '%s'", recorded_chanid, recorded_starttime);
+	
+	/*
 	this.controller.showAlertDialog({
         onChoose: function(value) {},
         title: "WebMyth - v" + Mojo.Controller.appInfo.version,
@@ -289,7 +397,13 @@ RecordedAssistant.prototype.goRecordedDetails = function(event) {
 		}],
 		allowHTMLMessage: true
     });
+	*/
+
 	
+	//Open recordedDetails communication scene
+	Mojo.Controller.stageController.pushScene("recordedDetails", recorded_chanid, recorded_starttime);
+	
+
 };
 
 RecordedAssistant.prototype.filterListFunction = function(filterString, listWidget, offset, count) {
@@ -370,4 +484,36 @@ RecordedAssistant.prototype.searchFilter = function(event)    {
 		var listWidget = this.controller.get('recordedList');
 		this.filterListFunction('', listWidget, 0, this.resultList.length);
     } 
+};
+
+RecordedAssistant.prototype.updateRecgroupList = function(transaction, results)  { 
+	Mojo.Log.info('inside updateRecgroupList');
+	
+	var updatedList = [];
+	var string = "";
+	
+	for (var i = 0; i < results.rows.length; i++) {
+		var row = results.rows.item(i);
+		string = { label:row.displayname, value:row.groupname };
+		updatedList.push( string );
+		//Mojo.Log.error("Just added '%j' to list", string);
+	};
+						
+	//Mojo.Log.info("New recgroup list is '%j' with length %s", updatedList, updatedList.length);
+	
+	if (updatedList.length == 0) {
+		updatedList = [ {'label':'Default', 'value':'Default' } ];
+		Mojo.Log.info("Updated initial recgroup list is '%j' ", updatedList);
+		this.selectorsModel.currentRecgroup = 'Default';
+	} else {
+		//Mojo.Log.info("New recgroup list is still '%j' ", updatedList);
+	}
+				
+				
+	this.recgroupFilterAttr.choices.clear();
+	Object.extend(this.recgroupFilterAttr.choices, updatedList);
+	this.controller.modelChanged(this.recgroupFilterAttr);
+	this.controller.modelChanged(this.selectorsModel);
+
+	
 };

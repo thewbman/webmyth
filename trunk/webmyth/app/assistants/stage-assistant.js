@@ -62,9 +62,6 @@ WebMyth.headerMenuButtonModel = {
 	 command: 'go-headerMenu'
 };
 	
-//Current frontend host
-WebMyth.activeHost = 'Undefined';
-WebMyth.activePort = '6546';
 	
 //Cookie for preferences
 WebMyth.prefsCookie = new Mojo.Model.Cookie('prefs');
