@@ -1,0 +1,34 @@
+Release 0.1.0:  Intial Release
+ - requires use of server script to use telnet communications with frontend
+ 
+Release 0.1.1: 
+ - Rewrite of several functions for better code reuse
+
+Release 0.1.2: 
+ - More function rewriting
+ - Added new welcome screen to select remote or recorded shows
+ - Added ability to set server script locations
+ 
+Release 0.1.3:
+ - Can now list recorded shows on backend
+ - Recorded shows are alphabetized and searchable
+ - Recorded shows are stored to local DB, but views currently only come from AJAX request
+ - Displays all shows (included deleted ones)
+ - (Details of shows still work in progress) 
+ - (Should add in more error checking)
+ 
+Release 0.1.4:
+ - List of recorded now sorts by date and title, and deleted items have strikethrough
+ - Spinner widget on recorded list while waiting for data
+ - Full recorded table gets saved locally for future use
+ - Falls back to locally saved recorded data when cannot get remote data
+ - Fixed bug of upgrades from earlier verions not getting default server scripts in setting
+ - Script files now have basic information on where to install
+ 
+Release 0.1.5:
+ - Fixed typo in About screen linking to homepage
+ 
+Relase 0.1.6:
+ - Moved server setup checking to first scene
+ - Added filtering by recgroup to 'recorded' scene
+ - New details scene for recorded programs - can start playback directly from scene
