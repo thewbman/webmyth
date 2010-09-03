@@ -57,6 +57,16 @@ switch($_POST['op']) {			//change back to POST
 		);
       break;
     }
+
+    case 'getFrontends': {
+	$use_mysql = true;
+
+	$query = sprintf("SELECT DISTINCT hostname, value, data FROM settings WHERE ((hostname IS NOT NULL) AND ((value = 'NetworkControlEnabled') OR (value = 'NetworkControlPort')))"
+		);
+	
+      break;
+    }
+
 }
 
 if($use_mysql) {
