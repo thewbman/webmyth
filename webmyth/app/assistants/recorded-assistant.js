@@ -95,7 +95,7 @@ RecordedAssistant.prototype.setup = function() {
     try {
         var request = new Ajax.Request(requestUrl,{
             method: 'post',
-            parameters: {'op': 'getAllRecords', 'table': 'recorded', 'sort': 'starttime'},
+			parameters: {'op': 'getRecorded'},
             evalJSON: 'true',
             onSuccess: this.readRemoteDbTableSuccess.bind(this),
             onFailure: this.useLocalDataTable.bind(this)  
@@ -196,7 +196,7 @@ RecordedAssistant.prototype.queryDataHandler = function(transaction, results) {
 				previouslyshown: row.previouslyshown, originalairdate: row.originalairdate, preserve: row.preserve, findid: row.findid,	deletepending: row.deletepending, 
 				transcoder: row.transcoder, timestretch: row.timestretch, recpriority: row.recpriority, basename: row.basename,	progstart: row.progstart, 
 				progend: row.progend, playgroup: row.playgroup, profile: row.profile, duplicate: row.duplicate, transcoded: row.transcoded, 
-				watched: row.watched, storagegroup: row.storagegroup, bookmarkupdate: row.bookmarkupdate
+				watched: row.watched, storagegroup: row.storagegroup, bookmarkupdate: row.bookmarkupdate, channum: row.channum, name: row.name
 			 };
 			 
 			list.push( string );
@@ -345,6 +345,8 @@ RecordedAssistant.prototype.readRemoteDbTableSuccess = function(response) {
 
 function insertRecordedRow(newline){
 
+	//added channel fields are not working for some reason
+
 	var recorded_sql = "INSERT INTO 'recorded' (chanid, starttime, endtime, title, subtitle, description, category, hostname, bookmark, editing, cutlist, autoexpire, commflagged, recgroup, recordid, seriesid, programid, lastmodified, filesize, stars, previouslyshown, originalairdate, preserve, findid, deletepending, transcoder, timestretch, recpriority, basename, progstart, progend, playgroup, profile, duplicate, transcoded, watched, storagegroup, bookmarkupdate) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
 	var recgroup_sql = "REPLACE INTO 'recgroup' (groupname, displayname) VALUES (?, ?);";
 	
@@ -386,22 +388,12 @@ RecordedAssistant.prototype.goRecordedDetails = function(event) {
 	
 	Mojo.Log.info("Selected individual recording: '%s' + '%s'", recorded_chanid, recorded_starttime);
 	
-	/*
-	this.controller.showAlertDialog({
-        onChoose: function(value) {},
-        title: "WebMyth - v" + Mojo.Controller.appInfo.version,
-        message: "Details screen comming soon ... <br>",
-        choices: [{
-            label: "OK",
-			value: ""
-		}],
-		allowHTMLMessage: true
-    });
-	*/
+	detailsObject = trimByChanidStarttime(this.fullResultList, recorded_chanid, recorded_starttime)
 
+	Mojo.Log.info("Selected object is: '%j'", detailsObject);
 	
 	//Open recordedDetails communication scene
-	Mojo.Controller.stageController.pushScene("recordedDetails", recorded_chanid, recorded_starttime);
+	Mojo.Controller.stageController.pushScene("recordedDetails", detailsObject);
 	
 
 };

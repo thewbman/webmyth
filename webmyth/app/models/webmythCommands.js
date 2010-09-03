@@ -39,14 +39,23 @@ function createHostnameDb() {
 	
 	//Recorded table
 	newdb.transaction(function(tx2) {
-    tx2.executeSql('CREATE TABLE IF NOT EXISTS recorded(id INTEGER PRIMARY KEY, chanid INTEGER, starttime TEXT, endtime TEXT, title TEXT, subtitle TEXT, description TEXT, category TEXT, hostname TEXT, bookmark INTEGER, editing INTEGER, cutlist INTEGER, autoexpire INTEGER, commflagged INTEGER, recgroup TEXT, recordid INTEGER, seriesid TEXT, programid TEXT, lastmodified TEXT, filesize INTEGER, stars REAL, previouslyshown INTEGER, originalairdate TEXT, preserve INTEGER, findid INTEGER, deletepending INTEGER, transcoder INTEGER, timestretch REAL, recpriority INTEGER, basename TEXT, progstart TEXT, progend TEXT, playgroup TEXT, profile TEXT, duplicate INTEGER, transcoded INTEGER, watched INTEGER, storagegroup TEXT, bookmarkupdate TEXT)', 
+    tx2.executeSql('CREATE TABLE IF NOT EXISTS recorded(id INTEGER PRIMARY KEY, chanid INTEGER, starttime TEXT, endtime TEXT, title TEXT, subtitle TEXT, description TEXT, category TEXT, hostname TEXT, bookmark INTEGER, editing INTEGER, cutlist INTEGER, autoexpire INTEGER, commflagged INTEGER, recgroup TEXT, recordid INTEGER, seriesid TEXT, programid TEXT, lastmodified TEXT, filesize INTEGER, stars REAL, previouslyshown INTEGER, originalairdate TEXT, preserve INTEGER, findid INTEGER, deletepending INTEGER, transcoder INTEGER, timestretch REAL, recpriority INTEGER, basename TEXT, progstart TEXT, progend TEXT, playgroup TEXT, profile TEXT, duplicate INTEGER, transcoded INTEGER, watched INTEGER, storagegroup TEXT, bookmarkupdate TEXT,  channnum TEXT, name TEXT)', 
       []);
     });
+	//Release 0.1.7 add in channel columns
+	newdb.transaction(function(tx4) {
+    tx4.executeSql('ALTER TABLE recorded ADD channnum TEXT', 
+      []);
+    });
+	newdb.transaction(function(tx5) {
+    tx5.executeSql('ALTER TABLE recorded ADD name TEXT', 
+      []);
+    });
+
 	
 	//Recgroup table for filtering of recorded table
 	newdb.transaction(function(tx3) {
     tx3.executeSql('CREATE TABLE IF NOT EXISTS recgroup(groupname TEXT PRIMARY KEY, displayname TEXT)', 
-    //tx3.executeSql('DROP TABLE IF EXISTS recgroup', 
       []);
     });
 	} catch (err) {
@@ -104,13 +113,14 @@ function defaultCookie() {
 	//These values are initiated in 'welcome' scene if not set
 
 	var newCookieObject = {
-		webserverName: '',							//included in initial cookie version
-		allowMetrix: true,							//included in initial cookie version
+		webserverName: '',							
+		allowMetrix: true,							
 		webserverRemoteFile: '/cgi-bin/remote.py',
 		webMysqlFile: '/webmyth-mysql.php',
 		currentRecgroup: 'Default',
 		currentFrontend: 'frontend',
-		currentRemotePort: '6546'
+		currentRemotePort: '6546',
+		previousScriptVersion: 0
 	};
 	
 	return newCookieObject;
@@ -186,9 +196,28 @@ var trimByRecgroup = function(fullList, myRecgroup) {
 };
 
 
+var trimByChanidStarttime = function(fullList, chanid_in, starttime_in) {
+	
+		var i, s;
+	
+		for (i = 0; i < fullList.length; i++) {
+	
+			s = fullList[i];
+			if ((s.chanid == chanid_in) && (s.starttime == starttime_in)) {
+				//Matches chanid and starttime
+				return s;
+			} else {
+				//Does not match
+			}
+		}
+		return {};
+
+};
+
+
 var isEmpty = function(object) { 
 	for(var i in object) { 
 		return false; 
 	};
 	return true; 
-} ;
+};
