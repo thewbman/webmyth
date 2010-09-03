@@ -19,15 +19,13 @@
  */
 
 
-function RecordedDetailsAssistant(recorded_chanid, recorded_starttime) {
+function RecordedDetailsAssistant(detailsObject) {
 	/* this is the creator function for your scene assistant object. It will be passed all the 
 	   additional parameters (after the scene name) that were passed to pushScene. The reference
 	   to the scene controller (this.controller) has not be established yet, so any initialization
 	   that needs the scene controller should be done in the setup function below. */
 	   
-	   this.recorded_chanid = recorded_chanid;
-	   this.recorded_starttime = recorded_starttime;
-	   this.recordedObject = {};
+	   this.recordedObject = detailsObject;
 	   
 }
 
@@ -36,7 +34,7 @@ RecordedDetailsAssistant.prototype.setup = function() {
 		
 	/* use Mojo.View.render to render view templates and add them to the scene, if needed */
 	
-	Mojo.Log.info("Starting scene with "+this.recorded_chanid+" and "+this.recorded_starttime);
+	Mojo.Log.info("Starting recorded details scene");
 	
 	//Play button
 	this.controller.setupWidget("goPlayButtonId", {}, { label : "Play", disabled: false } );
@@ -57,25 +55,13 @@ RecordedDetailsAssistant.prototype.setup = function() {
          this.frontendTextModel
     ); 
 	
+
 	
-	try {
-	//Get data from table
-	var recordedDetailsSql = "SELECT * FROM recorded WHERE ((chanid = ?) AND (starttime = ?))";
-    WebMyth.db.transaction( 
-		(function (transaction) {
-			transaction.executeSql( recordedDetailsSql,  [this.recorded_chanid, this.recorded_starttime], 
-				this.handleSuccessQuery.bind(this),
-				this.handleErrorQuery.bind(this)
-			);
-		}
-		).bind(this)
-	);
-	}
-    catch(e) {
-        Mojo.Log.error(e);
-    }
+	//Fill in data values
+	$('scene-title').innerText = this.recordedObject.title;
+	$('subtitle-title').innerText = this.recordedObject.subtitle;
+	$('description-title').innerText = this.recordedObject.description;
 	
-	/* add event handlers to listen to events from widgets */
 };
 
 RecordedDetailsAssistant.prototype.activate = function(event) {
@@ -93,56 +79,6 @@ RecordedDetailsAssistant.prototype.cleanup = function(event) {
 	   a result of being popped off the scene stack */
 };
 
-RecordedDetailsAssistant.prototype.handleSuccessQuery = function(transaction, results) {
-	var string = "";
-	
-	
-	if(results.rows.length == 0) {
-	
-	this.controller.showAlertDialog({
-        onChoose: function(value) {},
-        title: "WebMyth - v" + Mojo.Controller.appInfo.version,
-        message: "Error trying to get details for chanid:"+this.recorded_chanid+" with starttime: "+this.recorded_starttime+"<br>",
-        choices: [{
-            label: "OK",
-			value: ""
-		}],
-		allowHTMLMessage: true
-    });
-	
-	Mojo.Log.error("results array is empty");
-	
-	}
-	else {
-	var row = results.rows.item(0);
-		string = {
-				chanid: row.chanid, starttime: row.starttime, endtime: row.endtime, title: row.title, subtitle: row.subtitle, 
-				description: row.description, category: row.category, hostname: row.hostname, bookmark: row.bookmark, editing: row.editing, 
-				cutlist: row.cutlist, autoexpire: row.autoexpire, commflagged: row.commflagged, recgroup: row.recgroup, recordid: row.recordid, 
-				seriesid: row.seriesid, programid: row.programid, lastmodified: row.lastmodified, filesize: row.filesize, stars: row.stars, 
-				previouslyshown: row.previouslyshown, originalairdate: row.originalairdate, preserve: row.preserve, findid: row.findid,	deletepending: row.deletepending, 
-				transcoder: row.transcoder, timestretch: row.timestretch, recpriority: row.recpriority, basename: row.basename,	progstart: row.progstart, 
-				progend: row.progend, playgroup: row.playgroup, profile: row.profile, duplicate: row.duplicate, transcoded: row.transcoded, 
-				watched: row.watched, storagegroup: row.storagegroup, bookmarkupdate: row.bookmarkupdate
-			 };
-		this.recordedObject = string;
-	
-	
-						
-	//Mojo.Log.info("New list is '%j' with length %s", this.recordedObject, this.recordedObject.length);
-	}
-	
-	
-	$('scene-title').innerText = this.recordedObject.title;
-	$('subtitle-title').innerText = this.recordedObject.subtitle;
-	$('description-title').innerText = this.recordedObject.description;
-	
-	
-};
-
-RecordedDetailsAssistant.prototype.handleErrorQuery = function(transaction, errors) {
-	Mojo.Log.error("Error is %j%", errors);
-};
 
 RecordedDetailsAssistant.prototype.goPlay = function(event) {
 	//Attempting to play

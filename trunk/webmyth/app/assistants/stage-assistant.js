@@ -33,7 +33,8 @@ WebMyth.appMenuModel = {
 	visible: true,
 	items: [
 		{label: "About...", command: 'do-aboutApp'},
-		{label: "Preferences", command: 'do-prefsApp'}
+		{label: "Preferences", command: 'do-prefsApp'},
+		{label: "Help", command: 'do-helpApp'}
 	]
 };
 //Create WebMyth.db for use or open existing
@@ -66,10 +67,20 @@ WebMyth.headerMenuButtonModel = {
 //Cookie for preferences
 WebMyth.prefsCookie = new Mojo.Model.Cookie('prefs');
 WebMyth.prefsCookieObject = WebMyth.prefsCookie.get();
-//WebMyth.prefsCookieObject = checkCookieDefaults(WebMyth.prefsCookie.get());
-//WebMyth.prefsCookie.put(WebMyth.prefsCookieObject);
 
 
+//Current script verion
+//1 = 0.1.7
+WebMyth.currentScriptVersion = 1;
+
+
+//Help and first-run message
+WebMyth.helpMessage = "This app requires the installation of 2 scripts on a local webserver on your network.  ";
+WebMyth.helpMessage += "You can get the files <a href='http://code.google.com/p/webmyth/'>here</a><hr/>";
+WebMyth.helpMessage += "The remote script (<a href='http://code.google.com/p/webmyth/source/browse/trunk/remote.py'>remote.py</a>) ";
+WebMyth.helpMessage += "needs to be in executable as cgi-bin while the mysql script (<a href='http://code.google.com/p/webmyth/source/browse/trunk/webmyth-mysql.php'>webmyth-mysql.php</a>) can be in any standard directory.  ";
+WebMyth.helpMessage += "Both files needs to be accesible to this device without any authentication.<hr/>";
+WebMyth.helpMessage += "You will also need to set the IP address of the server in the preferences of this app.";
 
 
 StageAssistant.prototype.setup = function() {
@@ -120,6 +131,21 @@ StageAssistant.prototype.handleCommand = function(event) {
 			this.controller.pushScene("preferences");
        break;
 	   
+	  case 'do-helpApp':
+			//helpAlert();
+	
+			currentScene.showAlertDialog({
+				onChoose: function(value) {},
+				title: "WebMyth - v" + Mojo.Controller.appInfo.version,
+				message:  WebMyth.helpMessage, 
+				choices: [{
+					label: "OK",
+					value: ""
+				}],
+				allowHTMLMessage: true
+			});	
+       break;
+	   
 	  case 'do-recorded':
 			this.controller.pushScene("recorded");
        break;
@@ -151,17 +177,3 @@ StageAssistant.prototype.handleCommand = function(event) {
   }
 };
 
-pluginMessageFunc = function(a)       
-{       
-      //Send up an alert dialog with message from plug-in
-	  currentScene.showAlertDialog({
-                onChoose: function(value) {},
-                title: "Message from plug-in:",
-                message: String(a),
-                choices: [{
-                    label: "OK",
-                    value: ""
-                }],
-                allowHTMLMessage: true
-            });   
-}; 

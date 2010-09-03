@@ -32,3 +32,11 @@ Relase 0.1.6:
  - Moved server setup checking to first scene
  - Added filtering by recgroup to 'recorded' scene
  - New details scene for recorded programs - can start playback directly from scene
+ 
+Release 0.1.7:
+ - Update to webmyth-mysql.php script for showing upcoming recordings
+ - Setup version in php script for future updates
+ - Optimize recorded detail scene
+ - Add help to menu that describes the need for server-side scripts
+ - Help screen shows on first run
+ 

@@ -8,6 +8,8 @@
 # This files needs to be accesible without authentication on the webserver
 #
 # You will also need to have a working copy of python installed on the server
+#
+version = 1
 
 import cgi
 import cgitb
