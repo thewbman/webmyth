@@ -1,4 +1,4 @@
-#Some common questions on getting WebMyth up and running.
+#Some common questions on getting !WebMyth up and running.
 
 = Introduction =
 
