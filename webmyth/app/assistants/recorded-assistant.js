@@ -390,7 +390,7 @@ RecordedAssistant.prototype.goRecordedDetails = function(event) {
 	
 	detailsObject = trimByChanidStarttime(this.fullResultList, recorded_chanid, recorded_starttime)
 
-	Mojo.Log.info("Selected object is: '%j'", detailsObject);
+	//Mojo.Log.info("Selected object is: '%j'", detailsObject);
 	
 	//Open recordedDetails communication scene
 	Mojo.Controller.stageController.pushScene("recordedDetails", detailsObject);

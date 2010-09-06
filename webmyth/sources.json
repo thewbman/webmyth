@@ -42,5 +42,9 @@
     {
         "scenes": "recordedDetails",
         "source": "app/assistants/recordedDetails-assistant.js"
+    },
+    {
+        "scenes": "searchHosts",
+        "source": "app/assistants/searchHosts-assistant.js"
     }
 ]

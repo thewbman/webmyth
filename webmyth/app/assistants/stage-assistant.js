@@ -70,17 +70,29 @@ WebMyth.prefsCookieObject = WebMyth.prefsCookie.get();
 
 
 //Current script verion
-//1 = 0.1.7
+//2 = 0.1.8
 WebMyth.currentScriptVersion = 1;
 
 
 //Help and first-run message
 WebMyth.helpMessage = "This app requires the installation of 2 scripts on a local webserver on your network.  ";
-WebMyth.helpMessage += "You can get the files <a href='http://code.google.com/p/webmyth/'>here</a><hr/>";
-WebMyth.helpMessage += "The remote script (<a href='http://code.google.com/p/webmyth/source/browse/trunk/remote.py'>remote.py</a>) ";
-WebMyth.helpMessage += "needs to be in executable as cgi-bin while the mysql script (<a href='http://code.google.com/p/webmyth/source/browse/trunk/webmyth-mysql.php'>webmyth-mysql.php</a>) can be in any standard directory.  ";
-WebMyth.helpMessage += "Both files needs to be accesible to this device without any authentication.<hr/>";
+WebMyth.helpMessage += "You can get the files <a href='http://code.google.com/p/webmyth/downloads/list'>here</a><hr/>";
+WebMyth.helpMessage += "If you have installed previous verions of the script files please upgrade them to the latest versions.<hr/>";
+//WebMyth.helpMessage += "The remote script (<a href='http://code.google.com/p/webmyth/source/browse/trunk/remote.py'>remote.py</a>) ";
+//WebMyth.helpMessage += "needs to be in executable as cgi-bin while the mysql script (<a href='http://code.google.com/p/webmyth/source/browse/trunk/webmyth-mysql.php'>webmyth-mysql.php</a>) can be in any standard directory.  ";
+//WebMyth.helpMessage += "Both files needs to be accesible to this device without any authentication.<hr/>";
 WebMyth.helpMessage += "You will also need to set the IP address of the server in the preferences of this app.";
+
+
+WebMyth.helpEmailText = "This app requires the installation of 2 scripts on a local webserver on your network.  ";
+WebMyth.helpEmailText += "You can get the files <a href='http://code.google.com/p/webmyth/downloads/list'>here</a><hr/>";
+WebMyth.helpEmailText += "The remote script (<a href='http://code.google.com/p/webmyth/source/browse/trunk/remote.py'>remote.py</a>) ";
+WebMyth.helpEmailText += "needs to be in executable as cgi-bin while the mysql script (<a href='http://code.google.com/p/webmyth/source/browse/trunk/webmyth-mysql.php'>webmyth-mysql.php</a>) can be in any standard directory.  ";
+WebMyth.helpEmailText += "You will need change the hardcoded values of your MySQL server of the script.  ";
+WebMyth.helpEmailText += "Both files needs to be accesible to this device without any authentication.<hr/>";
+WebMyth.helpEmailText += "You will also need to set the IP address of the server in the preferences of this app.<hr/>";
+WebMyth.helpEmailText += "Please report any issues you find with the system on the 'issues' tab of the homepage.  ";
+WebMyth.helpEmailText += "Or you can email the developer directly at <a href=mailto:thewbman+webmyth@gmail.com>thewbman@gmail.com</a>.";
 
 
 StageAssistant.prototype.setup = function() {
@@ -118,10 +130,9 @@ StageAssistant.prototype.handleCommand = function(event) {
                 onChoose: function(value) {},
                 title: "WebMyth - v" + Mojo.Controller.appInfo.version,
                 message: "Copyright 2010, Wes Brown <br>" + aboutinfo,
-                choices: [{
-                    label: "OK",
-                    value: ""
-                }],
+                choices: [
+					{label: "OK", value: ""}
+					],
                 allowHTMLMessage: true
             });
 
@@ -135,15 +146,31 @@ StageAssistant.prototype.handleCommand = function(event) {
 			//helpAlert();
 	
 			currentScene.showAlertDialog({
-				onChoose: function(value) {},
+				onChoose: function(value) {if (value==true) {
+					Mojo.Log.error("appPath:" + Mojo.appPath);
+					this.controller.serviceRequest(
+						"palm://com.palm.applicationManager", {
+							method: 'open',
+							parameters: {
+								id: "com.palm.app.email",
+								params: {
+									summary: "WebMyth setup instructions",
+									text: WebMyth.helpEmailText
+								}
+							}
+						}
+					);
+					}
+				},
 				title: "WebMyth - v" + Mojo.Controller.appInfo.version,
 				message:  WebMyth.helpMessage, 
-				choices: [{
-					label: "OK",
-					value: ""
-				}],
+				choices: [
+                    {label: "OK", value: false},
+					{label: "Email this", value: true}
+					],
 				allowHTMLMessage: true
 			});	
+			
        break;
 	   
 	  case 'do-recorded':
@@ -176,4 +203,3 @@ StageAssistant.prototype.handleCommand = function(event) {
     }
   }
 };
-

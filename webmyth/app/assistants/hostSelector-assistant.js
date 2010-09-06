@@ -29,7 +29,19 @@ function HostSelectorAssistant() {
 	 
 	  
 	  this.resultList = [];
-}
+};
+
+//Setup remote commandmenu
+HostSelectorAssistant.hostsCommandMenuModel = {
+	visible: true,
+	items: [
+		{},
+		{ items: [ { label: "Add", command: 'go-addHost', width: 80 } ] },
+		{},
+		{ items: [ { label: "Search", command: 'go-searchHost', width: 100 } ] },
+		{}
+	]
+};
 
 HostSelectorAssistant.prototype.setup = function() {
 	
@@ -38,19 +50,7 @@ HostSelectorAssistant.prototype.setup = function() {
 	
 	
 	//Bottom of page menu widget
-	this.bottomMenuModel = {
-	items: [
-		{},
-		{
-			label:'Host Selector Bottom Menu',
-			items: [
-				{ label: "Add", command: 'go-addHost', width: 80 }
-			]
-		},
-		{}
-	]
-	};
-	this.controller.setupWidget( Mojo.Menu.commandMenu, {}, this.bottomMenuModel );
+	this.controller.setupWidget( Mojo.Menu.commandMenu, {}, HostSelectorAssistant.hostsCommandMenuModel );
 	
 	
 	//List of hosts widget
@@ -62,8 +62,6 @@ HostSelectorAssistant.prototype.setup = function() {
     this.hostListModel = {            
         items: this.resultList
     };
-	
-	
 	this.controller.setupWidget( "hostlist" , this.hostListAttribs, this.hostListModel);
 	
 	
@@ -77,6 +75,8 @@ HostSelectorAssistant.prototype.setup = function() {
 	//Delete host
 	this.controller.listen(this.controller.get( "hostlist" ), Mojo.Event.listDelete,
         this.deleteHost.bind(this));
+		
+
 	
 };
 
@@ -88,7 +88,7 @@ HostSelectorAssistant.prototype.activate = function(event) {
 	//Close out open telnet connections
 	//TODO: Add check to only close if a connection exists
 	//closeTelnet(this.telnetPlug);
-	
+			
 	// Query `hosts` table
 	var mytext = 'select * from hosts;'
     WebMyth.db.transaction( 
@@ -124,9 +124,12 @@ HostSelectorAssistant.prototype.handleCommand = function(event) {
     switch(event.command) {
       case 'go-addHost':
         Mojo.Controller.stageController.pushScene("addHost");
-        break;
+       break;
+      case 'go-searchHost':
+		Mojo.Controller.stageController.pushScene("searchHosts");
+       break;
     }
-  }
+  };
 };
 
 HostSelectorAssistant.prototype.queryDataHandler = function(transaction, results) { 
@@ -192,7 +195,6 @@ HostSelectorAssistant.prototype.deleteHost = function(event) {
 };
 
 
-
 HostSelectorAssistant.prototype.startCommunication = function(event) {
 	Mojo.Log.info("Selected host.  Starting communication ...");
 	
@@ -236,10 +238,16 @@ HostSelectorAssistant.prototype.sendTelnet = function(value){
 			method: 'get',
 			onSuccess: function(transport){
 				reply = transport.responseText;
-				Mojo.Log.info("Success AJAX: '%s'", reply);
+				if (reply.substring(0,5) == "ERROR") {
+					Mojo.Log.error("Error in response: '%s'", reply.substring(6));
+					Mojo.Controller.getAppController().showBanner(reply, {source: 'notification'});
+				} else {
+					Mojo.Log.info("Success AJAX: '%s'", reply);
+				}
 			},
 			onFailure: function() {
-				Mojo.Log.info("Failed AJAX: '%s'", requestURL);
+				Mojo.Log.error("Failed AJAX: '%s'", requestURL);
+				Mojo.Controller.getAppController().showBanner("ERROR - check remote.py scipt", {source: 'notification'});
 			}
 		});
 	}

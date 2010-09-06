@@ -215,9 +215,55 @@ var trimByChanidStarttime = function(fullList, chanid_in, starttime_in) {
 };
 
 
+var trimByEnabled = function(fullList, enabled) {
+	
+	//Check for remoteIsEnabled for no filtering
+		var trimmedList = [];
+		var i, s;
+	
+		for (i = 0; i < fullList.length; i++) {
+	
+			s = fullList[i];
+			if (s.remoteIsEnabled == enabled) {
+				//Matches selected recgroup
+				trimmedList.push(s);
+			} else {
+				//Does not match recgroup
+			}
+		}
+		return trimmedList;
+
+};
+
+
 var isEmpty = function(object) { 
 	for(var i in object) { 
 		return false; 
 	};
 	return true; 
 };
+
+
+function doHelpEmail() {
+	
+	this.controller.serviceRequest(
+    "palm://com.palm.applicationManager", {
+        method: 'open',
+        parameters: {
+            id: "com.palm.app.email",
+            params: {
+                summary: "test subject",
+                text: "Test email text.",
+                recipients: [{
+                    type:"email",
+                    role:1,
+                    value:"adsf@asdf.com",
+                    contactDisplay:"Your name"
+                }]
+            }
+        }
+    }
+);
+	
+	Mojo.Log.error("do send email");
+}
