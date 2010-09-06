@@ -1,11 +1,11 @@
-#Some common questions on getting !WebMyth up and running.
+Some common questions on getting !WebMyth up and running.  If you have a new question you can try submitting it as a comment to this page.
 
-= Introduction =
+= Q1 =
 
 Add your content here.
 
 
-= Details =
+== Details ==
 
 Add your content here.  Format your content with:
   * Text in *bold* or _italic_
