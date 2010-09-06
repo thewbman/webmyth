@@ -88,3 +88,11 @@
 .palm-row.multi-line.Default {
 
 }
+
+.enabled-0 {
+	innerHtml: 'Disabled'
+}
+
+.enabled-1 {
+	innerHtml: 'Enabled'
+}

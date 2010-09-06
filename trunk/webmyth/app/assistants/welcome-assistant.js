@@ -73,27 +73,28 @@ WelcomeAssistant.prototype.setup = function() {
 		
 		//Check if scripts need an upgrade message
 		if (WebMyth.prefsCookieObject.previousScriptVersion == null) {
-			Mojo.Log.error("Previous script version in cookie not set");
+			Mojo.Log.info("Previous script version in cookie not set");		//for upgrades
 			WebMyth.prefsCookieObject.previousScriptVersion = WebMyth.currentScriptVersion;
-			this.alertNeedScript();//.bind(this);
+			this.alertNeedScript();
 		} else if ( (WebMyth.prefsCookieObject.previousScriptVersion) < (WebMyth.currentScriptVersion) ) {
-			Mojo.Log.error("Previous script version is old: "+WebMyth.prefsCookieObject.previousScriptVersion);
-			this.alertScriptUpdate(WebMyth.prefsCookieObject.previousScriptVersion);//.bind(this);
+			Mojo.Log.info("Previous script version is old: "+WebMyth.prefsCookieObject.previousScriptVersion);
+			this.alertScriptUpdate(WebMyth.prefsCookieObject.previousScriptVersion);
 			WebMyth.prefsCookieObject.previousScriptVersion = WebMyth.currentScriptVersion;
 		} else {
-			Mojo.Log.error("Previous script version matches current :"+WebMyth.currentScriptVersion);
+			Mojo.Log.info("Previous script version matches current :"+WebMyth.prefsCookieObject.previousScriptVersion+" "+WebMyth.currentScriptVersion);
+			WebMyth.prefsCookieObject.previousScriptVersion = WebMyth.currentScriptVersion;
 		}
 		
 		WebMyth.prefsCookie.put(WebMyth.prefsCookieObject); 
 			
 		Mojo.Controller.getAppController().showBanner("Using '"+WebMyth.prefsCookieObject.webserverName+"' webserver", {source: 'notification'});
 		
-	} else {
+	} else {		//for new installs
 		//Mojo.Controller.getAppController().showBanner("Setup server in preferences", {source: 'notification'});
 		WebMyth.prefsCookieObject = defaultCookie();
 		WebMyth.prefsCookieObject.previousScriptVersion = WebMyth.currentScriptVersion;
 		WebMyth.prefsCookie.put(WebMyth.prefsCookieObject);
-		this.alertNeedScript();//.bind(this);
+		this.alertNeedScript();
 	};
 	
 };
@@ -146,8 +147,8 @@ WelcomeAssistant.prototype.alertNeedScript = function() {
 WelcomeAssistant.prototype.alertScriptUpdate = function(oldversion) {
 	
 	/* Script history:
-		remote.py version 1 from 0.1.7
-		webmyth-mysql.php version 1 from 0.1.7
+		remote.py version 2 from 0.1.8
+		webmyth-mysql.php version 2 from 0.1.8
 	*/
 	
 	Mojo.Log.error("Current version is " + WebMyth.currentScriptVersion + " but last version was " + oldversion);
@@ -157,16 +158,33 @@ WelcomeAssistant.prototype.alertScriptUpdate = function(oldversion) {
 	
 		Mojo.Log.error("Inside remote alert if");
 	
-		var remote_message = "Remote needs to be updated";
+		var script_message = "This update to WebMyth includes updates to the script files for additional functionality and fewer bugs.<hr/>";
+		script_message += "Please upgrade to the latest script versions for remote.py and webmyth-mysql.php.<hr/>";
+		script_message += "The current versions for both scripts is version " + WebMyth.currentScriptVersion + ".";
        
 		this.controller.showAlertDialog({
-			onChoose: function(value) {},
+			onChoose: function(value) {if (value==true) {
+					Mojo.Log.error("appPath:" + Mojo.appPath);
+					this.controller.serviceRequest(
+						"palm://com.palm.applicationManager", {
+							method: 'open',
+							parameters: {
+								id: "com.palm.app.email",
+								params: {
+									summary: "WebMyth setup instructions",
+									text: WebMyth.helpEmailText
+								}
+							}
+						}
+					);
+					}
+				},
 			title: "WebMyth - v" + Mojo.Controller.appInfo.version,
-			message:  remote_message, 
-			choices: [{
-				label: "OK",
-				value: ""
-			}],
+			message:  script_message, 
+			choices: [
+                    {label: "OK", value: false},
+					{label: "Email this", value: true}
+					],
 			allowHTMLMessage: true
 		});
 	};

@@ -40,3 +40,9 @@ Release 0.1.7:
  - Add help to menu that describes the need for server-side scripts
  - Help screen shows on first run
  
+Release 0.1.8:
+ - Updates both scripts to version 2
+ - Can now search for frontends availible on backend via SQL
+ - Some bug fixes to playing recordings when not on list of recordings on frontend
+ - Some feedback given on remote errors
+ 

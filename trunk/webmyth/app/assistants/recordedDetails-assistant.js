@@ -30,11 +30,11 @@ function RecordedDetailsAssistant(detailsObject) {
 }
 
 RecordedDetailsAssistant.prototype.setup = function() {
-	/* this function is for setup tasks that have to happen when the scene is first created */
-		
-	/* use Mojo.View.render to render view templates and add them to the scene, if needed */
 	
 	Mojo.Log.info("Starting recorded details scene");
+	
+	//App menu widget
+	this.controller.setupWidget(Mojo.Menu.appMenu, WebMyth.appMenuAttr, WebMyth.appMenuModel);
 	
 	//Play button
 	this.controller.setupWidget("goPlayButtonId", {}, { label : "Play", disabled: false } );
@@ -86,13 +86,13 @@ RecordedDetailsAssistant.prototype.goPlay = function(event) {
 	
 	var clean_starttime = this.recordedObject.starttime.replace(' ','T');
 	
-	var cmdvalue = "play program "+this.recordedObject.chanid+" "+clean_starttime+" resume";
+	var cmd = "play program "+this.recordedObject.chanid+" "+clean_starttime+" resume";
 	
 	Mojo.Log.info("Command to send is " + cmd);
 /*	
 };
 
-RecordedDetailsAssistant.prototype.sendTelnet = function(cmdvalue){
+RecordedDetailsAssistant.prototype.sendTelnet = function(cmd){
 */
 
 	var reply;
@@ -101,17 +101,23 @@ RecordedDetailsAssistant.prototype.sendTelnet = function(cmdvalue){
 		//Mojo.Controller.getAppController().showBanner("Sending command to telnet", {source: 'notification'});
 		
 		//Using cgi-bin on server
-		var cmd = encodeURIComponent(cmdvalue);
+		//var cmd = encodeURIComponent(cmd);
 		var requestURL="http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webserverRemoteFile+"?host="+this.frontendTextModel.value+"&cmd="+cmd;
 	
 		var request = new Ajax.Request(requestURL, {
 			method: 'get',
 			onSuccess: function(transport){
 				reply = transport.responseText;
-				Mojo.Log.info("Success AJAX: '%s'", reply);
+				if (reply.substring(0,5) == "ERROR") {
+					Mojo.Log.error("ERROR in response: '%s'", reply.substring(6));
+					Mojo.Controller.getAppController().showBanner(reply, {source: 'notification'});
+				} else {
+					Mojo.Log.info("Success AJAX: '%s'", reply);
+				}
 			},
 			onFailure: function() {
-				Mojo.Log.info("Failed AJAX: '%s'", requestURL);
+				Mojo.Log.error("Failed AJAX: '%s'", requestURL);
+				Mojo.Controller.getAppController().showBanner("ERROR - check remote.py scipt", {source: 'notification'});
 			}
 		});
 	}
