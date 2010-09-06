@@ -12,7 +12,7 @@ A: First double check you installed the script file is installed on a local web 
 
 A: This might be an issue that the server where the remote.py scripts lives cannot resolve the frontend's system name.  You can either add it manually to the server's /etc/hosts file or just use the frontend's IP address if you know it.
 
-=== Q: !What does it mean when some frontends are listed as 'disabled'? ===
+=== Q: What does it mean when some frontends are listed as 'disabled'? ===
 
 A: For each frontend you want to access remotely you have to all the network control interface.  See [http://www.mythtv.org/wiki/Telnet_socket] for more information on setting it up.  Although the app will let you add a 'disabled' frontend, you won't be able to control it until you allow it on the frontend itself.
 
