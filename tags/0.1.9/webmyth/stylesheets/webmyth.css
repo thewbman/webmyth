@@ -1,0 +1,130 @@
+/* TODO: put your application-specific CSS here */
+
+.buttonClass {
+	height: 30px;
+	width: 75px;
+	margin: 5px;
+	
+	border-style: solid;
+	border-color: #000000;
+	border-radius: 10px;
+	
+	background-color: #111111;
+	
+	text-align: center;
+	vertical-align: middle;
+	color: white
+}
+
+.italics {
+	font-style: italic
+}
+
+.centered {
+	text-align: center;
+	vertical-align: middle;
+}
+
+.noButton {
+	height: 30px;
+	width: 75px;
+	margin: 5px;
+}
+
+.buttonRow {
+	width: 100%;
+	margin: 0 15px 0 15px;
+	height: 50px
+}
+
+.column1 {
+	float: left;
+	width: 33%;
+	margin: 10
+}
+
+.column2 {
+	float: left;
+	width: 33%;
+	margin: 10
+}
+
+.column3 {
+	float: left;
+	width: 33%;
+	margin: 10
+}
+
+#recorded-header-menu-button {
+	position: absolute;
+	right: -18px;
+	top: 6px;
+	width: 100px;
+	-webkit-border-radius: 15px;
+	text-transform: none;
+	vertical-align: middle;
+	padding: 4px 4px 4px 4px;
+	color: white;
+}
+
+#welcome-header-icon {
+	background: url('../images/icon-32x32.png');
+	background-repeat: no-repeat;
+	
+	top: 10px;
+	left: 12px;
+}
+
+.filter-field-container-height {
+	height: 96px;
+}
+
+
+/*  Recorded scene items  */
+.palm-row.multi-line.Deleted {
+	text-decoration: line-through;
+}
+
+.palm-row.multi-line.Default {
+
+}
+
+.recorded-list-item {
+	height: 100px
+}
+
+.left-list-image {
+	height: 100px;
+	width: 35%;
+	float: left;
+}
+
+.right-list-text {
+	height: 100px;
+	width: 65%;
+	float: right;
+}
+
+.recorded-screenshot {
+	padding: 10px;
+	width: 300px;
+	text-align: center;
+	border: 0px; 
+	-webkit-border-radius: 5px;
+}
+
+.recorded-screenshot-small {
+	padding: 2px;
+	width: 120px;
+	height: 90px;
+	text-align: center;
+	border: 0px; 
+}
+
+.enabled-0 {
+	innerHtml: 'Disabled'
+}
+
+.enabled-1 {
+	innerHtml: 'Enabled'
+}
