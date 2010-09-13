@@ -30,12 +30,15 @@ function createHostnameDb() {
 	
 	var newdb = openDatabase('hostnames', "0.1", "Hostname db");
 	
+
 	try {
+	/*
 	//Hosts (frontends) table
 	newdb.transaction(function(tx1) {
     tx1.executeSql('CREATE TABLE IF NOT EXISTS hosts(id INTEGER PRIMARY KEY, hostname TEXT, port INTEGER, ipChar TEXT)', 
       []);
     });
+	*/
 	
 	//Recorded table
 	newdb.transaction(function(tx2) {
@@ -115,13 +118,30 @@ function defaultCookie() {
 	var newCookieObject = {
 		webserverName: '',							
 		allowMetrix: true,							
-		webserverRemoteFile: '/cgi-bin/remote.py',
-		webMysqlFile: '/webmyth-mysql.php',
+		//webserverRemoteFile: '/cgi-bin/remote.py',
+		//webMysqlFile: '/webmyth-mysql.php',
+		webmythPythonFile: '/cgi-bin/webmyth.py',
 		currentRecgroup: 'Default',
+		currentRecSort: 'date-desc',
 		currentFrontend: 'frontend',
 		currentRemotePort: '6546',
-		previousScriptVersion: 0
+		currentRemoteScene: 'navigation',
+		previousScriptVersion: 0,
+		allowRecordedDownloads: false,
+		recordedDownloadsUrl: ''
 	};
+	
+	return newCookieObject;
+};
+
+function defaultHostsCookie() {
+
+	//These values are initiated in 'welcome' scene if not set
+
+	var newCookieObject = [{
+		"hostname": "frontend",							
+		"port": "6546"
+	}];
 	
 	return newCookieObject;
 };
@@ -236,11 +256,64 @@ var trimByEnabled = function(fullList, enabled) {
 };
 
 
+var cutoutHostname = function(fullList, myHostname) {
+	
+		var trimmedList = [];
+		var i, s;
+	
+		for (i = 0; i < fullList.length; i++) {
+	
+			s = fullList[i];
+			if (s.hostname == myHostname) {
+				//Matches selected recgroup
+			} else {
+				//Does not match recgroup
+				trimmedList.push(s);
+			}
+		}
+		
+		if(trimmedList.length == 0) {
+			return defaultHostsList();
+		} else {
+			return trimmedList;
+		}
+};
+
+
 var isEmpty = function(object) { 
 	for(var i in object) { 
 		return false; 
 	};
 	return true; 
+};
+
+
+var isoToDate = function(isoDate) { 
+    
+	var regexp = "([0-9]{4})(-([0-9]{2})(-([0-9]{2})" +
+        "( ([0-9]{2}):([0-9]{2})(:([0-9]{2})(\.([0-9]+))?)?" +
+        "(Z|(([-+])([0-9]{2}):([0-9]{2})))?)?)?)?";
+    var d = isoDate.match(new RegExp(regexp));
+
+    var offset = 0;
+    var date = new Date(d[1], 0, 1);
+
+    if (d[3]) { date.setMonth(d[3] - 1); }
+    if (d[5]) { date.setDate(d[5]); }
+    if (d[7]) { date.setHours(d[7]); }
+    if (d[8]) { date.setMinutes(d[8]); }
+    if (d[10]) { date.setSeconds(d[10]); }
+    if (d[12]) { date.setMilliseconds(Number("0." + d[12]) * 1000); }
+    if (d[14]) {
+        offset = (Number(d[16]) * 60) + Number(d[17]);
+        offset *= ((d[15] == '-') ? 1 : -1);
+    }
+
+    //offset -= date.getTimezoneOffset();
+    time = (Number(date));
+	
+	return Number(time);
+ 
 };
 
 

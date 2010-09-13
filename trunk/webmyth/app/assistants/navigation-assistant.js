@@ -73,6 +73,8 @@ NavigationAssistant.prototype.activate = function(event) {
 	   
 	$('scene-title').innerHTML = 'Remote: '+WebMyth.prefsCookieObject.currentFrontend;
 	
+	WebMyth.prefsCookieObject.currentRemoteScene = 'navigation';
+	WebMyth.prefsCookie.put(WebMyth.prefsCookieObject); 
 	
 };
 
@@ -287,10 +289,11 @@ NavigationAssistant.prototype.handleKey = function(event) {
 };
 
 NavigationAssistant.prototype.sendTelnetKey = function(value, event){
-	this.sendTelnet("key "+value);
-
+	//this.sendTelnet("key "+value);
 	
-	//Mojo.Log.info("Sending key '%s' to host", value);
+	this.controller.stageController.parentSceneAssistant(this).sendKey(value); 
+
+	Mojo.Log.info("Sending key '%s' to host", value);
 };
 
 NavigationAssistant.prototype.sendTelnet = function(value, event){

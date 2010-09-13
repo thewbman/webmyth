@@ -52,6 +52,16 @@ WelcomeAssistant.prototype.setup = function() {
      );
 	Mojo.Event.listen(this.controller.get("goRecordedButtonId"),Mojo.Event.tap, this.goRecorded.bind(this));
 	
+	//View upcoming button
+	this.controller.setupWidget("goUpcomingButtonId",
+         {},
+         {
+             label : "Upcoming Recordings",
+             disabled: false
+         }
+     );
+	Mojo.Event.listen(this.controller.get("goUpcomingButtonId"),Mojo.Event.tap, this.goUpcoming.bind(this));
+	
 	
 	
 
@@ -66,10 +76,15 @@ WelcomeAssistant.prototype.setup = function() {
 		
 		//Setup default settings if missing due to old cookie versions
 		if (WebMyth.prefsCookieObject.webserverRemoteFile == null) WebMyth.prefsCookieObject.webserverRemoteFile = defaultCookie().webserverRemoteFile;
-		if (WebMyth.prefsCookieObject.webMysqlFile == null) WebMyth.prefsCookieObject.webMysqlFile = defaultCookie().webMysqlFile;
+		//if (WebMyth.prefsCookieObject.webMysqlFile == null) WebMyth.prefsCookieObject.webMysqlFile = defaultCookie().webMysqlFile;
+		//if (WebMyth.prefsCookieObject.webmythPythonFile == null) WebMyth.prefsCookieObject.webmythPythonFile = defaultCookie().webmythPythonFile;
 		if (WebMyth.prefsCookieObject.currentRecgroup == null) WebMyth.prefsCookieObject.currentRecgroup = defaultCookie().currentRecgroup;
+		if (WebMyth.prefsCookieObject.currentRecSort == null) WebMyth.prefsCookieObject.currentRecSort = defaultCookie().currentRecSort;
 		if (WebMyth.prefsCookieObject.currentFrontend == null) WebMyth.prefsCookieObject.currentFrontend = defaultCookie().currentFrontend;
 		if (WebMyth.prefsCookieObject.currentRemotePort == null) WebMyth.prefsCookieObject.currentRemotePort = defaultCookie().currentRemotePort;
+		if (WebMyth.prefsCookieObject.currentRemoteScene == null) WebMyth.prefsCookieObject.currentRemoteScene = defaultCookie().currentRemoteScene;
+		if (WebMyth.prefsCookieObject.allowRecordedDownloads == null) WebMyth.prefsCookieObject.allowRecordedDownloads = defaultCookie().allowRecordedDownloads;
+		if (WebMyth.prefsCookieObject.recordedDownloadsUrl == null) WebMyth.prefsCookieObject.recordedDownloadsUrl = defaultCookie().recordedDownloadsUrl;
 		
 		//Check if scripts need an upgrade message
 		if (WebMyth.prefsCookieObject.previousScriptVersion == null) {
@@ -87,7 +102,9 @@ WelcomeAssistant.prototype.setup = function() {
 		
 		WebMyth.prefsCookie.put(WebMyth.prefsCookieObject); 
 			
-		Mojo.Controller.getAppController().showBanner("Using '"+WebMyth.prefsCookieObject.webserverName+"' webserver", {source: 'notification'});
+		if(WebMyth.prefsCookieObject.webserverName == '') {
+			Mojo.Controller.getAppController().showBanner("Please configure app preferences", {source: 'notification'});
+		}
 		
 	} else {		//for new installs
 		//Mojo.Controller.getAppController().showBanner("Setup server in preferences", {source: 'notification'});
@@ -96,6 +113,15 @@ WelcomeAssistant.prototype.setup = function() {
 		WebMyth.prefsCookie.put(WebMyth.prefsCookieObject);
 		this.alertNeedScript();
 	};
+
+	//Hosts cookie
+	if (WebMyth.hostsCookieObject) {		//cookie exist
+		//do nothing?
+	} else {
+		WebMyth.hostsCookieObject = defaultHostsCookie();
+		WebMyth.hostsCookie.put(WebMyth.hostsCookieObject);
+	}
+	
 	
 };
 
@@ -116,16 +142,28 @@ WelcomeAssistant.prototype.cleanup = function(event) {
 		WebMyth.prefsCookie.put(WebMyth.prefsCookieObject);
 };
 
+WelcomeAssistant.prototype.handleCommand = function(event) {
+
+  if(event.type == Mojo.Event.forward) {
+		Mojo.Controller.stageController.pushScene("hostSelector", true);
+  }
+  
+};
+
 WelcomeAssistant.prototype.goRemote = function(event) {
 	//Start remote scene 
-	
-	Mojo.Controller.stageController.pushScene("hostSelector");
+	Mojo.Controller.stageController.pushScene("hostSelector", false);
 };
 
 WelcomeAssistant.prototype.goRecorded = function(event) {
 	//Start recorded scene
-	
 	Mojo.Controller.stageController.pushScene("recorded");
+};
+
+WelcomeAssistant.prototype.goUpcoming = function(event) {
+	//Start recorded scene
+	
+	Mojo.Controller.stageController.pushScene("upcoming");
 	
 };
 
@@ -156,11 +194,11 @@ WelcomeAssistant.prototype.alertScriptUpdate = function(oldversion) {
 	
 	if( (WebMyth.currentScriptVersion) > oldversion ) {
 	
-		Mojo.Log.error("Inside remote alert if");
+		Mojo.Log.info("Inside remote alert if");
 	
-		var script_message = "This update to WebMyth includes updates to the script files for additional functionality and fewer bugs.<hr/>";
-		script_message += "Please upgrade to the latest script versions for remote.py and webmyth-mysql.php.<hr/>";
-		script_message += "The current versions for both scripts is version " + WebMyth.currentScriptVersion + ".";
+		var script_message = "This update to WebMyth includes a brand new script (webmyth.py) that replaces the previous scripts.<hr/>";
+		script_message += "Unfortunately this app breaks compatibility with the old scripts and will not work until you install the new script.<hr/>";
+		script_message += "The current versions for the script is version " + WebMyth.currentScriptVersion + ".";
        
 		this.controller.showAlertDialog({
 			onChoose: function(value) {if (value==true) {

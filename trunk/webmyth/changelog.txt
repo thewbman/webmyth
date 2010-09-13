@@ -46,3 +46,13 @@ Release 0.1.8:
  - Some bug fixes to playing recordings when not on list of recordings on frontend
  - Some feedback given on remote errors
  
+Release 0.1.9:
+ - New webmyth.py script that uses mythtv python bindings - replaces old scripts 
+ - Initial support for upcoming recordings w/detailed scene
+ - Conversion of frontends to JSON cookie instead of DB table
+ - Shows screenshots from recorded programs (kinda slow to load)
+ - Cleanup of recorded list
+ - Saving or remote scene for forward swipt shortcut
+ - Unfortunately no more feedback for remote
+ 
+ 
