@@ -21,10 +21,12 @@ SearchHostsAssistant.prototype.setup = function() {
 		swipeToDelete: false
 	};
     this.enabledHostsListModel = {            
-        items: this.enabledResultList
+        //items: this.enabledResultList
+		items: this.resultList
     };
 	this.controller.setupWidget( 'enabledHostsList' , this.enabledHostsListAttribs, this.enabledHostsListModel);
 	
+	/*
 	this.disabledHostsListAttribs = {
 		itemTemplate: "searchHosts/foundHostsListItem",
 		swipeToDelete: false
@@ -33,14 +35,14 @@ SearchHostsAssistant.prototype.setup = function() {
         items: this.disabledResultList
     };
 	this.controller.setupWidget( 'disabledHostsList' , this.disabledHostsListAttribs, this.disabledHostsListModel);
-	
+	*/
 	
 	
 	
 	//Tap a host from enabled list
 	this.controller.listen(this.controller.get( 'enabledHostsList' ) , Mojo.Event.listTap, this.selectedHost.bind(this));
 	//Tap a host from disabled list
-	this.controller.listen(this.controller.get( 'disabledHostsList' ), Mojo.Event.listTap, this.selectedHost.bind(this));
+	//this.controller.listen(this.controller.get( 'disabledHostsList' ), Mojo.Event.listTap, this.selectedHost.bind(this));
 	
 	
 };
@@ -51,11 +53,12 @@ SearchHostsAssistant.prototype.activate = function(event) {
 	   
 	Mojo.Log.info("Searching for hosts...");
 	
-	var requestUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webMysqlFile;
+	var requestUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webmythPythonFile;
+	requestUrl += "?op=getHosts";
+	
     try {
         var request = new Ajax.Request(requestUrl,{
-            method: 'post',
-			parameters: {'op': 'getFrontends'},
+            method: 'get',
             evalJSON: 'true',
             onSuccess: this.getFrontendsSuccess.bind(this),
             onFailure: this.getFrontendsFailure.bind(this)  
@@ -79,17 +82,18 @@ SearchHostsAssistant.prototype.cleanup = function(event) {
 
 
 SearchHostsAssistant.prototype.getFrontendsSuccess = function(response) {
-	Mojo.Log.info("got frontends: '%j'", response.responseJSON);
+	Mojo.Log.info("got response text: '%s'", response.responseText);
+	Mojo.Log.info("got frontends json: '%j'", response.responseJSON);
 	var i, s;
 	 
 	this.resultList.clear();
 	Object.extend(this.resultList,response.responseJSON.sort(sort_by('hostname', false)));
 	
-	Object.extend(this.enabledResultList,trimByEnabled(this.resultList, 1));
-	Object.extend(this.disabledResultList,trimByEnabled(this.resultList, 0));
+	//Object.extend(this.enabledResultList,trimByEnabled(this.resultList, 1));
+	//Object.extend(this.disabledResultList,trimByEnabled(this.resultList, 0));
 	
 	this.controller.modelChanged(this.enabledHostsListModel);
-	this.controller.modelChanged(this.disabledHostsListModel);
+	//this.controller.modelChanged(this.disabledHostsListModel);
 		
 	//Mojo.Log.info("Done with data query function");
 };
@@ -102,8 +106,18 @@ SearchHostsAssistant.prototype.getFrontendsFailure = function(event) {
 
 SearchHostsAssistant.prototype.selectedHost = function(event) {
 	Mojo.Log.info("chosen a host "+event.item.hostname+" with port "+event.item.port);
+	var newHost = {
+		'hostname': event.item.hostname,
+		'port': event.item.port
+	};
 	
-	 
+	//Mojo.Log.info("New hostname is %s", this.hostTextModel.value);
+	Mojo.Log.info("New hostname is %s", newHost.hostname);
+	
+	WebMyth.hostsCookieObject.push(newHost);
+	WebMyth.hostsCookie.put(WebMyth.hostsCookieObject);
+	
+	 /*
 	var sql = "INSERT INTO 'hosts' (hostname, port) VALUES (?, ?)";
 	
 	WebMyth.db.transaction( function (transaction) {
@@ -116,7 +130,7 @@ SearchHostsAssistant.prototype.selectedHost = function(event) {
             }
 		);
 	});
-	
+	*/
 	
 	
 	//Return to host selector

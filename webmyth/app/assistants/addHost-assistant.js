@@ -106,9 +106,13 @@ AddHostAssistant.prototype.submitNewHost = function(event) {
 	
 	//TODO: resolve IP address to add into WebMyth.db
 	
-	Mojo.Log.info("New hostname is %s", this.hostTextModel.value);
+	//Mojo.Log.info("New hostname is %s", this.hostTextModel.value);
 	Mojo.Log.info("New hostname is %s", newHost.hostname);
+	
+	WebMyth.hostsCookieObject.push(newHost);
+	WebMyth.hostsCookie.put(WebMyth.hostsCookieObject);
 	 
+	 /*
 	var sql = "INSERT INTO 'hosts' (hostname, port) VALUES (?, ?)";
  
 	WebMyth.db.transaction( function (transaction) {
@@ -121,7 +125,7 @@ AddHostAssistant.prototype.submitNewHost = function(event) {
             }
 		);
 	});
-	
+	*/
 	
 	
 	//Return to host selector

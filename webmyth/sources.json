@@ -46,5 +46,13 @@
     {
         "scenes": "searchHosts",
         "source": "app/assistants/searchHosts-assistant.js"
+    },
+    {
+        "scenes": "upcoming",
+        "source": "app/assistants/upcoming-assistant.js"
+    },
+    {
+        "scenes": "upcomingDetails",
+        "source": "app/assistants/upcomingDetails-assistant.js"
     }
 ]

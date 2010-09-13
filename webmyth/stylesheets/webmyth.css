@@ -76,7 +76,7 @@
 }
 
 .filter-field-container-height {
-  height: 96px;
+	height: 96px;
 }
 
 
@@ -87,6 +87,38 @@
 
 .palm-row.multi-line.Default {
 
+}
+
+.recorded-list-item {
+	height: 100px
+}
+
+.left-list-image {
+	height: 100px;
+	width: 35%;
+	float: left;
+}
+
+.right-list-text {
+	height: 100px;
+	width: 65%;
+	float: right;
+}
+
+.recorded-screenshot {
+	padding: 10px;
+	width: 300px;
+	text-align: center;
+	border: 0px; 
+	-webkit-border-radius: 5px;
+}
+
+.recorded-screenshot-small {
+	padding: 2px;
+	width: 120px;
+	height: 90px;
+	text-align: center;
+	border: 0px; 
 }
 
 .enabled-0 {

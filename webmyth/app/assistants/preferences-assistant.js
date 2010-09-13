@@ -45,7 +45,7 @@ PreferencesAssistant.prototype.setup = function() {
          },
          this.webserverTextModel
     ); 
-	
+	/*
 	this.webserverRemoteFileTextModel = {
              value: "/cgi-bin/remote.py",
              disabled: false
@@ -72,6 +72,20 @@ PreferencesAssistant.prototype.setup = function() {
             focus: false
          },
          this.webMysqlFileTextModel
+    ); 
+	*/
+	this.webmythPythonFileTextModel = {
+             value: "/cgi-bin/webmyth.py",
+             disabled: false
+    };
+	this.controller.setupWidget("webmythPythonFieldId",
+        {
+            hintText: $L("/cgi-bin/webmyth.py"),
+            multiline: false,
+            enterSubmits: false,
+            focus: false
+         },
+         this.webmythPythonFileTextModel
     ); 
 	
 	this.metrixToggleModel = {
@@ -109,19 +123,28 @@ PreferencesAssistant.prototype.activate = function(event) {
 			
 			
 			//Update filenames on web server if set
+			/*
 			if ( WebMyth.prefsCookieObject.webserverRemoteFile == null ) {
 				Mojo.Log.error("Did not find remote file in cookie");
 			} else {
-				Mojo.Log.error("Found remote file in cookie '%s'", WebMyth.prefsCookieObject.webserverRemoteFile);
+				Mojo.Log.info("Found remote file in cookie '%s'", WebMyth.prefsCookieObject.webserverRemoteFile);
 				this.webserverRemoteFileTextModel.value = WebMyth.prefsCookieObject.webserverRemoteFile;
 				this.controller.modelChanged(this.webserverRemoteFileTextModel);
 			}
 			if ( WebMyth.prefsCookieObject.webMysqlFile == null ) {
 				Mojo.Log.error("Did not find mysql file in cookie");
 			} else {
-				Mojo.Log.error("Found mysql file in cookie '%s'", WebMyth.prefsCookieObject.webMysqlFile);
+				Mojo.Log.info("Found mysql file in cookie '%s'", WebMyth.prefsCookieObject.webMysqlFile);
 				this.webMysqlFileTextModel.value = WebMyth.prefsCookieObject.webMysqlFile;
 				this.controller.modelChanged(this.webMysqlFileTextModel);
+			}
+			*/
+			if ( WebMyth.prefsCookieObject.webmythPythonFile == null ) {
+				Mojo.Log.error("Did not find python file in cookie");
+			} else {
+				Mojo.Log.info("Found puthon file in cookie '%s'", WebMyth.prefsCookieObject.webmythPythonFile);
+				this.webmythPythonFileTextModel.value = WebMyth.prefsCookieObject.webmythPythonFile;
+				this.controller.modelChanged(this.webmythPythonFileTextModel);
 			}
 			
 			//Update metrix toggle from cookie
@@ -144,8 +167,9 @@ PreferencesAssistant.prototype.cleanup = function(event) {
 PreferencesAssistant.prototype.saveWebserver = function(event) {
 	
 	Mojo.Log.info("New webserverName is %s", this.webserverTextModel.value);
-	Mojo.Log.info("New remote file is %s", this.webserverRemoteFileTextModel.value);
-	Mojo.Log.info("New mysql file is %s", this.webMysqlFileTextModel.value);
+	//Mojo.Log.info("New remote file is %s", this.webserverRemoteFileTextModel.value);
+	//Mojo.Log.info("New mysql file is %s", this.webMysqlFileTextModel.value);
+	Mojo.Log.info("New python file is %s", this.webmythPythonFileTextModel.value);
 	Mojo.Log.info("Metrix value is %s", this.metrixToggleModel.value);
 
 	if (WebMyth.prefsCookieObject) {
@@ -157,8 +181,9 @@ PreferencesAssistant.prototype.saveWebserver = function(event) {
 	}
 	
 	WebMyth.prefsCookieObject.webserverName = this.webserverTextModel.value;
-	WebMyth.prefsCookieObject.webserverRemoteFile = this.webserverRemoteFileTextModel.value;
-	WebMyth.prefsCookieObject.webMysqlFile = this.webMysqlFileTextModel.value;
+	//WebMyth.prefsCookieObject.webserverRemoteFile = this.webserverRemoteFileTextModel.value;
+	//WebMyth.prefsCookieObject.webMysqlFile = this.webMysqlFileTextModel.value;
+	WebMyth.prefsCookieObject.webmythPythonFile = this.webmythPythonFileTextModel.value;
 	WebMyth.prefsCookieObject.allowMetrix = this.metrixToggleModel.value;
 	WebMyth.prefsCookie.put(WebMyth.prefsCookieObject);
 	

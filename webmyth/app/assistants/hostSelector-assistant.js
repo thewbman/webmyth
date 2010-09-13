@@ -19,15 +19,16 @@
  */
 
 
-function HostSelectorAssistant() {
+function HostSelectorAssistant(jumpRemote) {
 	/* this is the creator function for your scene assistant object. It will be passed all the 
 	   additional parameters (after the scene name) that were passed to pushScene. The reference
 	   to the scene controller (this.controller) has not be established yet, so any initialization
 	   that needs the scene controller should be done in the setup function below. */
 	  
+	  this.jumpToRemote = jumpRemote;
+	  
 	  this.nullHandleCount = 0;
 	 
-	  
 	  this.resultList = [];
 };
 
@@ -35,11 +36,9 @@ function HostSelectorAssistant() {
 HostSelectorAssistant.hostsCommandMenuModel = {
 	visible: true,
 	items: [
+		{ items: [ { label: "Add", command: 'go-addHost', width: 90 } ] },
 		{},
-		{ items: [ { label: "Add", command: 'go-addHost', width: 80 } ] },
-		{},
-		{ items: [ { label: "Search", command: 'go-searchHost', width: 100 } ] },
-		{}
+		{ items: [ { label: "Search", command: 'go-searchHost', width: 90 } ] }
 	]
 };
 
@@ -70,13 +69,11 @@ HostSelectorAssistant.prototype.setup = function() {
 	
 	//Tap a host from list
 	this.controller.listen(this.controller.get( "hostlist" ), Mojo.Event.listTap,
-        this.startCommunication.bind(this));
+        this.chooseList.bind(this));
 		
 	//Delete host
 	this.controller.listen(this.controller.get( "hostlist" ), Mojo.Event.listDelete,
         this.deleteHost.bind(this));
-		
-
 	
 };
 
@@ -88,7 +85,8 @@ HostSelectorAssistant.prototype.activate = function(event) {
 	//Close out open telnet connections
 	//TODO: Add check to only close if a connection exists
 	//closeTelnet(this.telnetPlug);
-			
+	
+	/*	
 	// Query `hosts` table
 	var mytext = 'select * from hosts;'
     WebMyth.db.transaction( 
@@ -96,12 +94,25 @@ HostSelectorAssistant.prototype.activate = function(event) {
             transaction.executeSql(mytext, [], this.queryDataHandler.bind(this), this.errorHandler.bind(this)); 
         }).bind(this) 
     );
+	*/
+	
+	//Populate list using cookie
+	this.resultList.clear();
+	Object.extend(this.resultList,WebMyth.hostsCookieObject);
+	this.controller.modelChanged(this.hostListModel);
+	
+	if(this.jumpToRemote) {
+		this.jumpToRemote = false;
+		this.startCommunication();
+	}
 	
 };
 
 HostSelectorAssistant.prototype.deactivate = function(event) {
 	/* remove any event handlers you added in activate and do any other cleanup that should happen before
 	   this scene is popped or another scene is pushed on top */
+	   
+	WebMyth.hostsCookie.put(WebMyth.hostsCookieObject);
 	  
 	  	  
 };
@@ -177,8 +188,23 @@ HostSelectorAssistant.prototype.deleteHost = function(event) {
 	var hostId = event.item.id;
 	
 	
-	Mojo.Log.info("Deleting host: %s",hostId);
+	Mojo.Log.info("Deleting host: %s",event.item.hostname);
 	
+	
+	var newList = cutoutHostname(WebMyth.hostsCookieObject, event.item.hostname);
+	
+	//Update cookie
+	WebMyth.hostsCookieObject.clear();
+	Object.extend(WebMyth.hostsCookieObject,newList);
+	WebMyth.hostsCookie.put(WebMyth.hostsCookieObject);
+	
+	/*
+	this.resultList.clear();
+	Object.extend(this.resultList,newList);
+	*/
+	
+	
+	/*
 	var sql = "DELETE FROM hosts WHERE id = ?";
 	
 	WebMyth.db.transaction( function (transaction) {
@@ -191,17 +217,27 @@ HostSelectorAssistant.prototype.deleteHost = function(event) {
                          }
  	 );
 	});
+	*/
 	
 };
 
 
-HostSelectorAssistant.prototype.startCommunication = function(event) {
-	Mojo.Log.info("Selected host.  Starting communication ...");
+HostSelectorAssistant.prototype.chooseList = function(event) {
+	Mojo.Log.info("Selected host.");
 	
 	WebMyth.prefsCookieObject.currentFrontend = event.item.hostname;
 	WebMyth.prefsCookieObject.currentRemotePort = event.item.port;
 	WebMyth.prefsCookie.put(WebMyth.prefsCookieObject);
 	 
+	
+	this.startCommunication();
+	
+};
+
+
+HostSelectorAssistant.prototype.startCommunication = function(event) {
+	
+	Mojo.Log.info("Starting communication ...");
 	
 	//Start telnet communication with selected host
 	if (Mojo.appInfo.skipPDK == "true") {
@@ -219,7 +255,7 @@ HostSelectorAssistant.prototype.startCommunication = function(event) {
 
 	
 	//Open initial communication scene
-	Mojo.Controller.stageController.pushScene("navigation");
+	Mojo.Controller.stageController.pushScene(WebMyth.prefsCookieObject.currentRemoteScene);
 	
 };
 
@@ -229,6 +265,7 @@ HostSelectorAssistant.prototype.sendTelnet = function(value){
 	
 	if (Mojo.appInfo.skipPDK == "true") {
 		//Mojo.Controller.getAppController().showBanner("Sending command to telnet", {source: 'notification'});
+		
 		
 		//Using cgi-bin on server
 		var cmdvalue = encodeURIComponent(value);
@@ -250,8 +287,42 @@ HostSelectorAssistant.prototype.sendTelnet = function(value){
 				Mojo.Controller.getAppController().showBanner("ERROR - check remote.py scipt", {source: 'notification'});
 			}
 		});
+		
+		
+		
 	}
 	else {
 		$('telnetPlug').SendTelnet(value);
 	}
 };
+
+
+
+HostSelectorAssistant.prototype.sendKey = function(value){
+		
+		var cmdvalue = encodeURIComponent(value);
+		
+		var requestUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webmythPythonFile;
+		requestUrl += "?op=remote&type=key";
+		requestUrl += "&host="+WebMyth.prefsCookieObject.currentFrontend;
+		requestUrl += "&cmd="+cmdvalue;
+		//var requestURL="http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webserverRemoteFile+"?host="+this.frontendTextModel.value+"&cmd="+cmd;  
+	
+		var request = new Ajax.Request(requestUrl, {
+			method: 'get',
+			onSuccess: function(transport){
+				reply = transport.responseText;
+				if (reply.substring(0,5) == "ERROR") {
+					Mojo.Log.error("ERROR in response: '%s'", reply.substring(6));
+					Mojo.Controller.getAppController().showBanner(reply, {source: 'notification'});
+				} else {
+					Mojo.Log.info("Success AJAX: '%s'", reply);
+				}
+			},
+			onFailure: function() {
+				Mojo.Log.error("Failed AJAX: '%s'", requestURL);
+				Mojo.Controller.getAppController().showBanner("ERROR - check remote.py scipt", {source: 'notification'});
+			}
+		});
+};
+

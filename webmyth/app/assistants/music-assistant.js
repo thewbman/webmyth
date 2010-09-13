@@ -74,6 +74,10 @@ MusicAssistant.prototype.activate = function(event) {
 	   example, key handlers that are observing the document */
 	   
 	   $('scene-title').innerHTML = 'Remote: '+WebMyth.prefsCookieObject.currentFrontend;
+	   
+	   
+	WebMyth.prefsCookieObject.currentRemoteScene = 'music';
+	WebMyth.prefsCookie.put(WebMyth.prefsCookieObject); 
 	  
 };
 
@@ -290,7 +294,9 @@ MusicAssistant.prototype.handleKey = function(event) {
 };
 
 MusicAssistant.prototype.sendTelnetKey = function(value, event){
-	this.sendTelnet("key "+value);
+	//this.sendTelnet("key "+value);
+	
+	this.controller.stageController.parentSceneAssistant(this).sendKey(value); 
 	
 	//Mojo.Log.info("Sending command '%s' to host", value);
 };
