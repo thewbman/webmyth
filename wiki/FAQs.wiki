@@ -6,6 +6,8 @@ A: Yes.  Currently the SDK provided by Palm does not allow for the direct telnet
 
 === Q: The recordings and frontend searches are not working ===
 
+UNCONFIRMED: I believe the script tries to save the DB configuration information it automatically finds to a file.  The directory where it tries to save the information is ~/.mythtv/, which may not be a writable directory to script.  On my system (Ubuntu 9.10) that directory is actually /var/www/.mythtv/ when running the script through apache.  You can try creating that file yourself and making it writable to everyone ("sudo mkdir /var/www/.mythtv/; sudo chmod a+rw /var/www/.mythtv/") if you are having problems with the script.
+
 A: First double check you installed the script file is installed on a local web server.  Although there won't be any data, you can see if it is accessible by trying to view it from a web browser (i.e [http://my-server/webmyth-mysql.php]).  If your browser tries to download a blank file then that much is working.  Double check that the MySQL server name and database details hard-coded into the file match your local configuration.  You can check out /etc/mythtv/mysql.txt on a working frontend or backend for the proper values.
 
 === Q: !WebMyth can't seem to talk to a remote frontend even though I know it is a valid frontend ===
