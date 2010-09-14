@@ -1,22 +1,18 @@
 Some common questions on getting !WebMyth up and running.  If you have a new question you can try submitting it as a comment to this page.
 
-=== Q: Do I really need to install the script files? ===
+=== Q: Do I really need to install the script file? ===
 
-A: Yes.  Currently the SDK provided by Palm does not allow for the direct telnet, MySQL and zeroconf services needed for this program.  WebOS 2.0 should fill that gap, but for now both scripts must be installed for WebMyth to operate correctly
+A: Yes.  Currently the SDK provided by Palm does not allow for the direct telnet, MySQL and zeroconf services needed for this program.  WebOS 2.0 should fill that gap, but for now the script must be installed for !WebMyth to operate correctly
 
 === Q: The recordings and frontend searches are not working ===
 
 UNCONFIRMED: I believe the script tries to save the DB configuration information it automatically finds to a file.  The directory where it tries to save the information is ~/.mythtv/, which may not be a writable directory to script.  On my system (Ubuntu 9.10) that directory is actually /var/www/.mythtv/ when running the script through apache.  You can try creating that file yourself and making it writable to everyone ("sudo mkdir /var/www/.mythtv/; sudo chmod a+rw /var/www/.mythtv/") if you are having problems with the script.
 
-A: First double check you installed the script file is installed on a local web server.  Although there won't be any data, you can see if it is accessible by trying to view it from a web browser (i.e [http://my-server/webmyth-mysql.php]).  If your browser tries to download a blank file then that much is working.  Double check that the MySQL server name and database details hard-coded into the file match your local configuration.  You can check out /etc/mythtv/mysql.txt on a working frontend or backend for the proper values.
+A: First double check you installed the script file is installed on a local web server.  You can see if it is accessible by trying to view it from a web browser (i.e [http://my-server/cgi-bin/webmyth.py?op=getHosts]).  If your browser tries to download a file then that much is working.  If you get a 500 error from your browser you can try looking at the apache error log ("/var/log/apache2/error.log") for information.  
 
 === Q: !WebMyth can't seem to talk to a remote frontend even though I know it is a valid frontend ===
 
-A: This might be an issue that the server where the remote.py scripts lives cannot resolve the frontend's system name.  You can either add it manually to the server's /etc/hosts file or just use the frontend's IP address if you know it.
-
-=== Q: What does it mean when some frontends are listed as 'disabled'? ===
-
-A: For each frontend you want to access remotely you have to all the network control interface.  See [http://www.mythtv.org/wiki/Telnet_socket] for more information on setting it up.  Although the app will let you add a 'disabled' frontend, you won't be able to control it until you allow it on the frontend itself.
+A: This might be an issue that the server where the script lives cannot resolve the frontend's system name.  You can either add it manually to the server's /etc/hosts file or just use the frontend's IP address if you know it.
 
 === Q: I don't like the way the app looks, will it get better? ===
 
