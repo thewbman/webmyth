@@ -54,7 +54,7 @@ RecordedDetailsAssistant.prototype.setup = function() {
 			]};
 
  
-	this.controller.setupWidget(Mojo.Menu.commandMenu,  {}, this.cmdMenuModel);
+	this.controller.setupWidget(Mojo.Menu.commandMenu, {menuClass: 'no-fade'}, this.cmdMenuModel);
 	this.controller.setupWidget('hosts-menu', '', this.hostsMenuModel);
 	this.controller.setupWidget('web-menu', '', this.webMenuModel);
 

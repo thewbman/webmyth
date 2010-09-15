@@ -128,7 +128,8 @@ function defaultCookie() {
 		currentRemoteScene: 'navigation',
 		previousScriptVersion: 0,
 		allowRecordedDownloads: false,
-		recordedDownloadsUrl: ''
+		recordedDownloadsUrl: '',
+		theme: 'palm-dark'
 	};
 	
 	return newCookieObject;

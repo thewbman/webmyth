@@ -11,7 +11,19 @@
 #
 # This script replaces previous scripts used by webmyth (remote.py and webmyth-mysql.php)
 #
-version = 3
+# You need to setup this configuration for your specifc setup - you can find these values in /etc/mythtv/mysql.txt
+#
+
+myDBHostName = 'localhost'
+myDBName = 'mythconverg'
+myDBUserName = 'mythtv'
+myDBPassword = 'mythtv'
+
+#
+# end of configuration
+#
+
+version = 4
 
 import cgi
 import cgitb
@@ -19,14 +31,17 @@ import time
 import json
 import string
 import os
+import sys
 #cgitb.enable()
 from telnetlib import Telnet
 from MythTV import MythDB, MythBE, Frontend, MythVideo, MythXML, MythLog, MythError, Video, ftopen
 
+
 form = cgi.FieldStorage()
 
 MythLog._setlevel('none')
-mythDB = MythDB()
+#mythDB = MythDB()
+mythDB = MythDB(args=(('DBHostName',myDBHostName),('DBName',myDBName),('DBUserName',myDBUserName),('DBPassword',myDBPassword)))
 mythXML = MythXML()
 mythVideo = MythVideo()
 

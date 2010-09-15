@@ -49,7 +49,7 @@ HostSelectorAssistant.prototype.setup = function() {
 	
 	
 	//Bottom of page menu widget
-	this.controller.setupWidget( Mojo.Menu.commandMenu, {}, HostSelectorAssistant.hostsCommandMenuModel );
+	this.controller.setupWidget( Mojo.Menu.commandMenu, {menuClass: 'no-fade'}, HostSelectorAssistant.hostsCommandMenuModel );
 	
 	
 	//List of hosts widget

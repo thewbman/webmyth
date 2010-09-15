@@ -61,7 +61,7 @@ RecordedAssistant.prototype.setup = function() {
 			]};
 	this.groupMenuModel = { label: $L('Group'), items: [{"label": WebMyth.prefsCookieObject.currentRecgroup, "command": "go-group"+WebMyth.prefsCookieObject.currentRecgroup }]};
 
-	this.controller.setupWidget(Mojo.Menu.commandMenu,  {}, this.cmdMenuModel);
+	this.controller.setupWidget(Mojo.Menu.commandMenu, {menuClass: 'no-fade'}, this.cmdMenuModel);
 	this.controller.setupWidget('sort-menu', '', this.sortMenuModel);
 	this.controller.setupWidget('group-menu', '', this.groupMenuModel);
 	

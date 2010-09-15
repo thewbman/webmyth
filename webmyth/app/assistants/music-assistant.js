@@ -35,7 +35,7 @@ MusicAssistant.prototype.setup = function() {
 	this.controller.setupWidget(Mojo.Menu.appMenu, WebMyth.appMenuAttr, WebMyth.appMenuModel);
 	
 	//Bottom of remote page command menu widget
-	this.controller.setupWidget( Mojo.Menu.commandMenu, {}, WebMyth.remoteCommandMenuModel );
+	this.controller.setupWidget( Mojo.Menu.commandMenu, WebMyth.remoteCommandMenuAttr, WebMyth.remoteCommandMenuModel );
 	WebMyth.remoteCommandMenuModel.items[1].toggleCmd = 'go-music'; 
 	this.controller.modelChanged(WebMyth.remoteCommandMenuModel);
 

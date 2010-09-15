@@ -55,4 +55,12 @@ Release 0.1.9:
  - Saving or remote scene for forward swipt shortcut
  - Unfortunately no more feedback for remote
  
+Release 0.2.0:
+ - Update webmyth.py script to version 4 to fix executable issue
+ - Script now requires user to setup their DB settings
+ - Added support to palm-dark theme
+ 
+Release 0.2.1:
+ - Removed python scripts that caused rejection from palm
+ 
  

@@ -42,6 +42,20 @@ WebMyth.db;
 	
 	
 //Setup remote commandmenu
+WebMyth.remoteCommandMenuAttr = { menuClass: 'no-fade' };	
+WebMyth.remoteCommandMenuModel = {
+	visible: true,
+	items: [{},{
+		items: [
+			{label: "Nav", command: 'go-navigation', width: 90},
+			{label: "Play", command: 'go-playback', width: 70},
+			{label: "Music", command: 'go-music', width: 90}
+		]
+		},
+	{}
+	]
+};
+
 WebMyth.remoteCommandMenuModel = {
 	visible: true,
 	items: [{},{
@@ -75,8 +89,8 @@ WebMyth.hostsCookieObject = WebMyth.hostsCookie.get();
 
 
 //Current script verion
-//2 = 0.1.8
-WebMyth.currentScriptVersion = 3;
+//2 = 0.1.8, 3 = 0.1.9, 4 = 0.2.0
+WebMyth.currentScriptVersion = 4;
 
 
 //Help and first-run message
@@ -92,6 +106,7 @@ WebMyth.helpEmailText = "This app requires the installation of 1 script on a loc
 WebMyth.helpEmailText += "You can get the file <a href='http://code.google.com/p/webmyth/downloads/list'>here</a><hr/>";
 WebMyth.helpEmailText += "The script (<a href='http://code.google.com/p/webmyth/source/browse/trunk/webmyth.py'>webmyth.py</a>) ";
 WebMyth.helpEmailText += "needs to be in executable as cgi-bin on your local webserver.  ";
+WebMyth.helpEmailText += "The script has some database settings that you need to manually set.  You can find the correct values for your system by looking at /etc/mythtv/mysql.txt on your frontend or backend machine.<hr/>";
 WebMyth.helpEmailText += "The file needs to be accesible to this device without any authentication.<hr/>";
 WebMyth.helpEmailText += "Please report any issues you find with the system on the 'issues' tab of the homepage.  ";
 WebMyth.helpEmailText += "Or you can email the developer directly at <a href=mailto:thewbman+webmyth@gmail.com>thewbman@gmail.com</a>.";
@@ -129,11 +144,27 @@ StageAssistant.prototype.handleCommand = function(event) {
 			aboutinfo += "Licensed under <a href='http://www.gnu.org/licenses/gpl-2.0.html'>GPLv2</a>."
 
             currentScene.showAlertDialog({
-                onChoose: function(value) {},
-                title: "WebMyth - v" + Mojo.Controller.appInfo.version,
+                onChoose: function(value) {if (value==true) {
+					Mojo.Log.error("appPath:" + Mojo.appPath);
+					this.controller.serviceRequest(
+						"palm://com.palm.applicationManager", {
+							method: 'open',
+							parameters: {
+								id: "com.palm.app.email",
+								params: {
+									summary: "WebMyth setup instructions",
+									text: WebMyth.helpEmailText
+								}
+							}
+						}
+					);
+					}
+				},
+				title: "WebMyth - v" + Mojo.Controller.appInfo.version,
                 message: "Copyright 2010, Wes Brown <br>" + aboutinfo,
                 choices: [
-					{label: "OK", value: ""}
+					{label: "OK", value: false},
+					{label: "Email Instructions", value: true}
 					],
                 allowHTMLMessage: true
             });
