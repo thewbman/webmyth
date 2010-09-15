@@ -6,19 +6,11 @@ A: Yes.  Currently the SDK provided by Palm does not allow for the direct telnet
 
 === Q: The recordings and frontend searches are not working ===
 
-UNCONFIRMED: I believe the script tries to save the DB configuration information it automatically finds to a file.  The directory where it tries to save the information is ~/.mythtv/, which may not be a writable directory to script.  On my system (Ubuntu 9.10) that directory is actually /var/www/.mythtv/ when running the script through apache.  You can try creating that file yourself and making it writable to everyone if you are having problems with the script.  
-{{{sudo mkdir /var/www/.mythtv/; sudo chmod a+rw /var/www/.mythtv/"}}} 
-In the future I will try to have a better way to deal with this problem.  Alternatively you can try changing the 
-{{{mythDB = MythDB()}}}
- line the hardcoded values of your specific system:
-{{{mythDB = MythDB(args=(('DBHostName','mybackend'), ('DBName','mythconverg'), ('DBUserName','mythtv'), ('DBPassword','mythtv')))}}}
-
-
-A: First double check you installed the script file is installed on a local web server.  You can see if it is accessible by trying to view it from a web browser (i.e [http://my-server/cgi-bin/webmyth.py?op=getHosts]).  If your browser tries to download a file then that much is working.  If you get a 500 error from your browser you can try looking at the apache error log ("/var/log/apache2/error.log") for information.  
+A: First double check you installed the script file is installed on a local web server.  And that you changed the hardcoded to yoru specific system.  You can get the variables you need by looking at /etc/mythtv/mysql.txt on a functioning frontend or backend.  You can see if it is accessible by trying to view it from a web browser (i.e [http://my-server/cgi-bin/webmyth.py?op=getHosts]).  If your browser tries to download a file then that much is working.  If you get a 500 error from your browser you can try looking at the apache error log ("/var/log/apache2/error.log") for information.  
 
 === Q: !WebMyth can't seem to talk to a remote frontend even though I know it is a valid frontend ===
 
-A: This might be an issue that the server where the script lives cannot resolve the frontend's system name.  You can either add it manually to the server's /etc/hosts file or just use the frontend's IP address if you know it.
+A: This might be an issue that the server where the script lives cannot resolve the frontend's system name.  You probably need to add it manually to the server's /etc/hosts file.
 
 === Q: I don't like the way the app looks, will it get better? ===
 
