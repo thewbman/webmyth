@@ -85,6 +85,7 @@ WelcomeAssistant.prototype.setup = function() {
 		if (WebMyth.prefsCookieObject.currentRemoteScene == null) WebMyth.prefsCookieObject.currentRemoteScene = defaultCookie().currentRemoteScene;
 		if (WebMyth.prefsCookieObject.allowRecordedDownloads == null) WebMyth.prefsCookieObject.allowRecordedDownloads = defaultCookie().allowRecordedDownloads;
 		if (WebMyth.prefsCookieObject.recordedDownloadsUrl == null) WebMyth.prefsCookieObject.recordedDownloadsUrl = defaultCookie().recordedDownloadsUrl;
+		if (WebMyth.prefsCookieObject.theme == null) WebMyth.prefsCookieObject.theme = defaultCookie().theme;
 		
 		//Check if scripts need an upgrade message
 		if (WebMyth.prefsCookieObject.previousScriptVersion == null) {
@@ -100,7 +101,10 @@ WelcomeAssistant.prototype.setup = function() {
 			WebMyth.prefsCookieObject.previousScriptVersion = WebMyth.currentScriptVersion;
 		}
 		
+		//Save cookie
 		WebMyth.prefsCookie.put(WebMyth.prefsCookieObject); 
+		//Use theme
+		this.controller.document.body.className = WebMyth.prefsCookieObject.theme;
 			
 		if(WebMyth.prefsCookieObject.webserverName == '') {
 			Mojo.Controller.getAppController().showBanner("Please configure app preferences", {source: 'notification'});
@@ -111,6 +115,10 @@ WelcomeAssistant.prototype.setup = function() {
 		WebMyth.prefsCookieObject = defaultCookie();
 		WebMyth.prefsCookieObject.previousScriptVersion = WebMyth.currentScriptVersion;
 		WebMyth.prefsCookie.put(WebMyth.prefsCookieObject);
+		
+		//Use theme
+		this.controller.document.body.className = WebMyth.prefsCookieObject.theme;
+		
 		this.alertNeedScript();
 	};
 
@@ -196,9 +204,10 @@ WelcomeAssistant.prototype.alertScriptUpdate = function(oldversion) {
 	
 		Mojo.Log.info("Inside remote alert if");
 	
-		var script_message = "This update to WebMyth includes a brand new script (webmyth.py) that replaces the previous scripts.<hr/>";
-		script_message += "Unfortunately this app breaks compatibility with the old scripts and will not work until you install the new script.<hr/>";
-		script_message += "The current versions for the script is version " + WebMyth.currentScriptVersion + ".";
+		var script_message = "This update to WebMyth includes a brand new script (webmyth.py) that replaces the previous scripts.  ";
+		script_message += "Unfortunately this app breaks compatibility with the old scripts and will not work until you install the new script.  ";
+		script_message += "If you recently installed webmyth.py version 3 and were having problems, this update to the script should fix all that.<hr/>";
+		script_message += "The current script version is " + WebMyth.currentScriptVersion + ".";
        
 		this.controller.showAlertDialog({
 			onChoose: function(value) {if (value==true) {
