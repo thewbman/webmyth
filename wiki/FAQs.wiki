@@ -4,6 +4,10 @@ Some common questions on getting !WebMyth up and running.  If you have a new que
 
 A: Yes.  Currently the SDK provided by Palm does not allow for the direct telnet, MySQL and zeroconf services needed for this program.  WebOS 2.0 should fill that gap, but for now the script must be installed for !WebMyth to operate correctly
 
+=== Q: Why are there 0.23/python/MythVideo requirements? ===
+
+A: The server script that this app uses relies on the python bindings included with MythTV.  By using the actual python bindings the script itself can be simpler and frankly easier for me to write.  But unfortunately the python bindings for MythTV was drastically reworked for MythTV for 0.23, making the script not backwards compatible with MythTV 0.22.  The MythVideo requirement is somewhat arbitrary and you can comment out the two lines in the script that include the function call "MythVideo(...)" if you do not have MythVideo installed on your system.
+
 === Q: The recordings and frontend searches are not working ===
 
 A: First double check you installed the script file is installed on a local web server.  And that you changed the hardcoded to yoru specific system.  You can get the variables you need by looking at /etc/mythtv/mysql.txt on a functioning frontend or backend.  You can see if it is accessible by trying to view it from a web browser (i.e [http://my-server/cgi-bin/webmyth.py?op=getHosts]).  If your browser tries to download a file then that much is working.  If you get a 500 error from your browser you can try looking at the apache error log ("/var/log/apache2/error.log") for information.  
