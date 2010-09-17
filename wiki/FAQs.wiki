@@ -1,4 +1,4 @@
-#summary Some common questions on getting !WebMyth up and running.  If you have a new question you can try submitting it as a comment to this page.
+#summary Some common questions on getting WebMyth up and running.  If you have a new question you can try submitting it as a comment to this page.
 
 === Q: Do I really need to install the script file? ===
 
