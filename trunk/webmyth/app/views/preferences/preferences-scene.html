@@ -47,14 +47,29 @@
 </div>
 
 <div class="palm-group">
-	<div class="palm-group-title" id="preferences-global">Global</div>
+	<div class="palm-group-title" id="preferences-global">General</div>
 	<div class="palm-list">
         
-		<div class="palm-row single"> <!-- x-mojo-tap-highlight="momentary" //-->
+		<div class="palm-row first"> <!-- x-mojo-tap-highlight="momentary" //-->
 			<div class="palm-row-wrapper">
 				<div id="theme" x-mojo-element="ListSelector"></div>
             </div>
         </div>
+		
+		<div class="palm-row">
+			<div class="palm-row-wrapper" x-mojo-focus-highlight="true">         
+				<div x-mojo-element="ToggleButton" id="vibrateToggleId"></div>
+				<div class="title left">Remote Vibrates</div>
+			</div>
+		</div>
+		
+		<div class="palm-row last">
+			<div class="palm-row-wrapper" x-mojo-focus-highlight="true">         
+				<div x-mojo-element="ToggleButton" id="remoteFullscreenToggleId"></div>
+				<div class="title left">Remote Fullscreen</div>
+			</div>
+		</div>
+	
 	</div>
 </div>
 

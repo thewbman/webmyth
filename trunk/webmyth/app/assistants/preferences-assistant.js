@@ -106,6 +106,31 @@ PreferencesAssistant.prototype.setup = function() {
 	this.controller.listen('theme', Mojo.Event.propertyChange, this.themeChanged.bindAsEventListener(this));
 	
 	
+	//Remote keys vibrate
+	this.vibrateToggleModel = {
+             value: true
+    };
+	this.controller.setupWidget("vibrateToggleId",
+        {
+			label: $L("Vibrate remote"),
+            modelProperty: "value"
+         },
+         this.vibrateToggleModel
+    ); 
+	
+	//Remote scenes fun in fullscreen
+	this.remoteFullscreenToggleModel = {
+             value: false
+    };
+	this.controller.setupWidget("remoteFullscreenToggleId",
+        {
+			label: $L("Fullscreen remote"),
+            modelProperty: "value"
+         },
+         this.remoteFullscreenToggleModel
+    ); 
+	
+	
 	this.metrixToggleModel = {
              value: true
     };
@@ -165,9 +190,15 @@ PreferencesAssistant.prototype.activate = function(event) {
 				this.controller.modelChanged(this.webmythPythonFileTextModel);
 			}
 			
-			//Update metrix toggle from cookie
+			//Update toggles from cookie
 			this.metrixToggleModel.value = WebMyth.prefsCookieObject.allowMetrix;
 			this.controller.modelChanged(this.metrixToggleModel);
+			
+			this.vibrateToggleModel.value = WebMyth.prefsCookieObject.remoteVibrate;
+			this.controller.modelChanged(this.vibrateToggleModel);
+			
+			this.remoteFullscreenToggleModel.value = WebMyth.prefsCookieObject.remoteFullscreen;
+			this.controller.modelChanged(this.remoteFullscreenToggleModel);
 			
 		} 
 };
@@ -193,6 +224,8 @@ PreferencesAssistant.prototype.saveWebserver = function(event) {
 	//Mojo.Log.info("New mysql file is %s", this.webMysqlFileTextModel.value);
 	Mojo.Log.info("New python file is %s", this.webmythPythonFileTextModel.value);
 	Mojo.Log.info("Metrix value is %s", this.metrixToggleModel.value);
+	Mojo.Log.info("Remote vibrate value is %s", this.vibrateToggleModel.value);
+	Mojo.Log.info("Remote fullscreen value is %s", this.remoteFullscreenToggleModel.value);
 	Mojo.Log.info("Theme value is %s", this.themeModel.value);
 
 	if (WebMyth.prefsCookieObject) {
@@ -208,6 +241,8 @@ PreferencesAssistant.prototype.saveWebserver = function(event) {
 	//WebMyth.prefsCookieObject.webMysqlFile = this.webMysqlFileTextModel.value;
 	WebMyth.prefsCookieObject.webmythPythonFile = this.webmythPythonFileTextModel.value;
 	WebMyth.prefsCookieObject.allowMetrix = this.metrixToggleModel.value;
+	WebMyth.prefsCookieObject.remoteVibrate = this.vibrateToggleModel.value;
+	WebMyth.prefsCookieObject.remoteFullscreen = this.remoteFullscreenToggleModel.value;
 	WebMyth.prefsCookieObject.theme = this.themeModel.value;
 	WebMyth.prefsCookie.put(WebMyth.prefsCookieObject);
 	

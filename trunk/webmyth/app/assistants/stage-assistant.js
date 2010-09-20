@@ -47,22 +47,10 @@ WebMyth.remoteCommandMenuModel = {
 	visible: true,
 	items: [{},{
 		items: [
-			{label: "Nav", command: 'go-navigation', width: 90},
-			{label: "Play", command: 'go-playback', width: 70},
-			{label: "Music", command: 'go-music', width: 90}
-		]
-		},
-	{}
-	]
-};
-
-WebMyth.remoteCommandMenuModel = {
-	visible: true,
-	items: [{},{
-		items: [
-			{label: "Nav", command: 'go-navigation', width: 90},
-			{label: "Play", command: 'go-playback', width: 70},
-			{label: "Music", command: 'go-music', width: 90}
+			{label: "Nav", command: 'go-navigation', width: 80},
+			{label: "Play", command: 'go-playback', width: 80},
+			{label: "Music", command: 'go-music', width: 80},
+			{label: "Flick", command: 'go-flick', width: 80}
 		]
 		},
 	{}
@@ -231,6 +219,14 @@ StageAssistant.prototype.handleCommand = function(event) {
 				Mojo.Log.info("Already on music");
 			} else {
 				Mojo.Controller.stageController.swapScene("music");
+			}
+	   break;
+	   
+	  case 'go-flick':
+			if(currentScene == 'flick'){
+				Mojo.Log.info("Already on flick");
+			} else {
+				Mojo.Controller.stageController.swapScene("flick");
 			}
 	   break;
     }
