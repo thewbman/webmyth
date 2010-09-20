@@ -54,5 +54,13 @@
     {
         "scenes": "upcomingDetails",
         "source": "app/assistants/upcomingDetails-assistant.js"
+    },
+    {
+        "scenes": "flick",
+        "source": "app/assistants/flick-assistant.js"
+    },
+    {
+        "scenes": "status",
+        "source": "app/assistants/status-assistant.js"
     }
 ]

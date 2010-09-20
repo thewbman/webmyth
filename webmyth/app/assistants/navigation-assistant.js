@@ -39,6 +39,32 @@ NavigationAssistant.prototype.setup = function() {
 	WebMyth.remoteCommandMenuModel.items[1].toggleCmd = 'go-navigation';  //fix this
 	this.controller.modelChanged(WebMyth.remoteCommandMenuModel);
 	
+	//Buttons
+		//navigation
+	this.controller.setupWidget("backButton", {}, { label : "ESC", disabled: false } );
+	this.controller.setupWidget("upButton", {}, { label : "Up", disabled: false } );
+	this.controller.setupWidget("leftButton", {}, { label : "Left", disabled: false } );
+	this.controller.setupWidget("selectButton", {}, { label : "OK", disabled: false } );
+	this.controller.setupWidget("rightButton", {}, { label : "Right", disabled: false } );
+	this.controller.setupWidget("downButton", {}, { label : "Down", disabled: false } );
+		//general
+	this.controller.setupWidget("infoButton", {}, { label : "Info", disabled: false } );
+	this.controller.setupWidget("menuButton", {}, { label : "Menu", disabled: false } );
+		//playback
+	//this.controller.setupWidget("playButton", {}, { label : "Play", disabled: false } );
+	//this.controller.setupWidget("pauseButton", {}, { label : "||", disabled: false } );
+	//this.controller.setupWidget("fastforwardButton", {}, { label : ">>", disabled: false } );
+	//this.controller.setupWidget("rewindButton", {}, { label : "<<", disabled: false } );
+	//this.controller.setupWidget("skipForwardButton", {}, { label : ">|", disabled: false } );
+	//this.controller.setupWidget("skipBackButton", {}, { label : "|<", disabled: false } );
+		//volume
+	//this.controller.setupWidget("volumeUpButton", {}, { label : "Vol+", disabled: false } );
+	//this.controller.setupWidget("volumeDownButton", {}, { label : "Vol-", disabled: false } );
+	//this.controller.setupWidget("muteButton", {}, { label : "Mute", disabled: false } );
+	
+	
+
+	
 	
 	//Keypress event
 	Mojo.Event.listen(this.controller.sceneElement, Mojo.Event.keyup, this.handleKey.bind(this));
@@ -75,6 +101,9 @@ NavigationAssistant.prototype.activate = function(event) {
 	
 	WebMyth.prefsCookieObject.currentRemoteScene = 'navigation';
 	WebMyth.prefsCookie.put(WebMyth.prefsCookieObject); 
+	
+	
+	this.controller.enableFullScreenMode(WebMyth.prefsCookieObject.remoteFullscreen);
 	
 };
 
@@ -129,7 +158,7 @@ NavigationAssistant.prototype.sendCommand = function(element, event) {
 	  this.sendTelnetKey("[");
 	  break;
 	case muteButton:
-	  this.sendTelnetKey("\\");
+	  this.sendTelnetKey("\|");
 	  break;
 	//Playback Commands
 	case pauseButton:
@@ -291,9 +320,14 @@ NavigationAssistant.prototype.handleKey = function(event) {
 NavigationAssistant.prototype.sendTelnetKey = function(value, event){
 	//this.sendTelnet("key "+value);
 	
+	
 	this.controller.stageController.parentSceneAssistant(this).sendKey(value); 
-
-	Mojo.Log.info("Sending key '%s' to host", value);
+	
+	if(WebMyth.prefsCookieObject.remoteVibrate) {
+		this.controller.stageController.getAppController().playSoundNotification( "vibrate", "" );
+	};
+	
+	//Mojo.Log.info("Sending key '%s' to host", value);
 };
 
 NavigationAssistant.prototype.sendTelnet = function(value, event){

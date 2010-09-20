@@ -63,6 +63,17 @@ WelcomeAssistant.prototype.setup = function() {
 	Mojo.Event.listen(this.controller.get("goUpcomingButtonId"),Mojo.Event.tap, this.goUpcoming.bind(this));
 	
 	
+	//View upcoming button
+	this.controller.setupWidget("goStatusButtonId",
+         {},
+         {
+             label : "Status",
+             disabled: false
+         }
+     );
+	Mojo.Event.listen(this.controller.get("goStatusButtonId"),Mojo.Event.tap, this.goStatus.bind(this));
+	
+	
 	
 
 	if (WebMyth.prefsCookieObject) {		//cookie exists
@@ -86,6 +97,9 @@ WelcomeAssistant.prototype.setup = function() {
 		if (WebMyth.prefsCookieObject.allowRecordedDownloads == null) WebMyth.prefsCookieObject.allowRecordedDownloads = defaultCookie().allowRecordedDownloads;
 		if (WebMyth.prefsCookieObject.recordedDownloadsUrl == null) WebMyth.prefsCookieObject.recordedDownloadsUrl = defaultCookie().recordedDownloadsUrl;
 		if (WebMyth.prefsCookieObject.theme == null) WebMyth.prefsCookieObject.theme = defaultCookie().theme;
+		if (WebMyth.prefsCookieObject.remoteVibrate == null) WebMyth.prefsCookieObject.remoteVibrate = defaultCookie().remoteVibrate;
+		if (WebMyth.prefsCookieObject.remoteFullscreen == null) WebMyth.prefsCookieObject.remoteFullscreen = defaultCookie().remoteFullscreen;
+		if (WebMyth.prefsCookieObject.masterBackendIp == null) WebMyth.prefsCookieObject.masterBackendIp = defaultCookie().masterBackendIp;
 		
 		//Check if scripts need an upgrade message
 		if (WebMyth.prefsCookieObject.previousScriptVersion == null) {
@@ -131,6 +145,25 @@ WelcomeAssistant.prototype.setup = function() {
 	}
 	
 	
+	//Get backend IP
+	//Mojo.Log.info('Getting MasterBackendIP');
+	
+	var requestUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webmythPythonFile;
+	requestUrl += "?op=getSetting";
+	requestUrl += "&setting=MasterServerIP";
+	
+    try {
+        var request = new Ajax.Request(requestUrl,{
+            method: 'get',
+            onSuccess: this.readSettingSuccess.bind(this),
+            onFailure: this.readSettingFail.bind(this)  
+        });
+    }
+    catch(e) {
+        Mojo.Log.error(e);
+    }
+	
+	
 };
 
 WelcomeAssistant.prototype.activate = function(event) {
@@ -169,10 +202,13 @@ WelcomeAssistant.prototype.goRecorded = function(event) {
 };
 
 WelcomeAssistant.prototype.goUpcoming = function(event) {
-	//Start recorded scene
-	
+	//Start upcoming scene
 	Mojo.Controller.stageController.pushScene("upcoming");
-	
+};
+
+WelcomeAssistant.prototype.goStatus = function(event) {
+	//Start upcoming scene
+	Mojo.Controller.stageController.pushScene("status");
 };
 
 WelcomeAssistant.prototype.alertNeedScript = function() {
@@ -237,6 +273,23 @@ WelcomeAssistant.prototype.alertScriptUpdate = function(oldversion) {
 	};
 	
 	Mojo.Log.error("Leaving alert script update");
+	
+	
+};
+
+
+WelcomeAssistant.prototype.readSettingFail = function(response) {
+	Mojo.Log.error("Failed to get backend setting information");
+	
+	
+};
+
+WelcomeAssistant.prototype.readSettingSuccess = function(response) {
+	var masterIpAddress = response.responseText.trim()
+	//Mojo.Log.info("Got master backend IP from settings: "+masterIpAddress);
+	
+	WebMyth.prefsCookieObject.masterBackendIp =masterIpAddress;
+	WebMyth.prefsCookie.put(WebMyth.prefsCookieObject);
 	
 	
 };

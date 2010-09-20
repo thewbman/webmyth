@@ -129,7 +129,10 @@ function defaultCookie() {
 		previousScriptVersion: 0,
 		allowRecordedDownloads: false,
 		recordedDownloadsUrl: '',
-		theme: 'palm-dark'
+		theme: 'palm-dark',
+		remoteVibrate: false,
+		remoteFullscreen: false,
+		masterBackendIp: ''
 	};
 	
 	return newCookieObject;
