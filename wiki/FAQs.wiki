@@ -14,7 +14,7 @@ A: First double check you installed the script file is installed on a local web 
 
 === Q: !WebMyth can't seem to talk to a remote frontend even though I know it is a valid frontend ===
 
-A: This might be an issue that the server where the script lives cannot resolve the frontend's system name.  You probably need to add it manually to the server's /etc/hosts file.
+A: This might be an issue that the server where the script lives cannot resolve the frontend's system name.  You probably need to add it manually to the server's /etc/hosts file.  The webmyth.py script does not seem to be able to use IP addresses instead of system names.
 
 === Q: I don't like the way the app looks, will it get better? ===
 
