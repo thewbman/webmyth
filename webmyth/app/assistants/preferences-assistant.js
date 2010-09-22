@@ -118,7 +118,7 @@ PreferencesAssistant.prototype.setup = function() {
          this.vibrateToggleModel
     ); 
 	
-	//Remote scenes fun in fullscreen
+	//Remote scenes run in fullscreen
 	this.remoteFullscreenToggleModel = {
              value: false
     };
@@ -130,7 +130,7 @@ PreferencesAssistant.prototype.setup = function() {
          this.remoteFullscreenToggleModel
     ); 
 	
-	
+	//Metrix
 	this.metrixToggleModel = {
              value: true
     };
@@ -141,6 +141,51 @@ PreferencesAssistant.prototype.setup = function() {
          this.metrixToggleModel
     ); 
 	
+	
+	//Remote scene - navigation
+	this.remoteNavigationToggleModel = {
+             value: true
+    };
+	this.controller.setupWidget("remoteNavigationToggleId",
+        {
+            modelProperty: "value"
+         },
+         this.remoteNavigationToggleModel
+    ); 
+	//Remote scene - playback
+	this.remotePlaybackToggleModel = {
+             value: true
+    };
+	this.controller.setupWidget("remotePlaybackToggleId",
+        {
+            modelProperty: "value"
+         },
+         this.remotePlaybackToggleModel
+    ); 
+	//Remote scene - music
+	this.remoteMusicToggleModel = {
+             value: true
+    };
+	this.controller.setupWidget("remoteMusicToggleId",
+        {
+            modelProperty: "value"
+         },
+         this.remoteMusicToggleModel
+    ); 
+	//Remote scene - flick
+	this.remoteFlickToggleModel = {
+             value: true
+    };
+	this.controller.setupWidget("remoteFlickToggleId",
+        {
+            modelProperty: "value"
+         },
+         this.remoteFlickToggleModel
+    ); 
+	
+	
+	
+	//Save button
 	this.controller.setupWidget("saveWebserverButtonId",
          {},
          {
@@ -149,10 +194,8 @@ PreferencesAssistant.prototype.setup = function() {
          }
      );
 	
-	/* add event handlers to listen to events from widgets */
 	Mojo.Event.listen(this.controller.get("saveWebserverButtonId"),Mojo.Event.tap, this.saveWebserver.bind(this));
 	
-	/* add event handlers to listen to events from widgets */
 };
 
 PreferencesAssistant.prototype.activate = function(event) {
@@ -185,7 +228,7 @@ PreferencesAssistant.prototype.activate = function(event) {
 			if ( WebMyth.prefsCookieObject.webmythPythonFile == null ) {
 				Mojo.Log.error("Did not find python file in cookie");
 			} else {
-				Mojo.Log.info("Found puthon file in cookie '%s'", WebMyth.prefsCookieObject.webmythPythonFile);
+				Mojo.Log.info("Found python file in cookie '%s'", WebMyth.prefsCookieObject.webmythPythonFile);
 				this.webmythPythonFileTextModel.value = WebMyth.prefsCookieObject.webmythPythonFile;
 				this.controller.modelChanged(this.webmythPythonFileTextModel);
 			}
@@ -201,6 +244,22 @@ PreferencesAssistant.prototype.activate = function(event) {
 			this.controller.modelChanged(this.remoteFullscreenToggleModel);
 			
 		} 
+		
+		//Active remote scenes
+		if(WebMyth.remoteCookieObject) {
+			
+			this.remoteNavigationToggleModel.value = WebMyth.remoteCookieObject[0].enabled;
+			this.controller.modelChanged(this.remoteNavigationToggleModel);
+			
+			this.remotePlaybackToggleModel.value = WebMyth.remoteCookieObject[1].enabled;
+			this.controller.modelChanged(this.remotePlaybackToggleModel);
+			
+			this.remoteMusicToggleModel.value = WebMyth.remoteCookieObject[2].enabled;
+			this.controller.modelChanged(this.remoteMusicToggleModel);
+			
+			this.remoteFlickToggleModel.value = WebMyth.remoteCookieObject[3].enabled;
+			this.controller.modelChanged(this.remoteFlickToggleModel);
+		}
 };
 
 PreferencesAssistant.prototype.deactivate = function(event) {
@@ -219,33 +278,57 @@ PreferencesAssistant.prototype.themeChanged = function(event) {
 
 PreferencesAssistant.prototype.saveWebserver = function(event) {
 	
-	Mojo.Log.info("New webserverName is %s", this.webserverTextModel.value);
-	//Mojo.Log.info("New remote file is %s", this.webserverRemoteFileTextModel.value);
-	//Mojo.Log.info("New mysql file is %s", this.webMysqlFileTextModel.value);
-	Mojo.Log.info("New python file is %s", this.webmythPythonFileTextModel.value);
-	Mojo.Log.info("Metrix value is %s", this.metrixToggleModel.value);
-	Mojo.Log.info("Remote vibrate value is %s", this.vibrateToggleModel.value);
-	Mojo.Log.info("Remote fullscreen value is %s", this.remoteFullscreenToggleModel.value);
-	Mojo.Log.info("Theme value is %s", this.themeModel.value);
-
-	if (WebMyth.prefsCookieObject) {
-		//Nothing
+	if((this.webserverTextModel.value.substring(0,4) == 'http') || (this.webserverTextModel.value.substring(0,4) == 'Http')) {
+		
+        this.controller.showAlertDialog({
+                onChoose: function(value) {},
+				title: "WebMyth - v" + Mojo.Controller.appInfo.version,
+                message: "Do not put the 'http' at the beginning or your webserver",
+                choices: [
+					{label: "OK", value: false}
+					],
+                allowHTMLMessage: true
+            });
+		
 	} else {
-		//Create default cookie if doesnt exist
-		var newPrefsCookieObject = defaultCookie();
-		WebMyth.prefsCookieObject = newPrefsCookieObject;
+		Mojo.Log.info("New webserverName is %s", this.webserverTextModel.value);
+		//Mojo.Log.info("New remote file is %s", this.webserverRemoteFileTextModel.value);
+		//Mojo.Log.info("New mysql file is %s", this.webMysqlFileTextModel.value);
+		Mojo.Log.info("New python file is %s", this.webmythPythonFileTextModel.value);
+		Mojo.Log.info("Metrix value is %s", this.metrixToggleModel.value);
+		Mojo.Log.info("Remote vibrate value is %s", this.vibrateToggleModel.value);
+		Mojo.Log.info("Remote fullscreen value is %s", this.remoteFullscreenToggleModel.value);
+		Mojo.Log.info("Theme value is %s", this.themeModel.value);
+
+		if (WebMyth.prefsCookieObject) {
+			//Nothing
+		} else {
+			//Create default cookie if doesnt exist
+			var newPrefsCookieObject = defaultCookie();
+			WebMyth.prefsCookieObject = newPrefsCookieObject;
+		}
+	
+		WebMyth.prefsCookieObject.webserverName = this.webserverTextModel.value;
+		//WebMyth.prefsCookieObject.webserverRemoteFile = this.webserverRemoteFileTextModel.value;
+		//WebMyth.prefsCookieObject.webMysqlFile = this.webMysqlFileTextModel.value;
+		WebMyth.prefsCookieObject.webmythPythonFile = this.webmythPythonFileTextModel.value;
+		WebMyth.prefsCookieObject.allowMetrix = this.metrixToggleModel.value;
+		WebMyth.prefsCookieObject.remoteVibrate = this.vibrateToggleModel.value;
+		WebMyth.prefsCookieObject.remoteFullscreen = this.remoteFullscreenToggleModel.value;
+		WebMyth.prefsCookieObject.theme = this.themeModel.value;
+		WebMyth.prefsCookie.put(WebMyth.prefsCookieObject);
+	
+	
+		//Enabled remote scenes
+		WebMyth.remoteCookieObject[0].enabled = this.remoteNavigationToggleModel.value;
+		WebMyth.remoteCookieObject[1].enabled = this.remotePlaybackToggleModel.value;
+		WebMyth.remoteCookieObject[2].enabled = this.remoteMusicToggleModel.value;
+		WebMyth.remoteCookieObject[3].enabled = this.remoteFlickToggleModel.value;
+	
+		WebMyth.remoteCookie.put(WebMyth.remoteCookieObject);
+
+		Mojo.Controller.stageController.popScene();
+	
 	}
 	
-	WebMyth.prefsCookieObject.webserverName = this.webserverTextModel.value;
-	//WebMyth.prefsCookieObject.webserverRemoteFile = this.webserverRemoteFileTextModel.value;
-	//WebMyth.prefsCookieObject.webMysqlFile = this.webMysqlFileTextModel.value;
-	WebMyth.prefsCookieObject.webmythPythonFile = this.webmythPythonFileTextModel.value;
-	WebMyth.prefsCookieObject.allowMetrix = this.metrixToggleModel.value;
-	WebMyth.prefsCookieObject.remoteVibrate = this.vibrateToggleModel.value;
-	WebMyth.prefsCookieObject.remoteFullscreen = this.remoteFullscreenToggleModel.value;
-	WebMyth.prefsCookieObject.theme = this.themeModel.value;
-	WebMyth.prefsCookie.put(WebMyth.prefsCookieObject);
-	
-
-	Mojo.Controller.stageController.popScene();
 };

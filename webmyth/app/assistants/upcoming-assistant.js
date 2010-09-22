@@ -53,7 +53,8 @@ UpcomingAssistant.prototype.setup = function() {
 		dividerTemplate: "upcoming/upcomingDivider",
 		swipeToDelete: false,
 		filterFunction: this.filterListFunction.bind(this),
-		dividerFunction: this.recorderDividerFunction.bind(this)
+		dividerFunction: this.recorderDividerFunction.bind(this),
+		formatters:{myData: this.setMyData.bind(this)}
 	};
     this.upcomingListModel = {            
         //items: this.resultList,
@@ -330,4 +331,42 @@ UpcomingAssistant.prototype.recorderDividerFunction = function(itemModel) {
 	var date = new Date(isoToDate(itemModel.starttime));
 	
 	return date.toLocaleString().substring(0,15);
+};
+
+
+
+UpcomingAssistant.prototype.setMyData = function(propertyValue, model) {
+	
+	//Mojo.Log.error('property value is %j', propertyValue);
+	//var newDate = new Date(isoToDate(model.starttime));
+	//var modifiedDate = date.toLocaleString().substring(0,15);
+	
+	/*
+	var titleAndSubtitle = '<div class="recorded-title"><div class="palm-info-text title right">'+model.title+'</div></div>';
+	titleAndSubtitle += '<div class="recorded-subtitle"><div class="palm-info-text title right italics">'+model.subtitle+'</div></div>';
+	
+	var timeAndSubtitle = '<div class="recorded-starttime"><div class="palm-info-text title right">'+model.starttime+'</div></div>';
+	//var timeAndSubtitle = '<div class="recorded-starttime"><div class="palm-info-text title right">'+newDate+'</div></div>';
+	timeAndSubtitle += '<div class="recorded-subtitle"><div class="palm-info-text title right italics">'+model.subtitle+'</div></div>';
+	*/
+	
+	
+	//Details text
+	//var upcomingDetailsText = '<div class="upcoming-title"><div class="palm-info-text title truncating-text left">'+model.title+'</div></div>';
+    var upcomingDetailsText = '<div class="upcoming-subtitle"><div class="palm-info-text truncating-text left italics">'+model.subtitle+'</div></div>';
+	upcomingDetailsText += '<div class="upcoming-starttime"><div class="palm-info-text truncating-text left">'+model.starttime+'</div></div>';
+	
+	model.myDetailsData = upcomingDetailsText;
+	
+	
+	//And img source
+	var channelIconUrl = "http://"+WebMyth.prefsCookieObject.masterBackendIp+":6544/Myth/GetChannelIcon?ChanId=";
+	channelIconUrl += model.chanid;
+	
+	Mojo.Log.error("iconURL is "+channelIconUrl);
+	
+	//Mojo.Log.error('url is ' +screenshotUrl);
+	model.myImgSrc = channelIconUrl;
+
+	
 };

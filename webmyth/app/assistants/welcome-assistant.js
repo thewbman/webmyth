@@ -28,6 +28,7 @@
 WelcomeAssistant.prototype.setup = function() {
 	/* this function is for setup tasks that have to happen when the scene is first created */
 		
+		
 	//App menu widget
 	this.controller.setupWidget(Mojo.Menu.appMenu, WebMyth.appMenuAttr, WebMyth.appMenuModel);
 	
@@ -144,6 +145,14 @@ WelcomeAssistant.prototype.setup = function() {
 		WebMyth.hostsCookie.put(WebMyth.hostsCookieObject);
 	}
 	
+	//Remote scenes cookie
+	if (WebMyth.remoteCookieObject) {		//cookie exist
+		//do nothing?
+	} else {
+		WebMyth.remoteCookieObject = defaultRemoteCookie();
+		WebMyth.remoteCookie.put(WebMyth.remoteCookieObject);
+	}
+	
 	
 	//Get backend IP
 	//Mojo.Log.info('Getting MasterBackendIP');
@@ -169,6 +178,8 @@ WelcomeAssistant.prototype.setup = function() {
 WelcomeAssistant.prototype.activate = function(event) {
 	/* put in event handlers here that should only be in effect when this scene is active. For
 	   example, key handlers that are observing the document */
+	   
+	   //Mojo.Log.error("remote cookie is %j", WebMyth.remoteCookieObject);
 };
 
 WelcomeAssistant.prototype.deactivate = function(event) {
@@ -288,8 +299,10 @@ WelcomeAssistant.prototype.readSettingSuccess = function(response) {
 	var masterIpAddress = response.responseText.trim()
 	//Mojo.Log.info("Got master backend IP from settings: "+masterIpAddress);
 	
-	WebMyth.prefsCookieObject.masterBackendIp =masterIpAddress;
+	WebMyth.prefsCookieObject.masterBackendIp = masterIpAddress;
 	WebMyth.prefsCookie.put(WebMyth.prefsCookieObject);
+	
+	$('masterIpAddress-title').innerHTML = masterIpAddress;
 	
 	
 };

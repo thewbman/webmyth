@@ -40,7 +40,8 @@ WebMyth.appMenuModel = {
 //Create WebMyth.db for use or open existing
 WebMyth.db;
 	
-	
+
+/*
 //Setup remote commandmenu
 WebMyth.remoteCommandMenuAttr = { menuClass: 'no-fade' };	
 WebMyth.remoteCommandMenuModel = {
@@ -56,6 +57,23 @@ WebMyth.remoteCommandMenuModel = {
 	{}
 	]
 };
+*/
+
+
+//Setup remote view menu
+WebMyth.remoteViewMenuAttr = { spacerHeight: 0, menuClass: 'no-fade' };	
+WebMyth.remoteViewMenuModel = {
+	visible: true,
+	items: [{
+		items: [
+			{ icon: 'back', command: 'go-remotePrevious'},
+			{ label: "Remote", command: 'do-queryLocation', width: 200 },
+			{ icon: 'forward', command: 'go-remoteNext'}
+		]
+	}]
+};
+
+
 	
 //Setup header menu button
 WebMyth.headerMenuButtonModel = {
@@ -74,6 +92,11 @@ WebMyth.prefsCookieObject = WebMyth.prefsCookie.get();
 //Cookie for hosts
 WebMyth.hostsCookie = new Mojo.Model.Cookie('hosts');
 WebMyth.hostsCookieObject = WebMyth.hostsCookie.get();
+	
+	
+//Cookie for remote
+WebMyth.remoteCookie = new Mojo.Model.Cookie('remote');
+WebMyth.remoteCookieObject = WebMyth.remoteCookie.get();
 
 
 //Current script verion
@@ -229,6 +252,19 @@ StageAssistant.prototype.handleCommand = function(event) {
 				Mojo.Controller.stageController.swapScene("flick");
 			}
 	   break;
+	   
+	  case 'go-remotePrevious':
+			var previousRemoteScene = getPreviousRemote(WebMyth.remoteCookieObject, WebMyth.prefsCookieObject.currentRemoteScene);
+			Mojo.Controller.stageController.swapScene(previousRemoteScene);
+	   break;
+	   
+	  case 'go-remoteNext':
+			//Mojo.Log.error("current scene is " + WebMyth.prefsCookieObject.currentRemoteScene);
+			var nextRemoteScene = getNextRemote(WebMyth.remoteCookieObject, WebMyth.prefsCookieObject.currentRemoteScene);
+			//Mojo.Log.error("next scene is " + nextRemoteScene);
+			Mojo.Controller.stageController.swapScene(nextRemoteScene);
+	   break;
+
     }
   }
 };

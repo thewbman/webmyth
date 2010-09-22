@@ -624,6 +624,9 @@ StatusAssistant.prototype.setEncodersData = function(propertyValue, model)  {
 	var state;
 	
 	switch(parseInt(model.state)) {
+		case -1:
+			state = "Disconnected";
+			break;
 		case 0:
 			state = "Idle";
 			break;

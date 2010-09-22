@@ -150,6 +150,20 @@ function defaultHostsCookie() {
 	return newCookieObject;
 };
 
+function defaultRemoteCookie() {
+
+	//These values are initiated in 'welcome' scene if not set
+
+	var newCookieObject = [
+		{ "name": "navigation", "enabled": true } ,
+		{ "name": "playback", "enabled": true } ,
+		{ "name": "music", "enabled": true } ,
+		{ "name": "flick", "enabled": true } ,
+	];
+	
+	return newCookieObject;
+};
+
 
 var sort_by = function(field, reverse, primer){
 
@@ -340,7 +354,93 @@ function doHelpEmail() {
             }
         }
     }
-);
+	);
 	
-	Mojo.Log.error("do send email");
-}
+	Mojo.Log.info("do send email");
+};
+
+
+var getPreviousRemote = function(fullRemoteList, currentRemote) {   
+	
+	var listLength = fullRemoteList.length;
+	var currentIndex, newIndex = -1, lowestIndex = 100, highestIndex = -1, i, j, s;
+	
+	//Populate list indexes
+	for (i = 0; i < listLength; i++) {
+		s = fullRemoteList[i];
+		
+		if (s.enabled == true) {
+			if(i < lowestIndex) lowestIndex = i;
+			if(i > highestIndex) highestIndex = i;
+			
+			if(s.name == currentRemote) currentIndex = i;
+		}	
+	} 
+	
+	//If at start of list start over
+	if(currentIndex == lowestIndex) {
+		newIndex = highestIndex;
+	} else {
+	
+		//Loop to get previous list
+		for (j = currentIndex - 1; j >= 0; j--) {
+			s = fullRemoteList[j];
+		
+			if (s.enabled == true) {
+				newIndex = j;
+				j = 0;
+			}	
+		}
+	}
+	
+	//Fall back to same if cannot get next
+	if(newIndex == -1) {
+		return currentRemote;
+	} else {
+		return fullRemoteList[newIndex].name;
+	}
+
+};
+
+
+var getNextRemote = function(fullRemoteList, currentRemote) {   
+	
+	var listLength = fullRemoteList.length;
+	var currentIndex, newIndex = -1, lowestIndex = 100, highestIndex = -1, i, j, s;
+	
+	//Populate list indexes
+	for (i = 0; i < listLength; i++) {
+		s = fullRemoteList[i];
+		
+		if (s.enabled == true) {
+			if(i < lowestIndex) lowestIndex = i;
+			if(i > highestIndex) highestIndex = i;
+			
+			if(s.name == currentRemote) currentIndex = i;
+		}	
+	} 
+	
+	//If at end of list start over
+	if(currentIndex == highestIndex) {
+		newIndex = lowestIndex;
+	} else {
+	
+		//Loop to get next list
+		for (j = currentIndex + 1; j < listLength; j++) {
+			s = fullRemoteList[j];
+		
+			if (s.enabled == true) {
+				newIndex = j;
+				j = listLength;
+			}	
+		}
+	}
+	
+	//Fall back to same if cannot get next
+	if(newIndex == -1) {
+		return currentRemote;
+	} else {
+		return fullRemoteList[newIndex].name;
+	}
+
+};

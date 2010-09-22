@@ -63,4 +63,18 @@ Release 0.2.0:
 Release 0.2.1:
  - Removed python scripts that caused rejection from palm
  
+Release 0.2.2:
+ - Added backend status information (uses backend IP address from settings table)
+ - Added options for vibration and fullscreen on remote scenes
+ - Added gesture remote scene as proof of concept - having problems with look and registering touches and flicks together
+ 
+Release 0.2.3:
+ - Changed switching between remote screens to view menu (top) instead of commandmenu (bottom)
+ - Users can now turn off remote screnes they do not want
+ - Added channel icons to upcoming and cleaned up display text
+ - Cleaned up display on recorded list
+ - Now shows master backend IP on welcome page
+ - Fix bug of taps occuring after flick
+ - Warn against webserver name starting with http or Http
+ 
  
