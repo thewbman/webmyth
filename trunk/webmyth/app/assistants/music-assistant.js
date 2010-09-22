@@ -35,9 +35,14 @@ MusicAssistant.prototype.setup = function() {
 	this.controller.setupWidget(Mojo.Menu.appMenu, WebMyth.appMenuAttr, WebMyth.appMenuModel);
 	
 	//Bottom of remote page command menu widget
-	this.controller.setupWidget( Mojo.Menu.commandMenu, WebMyth.remoteCommandMenuAttr, WebMyth.remoteCommandMenuModel );
-	WebMyth.remoteCommandMenuModel.items[1].toggleCmd = 'go-music'; 
-	this.controller.modelChanged(WebMyth.remoteCommandMenuModel);
+	//this.controller.setupWidget( Mojo.Menu.commandMenu, WebMyth.remoteCommandMenuAttr, WebMyth.remoteCommandMenuModel );
+	//WebMyth.remoteCommandMenuModel.items[1].toggleCmd = 'go-music'; 
+	//this.controller.modelChanged(WebMyth.remoteCommandMenuModel);
+	
+	//View menu widget
+	WebMyth.remoteViewMenuModel.items[0].items[1].label = "Music: " + WebMyth.prefsCookieObject.currentFrontend;  
+	this.controller.setupWidget( Mojo.Menu.viewMenu, WebMyth.remoteViewMenuAttr, WebMyth.remoteViewMenuModel );
+	//this.controller.modelChanged(WebMyth.remoteViewMenuModel);
 
 	
 	
@@ -97,7 +102,7 @@ MusicAssistant.prototype.activate = function(event) {
 	/* put in event handlers here that should only be in effect when this scene is active. For
 	   example, key handlers that are observing the document */
 	   
-	   $('scene-title').innerHTML = 'Remote: '+WebMyth.prefsCookieObject.currentFrontend;
+	   //$('scene-title').innerHTML = 'Remote: '+WebMyth.prefsCookieObject.currentFrontend;
 	   
 	   
 	WebMyth.prefsCookieObject.currentRemoteScene = 'music';

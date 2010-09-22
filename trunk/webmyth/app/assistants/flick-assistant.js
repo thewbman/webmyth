@@ -32,9 +32,14 @@ FlickAssistant.prototype.setup = function() {
 	this.controller.setupWidget(Mojo.Menu.appMenu, WebMyth.appMenuAttr, WebMyth.appMenuModel);
 	
 	//Bottom of remote page command menu widget
-	this.controller.setupWidget( Mojo.Menu.commandMenu, WebMyth.remoteCommandMenuAttr, WebMyth.remoteCommandMenuModel );
-	WebMyth.remoteCommandMenuModel.items[1].toggleCmd = 'go-flick';  
-	this.controller.modelChanged(WebMyth.remoteCommandMenuModel);
+	//this.controller.setupWidget( Mojo.Menu.commandMenu, WebMyth.remoteCommandMenuAttr, WebMyth.remoteCommandMenuModel );
+	//WebMyth.remoteCommandMenuModel.items[1].toggleCmd = 'go-flick';  
+	//this.controller.modelChanged(WebMyth.remoteCommandMenuModel);
+	
+	//View menu widget
+	WebMyth.remoteViewMenuModel.items[0].items[1].label = "Flick: " + WebMyth.prefsCookieObject.currentFrontend; 
+	this.controller.setupWidget( Mojo.Menu.viewMenu, WebMyth.remoteViewMenuAttr, WebMyth.remoteViewMenuModel ); 
+	//this.controller.modelChanged(WebMyth.remoteViewMenuModel);
 	
 	
 	
@@ -59,7 +64,7 @@ FlickAssistant.prototype.setup = function() {
 
 FlickAssistant.prototype.activate = function(event) {
 	
-	$('scene-title').innerHTML = 'Remote: '+WebMyth.prefsCookieObject.currentFrontend;
+	//$('scene-title').innerHTML = 'Remote: '+WebMyth.prefsCookieObject.currentFrontend;
 	
 	WebMyth.prefsCookieObject.currentRemoteScene = 'flick';
 	WebMyth.prefsCookie.put(WebMyth.prefsCookieObject); 
@@ -153,6 +158,8 @@ FlickAssistant.prototype.handleFlick = function(element, event) {
 	default:
 	  Mojo.Controller.errorDialog("no matching command for %$s", name);
 	}
+	
+	Event.stop(event);
   
 };
 

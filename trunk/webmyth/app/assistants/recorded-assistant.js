@@ -547,17 +547,17 @@ RecordedAssistant.prototype.filterListFunction = function(filterString, listWidg
 	listWidget.mojo.setLength(totalSubsetSize);
 	listWidget.mojo.setCount(totalSubsetSize);
 	
-	this.addImages();
+	//this.addImages();
 
 };	
 
 
-
+/*
 RecordedAssistant.prototype.addImages = function() {
 	//And img sources
 	var s, imageUrl = "", imageId = "";
 	var screenshotBaseUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webmythPythonFile+"?op=getPremadeImage&chanid=";
-	/*
+	
 	for (var i = 0; i < this.subset.length; i++) {
 		s = this.subset[i];
 		imageId = 'img-'+s.chanid+'T'+s.starttime;
@@ -568,8 +568,10 @@ RecordedAssistant.prototype.addImages = function() {
 		//Mojo.Log.error("i is " + i + " id is "+imageId+" url is " + imageUrl);
 		//Mojo.Log.error("id is "+"img-"+s.chanid+"T"+s.starttime+" url is " + imageUrl);
 	}
-	*/
-}
+	
+};
+*/
+
 
 RecordedAssistant.prototype.recorderDividerFunction = function(itemModel) {
 	 
@@ -653,11 +655,11 @@ RecordedAssistant.prototype.setMyData = function(propertyValue, model)  {
 	//var modifiedDate = date.toLocaleString().substring(0,15);
 
 	var titleAndSubtitle = '<div class="recorded-title"><div class="palm-info-text title right">'+model.title+'</div></div>';
-	titleAndSubtitle += '<div class="recorded-subtitle"><div class="palm-info-text title right italics">'+model.subtitle+'</div></div>';
+	titleAndSubtitle += '<div class="recorded-subtitle"><div class="palm-info-text right italics">'+model.subtitle+'</div></div>';
 	
 	var timeAndSubtitle = '<div class="recorded-starttime"><div class="palm-info-text title right">'+model.starttime+'</div></div>';
 	//var timeAndSubtitle = '<div class="recorded-starttime"><div class="palm-info-text title right">'+newDate+'</div></div>';
-	timeAndSubtitle += '<div class="recorded-subtitle"><div class="palm-info-text title right italics">'+model.subtitle+'</div></div>';
+	timeAndSubtitle += '<div class="recorded-subtitle"><div class="palm-info-text right italics">'+model.subtitle+'</div></div>';
 	
 	//Setup list items
 	switch(WebMyth.prefsCookieObject.currentRecSort) {

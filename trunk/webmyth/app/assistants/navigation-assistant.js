@@ -35,9 +35,15 @@ NavigationAssistant.prototype.setup = function() {
 	this.controller.setupWidget(Mojo.Menu.appMenu, WebMyth.appMenuAttr, WebMyth.appMenuModel);
 	
 	//Bottom of remote page command menu widget
-	this.controller.setupWidget( Mojo.Menu.commandMenu, WebMyth.remoteCommandMenuAttr, WebMyth.remoteCommandMenuModel );
-	WebMyth.remoteCommandMenuModel.items[1].toggleCmd = 'go-navigation';  //fix this
-	this.controller.modelChanged(WebMyth.remoteCommandMenuModel);
+	//this.controller.setupWidget( Mojo.Menu.commandMenu, WebMyth.remoteCommandMenuAttr, WebMyth.remoteCommandMenuModel );
+	//WebMyth.remoteCommandMenuModel.items[1].toggleCmd = 'go-navigation';  //fix this
+	//this.controller.modelChanged(WebMyth.remoteCommandMenuModel);
+	
+	//View menu widget
+	WebMyth.remoteViewMenuModel.items[0].items[1].label = "Navigation: " + WebMyth.prefsCookieObject.currentFrontend;  
+	this.controller.setupWidget( Mojo.Menu.viewMenu, WebMyth.remoteViewMenuAttr, WebMyth.remoteViewMenuModel );
+	//this.controller.modelChanged(WebMyth.remoteViewMenuModel);
+	
 	
 	//Buttons
 		//navigation
@@ -97,7 +103,7 @@ NavigationAssistant.prototype.activate = function(event) {
 	/* put in event handlers here that should only be in effect when this scene is active. For
 	   example, key handlers that are observing the document */
 	   
-	$('scene-title').innerHTML = 'Remote: '+WebMyth.prefsCookieObject.currentFrontend;
+	//$('scene-title').innerHTML = 'Remote: '+WebMyth.prefsCookieObject.currentFrontend;
 	
 	WebMyth.prefsCookieObject.currentRemoteScene = 'navigation';
 	WebMyth.prefsCookie.put(WebMyth.prefsCookieObject); 
