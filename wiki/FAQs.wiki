@@ -16,7 +16,7 @@ A: First double check you installed the script file is installed on a local web 
 
 A: This might be an issue that the server where the script lives cannot resolve the frontend's system name.  You probably need to add it manually to the server's /etc/hosts file.  The webmyth.py script does not seem to be able to use IP addresses instead of system names.
 
-=== Q: Can I use !WebMyth remotely over the cell network or another WiFi network? ===
+=== Q: Can I use !WebMyth remotely over the cell network or another !WiFi network? ===
 
 A: For the most part, yes.  You will have to know the IP address assigned to you by your internet provider (or setup a domain name that resolves to your IP address).  Then on your router you should forward ports 80 (webserver) and 6544 (MythTV backend XML) to the correct local IP address(es).  If these ports are blocked by your ISP or the netowrk connection you are using you are out of luck.  _Note: Manual entry of the master backend is only supported in release 0.2.4 and higher, so some functions may not work correctly if you have an older version.  Future app versions will be able to remote control frontends directly and then the remote control port (6546) would also need to be forwarded._
 
