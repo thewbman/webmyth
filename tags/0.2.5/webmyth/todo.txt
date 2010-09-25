@@ -1,0 +1,19 @@
+To Do - planned new features and updates:
+//next release 
+ - fix remote preferences when deselecting active screen
+ - warn against dropping all remote scenes
+ - check vibration settings
+ - channel icon on upcoming details scene
+ - comma to storage locations numbers
+ - better web search sites for mobile
+ 
+//Future
+ - new app icons/theme
+ - make guide scene functional and show current data source
+ - add guide details scene
+ - add global shortcuts (meta tap)
+ - notifications (remote)
+ - check if incoming call and pause
+ - add tips scene
+ - add changelog scene (automatic on launch?)
+ - cleanup flick remote scene
