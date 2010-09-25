@@ -62,5 +62,17 @@
     {
         "scenes": "status",
         "source": "app/assistants/status-assistant.js"
+    },
+    {
+        "scenes": "guide",
+        "source": "app/assistants/guide-assistant.js"
+    },
+    {
+        "scenes": "masterRemote",
+        "source": "app/assistants/masterRemote-assistant.js"
+    },
+    {
+        "scenes": "numberpad",
+        "source": "app/assistants/numberpad-assistant.js"
     }
 ]

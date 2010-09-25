@@ -1,23 +1,33 @@
 /* TODO: put your application-specific CSS here */
 
-.buttonClass {
+.buttonClass3 {
 	height: 30px;
 	width: 100px;
 	margin: 5px;
 	padding: 0px;
 	
-	/*
-	border-style: solid;
-	border-color: #000000;
-	border-radius: 10px;
-	
-	background-color: #111111;
-	*/
 	text-align: center;
 	vertical-align: middle;
 	color: white;
 	
 	float: left;
+}
+
+.buttonClass4 {
+	height: 30px;
+	width: 93px;
+	margin: 0px -5px;
+	padding: 0px -5px;
+	
+	text-align: center;
+	vertical-align: middle;
+	color: white;
+	
+	float: left;
+}
+
+.palm-dark .masterRemote .small-button .palm-button-wrapper {
+	color: white;
 }
 
 .italics {
@@ -40,26 +50,67 @@
 
 }
 
-.buttonRow {
+.buttonRow3 {
 	width: 100%;
 	margin: 0 0px 0 0px;
 	height: 50px;
 	min-height: 50px;
 }
 
-.column1 {
+.buttonRow4 {
+	width: 100%;
+	margin: 0 0px 0 0px;
+	height: 30px;
+	min-height: 30px;
+}
+
+.emptybuttonRow20 {
+	width: 100%;
+	margin: 0 0px 0 0px;
+	height: 20px;
+	min-height: 20px;
+}
+
+.emptybuttonRow40 {
+	width: 100%;
+	margin: 0 0px 0 0px;
+	height: 40px;
+	min-height: 40px;
+}
+
+.column1of3 {
 	float: left;
 	width: 33%;
 }
 
-.column2 {
+.column2of3 {
 	float: left;
 	width: 33%;
 }
 
-.column3 {
+.column3of3 {
 	float: left;
 	width: 33%;
+}
+
+.column1of4 {
+	float: left;
+	width: 25%;
+}
+
+.column2of4 {
+	float: left;
+	width: 25%;
+}
+
+.column3of4 {
+	float: left;
+	width: 25%;
+}
+
+.column4of4 {
+	float: left;
+	width: 25%;
 }
 
 .flickNavButton {
@@ -232,8 +283,22 @@
 	padding-bottom: 0px;
 }
 
-.welcome .palm-page-header-wrapper .title.sub {
+.welcome .palm-page-header-wrapper .sub {
+	padding-left: 80px;
 	font-size: 14px;
 	padding-top: 0px;
 	margin-top: 0px;
+	padding-bottom: 5px;
+}
+
+/*
+ * Status scene
+ */
+ 
+.status .scheduled-list .complete-scheduled-item {
+	height: 135px;
+}
+
+.status  .storage-list .complete-storage-item {
+	height: 150px;
 }

@@ -98,7 +98,7 @@ FlickAssistant.prototype.handleTap = function(element, event) {
 	  this.sendTelnetKey("p");
 	  break;
 	case flickVolumeButtonId:
-	  this.sendTelnetKey("\|");
+	  this.sendTelnetKey("f9");
 	  break;
 
 	  

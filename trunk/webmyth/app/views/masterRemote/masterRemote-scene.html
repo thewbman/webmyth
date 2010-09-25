@@ -1,4 +1,4 @@
-<div class="playback">
+<div class="masterRemote">
 <!--
 <div id="header-menu" class="palm-header">
 	<div id="scene-title">Remote</div>
@@ -10,20 +10,22 @@
 
 
 <div class="buttonRow3">
-	<div class="column1of3">
- 		<div id="backButton" x-mojo-element="Button" class="buttonClass3 backButton"></div> 
+ 	<div class="column1of3">
+ 		<div id="volumeDownButton" x-mojo-element="Button" class="buttonClass3 volumeDownButton"></div>
 	</div>
 	<div class="column2of3">
- 		<div class="noButton"></div>
+ 		<div id="muteButton" x-mojo-element="Button" class="buttonClass3 muteButton"></div> 
 	</div>
 	<div class="column3of3">
- 		<div class="noButton"></div>
+ 		<div id="volumeUpButton" x-mojo-element="Button" class="buttonClass3 volumeUpButton"></div>
 	</div>
 </div>
 
+<div class="emptybuttonRow20"></div>
+
 <div class="buttonRow3">
- 	<div class="column1of3">
- 		<div class="noButton"></div>
+	<div class="column1of3">
+ 		<div id="backButton" x-mojo-element="Button" class="buttonClass3 backButton"></div> 
 	</div>
 	<div class="column2of3">
  		<div id="upButton" x-mojo-element="Button" class="buttonClass3 upButton"></div>
@@ -47,13 +49,13 @@
 
 <div class="buttonRow3">
  	<div class="column1of3">
- 		<div class="noButton"></div> 
+ 		<div id="menuButton" x-mojo-element="Button" class="buttonClass3 menuButton"></div> 
 	</div>
 	<div class="column2of3">
  		<div id="downButton" x-mojo-element="Button" class="buttonClass3 downButton"></div>
 	</div>
 	<div class="column3of3">
- 		<div class="noButton"></div>
+ 		<div id="infoButton" x-mojo-element="Button" class="buttonClass3 infoButton"></div>
 	</div>
 </div>
 
@@ -71,15 +73,20 @@
 	</div>
 </div>
 
-<div class="buttonRow3">
- 	<div class="column1of3">
- 		<div id="rewindButton" x-mojo-element="Button" class="buttonClass3 rewindButton"></div>
+<div class="emptybuttonRow40"></div>
+
+<div class="buttonRow4">
+ 	<div class="column1of4">
+ 		<div id="livetvButton" x-mojo-element="Button" class="buttonClass4 livetvButton small-button"></div>
 	</div>
-	<div class="column2of3">
- 		<div id="pauseButton" x-mojo-element="Button" class="buttonClass3 pauseButton"></div>
+	<div class="column2of4">
+ 		<div id="musicButton" x-mojo-element="Button" class="buttonClass4 musicButton small-button"></div>
 	</div>
-	<div class="column3of3">
-		<div id="fastforwardButton" x-mojo-element="Button" class="buttonClass3 fastforwardButton"></div>
+	<div class="column3of4">
+		<div id="videosButton" x-mojo-element="Button" class="buttonClass4 videosButton small-button"></div>
+	</div>
+	<div class="column3of4">
+		<div id="recordedButton" x-mojo-element="Button" class="buttonClass4 recordedButton small-button"></div>
 	</div>
 </div>
 
