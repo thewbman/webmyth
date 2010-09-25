@@ -1,5 +1,5 @@
 To Do - planned new features and updates:
-//release 0.2.5 
+//next release 
  - fix remote preferences when deselecting active screen
  - warn against dropping all remote scenes
  - check vibration settings

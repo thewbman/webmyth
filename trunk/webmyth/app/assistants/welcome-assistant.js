@@ -166,7 +166,9 @@ WelcomeAssistant.prototype.setup = function() {
 	
 		if(WebMyth.remoteCookieObject.length == 4) {		//only 1st 4 remotes
 			WebMyth.remoteCookieObject.push({ "name": "masterRemote", "enabled": true });
+			WebMyth.remoteCookieObject.push({ "name": "numberpad", "enabled": true });
 			WebMyth.remoteCookie.put(WebMyth.remoteCookieObject);
+			
 		} else if(WebMyth.remoteCookieObject.length == 5) {		//only 1st 4 remotes
 			WebMyth.remoteCookieObject.push({ "name": "numberpad", "enabled": true });
 			WebMyth.remoteCookie.put(WebMyth.remoteCookieObject);

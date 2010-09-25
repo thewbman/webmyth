@@ -125,7 +125,7 @@ function defaultCookie() {
 		currentRecSort: 'date-desc',
 		currentFrontend: 'frontend',
 		currentRemotePort: '6546',
-		currentRemoteScene: 'navigation',
+		currentRemoteScene: 'masterRemote',
 		previousScriptVersion: 0,
 		allowRecordedDownloads: false,
 		recordedDownloadsUrl: '',
