@@ -31,7 +31,10 @@ PreferencesAssistant.prototype.setup = function() {
 	//App menu widget
 	this.controller.setupWidget(Mojo.Menu.appMenu, WebMyth.appMenuAttr, WebMyth.appMenuModel);	
 		
+		
 	//Widgets
+	
+	//Server configuration
 	this.webserverTextModel = {
              value: "",
              disabled: false
@@ -39,41 +42,13 @@ PreferencesAssistant.prototype.setup = function() {
 	this.controller.setupWidget("webserverTextFieldId",
         {
             hintText: $L(""),
-            multiline: false,
+            multiline: true,
             enterSubmits: false,
             focus: false
          },
          this.webserverTextModel
     ); 
-	/*
-	this.webserverRemoteFileTextModel = {
-             value: "/cgi-bin/remote.py",
-             disabled: false
-    };
-	this.controller.setupWidget("webserverRemoteFileFieldId",
-        {
-            hintText: $L("/cgi-bin/remote.py"),
-            multiline: false,
-            enterSubmits: false,
-            focus: false
-         },
-         this.webserverRemoteFileTextModel
-    ); 
-	
-	this.webMysqlFileTextModel = {
-             value: "/webmyth-mysql.php",
-             disabled: false
-    };
-	this.controller.setupWidget("webMysqlFileFieldId",
-        {
-            hintText: $L("/webmyth-mysql.php"),
-            multiline: false,
-            enterSubmits: false,
-            focus: false
-         },
-         this.webMysqlFileTextModel
-    ); 
-	*/
+	//Script location
 	this.webmythPythonFileTextModel = {
              value: "/cgi-bin/webmyth.py",
              disabled: false
@@ -87,7 +62,36 @@ PreferencesAssistant.prototype.setup = function() {
          },
          this.webmythPythonFileTextModel
     ); 
+	//Manual master backend
+	this.manualMasterBackendToggleModel = {
+             value: false
+    };
+	this.controller.setupWidget("manualMasterBackendToggleId",
+        {
+			label: $L("Manual Master Backend"),
+            modelProperty: "value"
+         },
+         this.manualMasterBackendToggleModel
+    );
+	this.controller.listen('manualMasterBackendToggleId', Mojo.Event.propertyChange, this.manualMasterBackendChanged.bindAsEventListener(this));
+	//Master backend IP - display or edit
+	this.masterBackendTextModel = {
+             value: "",
+             disabled: true
+    };
+	this.controller.setupWidget("masterBackendTextFieldId",
+        {
+            hintText: $L(""),
+            multiline: true,
+            enterSubmits: false,
+            focus: false
+         },
+         this.masterBackendTextModel
+    ); 
 	
+	
+	
+	//Theme
 	this.themeModel = {
 			value: WebMyth.prefsCookieObject.theme,
             disabled: false
@@ -104,8 +108,34 @@ PreferencesAssistant.prototype.setup = function() {
 		this.themeModel
 	);
 	this.controller.listen('theme', Mojo.Event.propertyChange, this.themeChanged.bindAsEventListener(this));
-	
-	
+	//Channel Icons in upcoming
+	this.upcomingChannelIconsToggleModel = {
+             value: false
+    };
+	this.controller.setupWidget("upcomingChannelIconsToggleId",
+        {
+			label: $L("Show Channel Icons on Upcoming"),
+            modelProperty: "value"
+         },
+         this.upcomingChannelIconsToggleModel
+    ); 
+	//Remote header action
+	this.remoteHeaderActionModel = {
+			value: WebMyth.prefsCookieObject.remoteHeaderAction,
+            disabled: false
+	};
+	this.controller.setupWidget('remoteHeaderAction',
+		{
+			label: $L("Remote Header"),
+			choices:[
+				{label:$L("Pause"),      value:'Pause'},
+				{label:$L("Mute"),         value:'Mute'},
+				{label:$L("Nothing"),         value:'Nothing'}
+			]//,
+			//modelProperty: 'theme'
+		},
+		this.remoteHeaderActionModel
+	);
 	//Remote keys vibrate
 	this.vibrateToggleModel = {
              value: true
@@ -117,7 +147,6 @@ PreferencesAssistant.prototype.setup = function() {
          },
          this.vibrateToggleModel
     ); 
-	
 	//Remote scenes run in fullscreen
 	this.remoteFullscreenToggleModel = {
              value: false
@@ -129,17 +158,18 @@ PreferencesAssistant.prototype.setup = function() {
          },
          this.remoteFullscreenToggleModel
     ); 
-	
-	//Metrix
-	this.metrixToggleModel = {
-             value: true
+	//Remote starts when playback starts
+	this.playJumpRemoteToggleModel = {
+             value: false
     };
-	this.controller.setupWidget("metrixToggleId",
+	this.controller.setupWidget("playJumpRemoteToggleId",
         {
+			label: $L("playJumpRemote"),
             modelProperty: "value"
          },
-         this.metrixToggleModel
+         this.playJumpRemoteToggleModel
     ); 
+	
 	
 	
 	//Remote scene - navigation
@@ -182,9 +212,40 @@ PreferencesAssistant.prototype.setup = function() {
          },
          this.remoteFlickToggleModel
     ); 
+	//Remote scene - master
+	this.remoteMasterToggleModel = {
+             value: true
+    };
+	this.controller.setupWidget("remoteMasterToggleId",
+        {
+            modelProperty: "value"
+         },
+         this.remoteMasterToggleModel
+    ); 
+	//Remote scene - numberpad
+	this.remoteNumberpadToggleModel = {
+             value: true
+    };
+	this.controller.setupWidget("remoteNumberpadToggleId",
+        {
+            modelProperty: "value"
+         },
+         this.remoteNumberpadToggleModel
+    ); 
 	
+
+	//Metrix
+	this.metrixToggleModel = {
+             value: true
+    };
+	this.controller.setupWidget("metrixToggleId",
+        {
+            modelProperty: "value"
+         },
+         this.metrixToggleModel
+    ); 
 	
-	
+	/*
 	//Save button
 	this.controller.setupWidget("saveWebserverButtonId",
          {},
@@ -195,7 +256,7 @@ PreferencesAssistant.prototype.setup = function() {
      );
 	
 	Mojo.Event.listen(this.controller.get("saveWebserverButtonId"),Mojo.Event.tap, this.saveWebserver.bind(this));
-	
+	*/
 };
 
 PreferencesAssistant.prototype.activate = function(event) {
@@ -206,6 +267,10 @@ PreferencesAssistant.prototype.activate = function(event) {
 			//Update webserver address from cookie
 			this.webserverTextModel.value = WebMyth.prefsCookieObject.webserverName;
 			this.controller.modelChanged(this.webserverTextModel);
+			
+			this.masterBackendTextModel.value = WebMyth.prefsCookieObject.masterBackendIp;
+			this.masterBackendTextModel.disabled = !WebMyth.prefsCookieObject.manualMasterBackend;
+			this.controller.modelChanged(this.masterBackendTextModel);
 			
 			
 			//Update filenames on web server if set
@@ -233,15 +298,27 @@ PreferencesAssistant.prototype.activate = function(event) {
 				this.controller.modelChanged(this.webmythPythonFileTextModel);
 			}
 			
+			
 			//Update toggles from cookie
-			this.metrixToggleModel.value = WebMyth.prefsCookieObject.allowMetrix;
-			this.controller.modelChanged(this.metrixToggleModel);
+			this.manualMasterBackendToggleModel.value = WebMyth.prefsCookieObject.manualMasterBackend;
+			this.controller.modelChanged(this.manualMasterBackendToggleModel);
+			
+			this.upcomingChannelIconsToggleModel.value = WebMyth.prefsCookieObject.showUpcomingChannelIcons;
+			this.controller.modelChanged(this.upcomingChannelIconsToggleModel);
 			
 			this.vibrateToggleModel.value = WebMyth.prefsCookieObject.remoteVibrate;
 			this.controller.modelChanged(this.vibrateToggleModel);
 			
 			this.remoteFullscreenToggleModel.value = WebMyth.prefsCookieObject.remoteFullscreen;
 			this.controller.modelChanged(this.remoteFullscreenToggleModel);
+			
+			this.playJumpRemoteToggleModel.value = WebMyth.prefsCookieObject.playJumpRemote;
+			this.controller.modelChanged(this.playJumpRemoteToggleModel);
+			
+			this.metrixToggleModel.value = WebMyth.prefsCookieObject.allowMetrix;
+			this.controller.modelChanged(this.metrixToggleModel);
+			
+			
 			
 		} 
 		
@@ -259,6 +336,9 @@ PreferencesAssistant.prototype.activate = function(event) {
 			
 			this.remoteFlickToggleModel.value = WebMyth.remoteCookieObject[3].enabled;
 			this.controller.modelChanged(this.remoteFlickToggleModel);
+			
+			this.remoteMasterToggleModel.value = WebMyth.remoteCookieObject[4].enabled;
+			this.controller.modelChanged(this.remoteMasterToggleModel);
 		}
 };
 
@@ -270,6 +350,31 @@ PreferencesAssistant.prototype.deactivate = function(event) {
 PreferencesAssistant.prototype.cleanup = function(event) {
 	/* this function should do any cleanup needed before the scene is destroyed as 
 	   a result of being popped off the scene stack */
+};
+
+PreferencesAssistant.prototype.handleCommand = function(event) {
+
+  if(event.type == Mojo.Event.back) {
+		this.saveWebserver();
+  }
+  
+};
+
+
+
+
+PreferencesAssistant.prototype.manualMasterBackendChanged = function(event) {
+	Mojo.Log.error("manual backend settings changed to "+this.manualMasterBackendToggleModel.value);
+	
+	this.masterBackendTextModel.disabled = !this.manualMasterBackendToggleModel.value;
+	/*
+	if(this.manualMasterBackendToggleModel.value) {
+		this.masterBackendToggleModel.value = false
+	} else {
+		this.manualMasterBackendToggleModel.value = true
+	}
+	*/
+	this.controller.modelChanged(this.masterBackendTextModel);
 };
 
 PreferencesAssistant.prototype.themeChanged = function(event) {
@@ -309,13 +414,19 @@ PreferencesAssistant.prototype.saveWebserver = function(event) {
 		}
 	
 		WebMyth.prefsCookieObject.webserverName = this.webserverTextModel.value;
-		//WebMyth.prefsCookieObject.webserverRemoteFile = this.webserverRemoteFileTextModel.value;
-		//WebMyth.prefsCookieObject.webMysqlFile = this.webMysqlFileTextModel.value;
 		WebMyth.prefsCookieObject.webmythPythonFile = this.webmythPythonFileTextModel.value;
-		WebMyth.prefsCookieObject.allowMetrix = this.metrixToggleModel.value;
+		WebMyth.prefsCookieObject.manualMasterBackend = this.manualMasterBackendToggleModel.value;
+		WebMyth.prefsCookieObject.masterBackendIp = this.masterBackendTextModel.value;
+		
+		WebMyth.prefsCookieObject.theme = this.themeModel.value;
+		WebMyth.prefsCookieObject.showUpcomingChannelIcons = this.upcomingChannelIconsToggleModel.value;
+		WebMyth.prefsCookieObject.remoteHeaderAction = this.remoteHeaderActionModel.value;
 		WebMyth.prefsCookieObject.remoteVibrate = this.vibrateToggleModel.value;
 		WebMyth.prefsCookieObject.remoteFullscreen = this.remoteFullscreenToggleModel.value;
-		WebMyth.prefsCookieObject.theme = this.themeModel.value;
+		WebMyth.prefsCookieObject.playJumpRemote = this.playJumpRemoteToggleModel.value;
+		
+		WebMyth.prefsCookieObject.allowMetrix = this.metrixToggleModel.value;
+		
 		WebMyth.prefsCookie.put(WebMyth.prefsCookieObject);
 	
 	
@@ -324,6 +435,9 @@ PreferencesAssistant.prototype.saveWebserver = function(event) {
 		WebMyth.remoteCookieObject[1].enabled = this.remotePlaybackToggleModel.value;
 		WebMyth.remoteCookieObject[2].enabled = this.remoteMusicToggleModel.value;
 		WebMyth.remoteCookieObject[3].enabled = this.remoteFlickToggleModel.value;
+		WebMyth.remoteCookieObject[4].enabled = this.remoteMasterToggleModel.value;
+		WebMyth.remoteCookieObject[5].enabled = this.remoteNumberpadToggleModel.value;
+		
 	
 		WebMyth.remoteCookie.put(WebMyth.remoteCookieObject);
 

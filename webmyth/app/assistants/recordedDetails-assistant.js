@@ -340,11 +340,6 @@ RecordedDetailsAssistant.prototype.playOnHost = function(host) {
 	var cmd = "program "+this.recordedObject.chanid+" "+clean_starttime+" resume";
 	
 	Mojo.Log.info("Command to send is " + cmd);
-/*	
-};
-
-RecordedDetailsAssistant.prototype.sendTelnet = function(cmd){
-*/
 
 	var reply;
 	
@@ -383,4 +378,7 @@ RecordedDetailsAssistant.prototype.sendTelnet = function(cmd){
 	else {
 		$('telnetPlug').SendTelnet(value);
 	}
+	
+	if(WebMyth.prefsCookieObject.playJumpRemote)  Mojo.Controller.stageController.pushScene("hostSelector", true);
+	
 };

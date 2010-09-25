@@ -62,29 +62,12 @@ UpcomingAssistant.prototype.setup = function() {
     };
 	this.controller.setupWidget( "upcomingList" , this.upcomingListAttribs, this.upcomingListModel);
 	
+	
 	//Event listeners
-	//this.controller.listen('recorded-header-menu-button', Mojo.Event.propertyChange, this.recgroupChanged.bindAsEventListener(this));
 	this.controller.listen(this.controller.get( "upcomingList" ), Mojo.Event.listTap, this.goUpcomingDetails.bind(this));
+	this.controller.listen(this.controller.get( "header-menu" ), Mojo.Event.tap, function(){this.controller.sceneScroller.mojo.revealTop();}.bind(this));
 	
-	/*
-	//Update list from mysql script
-	Mojo.Log.info('Starting upcoming data gathering');
 	
-	var requestUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webMysqlFile;
- 
-    try {
-        var request = new Ajax.Request(requestUrl,{
-            method: 'post',
-			parameters: {'op': 'getUpcoming'},
-            evalJSON: 'true',
-            onSuccess: this.readRemoteDbTableSuccess.bind(this),
-            onFailure: this.useLocalDataTable.bind(this)  
-        });
-    }
-    catch(e) {
-        Mojo.Log.error(e);
-    }
-	*/
 	//Update list from webmyth python script
 	Mojo.Log.info('Starting upcoming data gathering');
 	
@@ -353,20 +336,44 @@ UpcomingAssistant.prototype.setMyData = function(propertyValue, model) {
 	
 	//Details text
 	//var upcomingDetailsText = '<div class="upcoming-title"><div class="palm-info-text title truncating-text left">'+model.title+'</div></div>';
-    var upcomingDetailsText = '<div class="upcoming-subtitle"><div class="palm-info-text truncating-text left italics">'+model.subtitle+'</div></div>';
-	upcomingDetailsText += '<div class="upcoming-starttime"><div class="palm-info-text truncating-text left">'+model.starttime+'</div></div>';
+    //var upcomingDetailsText = '<div class="upcoming-subtitle"><div class="palm-info-text truncating-text left italics">'+model.subtitle+'</div></div>';
+	//upcomingDetailsText += '<div class="upcoming-starttime"><div class="palm-info-text truncating-text left">'+model.starttime+'</div></div>';
 	
-	model.myDetailsData = upcomingDetailsText;
+	//model.myDetailsData = upcomingDetailsText;
 	
 	
 	//And img source
 	var channelIconUrl = "http://"+WebMyth.prefsCookieObject.masterBackendIp+":6544/Myth/GetChannelIcon?ChanId=";
 	channelIconUrl += model.chanid;
 	
-	Mojo.Log.error("iconURL is "+channelIconUrl);
+	//Mojo.Log.error("iconURL is "+channelIconUrl);
 	
 	//Mojo.Log.error('url is ' +screenshotUrl);
 	model.myImgSrc = channelIconUrl;
+	
+	
+	
+	var upcomingDetailsText = '<div class="palm-info-text title truncating-text left upcoming-list-title">'+model.title+'</div>';
+	upcomingDetailsText += '<div class="palm-row-wrapper">';
+	
+	if(WebMyth.prefsCookieObject.showUpcomingChannelIcons) upcomingDetailsText += '<div class="left-list-text">';
+	
+	upcomingDetailsText += '<div class="upcoming-subtitle"><div class="palm-info-text truncating-text left italics">'+model.subtitle+'</div></div>';
+	upcomingDetailsText += '<div class="upcoming-starttime"><div class="palm-info-text truncating-text left">'+model.starttime+'</div></div>';
+	
+	
+	if(WebMyth.prefsCookieObject.showUpcomingChannelIcons) {
+		upcomingDetailsText += '</div>';
+		upcomingDetailsText += '<div class="right-list-image">';
+		upcomingDetailsText += '<img id="img-'+model.chanid+'T'+model.starttime+'" class="upcoming-channelicon-small" src="';
+		upcomingDetailsText += 'http://'+WebMyth.prefsCookieObject.masterBackendIp+':6544/Myth/GetChannelIcon?ChanId='+model.chanid+'" />';
+		upcomingDetailsText += '</div>';
+	}
+	
+	upcomingDetailsText += '</div>';
+		
+	model.myData = upcomingDetailsText;
+	
 
 	
 };

@@ -19,15 +19,14 @@
  */
 
 
-function MusicAssistant() {
+function MasterRemoteAssistant() {
 	/* this is the creator function for your scene assistant object. It will be passed all the 
 	   additional parameters (after the scene name) that were passed to pushScene. The reference
 	   to the scene controller (this.controller) has not be established yet, so any initialization
 	   that needs the scene controller should be done in the setup function below. */
-
 }
 
-MusicAssistant.prototype.setup = function() {
+MasterRemoteAssistant.prototype.setup = function() {
 	/* this function is for setup tasks that have to happen when the scene is first created */
 	
 	
@@ -40,7 +39,7 @@ MusicAssistant.prototype.setup = function() {
 	//this.controller.modelChanged(WebMyth.remoteCommandMenuModel);
 	
 	//View menu widget
-	WebMyth.remoteViewMenuModel.items[0].items[1].label = "Music: " + WebMyth.prefsCookieObject.currentFrontend;  
+	WebMyth.remoteViewMenuModel.items[0].items[1].label = "Master: " + WebMyth.prefsCookieObject.currentFrontend;  
 	this.controller.setupWidget( Mojo.Menu.viewMenu, WebMyth.remoteViewMenuAttr, WebMyth.remoteViewMenuModel );
 	//this.controller.modelChanged(WebMyth.remoteViewMenuModel);
 
@@ -48,26 +47,31 @@ MusicAssistant.prototype.setup = function() {
 	
 	//Buttons
 		//navigation
-	//this.controller.setupWidget("backButton", {}, { label : "ESC", disabled: false } );
-	//this.controller.setupWidget("upButton", {}, { label : "Up", disabled: false } );
-	//this.controller.setupWidget("leftButton", {}, { label : "Left", disabled: false } );
-	//this.controller.setupWidget("selectButton", {}, { label : "OK", disabled: false } );
-	//this.controller.setupWidget("rightButton", {}, { label : "Right", disabled: false } );
-	//this.controller.setupWidget("downButton", {}, { label : "Down", disabled: false } );
+	this.controller.setupWidget("backButton", {}, { label : "ESC", disabled: false } );
+	this.controller.setupWidget("upButton", {}, { label : "Up", disabled: false } );
+	this.controller.setupWidget("leftButton", {}, { label : "Left", disabled: false } );
+	this.controller.setupWidget("selectButton", {}, { label : "OK", disabled: false } );
+	this.controller.setupWidget("rightButton", {}, { label : "Right", disabled: false } );
+	this.controller.setupWidget("downButton", {}, { label : "Down", disabled: false } );
 		//general
-	//this.controller.setupWidget("infoButton", {}, { label : "Info", disabled: false } );
-	//this.controller.setupWidget("menuButton", {}, { label : "Menu", disabled: false } );
+	this.controller.setupWidget("infoButton", {}, { label : "Info", disabled: false } );
+	this.controller.setupWidget("menuButton", {}, { label : "Menu", disabled: false } );
 		//playback
 	this.controller.setupWidget("playButton", {}, { label : "Play", disabled: false } );
-	this.controller.setupWidget("pauseButton", {}, { label : "||", disabled: false } );
-	this.controller.setupWidget("fastforwardButton", {}, { label : ">>", disabled: false } );
-	this.controller.setupWidget("rewindButton", {}, { label : "<<", disabled: false } );
+	//this.controller.setupWidget("pauseButton", {}, { label : "||", disabled: false } );
+	//this.controller.setupWidget("fastforwardButton", {}, { label : ">>", disabled: false } );
+	//this.controller.setupWidget("rewindButton", {}, { label : "<<", disabled: false } );
 	this.controller.setupWidget("skipForwardButton", {}, { label : ">|", disabled: false } );
 	this.controller.setupWidget("skipBackButton", {}, { label : "|<", disabled: false } );
 		//volume
 	this.controller.setupWidget("volumeUpButton", {}, { label : "Vol+", disabled: false } );
 	this.controller.setupWidget("volumeDownButton", {}, { label : "Vol-", disabled: false } );
 	this.controller.setupWidget("muteButton", {}, { label : "Mute", disabled: false } );
+		//jump buttons
+	this.controller.setupWidget("livetvButton", {}, { buttonClass:'small-button', label : "LiveTV", disabled: false } );
+	this.controller.setupWidget("musicButton", {}, { buttonClass:'small-button', label : "Music", disabled: false } );
+	this.controller.setupWidget("videosButton", {}, { buttonClass:'small-button', label : "Videos", disabled: false } );
+	this.controller.setupWidget("recordedButton", {}, { buttonClass:'small-button', label : "Record", disabled: false } );
 	
 
 	
@@ -75,14 +79,14 @@ MusicAssistant.prototype.setup = function() {
 	Mojo.Event.listen(this.controller.sceneElement, Mojo.Event.keyup, this.handleKey.bind(this));
 	
 	//Navigation button events
-	//Mojo.Event.listen(this.controller.get("backButton"),Mojo.Event.tap, this.sendCommand.bind(this, this.controller.get("backButton")));
-	//Mojo.Event.listen(this.controller.get("upButton"),Mojo.Event.tap, this.sendCommand.bind(this, this.controller.get("upButton")));
-	//Mojo.Event.listen(this.controller.get("downButton"),Mojo.Event.tap, this.sendCommand.bind(this, this.controller.get("downButton")));
-	//Mojo.Event.listen(this.controller.get("leftButton"),Mojo.Event.tap, this.sendCommand.bind(this, this.controller.get("leftButton")));
-	//Mojo.Event.listen(this.controller.get("rightButton"),Mojo.Event.tap, this.sendCommand.bind(this, this.controller.get("rightButton")));
-	//Mojo.Event.listen(this.controller.get("selectButton"),Mojo.Event.tap, this.sendCommand.bind(this, this.controller.get("selectButton")));
-	//Mojo.Event.listen(this.controller.get("infoButton"),Mojo.Event.tap, this.sendCommand.bind(this, this.controller.get("infoButton")));
-	//Mojo.Event.listen(this.controller.get("menuButton"),Mojo.Event.tap, this.sendCommand.bind(this, this.controller.get("menuButton")));
+	Mojo.Event.listen(this.controller.get("backButton"),Mojo.Event.tap, this.sendCommand.bind(this, this.controller.get("backButton")));
+	Mojo.Event.listen(this.controller.get("upButton"),Mojo.Event.tap, this.sendCommand.bind(this, this.controller.get("upButton")));
+	Mojo.Event.listen(this.controller.get("downButton"),Mojo.Event.tap, this.sendCommand.bind(this, this.controller.get("downButton")));
+	Mojo.Event.listen(this.controller.get("leftButton"),Mojo.Event.tap, this.sendCommand.bind(this, this.controller.get("leftButton")));
+	Mojo.Event.listen(this.controller.get("rightButton"),Mojo.Event.tap, this.sendCommand.bind(this, this.controller.get("rightButton")));
+	Mojo.Event.listen(this.controller.get("selectButton"),Mojo.Event.tap, this.sendCommand.bind(this, this.controller.get("selectButton")));
+	Mojo.Event.listen(this.controller.get("infoButton"),Mojo.Event.tap, this.sendCommand.bind(this, this.controller.get("infoButton")));
+	Mojo.Event.listen(this.controller.get("menuButton"),Mojo.Event.tap, this.sendCommand.bind(this, this.controller.get("menuButton")));
 	
 	//Volume button events
 	Mojo.Event.listen(this.controller.get("volumeUpButton"),Mojo.Event.tap, this.sendCommand.bind(this, this.controller.get("volumeUpButton")));
@@ -91,48 +95,51 @@ MusicAssistant.prototype.setup = function() {
 	
 	//Playback button events
 	Mojo.Event.listen(this.controller.get("playButton"),Mojo.Event.tap, this.sendCommand.bind(this, this.controller.get("playButton")));
-	Mojo.Event.listen(this.controller.get("pauseButton"),Mojo.Event.tap, this.sendCommand.bind(this, this.controller.get("pauseButton")));
-	Mojo.Event.listen(this.controller.get("fastforwardButton"),Mojo.Event.tap, this.sendCommand.bind(this, this.controller.get("fastforwardButton")));
-	Mojo.Event.listen(this.controller.get("rewindButton"),Mojo.Event.tap, this.sendCommand.bind(this, this.controller.get("rewindButton")));
+	//Mojo.Event.listen(this.controller.get("pauseButton"),Mojo.Event.tap, this.sendCommand.bind(this, this.controller.get("pauseButton")));
+	//Mojo.Event.listen(this.controller.get("fastforwardButton"),Mojo.Event.tap, this.sendCommand.bind(this, this.controller.get("fastforwardButton")));
+	//Mojo.Event.listen(this.controller.get("rewindButton"),Mojo.Event.tap, this.sendCommand.bind(this, this.controller.get("rewindButton")));
 	Mojo.Event.listen(this.controller.get("skipForwardButton"),Mojo.Event.tap, this.sendCommand.bind(this, this.controller.get("skipForwardButton")));
 	Mojo.Event.listen(this.controller.get("skipBackButton"),Mojo.Event.tap, this.sendCommand.bind(this, this.controller.get("skipBackButton")));
 
+	//Jump button events
+	Mojo.Event.listen(this.controller.get("livetvButton"),Mojo.Event.tap, this.sendCommand.bind(this, this.controller.get("livetvButton")));
+	Mojo.Event.listen(this.controller.get("musicButton"),Mojo.Event.tap, this.sendCommand.bind(this, this.controller.get("musicButton")));
+	Mojo.Event.listen(this.controller.get("videosButton"),Mojo.Event.tap, this.sendCommand.bind(this, this.controller.get("videosButton")));
+	Mojo.Event.listen(this.controller.get("recordedButton"),Mojo.Event.tap, this.sendCommand.bind(this, this.controller.get("recordedButton")));
+	
 };
 
-MusicAssistant.prototype.activate = function(event) {
+MasterRemoteAssistant.prototype.activate = function(event) {
 	/* put in event handlers here that should only be in effect when this scene is active. For
 	   example, key handlers that are observing the document */
 	   
-	   //$('scene-title').innerHTML = 'Remote: '+WebMyth.prefsCookieObject.currentFrontend;
 	   
 	   
-	WebMyth.prefsCookieObject.currentRemoteScene = 'music';
+	WebMyth.prefsCookieObject.currentRemoteScene = 'masterRemote';
 	WebMyth.prefsCookie.put(WebMyth.prefsCookieObject); 
 	
 	
 	this.controller.enableFullScreenMode(WebMyth.prefsCookieObject.remoteFullscreen);
-	  
 };
 
-MusicAssistant.prototype.deactivate = function(event) {
+MasterRemoteAssistant.prototype.deactivate = function(event) {
 	/* remove any event handlers you added in activate and do any other cleanup that should happen before
 	   this scene is popped or another scene is pushed on top */
 };
 
-MusicAssistant.prototype.cleanup = function(event) {
+MasterRemoteAssistant.prototype.cleanup = function(event) {
 	/* this function should do any cleanup needed before the scene is destroyed as 
 	   a result of being popped off the scene stack */
 };
 
 
-// Send commands to telnet connection
-MusicAssistant.prototype.sendCommand = function(element, event) {
+MasterRemoteAssistant.prototype.sendCommand = function(element, event) {
 
 	var name = element;
 	
 	switch(name)
 	{
-		/*
+		
 	//Navigation commands
 	case backButton:
 	  this.sendTelnetKey("escape");
@@ -158,7 +165,7 @@ MusicAssistant.prototype.sendCommand = function(element, event) {
 	case infoButton:
 	  this.sendTelnetKey("i");
 	  break;
-	  */
+	  
 	//Volume
 	case volumeUpButton:
 	  this.sendTelnetKey("]");
@@ -169,7 +176,9 @@ MusicAssistant.prototype.sendCommand = function(element, event) {
 	case muteButton:
 	  this.sendTelnetKey("f9");
 	  break;
+	  
 	//Playback Commands
+	/*
 	case pauseButton:
 	  this.sendTelnetKey("p");
 	  break;
@@ -179,6 +188,7 @@ MusicAssistant.prototype.sendCommand = function(element, event) {
 	case rewindButton:
 	  this.sendTelnetKey(",");
 	  break;
+	  */
 	case skipForwardButton:
 	  this.sendTelnetKey("z");
 	  break;
@@ -189,6 +199,20 @@ MusicAssistant.prototype.sendCommand = function(element, event) {
 	  this.sendTelnetKey("p");
 	  break;
 	  
+	//Jump commands
+	case livetvButton:
+	  this.sendJumpPoint("livetv");
+	  break;
+	case musicButton:
+	  this.sendJumpPoint("playmusic");
+	  break;
+	case videosButton:
+	  this.sendJumpPoint("mythvideo");
+	  break;
+	case recordedButton:
+	  this.sendJumpPoint("playbackrecordings");
+	  break;
+	  
 	default:
 	  Mojo.Controller.errorDialog("no matching command for %$s", name);
 	}
@@ -196,10 +220,11 @@ MusicAssistant.prototype.sendCommand = function(element, event) {
 };
 
 
-// Send commands to telnet connection
-MusicAssistant.prototype.handleKey = function(event) {
 
-	Mojo.Log.info("MusicAssistant.prototype.handleKey %o", event.originalEvent.keyCode);
+// Send commands to telnet connection
+MasterRemoteAssistant.prototype.handleKey = function(event) {
+
+	Mojo.Log.info("MasterRemoteAssistant.prototype.handleKey %o", event.originalEvent.keyCode);
 	
 	switch(event.originalEvent.keyCode)
 	{
@@ -326,7 +351,7 @@ MusicAssistant.prototype.handleKey = function(event) {
   
 };
 
-MusicAssistant.prototype.sendTelnetKey = function(value, event){
+MasterRemoteAssistant.prototype.sendTelnetKey = function(value, event){
 	//this.sendTelnet("key "+value);
 	
 	this.controller.stageController.parentSceneAssistant(this).sendKey(value); 
@@ -338,9 +363,22 @@ MusicAssistant.prototype.sendTelnetKey = function(value, event){
 	//Mojo.Log.info("Sending command '%s' to host", value);
 };
 
-MusicAssistant.prototype.sendTelnet = function(value, event){
+MasterRemoteAssistant.prototype.sendJumpPoint = function(value, event){
+	//this.sendTelnet("key "+value);
+	
+	this.controller.stageController.parentSceneAssistant(this).sendJump(value); 
+	
+	if(WebMyth.prefsCookieObject.remoteVibrate) {
+		this.controller.stageController.getAppController().playSoundNotification( "vibrate", "" );
+	};
+	
+	//Mojo.Log.info("Sending command '%s' to host", value);
+};
+
+MasterRemoteAssistant.prototype.sendTelnet = function(value, event){
 	//$('telnetPlug').SendTelnet(value);
 	this.controller.stageController.parentSceneAssistant(this).sendTelnet(value); 
 	
 	Mojo.Log.info("Sending command '%s' to host", value);
 };
+

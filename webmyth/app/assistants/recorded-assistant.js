@@ -102,6 +102,7 @@ RecordedAssistant.prototype.setup = function() {
 	//Event listeners
 	//this.controller.listen('recorded-header-menu-button', Mojo.Event.propertyChange, this.recgroupChanged.bindAsEventListener(this));
 	this.controller.listen(this.controller.get( "recordedList" ), Mojo.Event.listTap, this.goRecordedDetails.bind(this));
+	this.controller.listen(this.controller.get( "header-menu" ), Mojo.Event.tap, function(){this.controller.sceneScroller.mojo.revealTop();}.bind(this));
 	//this.controller.listen(this.controller.get( "recordedList" ), Mojo.Event.filter, this.searchFilter.bind(this));
 		
 	
@@ -178,10 +179,12 @@ RecordedAssistant.prototype.handleCommand = function(event) {
       case 'go-sort':
 		//Mojo.Log.error("sorting ..."+mySelection);
 	    //Mojo.Controller.getAppController().showBanner("Sorting not yet working", {source: 'notification'});
+		this.controller.sceneScroller.mojo.revealTop();
 		this.sortChanged(mySelection);
        break;
       case 'go-grou':
 		//Mojo.Log.error("group select ... "+mySelection);
+		this.controller.sceneScroller.mojo.revealTop();
 		this.recgroupChanged(mySelection);
        break;
     }

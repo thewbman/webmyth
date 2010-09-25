@@ -326,3 +326,33 @@ HostSelectorAssistant.prototype.sendKey = function(value){
 		});
 };
 
+
+
+HostSelectorAssistant.prototype.sendJump = function(value){
+		
+		var cmdvalue = encodeURIComponent(value);
+		
+		var requestUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webmythPythonFile;
+		requestUrl += "?op=remote&type=jump";
+		requestUrl += "&host="+WebMyth.prefsCookieObject.currentFrontend;
+		requestUrl += "&cmd="+cmdvalue;
+		//var requestURL="http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webserverRemoteFile+"?host="+this.frontendTextModel.value+"&cmd="+cmd;  
+	
+		var request = new Ajax.Request(requestUrl, {
+			method: 'get',
+			onSuccess: function(transport){
+				reply = transport.responseText;
+				if (reply.substring(0,5) == "ERROR") {
+					Mojo.Log.error("ERROR in response: '%s'", reply.substring(6));
+					Mojo.Controller.getAppController().showBanner(reply, {source: 'notification'});
+				} else {
+					Mojo.Log.info("Success AJAX: '%s'", reply);
+				}
+			},
+			onFailure: function() {
+				Mojo.Log.error("Failed AJAX: '%s'", requestURL);
+				Mojo.Controller.getAppController().showBanner("ERROR - check remote.py scipt", {source: 'notification'});
+			}
+		});
+};
+

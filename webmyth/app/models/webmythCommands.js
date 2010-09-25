@@ -130,9 +130,13 @@ function defaultCookie() {
 		allowRecordedDownloads: false,
 		recordedDownloadsUrl: '',
 		theme: 'palm-dark',
+		remoteHeaderAction: 'Pause',
 		remoteVibrate: false,
 		remoteFullscreen: false,
-		masterBackendIp: ''
+		masterBackendIp: '',
+		manualMasterBackend: false,
+		playJumpRemote: true,
+		showUpcomingChannelIcons: true
 	};
 	
 	return newCookieObject;
@@ -159,6 +163,8 @@ function defaultRemoteCookie() {
 		{ "name": "playback", "enabled": true } ,
 		{ "name": "music", "enabled": true } ,
 		{ "name": "flick", "enabled": true } ,
+		{ "name": "masterRemote", "enabled": true } ,
+		{ "name": "numberpad", "enabled": true } 
 	];
 	
 	return newCookieObject;
@@ -192,8 +198,8 @@ var double_sort_by = function(field1, field2, reverse, primer){
 
    return function(a,b){
 
-       a = a[field1]+a[field2];
-       b = b[field1]+b[field2];
+       a = a[field1]+'aaa'+a[field2];
+       b = b[field1]+'aaa'+b[field2];
 
        if (typeof(primer) != 'undefined'){
            a = primer(a);
@@ -332,6 +338,81 @@ var isoToDate = function(isoDate) {
 	
 	return Number(time);
  
+};
+
+var dateObjectToISO = function(dateObject) { 
+
+	var newDate = dateObject.year;
+	newDate += "-";
+	if(dateObject.month.toString().length == 2) {
+		newDate += dateObject.month.toString();
+	} else {
+		newDate += '0'+dateObject.month.toString();
+	}
+	newDate += "-";
+	if(dateObject.day.toString().length == 2) {
+		newDate += dateObject.day.toString();
+	} else {
+		newDate += '0'+dateObject.day.toString();
+	}
+	newDate += "T";
+	if(dateObject.hour.toString().length == 2) {
+		newDate += dateObject.hour.toString();
+	} else {
+		newDate += '0'+dateObject.hour.toString();
+	}
+	newDate += ":";
+	if(dateObject.minute.toString().length == 2) {
+		newDate += dateObject.minute.toString();
+	} else {
+		newDate += '0'+dateObject.minute.toString();
+	}
+	newDate += ":";
+	if(dateObject.second.toString().length == 2) {
+		newDate += dateObject.second.toString();
+	} else {
+		newDate += '0'+dateObject.second.toString();
+	}
+    
+	return newDate;
+	
+};
+
+
+var dateObjectToDayRange = function(dateObject) { 
+
+	var newDateStart = dateObject.year;
+	newDateStart += "-";
+	if(dateObject.month.toString().length == 2) {
+		newDateStart += dateObject.month.toString();
+	} else {
+		newDateStart += '0'+dateObject.month.toString();
+	}
+	newDateStart += "-";
+	if(dateObject.day.toString().length == 2) {
+		newDateStart += dateObject.day.toString();
+	} else {
+		newDateStart += '0'+dateObject.day.toString();
+	}
+	newDateStart += "T00:00:01";
+	
+	var newDateEnd = dateObject.year;
+	newDateEnd += "-";
+	if(dateObject.month.toString().length == 2) {
+		newDateEnd += dateObject.month.toString();
+	} else {
+		newDateEnd += '0'+dateObject.month.toString();
+	}
+	newDateEnd += "-";
+	if(dateObject.day.toString().length == 2) {
+		newDateEnd += dateObject.day.toString();
+	} else {
+		newDateEnd += '0'+dateObject.day.toString();
+	}
+	newDateEnd += "T23:59:59";
+    
+	return {'StartTime': newDateStart, 'EndTime': newDateEnd};
+	
 };
 
 

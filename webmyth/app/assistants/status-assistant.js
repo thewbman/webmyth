@@ -516,6 +516,11 @@ StatusAssistant.prototype.readStatusSuccess = function(response) {
 	$('generalStatusContent').innerHTML = generalStatusContent;
 	
 	
+	//Stop spinner and hide
+	this.spinnerModel.spinning = false;
+	this.controller.modelChanged(this.spinnerModel, this);
+	$('myScrim').hide()	
+	
 };
 
 
@@ -603,9 +608,9 @@ StatusAssistant.prototype.setJobqueueData = function(propertyValue, model)  {
 			
 	
 	var myDataModel = '<div class="title truncating-text left">'+model.title+'</div>';
-    myDataModel += '<div class="title truncating-text left">'+model.startTime+'</div>';
-    myDataModel += '<div class="title truncating-text right italics">'+jobType+'</div>';
-    myDataModel += '<div class="title truncating-text right italics">'+status+'</div>';
+    myDataModel += '<div class="palm-info-text left">'+model.startTime+'</div>';
+    myDataModel += '<div class="palm-info-text right italics">'+jobType+'</div>';
+    myDataModel += '<div class="palm-info-text right italics">'+status+'</div>';
 	
 	if(model.comments) myDataModel += '<div class="title truncating-text right italics">'+model.comments+'</div>';
 	
@@ -660,8 +665,8 @@ StatusAssistant.prototype.setEncodersData = function(propertyValue, model)  {
     myDataModel += '</div>';
 	
 	if(model.title) {
-		myDataModel += '<div class="title">'+model.title+':'+model.subTitle+'</div>';
-		myDataModel += '<div class="title">Will finish recording at '+model.endTime+'</div>';
+		myDataModel += '<div class="palm-info-text">'+model.title+':'+model.subTitle+'</div>';
+		myDataModel += '<div class="palm-info-text">Will finish recording at '+model.endTime+'</div>';
 	}
 	
 	model.myEncodersData = myDataModel;

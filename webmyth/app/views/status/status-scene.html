@@ -1,3 +1,5 @@
+<div class="status">
+
 <div id="header-menu" class="palm-header">
 	<div id="scene-title" class="truncating-text">Backend Status</div>
 </div>
@@ -30,10 +32,8 @@
 	</tr>
 </table>      
 <div  x-mojo-element="Drawer" id="scheduledDrawer">
-  <div class="palm-list">
-		<div class="palm-row-wrapper">
-			<div x-mojo-element="List" id="scheduledList"></div>
-		</div>
+  <div class="palm-list scheduled-list">
+		<div x-mojo-element="List" id="scheduledList"></div>
   </div>
 </div>
 
@@ -48,7 +48,7 @@
 </table> 
 <div  x-mojo-element="Drawer" id="jobqueueDrawer">
   <div class="palm-list">
-		<div class="palm-row-wrapper">
+		<div class="palm-row-wrapper job-list">
 			<div x-mojo-element="List" id="jobqueueList"></div>
 		</div>
   </div>
@@ -65,7 +65,7 @@
 </table> 
 <div  x-mojo-element="Drawer" id="storageDrawer">
   <div class="palm-list">
-		<div class="palm-row-wrapper">
+		<div class="palm-row-wrapper storage-list">
 			<div x-mojo-element="List" id="storageList"></div>
 		</div>
   </div>
@@ -103,4 +103,20 @@
 	<div id="generalStatusContent"></div>
 	
    </div>
+</div>
+
+
+
+
+
+<div class="palm-scrim" id="myScrim">
+	<div x-mojo-element="Spinner" id="spinner" class="center"></div>
+	<div id="spinner-text">Loading...</div> 
+</div>
+
+
+
+
+
+
 </div>

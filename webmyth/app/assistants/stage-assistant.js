@@ -67,7 +67,7 @@ WebMyth.remoteViewMenuModel = {
 	items: [{
 		items: [
 			{ icon: 'back', command: 'go-remotePrevious'},
-			{ label: "Remote", command: 'do-queryLocation', width: 200 },
+			{ label: "Remote", command: 'do-remoteHeaderAction', width: 200 },
 			{ icon: 'forward', command: 'go-remoteNext'}
 		]
 	}]
@@ -78,7 +78,7 @@ WebMyth.remoteViewMenuModel = {
 //Setup header menu button
 WebMyth.headerMenuButtonModel = {
 	 label: "...",
-	 buttonClass:'small-button',
+	 buttonClass3:'small-button',
      disabled: false, 
 	 command: 'go-headerMenu'
 };
@@ -263,6 +263,17 @@ StageAssistant.prototype.handleCommand = function(event) {
 			var nextRemoteScene = getNextRemote(WebMyth.remoteCookieObject, WebMyth.prefsCookieObject.currentRemoteScene);
 			//Mojo.Log.error("next scene is " + nextRemoteScene);
 			Mojo.Controller.stageController.swapScene(nextRemoteScene);
+	   break;
+	   
+	  case 'do-remoteHeaderAction':
+			switch(WebMyth.prefsCookieObject.remoteHeaderAction) {
+				case 'Pause':
+					currentScene.assistant.sendTelnetKey('p');
+				break;
+				case 'Mute':
+					currentScene.assistant.sendTelnetKey('f9');
+				break;
+			}
 	   break;
 
     }

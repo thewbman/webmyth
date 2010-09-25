@@ -1,3 +1,5 @@
+<div class="preferences">
+
 <div id="header-menu" class="palm-header">
 	<div id="scene-title">Preferences</div>
 </div>
@@ -10,8 +12,8 @@
 	<div class="palm-row first">
 		<div class="palm-row-wrapper textfield-group" x-mojo-focus-highlight="true">
 			<div class="title">                            
-				<div class="label">Server</div>
-				<div x-mojo-element="TextField" id="webserverTextFieldId" class="textFieldClass"></div>
+				<div class="label">Web Server</div>
+				<div x-mojo-element="TextField" id="webserverTextFieldId" class="textFieldClass" style="overflow: hidden; max-height:240px;"></div>
 			</div>
 		</div>
 	</div>
@@ -34,11 +36,27 @@
 		</div>
 	</div>
 -->	
-	<div class="palm-row last">
+	<div class="palm-row">
 		<div class="palm-row-wrapper textfield-group" x-mojo-focus-highlight="true">
 			<div class="title">                            
 				<div class="label">Script</div>
 				<div x-mojo-element="TextField" id="webmythPythonFieldId" class="textFieldClass"></div>
+			</div>
+		</div>
+	</div>
+		
+	<div class="palm-row">
+		<div class="palm-row-wrapper" x-mojo-focus-highlight="true">         
+			<div class="label right">Manual Backend IP</div>
+			<div x-mojo-element="ToggleButton" id="manualMasterBackendToggleId" class="left"></div>
+		</div>
+	</div>
+	
+	<div class="palm-row last">
+		<div class="palm-row-wrapper textfield-group" x-mojo-focus-highlight="true">
+			<div class="title">                            
+				<div class="label">Master Backend</div>
+				<div x-mojo-element="TextField" id="masterBackendTextFieldId" class="textFieldClass"></div>
 			</div>
 		</div>
 	</div>
@@ -50,9 +68,22 @@
 	<div class="palm-group-title" id="preferences-global">General</div>
 	<div class="palm-list">
         
-		<div class="palm-row first"> <!-- x-mojo-tap-highlight="momentary" //-->
+		<div class="palm-row first"> 
 			<div class="palm-row-wrapper">
 				<div id="theme" x-mojo-element="ListSelector"></div>
+            </div>
+        </div>
+		
+		<div class="palm-row">
+			<div class="palm-row-wrapper" x-mojo-focus-highlight="true">         
+				<div x-mojo-element="ToggleButton" id="upcomingChannelIconsToggleId"></div>
+				<div class="title left">Show Channel Icons on Upcoming</div>
+			</div>
+		</div>
+		
+		<div class="palm-row"> 
+			<div class="palm-row-wrapper">
+				<div id="remoteHeaderAction" x-mojo-element="ListSelector"></div>
             </div>
         </div>
 		
@@ -63,10 +94,17 @@
 			</div>
 		</div>
 		
-		<div class="palm-row last">
+		<div class="palm-row">
 			<div class="palm-row-wrapper" x-mojo-focus-highlight="true">         
 				<div x-mojo-element="ToggleButton" id="remoteFullscreenToggleId"></div>
 				<div class="title left">Remote Fullscreen</div>
+			</div>
+		</div>
+		
+		<div class="palm-row last">
+			<div class="palm-row-wrapper" x-mojo-focus-highlight="true">         
+				<div x-mojo-element="ToggleButton" id="playJumpRemoteToggleId"></div>
+				<div class="title left">Start Remote After Starting Playback</div>
 			</div>
 		</div>
 	
@@ -101,10 +139,24 @@
 			</div>
 		</div>
 		
-		<div class="palm-row last">
+		<div class="palm-row">
 			<div class="palm-row-wrapper" x-mojo-focus-highlight="true">         
 				<div x-mojo-element="ToggleButton" id="remoteFlickToggleId"></div>
 				<div class="title left">Flick</div>
+			</div>
+		</div>
+		
+		<div class="palm-row">
+			<div class="palm-row-wrapper" x-mojo-focus-highlight="true">         
+				<div x-mojo-element="ToggleButton" id="remoteMasterToggleId"></div>
+				<div class="title left">Master</div>
+			</div>
+		</div>
+		
+		<div class="palm-row last">
+			<div class="palm-row-wrapper" x-mojo-focus-highlight="true">         
+				<div x-mojo-element="ToggleButton" id="remoteNumberpadToggleId"></div>
+				<div class="title left">Numbers</div>
 			</div>
 		</div>
 	
@@ -132,6 +184,10 @@
   </div>
 </div>
 
+<!--
 <div class="palm-row last">
 	<div x-mojo-element="Button" id="saveWebserverButtonId"></div>
+</div>
+-->
+
 </div>

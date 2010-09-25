@@ -53,6 +53,7 @@ WelcomeAssistant.prototype.setup = function() {
      );
 	Mojo.Event.listen(this.controller.get("goRecordedButtonId"),Mojo.Event.tap, this.goRecorded.bind(this));
 	
+	
 	//View upcoming button
 	this.controller.setupWidget("goUpcomingButtonId",
          {},
@@ -63,8 +64,19 @@ WelcomeAssistant.prototype.setup = function() {
      );
 	Mojo.Event.listen(this.controller.get("goUpcomingButtonId"),Mojo.Event.tap, this.goUpcoming.bind(this));
 	
+	/*
+	//View guide button
+	this.controller.setupWidget("goGuideButtonId",
+         {},
+         {
+             label : "Program Guide",
+             disabled: false
+         }
+     );
+	Mojo.Event.listen(this.controller.get("goGuideButtonId"),Mojo.Event.tap, this.goGuide.bind(this));
+	*/
 	
-	//View upcoming button
+	//View status button
 	this.controller.setupWidget("goStatusButtonId",
          {},
          {
@@ -101,6 +113,10 @@ WelcomeAssistant.prototype.setup = function() {
 		if (WebMyth.prefsCookieObject.remoteVibrate == null) WebMyth.prefsCookieObject.remoteVibrate = defaultCookie().remoteVibrate;
 		if (WebMyth.prefsCookieObject.remoteFullscreen == null) WebMyth.prefsCookieObject.remoteFullscreen = defaultCookie().remoteFullscreen;
 		if (WebMyth.prefsCookieObject.masterBackendIp == null) WebMyth.prefsCookieObject.masterBackendIp = defaultCookie().masterBackendIp;
+		if (WebMyth.prefsCookieObject.manualMasterBackend == null) WebMyth.prefsCookieObject.manualMasterBackend = defaultCookie().manualMasterBackend;
+		if (WebMyth.prefsCookieObject.remoteHeaderAction == null) WebMyth.prefsCookieObject.remoteHeaderAction = defaultCookie().remoteHeaderAction;
+		if (WebMyth.prefsCookieObject.playJumpRemote == null) WebMyth.prefsCookieObject.playJumpRemote = defaultCookie().playJumpRemote;
+		if (WebMyth.prefsCookieObject.showUpcomingChannelIcons == null) WebMyth.prefsCookieObject.showUpcomingChannelIcons = defaultCookie().showUpcomingChannelIcons;
 		
 		//Check if scripts need an upgrade message
 		if (WebMyth.prefsCookieObject.previousScriptVersion == null) {
@@ -147,39 +163,48 @@ WelcomeAssistant.prototype.setup = function() {
 	
 	//Remote scenes cookie
 	if (WebMyth.remoteCookieObject) {		//cookie exist
-		//do nothing?
+	
+		if(WebMyth.remoteCookieObject.length == 4) {		//only 1st 4 remotes
+			WebMyth.remoteCookieObject.push({ "name": "masterRemote", "enabled": true });
+			WebMyth.remoteCookie.put(WebMyth.remoteCookieObject);
+		} else if(WebMyth.remoteCookieObject.length == 5) {		//only 1st 4 remotes
+			WebMyth.remoteCookieObject.push({ "name": "numberpad", "enabled": true });
+			WebMyth.remoteCookie.put(WebMyth.remoteCookieObject);
+		}
 	} else {
 		WebMyth.remoteCookieObject = defaultRemoteCookie();
 		WebMyth.remoteCookie.put(WebMyth.remoteCookieObject);
 	}
 	
 	
-	//Get backend IP
-	//Mojo.Log.info('Getting MasterBackendIP');
-	
-	var requestUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webmythPythonFile;
-	requestUrl += "?op=getSetting";
-	requestUrl += "&setting=MasterServerIP";
-	
-    try {
-        var request = new Ajax.Request(requestUrl,{
-            method: 'get',
-            onSuccess: this.readSettingSuccess.bind(this),
-            onFailure: this.readSettingFail.bind(this)  
-        });
-    }
-    catch(e) {
-        Mojo.Log.error(e);
-    }
-	
-	
 };
 
 WelcomeAssistant.prototype.activate = function(event) {
-	/* put in event handlers here that should only be in effect when this scene is active. For
-	   example, key handlers that are observing the document */
-	   
-	   //Mojo.Log.error("remote cookie is %j", WebMyth.remoteCookieObject);
+	//asdf
+	
+	$('masterIpAddress-title').innerHTML = WebMyth.prefsCookieObject.masterBackendIp;
+	
+		
+	//Get backend IP
+	//Mojo.Log.info('Getting MasterBackendIP');
+	if((WebMyth.prefsCookieObject.manualMasterBackend == null)||(WebMyth.prefsCookieObject.manualMasterBackend == false)) {
+		var requestUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webmythPythonFile;
+		requestUrl += "?op=getSetting";
+		requestUrl += "&setting=MasterServerIP";
+	
+		try {
+			var request = new Ajax.Request(requestUrl,{
+				method: 'get',
+				onSuccess: this.readSettingSuccess.bind(this),
+				onFailure: this.readSettingFail.bind(this)  
+			});
+		}
+		catch(e) {
+			Mojo.Log.error(e);
+		}
+	} else {
+		$('masterIpAddress-title').innerHTML = WebMyth.prefsCookieObject.masterBackendIp;
+	}
 };
 
 WelcomeAssistant.prototype.deactivate = function(event) {
@@ -215,6 +240,11 @@ WelcomeAssistant.prototype.goRecorded = function(event) {
 WelcomeAssistant.prototype.goUpcoming = function(event) {
 	//Start upcoming scene
 	Mojo.Controller.stageController.pushScene("upcoming");
+};
+
+WelcomeAssistant.prototype.goGuide = function(event) {
+	//Start upcoming scene
+	Mojo.Controller.stageController.pushScene("guide");
 };
 
 WelcomeAssistant.prototype.goStatus = function(event) {
