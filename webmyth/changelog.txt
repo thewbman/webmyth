@@ -80,9 +80,11 @@ Release 0.2.3:
 Release 0.2.4:
  - Removed save button to save preferences (just swipe back)
  - Some formatting change to status
- - Add Guide scene
  - Can manually set master IP address
  - Defaults to start remoet screne after starting recording, can disable
  - Add 'master' and 'numbers' scene
- - Added loading overlay scrim to status scene
+ - Added loading overlay scrim to status 
+
+Release 0.2.5:
+ - Fix bug in not able to save preferences on first run
  
