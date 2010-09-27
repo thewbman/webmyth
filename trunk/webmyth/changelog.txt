@@ -88,3 +88,12 @@ Release 0.2.4:
 Release 0.2.5:
  - Fix bug in not able to save preferences on first run
  
+Release 0.2.6:
+ - Added Guide scene that can list by channel or time
+ - Add option to email developer directly under help
+ - Check for deselecting current remote scene in preferences
+ - Fixed bug that made 'numbers' remote scene always become enabled in the preferences scene
+ 
+Release 0.2.7:
+ - 
+ 

@@ -64,7 +64,7 @@ WelcomeAssistant.prototype.setup = function() {
      );
 	Mojo.Event.listen(this.controller.get("goUpcomingButtonId"),Mojo.Event.tap, this.goUpcoming.bind(this));
 	
-	/*
+	
 	//View guide button
 	this.controller.setupWidget("goGuideButtonId",
          {},
@@ -74,7 +74,7 @@ WelcomeAssistant.prototype.setup = function() {
          }
      );
 	Mojo.Event.listen(this.controller.get("goGuideButtonId"),Mojo.Event.tap, this.goGuide.bind(this));
-	*/
+	
 	
 	//View status button
 	this.controller.setupWidget("goStatusButtonId",
@@ -309,7 +309,7 @@ WelcomeAssistant.prototype.alertScriptUpdate = function(oldversion) {
 			message:  script_message, 
 			choices: [
                     {label: "OK", value: false},
-					{label: "Email this", value: true}
+					{label: "Email Instructions", value: true}
 					],
 			allowHTMLMessage: true
 		});

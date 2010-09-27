@@ -23,7 +23,8 @@ function GuideAssistant() {
 
 	this.layoutStyle = "time";
 	this.channid, this.chanNum;
-	this.timeISO;
+	this.timeObject, this.timeISO;
+	this.timeJS = new Date();
 	this.day, this.dayRange;
 	
 	this.currentTimeObject = {};
@@ -45,7 +46,7 @@ GuideAssistant.prototype.setup = function() {
 		spinning: true
 	}; 
 	this.controller.setupWidget('spinner', this.spinnerAttr, this.spinnerModel);
-
+	
 	
 	//App menu widget
 	this.controller.setupWidget(Mojo.Menu.appMenu, WebMyth.appMenuAttr, WebMyth.appMenuModel);
@@ -58,7 +59,7 @@ GuideAssistant.prototype.setup = function() {
 		items: [{
 			items: [
 				{ icon: 'back', command: 'do-guidePrevious'},
-				{ label: "Program Guide", width: 200, command: 'do-revealTop' },
+				{ label: "Now Airing", width: 200, command: 'do-revealTop' },
 				{ icon: 'forward', command: 'do-guideNext'}
 			]
 		}]
@@ -69,7 +70,7 @@ GuideAssistant.prototype.setup = function() {
 	// Menu grouping at bottom of scene
     this.cmdMenuModel = { label: $L('Guide Menu'), items: [
 		{},
-        { toggleCmd: 'do-selectTime', items: [{label: $L('Time'), command:'do-selectTime'},{label: $L('Channel'), command: 'do-selectChannel', submenu:'channel-menu'}]},
+        { toggleCmd: 'do-now', items: [{label: $L('Now'), command:'do-now'},{label: $L('Time'), command:'do-selectTime'},{label: $L('Channel'), command: 'do-selectChannel', submenu:'channel-menu'}]},
 		{}]
 	};
 	this.channelMenuModel = { label: $L('Channel'), items: [] };
@@ -82,11 +83,11 @@ GuideAssistant.prototype.setup = function() {
 	this.guideListAttribs = {
 		itemTemplate: "guide/guideListItem",
 		//listTemplate: "guide/guideListTemplate",
-		//dividerTemplate: "guide/guideDivider",
+		dividerTemplate: "guide/guideDivider",
 		swipeToDelete: false,
-		filterFunction: this.filterListFunction.bind(this)//,
-		//dividerFunction: this.guideDividerFunction.bind(this),
-		//formatters:{myData: this.setMyData.bind(this)}
+		filterFunction: this.filterListFunction.bind(this),
+		dividerFunction: this.guideDividerFunction.bind(this),
+		formatters:{myData: this.setMyData.bind(this)}
 	};
     this.guideListModel = {            
         //items: this.resultList,
@@ -102,7 +103,12 @@ GuideAssistant.prototype.setup = function() {
 		method:"getSystemTime",
 		parameters:{},
 		onSuccess: function(response) {
+		
+			//Mojo.Log.info("time serivce reponse is %j", response);
+			//Mojo.Log.info("time serivce localtime is %j", response.localtime);
+		
 			this.currentTimeObject = response.localtime;
+			this.timeObject = this.currentTimeObject;
 			this.currentTimeISO = dateObjectToISO(this.currentTimeObject); 
 			this.currentDayRange = dateObjectToDayRange(this.currentTimeObject);
 			this.day = this.currentTimeObject.year+"-"+this.currentTimeObject.month+"-"+this.currentTimeObject.day;
@@ -123,6 +129,8 @@ GuideAssistant.prototype.setup = function() {
 	
 	//Update list from backend XML
 	//this.getGuideData();
+	
+	
 	
 };
 
@@ -147,39 +155,116 @@ GuideAssistant.prototype.handleCommand = function(event) {
 			case 'do-guidePrevious':
 				//adsf
 				Mojo.Log.error("selected guide previous");
+				
+				if(this.layoutStyle == 'channel') {
+				
+					//Restart spinner and show
+					this.spinnerModel.spinning = true;
+					this.controller.modelChanged(this.spinnerModel, this);
+					$('myScrim').show()
+				
+					//Offset day -1
+					this.timeObject = dateObjectSubtractOneDay(this.timeObject);
+					this.dayRange = dateObjectToDayRange(this.timeObject);
+					this.day = this.timeObject.year+"-"+this.timeObject.month+"-"+this.timeObject.day;
+					
+					//Update header label
+					this.guideViewMenuModel.items[0].items[1].label = this.day;
+					this.controller.modelChanged(this.guideViewMenuModel);
+				
+					//Update data
+					this.controller.sceneScroller.mojo.revealTop();
+					this.filterListFunction(' ', this.controller.get('guideList'), 0, this.resultList.length);
+					this.getGuideData();
+					
+				} else {
+					Mojo.Controller.getAppController().showBanner("More features coming soon", {source: 'notification'});
+				}
+				
 			  break;
 			case 'do-guideNext':
 				//adsf
 				Mojo.Log.error("selected guide next");
+				
+				if(this.layoutStyle == 'channel') {
+				
+					//Restart spinner and show
+					this.spinnerModel.spinning = true;
+					this.controller.modelChanged(this.spinnerModel, this);
+					$('myScrim').show()
+				
+					//Offset day +1
+					this.timeObject = dateObjectAddOneDay(this.timeObject);
+					this.dayRange = dateObjectToDayRange(this.timeObject);
+					this.day = this.timeObject.year+"-"+this.timeObject.month+"-"+this.timeObject.day;
+					
+					//Update header label
+					this.guideViewMenuModel.items[0].items[1].label = this.day;
+					this.controller.modelChanged(this.guideViewMenuModel);
+				
+					//Update data
+					this.controller.sceneScroller.mojo.revealTop();
+					this.filterListFunction(' ', this.controller.get('guideList'), 0, this.resultList.length);
+					this.getGuideData();
+					
+				} else {
+					Mojo.Controller.getAppController().showBanner("More features coming soon", {source: 'notification'});
+				}
+				
 			  break;
 			case 'do-revealTop':
 				//adsf
 				this.controller.sceneScroller.mojo.revealTop();
 			  break;
-			case 'do-selectTime':
+			case 'do-now':
 				//adsf
-				Mojo.Log.info("selected time");
+				Mojo.Log.info("selected now");
+				
+				
+				//Restart spinner and show
+				this.spinnerModel.spinning = true;
+				this.controller.modelChanged(this.spinnerModel, this);
+				$('myScrim').show();
+				
+				this.timeJS = new Date();
+				this.timeObject = dateJSToObject(this.timeJS);
+				this.timeISO = dateJSToISO(this.timeJS);
+				this.dayRange = dateObjectToDayRange(this.timeObject);
+				this.day = this.timeObject.year+"-"+this.timeObject.month+"-"+this.timeObject.day;
+
 				
 				//Update command menu
-				this.cmdMenuModel.items[1].toggleCmd = 'do-selectTime';
-				this.cmdMenuModel.items[1].items[1].label = 'Channel';
+				this.cmdMenuModel.items[1].toggleCmd = 'do-now';
+				this.cmdMenuModel.items[1].items[2].label = 'Channel';
 				this.controller.modelChanged(this.cmdMenuModel);
-				
+							
 				//Update header label
-				this.guideViewMenuModel.items[0].items[1].label = this.timeISO;
+				this.guideViewMenuModel.items[0].items[1].label = "Now Airing";
 				this.controller.modelChanged(this.guideViewMenuModel);
-				
+							
 				//Add popup selector later
 				this.layoutStyle = 'time';
 				this.controller.sceneScroller.mojo.revealTop();
 				this.filterListFunction(' ', this.controller.get('guideList'), 0, this.resultList.length);
 				this.getGuideData();
+								
+			  break;
+			case 'do-selectTime':
+				//adsf
+				Mojo.Log.info("selected time");
+				this.timePicker();
 					
 			  break;
 			default:
 				if(event.command.substring(0,10) == 'go-channel') {
 					//User tapped channel button
 					
+					//Restart spinner and show
+					this.spinnerModel.spinning = true;
+					this.controller.modelChanged(this.spinnerModel, this);
+					$('myScrim').show()
+					
+					//Decode channel selection
 					var chanString = event.command.substring(13);  //gets rid of 'go-channel___
 					Mojo.Log.info("selected channel list: "+chanString);
 					this.channid = chanString.substring(0, chanString.search('---'));
@@ -191,7 +276,7 @@ GuideAssistant.prototype.handleCommand = function(event) {
 					
 					//Update channel command menu label
 					this.cmdMenuModel.items[1].toggleCmd = 'do-selectChannel';
-					this.cmdMenuModel.items[1].items[1].label = 'Channel: '+this.chanNum;
+					this.cmdMenuModel.items[1].items[2].label = 'Channel: '+this.chanNum;
 					this.controller.modelChanged(this.cmdMenuModel);
 					
 					//Update header label
@@ -224,7 +309,7 @@ GuideAssistant.prototype.handleCommand = function(event) {
 GuideAssistant.prototype.filterListFunction = function(filterString, listWidget, offset, count) {
 	 
 	//Filtering function
-	
+	Mojo.Log.info("Filter string is "+filterString);
 	
 	var totalSubsetSize = 0;
  
@@ -253,8 +338,6 @@ GuideAssistant.prototype.filterListFunction = function(filterString, listWidget,
 		}
 	}
 	else {
-
-		Mojo.Log.info("No filter string");
 
 		var len = this.resultList.length;
  
@@ -291,17 +374,66 @@ GuideAssistant.prototype.filterListFunction = function(filterString, listWidget,
 
 
 GuideAssistant.prototype.goGuideDetails = function(event) {
-	//
+	Mojo.Controller.getAppController().showBanner("More features coming soon", {source: 'notification'});
 };
 
 
 GuideAssistant.prototype.guideDividerFunction = function(itemModel) {
-	itemModel.startTime;
+	
+	var divider = "Unknown";
+	
+	if(itemModel.endTime < this.currentTimeISO) {
+		divider = "In the Past";
+	} else if(itemModel.startTime < this.currentTimeISO) {
+		divider = "Now Airing";
+	} else {
+		divider = "Upcoming";
+	}
+	
+	return divider;
 };
 
 
 GuideAssistant.prototype.setMyData = function(propertyValue, model) {
-	//
+	
+	var guideDetailsText = '';
+	
+	if(model.recStatus == '-10') {
+		guideDetailsText += '<div class="palm-row multi-line guide-list-item recordingStatus'+model.recStatus+'>';
+		guideDetailsText += '<div class="palm-row-wrapper guide-list-item multi-line"><div class="palm-row guide-list-item">';
+	} else {
+		guideDetailsText += '<div class="palm-row guide-list-item-extended recordingStatus'+model.recStatus+'>';
+		guideDetailsText += '<div class="palm-row-wrapper guide-list-item-extended multi-line"><div class="palm-row guide-list-item-extended">';
+	}
+	
+	
+	if(WebMyth.prefsCookieObject.showUpcomingChannelIcons) {
+		guideDetailsText += '<div class="guide-left-list-image">';
+		guideDetailsText += '<img class="guide-channelicon-small" src="';
+		guideDetailsText += 'http://'+WebMyth.prefsCookieObject.masterBackendIp+':6544/Myth/GetChannelIcon?ChanId='+model.chanId+'" />';
+		guideDetailsText += '<div class="title truncating-text">'+model.chanNum+'</div>';
+		guideDetailsText += '</div>';
+	} else {
+		guideDetailsText += '<div class="guide-left-list-image">';
+		guideDetailsText += '<div class="title truncating-text chanNum-no-icon">'+model.chanNum+'</div>';
+		guideDetailsText += '</div>';
+	}
+	
+	guideDetailsText += '<div class="guide-right-list-text">';
+	guideDetailsText += '<div class="title truncating-text left guide-list-title">'+model.title+'</div>';
+	//guideDetailsText += '<div class="palm-info-text left">Start:&nbsp '+model.startTimeSpace+'<br>End:&nbsp &nbsp '+model.endTimeSpace+'</div>';
+	guideDetailsText += '<div class="palm-info-text left">Start: '+model.startTimeSpace+'</div>';
+	guideDetailsText += '<div class="palm-info-text truncating-text">'+model.channelName+'</div>';
+	guideDetailsText += '</div>';
+	
+	
+	if(model.recStatus == '-10') {
+		guideDetailsText += '</div></div></div>';
+	} else {
+		guideDetailsText += '<div class="title guide-recStatusText">'+model.recStatusText+'</div></div></div></div>';
+	}
+		
+	model.myData = guideDetailsText;
 };
 
 
@@ -347,8 +479,10 @@ GuideAssistant.prototype.getGuideData = function() {
 };
 
 
-GuideAssistant.prototype.readStatusFail = function(response) {
+GuideAssistant.prototype.readStatusFail = function() {
 	Mojo.Log.error("Failed to get guide information");	
+	Mojo.Controller.errorDialog("Failed to get guide information");
+
 };
 
 GuideAssistant.prototype.readStatusSuccess = function(response) {
@@ -362,6 +496,7 @@ GuideAssistant.prototype.readStatusSuccess = function(response) {
 	var topNode, topNodesCount, topSingleNode, programGuideNode, programGuideSingleNode;
 	var singleChannelNode, singleChannelChildNode, singleChannelJson;
 	var singleProgramNode, singleProgramNode, singleProgramJson;
+	var singleProgramChildNode;
 	var StartTime, EndTime, StartChanId, EndChanId, NumOfChannels, Count, AsOf, Version, ProtoVer;
 	
 	var s = {};
@@ -415,13 +550,13 @@ GuideAssistant.prototype.readStatusSuccess = function(response) {
 						singleChannelNode = programGuideSingleNode;
 						singleChannelJson = {
 							label: singleChannelNode.getAttributeNode("chanNum").nodeValue+": "+singleChannelNode.getAttributeNode("channelName").nodeValue,
-							command: "go-channel___"+singleChannelNode.getAttributeNode("chanId").nodeValue+"---"+singleChannelNode.getAttributeNode("chanNum").nodeValue
+							command: "go-channel___"+singleChannelNode.getAttributeNode("chanId").nodeValue+"---"+singleChannelNode.getAttributeNode("chanNum").nodeValue,
+							"chanNumInt": parseInt(singleChannelNode.getAttributeNode("chanNum").nodeValue)
 						}	
 						this.channelList.push(singleChannelJson);
 						
 						for(var k = 0; k < singleChannelNode.childNodes.length; k++) {
 							singleChannelChildNode = singleChannelNode.childNodes[k];
-							//Mojo.Log.error("node name is "+singleChannelChildNode.nodeName);
 							if(singleChannelChildNode.nodeName == 'Program') {
 								singleProgramJson = {
 									"channelName": singleChannelNode.getAttributeNode("channelName").nodeValue, 
@@ -435,21 +570,34 @@ GuideAssistant.prototype.readStatusSuccess = function(response) {
 									"catType": singleChannelChildNode.getAttributeNode("catType").nodeValue, 
 									"repeat": singleChannelChildNode.getAttributeNode("repeat").nodeValue, 
 									"endTime": singleChannelChildNode.getAttributeNode("endTime").nodeValue, 
-									"startTime": singleChannelChildNode.getAttributeNode("startTime").nodeValue
+									"startTime": singleChannelChildNode.getAttributeNode("startTime").nodeValue,
+									"startTimeSpace": singleChannelChildNode.getAttributeNode("startTime").nodeValue.replace("T"," "),
+									"endTimeSpace": singleChannelChildNode.getAttributeNode("endTime").nodeValue.replace("T"," "),
+									"recStatus": "-10"
 								}
 								if(singleProgramJson.chanNumInt == NaN) singleProgramJson.chanNumInt = 0;
+								
+								for(var l = 0; l < singleChannelChildNode.childNodes.length; l++) {
+									singleProgramChildNode = singleChannelChildNode.childNodes[l];
+									if(singleProgramChildNode.nodeName == "Recording") {
+										singleProgramJson.recStatus = singleProgramChildNode.getAttributeNode("recStatus").nodeValue;
+									}
+								}
+								
+								singleProgramJson.recStatusText = recStatusDecode(singleProgramJson.recStatus);
+								
 								this.resultList.push(singleProgramJson);
 								//Mojo.Log.error("program json is %j", singleProgramJson);
 							}
 						}
 					}
 				}
-				//Mojo.Log.error('done parsing ProgramGuide');
+				Mojo.Log.info('done parsing ProgramGuide');
 				//Mojo.Log.error("full json is %j", this.resultList);
 				//Mojo.Log.error("channels json is %j", this.channelList);
 				if(this.channelMenuModel.items.length == 0) {
 					this.channelList.sort(sort_by('chanNumInt', false));
-					Mojo.Log.error("didn't find any channels - adding now");
+					Mojo.Log.info("Didn't find any channels - adding now");
 					Object.extend(this.channelMenuModel.items,this.channelList);
 					
 					this.controller.modelChanged(this.channelMenuModel);
@@ -489,7 +637,7 @@ GuideAssistant.prototype.sortChanged = function() {
 		  break;
 		default :
 			//Mojo.Log.error("layout style is unknpwn");
-			this.resultList.sort(sort_by('startTime', false));
+			this.resultList.sort(sort_by('chanNumInt', false));
 		  break;
 	}
 	
@@ -497,3 +645,110 @@ GuideAssistant.prototype.sortChanged = function() {
 	this.filterListFunction('', listWidget, 0, this.resultList.length);
 	   
 };
+
+GuideAssistant.prototype.timePicker = function() {
+
+	
+	this.controller.showDialog({
+		template: 'dialogs/dateAndTimePicker',
+		assistant: new DateAndTimePickerAssistant(this, this.timeObject, this.timePickerCallback.bind(this))
+	});
+	
+};
+
+
+GuideAssistant.prototype.timePickerCallback = function(value) {
+
+
+	//Restart spinner and show
+	this.spinnerModel.spinning = true;
+	this.controller.modelChanged(this.spinnerModel, this);
+	$('myScrim').show()
+
+
+	//Mojo.Log.error("callback is %j", value);
+	//this.timeObject = dateJSToObject(value);
+	this.timeJS = value;
+	this.timeObject = dateJSToObject(value);
+	this.timeISO = dateJSToISO(value);
+	this.dayRange = dateObjectToDayRange(this.timeObject);
+	this.day = this.timeObject.year+"-"+this.timeObject.month+"-"+this.timeObject.day;
+	
+	Mojo.Log.error("callback JS it "+this.timeJS);
+	Mojo.Log.error("callback ISO is "+this.timeISO);
+	Mojo.Log.error("callback object is %j", this.timeObject);
+	
+
+	
+	//Update command menu
+	this.cmdMenuModel.items[1].toggleCmd = 'do-selectTime';
+	this.cmdMenuModel.items[1].items[2].label = 'Channel';
+	this.controller.modelChanged(this.cmdMenuModel);
+				
+	//Update header label
+	this.guideViewMenuModel.items[0].items[1].label = this.timeISO.replace("T", " ").substring(0,16);
+	this.controller.modelChanged(this.guideViewMenuModel);
+				
+	//Add popup selector later
+	this.layoutStyle = 'time';
+	this.controller.sceneScroller.mojo.revealTop();
+	this.filterListFunction(' ', this.controller.get('guideList'), 0, this.resultList.length);
+	this.getGuideData();
+	
+};
+
+
+/*
+	Small controller class used for the date and time picker.
+*/
+var DateAndTimePickerAssistant = Class.create({
+	
+	initialize: function(sceneAssistant, timeObject2, callbackFunc) {
+		this.sceneAssistant = sceneAssistant;
+		this.controller = sceneAssistant.controller;
+		
+		this.timeObject2 = timeObject2;
+		this.callbackFunc = callbackFunc;
+	},
+	
+	setup : function(widget) {
+	
+		this.widget = widget;
+		
+		Mojo.Log.error("time object 2 is %j", this.timeObject2);
+		
+		this.newTime = new Date(this.timeObject2.year, (this.timeObject2.month-1), this.timeObject2.day, this.timeObject2.hour, this.timeObject2.minute, this.timeObject2.second);
+		Mojo.Log.error("time is %j", this.newTime);
+		
+		this.controller.setupWidget("datepickerid",
+        this.dateAttributes = {
+             modelProperty: 'time' 
+        },
+        this.dateModel = {
+            time: this.newTime
+        }
+		); 
+		this.controller.setupWidget("timepickerid",
+        this.timeAttributes = {
+             modelProperty: 'time' 
+        },
+        this.timeModel = {
+            time: this.newTime
+        }
+		); 
+		
+		Mojo.Event.listen(this.controller.get('goDate_button'),Mojo.Event.tap,this.okButton.bind(this));
+
+		
+	},
+	
+	okButton: function() {
+	
+		this.callbackFunc(this.newTime);
+
+		this.widget.mojo.close();
+	}
+	
+	
+});
+

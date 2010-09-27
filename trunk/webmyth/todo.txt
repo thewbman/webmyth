@@ -1,7 +1,5 @@
 To Do - planned new features and updates:
 //next release 
- - fix remote preferences when deselecting active screen
- - warn against dropping all remote scenes
  - check vibration settings
  - channel icon on upcoming details scene
  - comma to storage locations numbers
@@ -17,3 +15,5 @@ To Do - planned new features and updates:
  - add tips scene
  - add changelog scene (automatic on launch?)
  - cleanup flick remote scene
+ - shake to reload status, guide, etc ?
+ - back key on gesture scene

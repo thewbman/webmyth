@@ -378,6 +378,62 @@ var dateObjectToISO = function(dateObject) {
 	
 };
 
+var dateJSToISO = function(dateJS) { 
+
+	var newDate = dateJS.getFullYear();
+	newDate += "-";
+	
+	var month = dateJS.getMonth() + 1;
+	
+	if(month.toString().length == 2) {
+		newDate += month.toString();
+	} else {
+		newDate += '0'+month.toString();
+	}
+	newDate += "-";
+	if(dateJS.getDate().toString().length == 2) {
+		newDate += dateJS.getDate().toString();
+	} else {
+		newDate += '0'+dateJS.getDate().toString();
+	}
+	newDate += "T";
+	if(dateJS.getHours().toString().length == 2) {
+		newDate += dateJS.getHours().toString();
+	} else {
+		newDate += '0'+dateJS.getHours().toString();
+	}
+	newDate += ":";
+	if(dateJS.getMinutes().toString().length == 2) {
+		newDate += dateJS.getMinutes().toString();
+	} else {
+		newDate += '0'+dateJS.getMinutes().toString();
+	}
+	newDate += ":";
+	if(dateJS.getSeconds().toString().length == 2) {
+		newDate += dateJS.getSeconds().toString();
+	} else {
+		newDate += '0'+dateJS.getSeconds().toString();
+	}
+    
+	return newDate;
+	
+};
+
+var dateJSToObject = function(dateJS) { 
+
+	var newDate = {
+		"year": dateJS.getFullYear(),
+		"month": dateJS.getMonth() + 1,
+		"day": dateJS.getDate(),
+		"hour": dateJS.getHours(),
+		"minute": dateJS.getMinutes(),
+		"second": dateJS.getSeconds()
+	}
+    
+	return newDate;
+	
+};
+
 
 var dateObjectToDayRange = function(dateObject) { 
 
@@ -412,6 +468,156 @@ var dateObjectToDayRange = function(dateObject) {
 	newDateEnd += "T23:59:59";
     
 	return {'StartTime': newDateStart, 'EndTime': newDateEnd};
+	
+};
+
+
+var dateObjectAddOneDay = function(dateObject) { 
+
+	var newDate = dateObject;
+	newDate.day++;
+	
+	switch(newDate.month) {
+		case 1:		//january
+			if(newDate.day == 32) {
+				newDate.day = 1;
+				newDate.month = 2;
+			} 
+			break;
+		case 2:		//feb
+			if(newDate.day == 29) {
+				newDate.day = 1;
+				newDate.month = 3;
+			} 
+			break;
+		case 3:		//mar
+			if(newDate.day == 32) {
+				newDate.day = 1;
+				newDate.month = 4;
+			} 
+			break;
+		case 4:		//apr
+			if(newDate.day == 31) {
+				newDate.day = 1;
+				newDate.month = 5;
+			} 
+			break;
+		case 5:		//may
+			if(newDate.day == 32) {
+				newDate.day = 1;
+				newDate.month = 6;
+			} 
+			break;
+		case 6:		//june
+			if(newDate.day == 31) {
+				newDate.day = 1;
+				newDate.month = 7;
+			} 
+			break;
+		case 7:		//jul
+			if(newDate.day == 32) {
+				newDate.day = 1;
+				newDate.month = 8;
+			} 
+			break;
+		case 8:		//aug
+			if(newDate.day == 32) {
+				newDate.day = 1;
+				newDate.month = 9;
+			} 
+			break;
+		case 9:		//sep
+			if(newDate.day == 31) {
+				newDate.day = 1;
+				newDate.month = 10;
+			} 
+			break;
+		case 10:		//oct
+			if(newDate.day == 32) {
+				newDate.day = 1;
+				newDate.month = 11;
+			} 
+			break;
+		case 11:		//nov
+			if(newDate.day == 31) {
+				newDate.day = 1;
+				newDate.month = 12;
+			} 
+			break;
+		case 12:		//dec
+			if(newDate.day == 32) {
+				newDate.day = 1;
+				newDate.month = 1;
+				newDate.year++;
+			} 
+			break;
+	}
+    
+	return newDate;
+	
+};
+
+
+var dateObjectSubtractOneDay = function(dateObject) { 
+
+	var newDate = dateObject;
+	newDate.day--;
+	
+	if(newDate.day == 0) {
+		switch(newDate.month) {
+			case 1:		//january
+				newDate.day = 31;
+				newDate.month = 12;
+				newDate.year--;
+			break;
+			case 2:		//feb
+				newDate.day = 31;
+				newDate.month = 1;
+			break;
+			case 3:		//mar
+				newDate.day = 28;
+				newDate.month = 2;
+			break;
+			case 4:		//apr
+				newDate.day = 31;
+				newDate.month = 3;
+			break;
+			case 5:		//may
+				newDate.day = 30;
+				newDate.month = 4;
+			break;
+			case 6:		//june
+				newDate.day = 31;
+				newDate.month = 5;
+			break;
+			case 7:		//jul
+				newDate.day = 30;
+				newDate.month = 6;
+			break;
+			case 8:		//aug
+				newDate.day = 31;
+				newDate.month = 7;
+			break;
+			case 9:		//sep
+				newDate.day = 30;
+				newDate.month = 8;
+			break;
+			case 10:		//oct
+				newDate.day = 31;
+				newDate.month = 9;
+			break;
+			case 11:		//nov
+				newDate.day = 30;
+				newDate.month = 10;
+			break;
+			case 12:		//dec
+				newDate.day = 31;
+				newDate.month = 11;
+			break;
+		}
+	}
+		
+	return newDate;
 	
 };
 
@@ -524,4 +730,80 @@ var getNextRemote = function(fullRemoteList, currentRemote) {
 		return fullRemoteList[newIndex].name;
 	}
 
+};
+
+
+var recStatusDecode = function(recStatusInt) { 
+
+	var newStatusText = "";
+	
+		switch(parseInt(recStatusInt)) {
+			case -8:		
+				newStatusText = "Tuner Busy";
+			break;
+			case -7:		
+				newStatusText = "Low Disk Space";
+			break;
+			case -6:		
+				newStatusText = "Cancelled";
+			break;
+			case -5:		
+				newStatusText = "Deleted";
+			break;
+			case -4:		
+				newStatusText = "Aborted";
+			break;
+			case -3:		
+				newStatusText = "Recorded";
+			break;
+			case -2:		
+				newStatusText = "Recording";
+			break;
+			case -1:		
+				newStatusText = "Will Record";
+			break;
+			case 0:		
+				newStatusText = "Unknown";
+			break;
+			case 1:		
+				newStatusText = "Don't Record";
+			break;
+			case 2:		
+				newStatusText = "Previous Recording";
+			break;
+			case 3:		
+				newStatusText = "Current Recording";
+			break;
+			case 4:		
+				newStatusText = "Marked Don't Record";
+			break;
+			case 5:		
+				newStatusText = "Earlier Showing";
+			break;
+			case 6:		
+				newStatusText = "Not Listed";
+			break;
+			case 7:		
+				newStatusText = "Conflict";
+			break;
+			case 8:		
+				newStatusText = "Later Showing";
+			break;
+			case 9:		
+				newStatusText = "Repeat";
+			break;
+			case 10:		
+				newStatusText = "Inactive";
+			break;
+			case 11:		
+				newStatusText = "Never Record";
+			break;
+			
+			default:
+				newStatusText = "No matching recording rule";
+			break;
+		}	
+		
+	return newStatusText;
+	
 };
