@@ -339,6 +339,9 @@ PreferencesAssistant.prototype.activate = function(event) {
 			
 			this.remoteMasterToggleModel.value = WebMyth.remoteCookieObject[4].enabled;
 			this.controller.modelChanged(this.remoteMasterToggleModel);
+			
+			this.remoteNumberpadToggleModel.value = WebMyth.remoteCookieObject[5].enabled;
+			this.controller.modelChanged(this.remoteNumberpadToggleModel);
 		}
 };
 
@@ -355,7 +358,8 @@ PreferencesAssistant.prototype.cleanup = function(event) {
 PreferencesAssistant.prototype.handleCommand = function(event) {
 
   if(event.type == Mojo.Event.back) {
-		this.saveWebserver();
+		this.checkSettings();
+		Event.stop(event);
   }
   
 };
@@ -381,7 +385,11 @@ PreferencesAssistant.prototype.themeChanged = function(event) {
 	this.controller.document.body.className = event.value;
 };
 
-PreferencesAssistant.prototype.saveWebserver = function(event) {
+PreferencesAssistant.prototype.checkSettings = function() {
+	
+	Mojo.Log.error("starting check of settings");
+	
+	var saveOK = true, remoteError = false, currentRemoteScene = "";
 	
 	if((this.webserverTextModel.value.substring(0,4) == 'http') || (this.webserverTextModel.value.substring(0,4) == 'Http')) {
 		
@@ -395,7 +403,63 @@ PreferencesAssistant.prototype.saveWebserver = function(event) {
                 allowHTMLMessage: true
             });
 		
+		saveOK = false;
 	} else {
+
+	Mojo.Log.error("now checking remote scene");
+	
+	switch(WebMyth.prefsCookieObject.currentRemoteScene) {
+		case 'navigation':
+			if(this.remoteNavigationToggleModel.value == false) remoteError = true;
+			currentRemoteScene = "Navigation";
+		break;
+		case 'playback':
+			if(this.remotePlaybackToggleModel.value == false) remoteError = true;
+			currentRemoteScene = "Playback";
+		break;
+		case 'music':
+			if(this.remoteMusicToggleModel.value == false) remoteError = true;
+			currentRemoteScene = "Music";
+		break;
+		case 'flick':
+			if(this.remoteFlickToggleModel.value == false) remoteError = true;
+			currentRemoteScene = "Flick";
+		break;
+		case 'masterRemote':
+			if(this.remoteMasterToggleModel.value == false) remoteError = true;
+			currentRemoteScene = "Master";
+		break;
+		case 'numberpad':
+			if(this.remoteNumberpadToggleModel.value == false) remoteError = true;
+			currentRemoteScene = "Numbers";
+		break;
+		
+		default:
+			Mojo.Log.error("current remote scene is: "+WebMyth.prefsCookieObject.currentRemoteScene);
+		break;
+	
+	}
+	
+	Mojo.Log.error("remote error is "+remoteError+" and current remote scene is: "+WebMyth.prefsCookieObject.currentRemoteScene);
+	
+	if(remoteError) {
+		
+        this.controller.showAlertDialog({
+                onChoose: function(value) {},
+				title: "WebMyth - v" + Mojo.Controller.appInfo.version,
+                message: "You cannot disable the current remote scene ("+currentRemoteScene+").",
+                choices: [
+					{label: "OK", value: false}
+					],
+                allowHTMLMessage: true
+            });
+			
+		saveOK = false;
+			
+	} else {
+	
+	if(saveOK) {
+
 		Mojo.Log.info("New webserverName is %s", this.webserverTextModel.value);
 		//Mojo.Log.info("New remote file is %s", this.webserverRemoteFileTextModel.value);
 		//Mojo.Log.info("New mysql file is %s", this.webMysqlFileTextModel.value);
@@ -443,6 +507,10 @@ PreferencesAssistant.prototype.saveWebserver = function(event) {
 
 		Mojo.Controller.stageController.popScene();
 	
+	}
+	
+	}
+
 	}
 	
 };

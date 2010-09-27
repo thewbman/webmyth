@@ -120,7 +120,7 @@ WebMyth.helpEmailText += "needs to be in executable as cgi-bin on your local web
 WebMyth.helpEmailText += "The script has some database settings that you need to manually set.  You can find the correct values for your system by looking at /etc/mythtv/mysql.txt on your frontend or backend machine.<hr/>";
 WebMyth.helpEmailText += "The file needs to be accesible to this device without any authentication.<hr/>";
 WebMyth.helpEmailText += "Please report any issues you find with the system on the 'issues' tab of the homepage.  ";
-WebMyth.helpEmailText += "Or you can email the developer directly at <a href=mailto:thewbman+webmyth@gmail.com>thewbman@gmail.com</a>.";
+WebMyth.helpEmailText += "Or you can email the developer directly at <a href=mailto:webmyth.help@gmail.com>webmyth.help@gmail.com</a>.";
 
 
 StageAssistant.prototype.setup = function() {
@@ -190,7 +190,7 @@ StageAssistant.prototype.handleCommand = function(event) {
 			//helpAlert();
 	
 			currentScene.showAlertDialog({
-				onChoose: function(value) {if (value==true) {
+				onChoose: function(value) {if (value=="instructions") {
 					//Mojo.Log.error("appPath:" + Mojo.appPath);
 					this.controller.serviceRequest(
 						"palm://com.palm.applicationManager", {
@@ -204,13 +204,31 @@ StageAssistant.prototype.handleCommand = function(event) {
 							}
 						}
 					);
+					} else if (value=="developer") {
+					this.controller.serviceRequest(
+						"palm://com.palm.applicationManager", {
+							method: 'open',
+							parameters: {
+								id: "com.palm.app.email",
+								params: {
+									summary: "Help with WebMyth v"+ Mojo.Controller.appInfo.version,
+									recipients: [{
+										type:"email",
+										value:"webmyth.help@gmail.com",
+										contactDisplay:"WebMyth Developer"
+									}]
+								}
+							}
+						}
+					);
 					}
 				},
 				title: "WebMyth - v" + Mojo.Controller.appInfo.version,
 				message:  WebMyth.helpMessage, 
 				choices: [
-                    {label: "OK", value: false},
-					{label: "Email this", value: true}
+                    {label: "OK", value: "ok"},
+					{label: "Email Instructions", value: "instructions"},
+					{label: "Contact Developer", value: "developer"}
 					],
 				allowHTMLMessage: true
 			});	

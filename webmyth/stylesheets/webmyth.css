@@ -199,6 +199,44 @@
 	height: 100px
 }
 
+.guide-list-item {
+	height: 100px
+}
+
+.guide-list-item-extended {
+	height: 135px
+}
+
+.guide-recStatusText {
+	padding: 120px 5px 0px 5px;
+}
+
+.chanNum-no-icon {
+	padding: 40px 0px 0px 0px;
+	height: 45px;
+	text-align: center;
+}
+
+.guide-left-list-image {
+	height: 100px;
+	width: 23%;
+	float: left;
+	text-align: center;
+}
+
+.guide-right-list-text {
+	height: 100px;
+	width: 77%;
+	float: right;
+}
+
+.guide-channelicon-small {
+	padding: 10px 5px 0px 10px;
+	width: 60px;
+	height: 45px;
+	border: 0px; 
+}
+
 .upcoming-list-item {
 	height: 100px
 }
@@ -302,3 +340,15 @@
 .status  .storage-list .complete-storage-item {
 	height: 150px;
 }
+
+
+
+
+.palm-dark .dateAndTimePicker  .palm-row {
+	color: #000;
+}
+
+.palm-dark .dateAndTimePicker  .mv-value {
+	color: #000;
+}
+
