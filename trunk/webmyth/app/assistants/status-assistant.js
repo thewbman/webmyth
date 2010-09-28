@@ -421,9 +421,9 @@ StatusAssistant.prototype.readStatusSuccess = function(response) {
 			singleStorageJson = { 
 									"dir" : singleStorageNode.getAttributeNode("dir").nodeValue,
 									"id" : singleStorageNode.getAttributeNode("id").nodeValue,
-									"free" : singleStorageNode.getAttributeNode("free").nodeValue,
-									"total" : singleStorageNode.getAttributeNode("total").nodeValue,
-									"used" : singleStorageNode.getAttributeNode("used").nodeValue
+									"free" : Mojo.Format.formatNumber(parseInt(singleStorageNode.getAttributeNode("free").nodeValue)),
+									"total" : Mojo.Format.formatNumber(parseInt(singleStorageNode.getAttributeNode("total").nodeValue)),
+									"used" : Mojo.Format.formatNumber(parseInt(singleStorageNode.getAttributeNode("used").nodeValue))
 								};
 			//Mojo.Log.info("Added storage group %j to list", singleStorageJson);
 			this.storageList.push(singleStorageJson);

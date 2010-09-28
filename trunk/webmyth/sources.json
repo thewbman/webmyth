@@ -74,5 +74,9 @@
     {
         "scenes": "numberpad",
         "source": "app/assistants/numberpad-assistant.js"
+    },
+    {
+        "scenes": "guideDetails",
+        "source": "app/assistants/guideDetails-assistant.js"
     }
 ]

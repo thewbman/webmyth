@@ -95,5 +95,11 @@ Release 0.2.6:
  - Fixed bug that made 'numbers' remote scene always become enabled in the preferences scene
  
 Release 0.2.7:
- - 
+ - Added channel icon to upcoming details scene
+ - Mobile versions of google and IMDB searches
+ - Improve guide navigation
+ - Can jump to live tv from guide listings
+ - Added commas to sizes of storage locations on status scene
+ 
+Releaes 0.2.8:
  

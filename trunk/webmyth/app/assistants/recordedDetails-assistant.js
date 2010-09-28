@@ -190,7 +190,7 @@ RecordedDetailsAssistant.prototype.openWeb = function(website) {
 		url = "http://www.themoviedb.org/search/movies?search[text]="+this.recordedObject.title;
 	  break;
 	case 'IMDB':
-		url = "http://www.imdb.com/find?s=all&q="+this.recordedObject.title;
+		url = "http://m.imdb.com/find?s=all&q="+this.recordedObject.title;
 	  break;
 	case 'TheTVDB':
 		url = "http://www.thetvdb.com/?string="+this.recordedObject.title+"&searchseriesid=&tab=listseries&function=Search";
@@ -199,7 +199,7 @@ RecordedDetailsAssistant.prototype.openWeb = function(website) {
 		url = "http://www.tv.com/search.php?type=11&stype=all&qs="+this.recordedObject.title;
 	  break;
 	case 'Google':
-		url = "http://www.google.com/search?q="+this.recordedObject.title;
+		url = "http://www.google.com/m/search?client=ms-palm-webOS&channel=iss&q="+this.upcomingObject.title;
 	  break;
   };
   

@@ -58,9 +58,9 @@ GuideAssistant.prototype.setup = function() {
 		visible: true,
 		items: [{
 			items: [
-				{ icon: 'back', command: 'do-guidePrevious'},
-				{ label: "Now Airing", width: 200, command: 'do-revealTop' },
-				{ icon: 'forward', command: 'do-guideNext'}
+				{},
+				{ label: "Now Airing", width: 320, command: 'do-revealTop' },
+				{}
 			]
 		}]
 	}; 
@@ -168,14 +168,7 @@ GuideAssistant.prototype.handleCommand = function(event) {
 					this.dayRange = dateObjectToDayRange(this.timeObject);
 					this.day = this.timeObject.year+"-"+this.timeObject.month+"-"+this.timeObject.day;
 					
-					//Update header label
-					this.guideViewMenuModel.items[0].items[1].label = this.day;
-					this.controller.modelChanged(this.guideViewMenuModel);
-				
-					//Update data
-					this.controller.sceneScroller.mojo.revealTop();
-					this.filterListFunction(' ', this.controller.get('guideList'), 0, this.resultList.length);
-					this.getGuideData();
+					this.selectedChannel();
 					
 				} else {
 					Mojo.Controller.getAppController().showBanner("More features coming soon", {source: 'notification'});
@@ -198,14 +191,7 @@ GuideAssistant.prototype.handleCommand = function(event) {
 					this.dayRange = dateObjectToDayRange(this.timeObject);
 					this.day = this.timeObject.year+"-"+this.timeObject.month+"-"+this.timeObject.day;
 					
-					//Update header label
-					this.guideViewMenuModel.items[0].items[1].label = this.day;
-					this.controller.modelChanged(this.guideViewMenuModel);
-				
-					//Update data
-					this.controller.sceneScroller.mojo.revealTop();
-					this.filterListFunction(' ', this.controller.get('guideList'), 0, this.resultList.length);
-					this.getGuideData();
+					this.selectedChannel();
 					
 				} else {
 					Mojo.Controller.getAppController().showBanner("More features coming soon", {source: 'notification'});
@@ -226,27 +212,7 @@ GuideAssistant.prototype.handleCommand = function(event) {
 				this.controller.modelChanged(this.spinnerModel, this);
 				$('myScrim').show();
 				
-				this.timeJS = new Date();
-				this.timeObject = dateJSToObject(this.timeJS);
-				this.timeISO = dateJSToISO(this.timeJS);
-				this.dayRange = dateObjectToDayRange(this.timeObject);
-				this.day = this.timeObject.year+"-"+this.timeObject.month+"-"+this.timeObject.day;
-
-				
-				//Update command menu
-				this.cmdMenuModel.items[1].toggleCmd = 'do-now';
-				this.cmdMenuModel.items[1].items[2].label = 'Channel';
-				this.controller.modelChanged(this.cmdMenuModel);
-							
-				//Update header label
-				this.guideViewMenuModel.items[0].items[1].label = "Now Airing";
-				this.controller.modelChanged(this.guideViewMenuModel);
-							
-				//Add popup selector later
-				this.layoutStyle = 'time';
-				this.controller.sceneScroller.mojo.revealTop();
-				this.filterListFunction(' ', this.controller.get('guideList'), 0, this.resultList.length);
-				this.getGuideData();
+				this.selectedNow();
 								
 			  break;
 			case 'do-selectTime':
@@ -272,22 +238,7 @@ GuideAssistant.prototype.handleCommand = function(event) {
 					//Mojo.Log.info("channid is %s",this.channid);
 					//Mojo.Log.info("chanNum is %s",this.chanNum);
 					
-					this.layoutStyle = 'channel';
-					
-					//Update channel command menu label
-					this.cmdMenuModel.items[1].toggleCmd = 'do-selectChannel';
-					this.cmdMenuModel.items[1].items[2].label = 'Channel: '+this.chanNum;
-					this.controller.modelChanged(this.cmdMenuModel);
-					
-					//Update header label
-					this.guideViewMenuModel.items[0].items[1].label = this.day;
-					this.controller.modelChanged(this.guideViewMenuModel);
-					
-					//Request and show data
-					this.controller.sceneScroller.mojo.revealTop();
-					this.filterListFunction(' ', this.controller.get('guideList'), 0, this.resultList.length);
-					this.getGuideData();
-					
+					this.selectedChannel();
 					
 					break;
 				}
@@ -374,7 +325,347 @@ GuideAssistant.prototype.filterListFunction = function(filterString, listWidget,
 
 
 GuideAssistant.prototype.goGuideDetails = function(event) {
-	Mojo.Controller.getAppController().showBanner("More features coming soon", {source: 'notification'});
+	
+	this.newChannid = event.item.chanId;
+	this.newChanNum = event.item.chanNum;
+	this.newStartTime = event.item.startTime.substring(0,16)+":59";
+	
+	var nowDate = new Date();
+	var popupItems = [];
+	
+	if(((event.item.startTime) <  dateJSToISO (nowDate)) && ((event.item.endTime) >  dateJSToISO(nowDate))) {
+		popupItems = [
+			{label: 'Play on '+WebMyth.prefsCookieObject.currentFrontend, command: 'do-playNow'},
+			{label: 'Details', command: 'do-pickDetails'},
+			{label: 'Guide: Channel '+this.newChanNum, command: 'do-pickChannel'},
+			{label: 'Guide: '+event.item.startTime.replace("T"," ").substring(0,16), command: 'do-pickTime'}
+		]
+	} else {
+		popupItems = [
+			{label: 'Details', command: 'do-pickDetails'},
+			{label: 'Guide: Channel '+this.newChanNum, command: 'do-pickChannel'},
+			{label: 'Guide: '+event.item.startTime.replace("T"," ").substring(0,16), command: 'do-pickTime'}
+		]
+	}
+	
+	
+	
+	this.popupIndex = event.index;
+    this.controller.popupSubmenu({
+      onChoose: this.popupHandler.bind(this),
+      placeNear: event.target,
+      items: popupItems
+    });
+  
+
+};
+
+GuideAssistant.prototype.popupHandler = function(event) {
+	
+	
+	switch(event) {
+		case 'do-playNow':
+			Mojo.Log.error("playing on livetv");
+			
+			this.channid = this.newChannid;
+			this.chanNum = this.newChanNum;
+			
+			this.checkLocation();
+			
+		break;
+		case 'do-pickDetails':
+			Mojo.Log.error("showing details scene");
+			
+			var detailsObject = trimGuideByChanidStarttime(this.resultList, this.newChannid, this.newStartTime)
+
+			Mojo.Log.info("Selected object is: '%j'", detailsObject);
+			
+			//Open guideDetails communication scene
+			Mojo.Controller.stageController.pushScene("guideDetails", detailsObject);
+			
+		break;
+		case 'do-pickChannel':
+			//Mojo.Log.error("showing channel list"+this.newChannid+this.newChanNum);
+			
+			//Restart spinner and show
+			this.spinnerModel.spinning = true;
+			this.controller.modelChanged(this.spinnerModel, this);
+			$('myScrim').show()
+			
+			this.channid = this.newChannid;
+			this.chanNum = this.newChanNum;
+			
+			this.selectedChannel();
+			
+		break;
+		case 'do-pickTime':
+			Mojo.Log.error("showing time list");
+			
+			//Restart spinner and show
+			this.spinnerModel.spinning = true;
+			this.controller.modelChanged(this.spinnerModel, this);
+			$('myScrim').show()
+
+			this.timeJS = new Date(isoToJS(this.newStartTime));
+			Mojo.Log.error("time JS is %j",this.timeJS);
+			this.timeISO = this.newStartTime;
+			Mojo.Log.error("timeISO is %j",this.timeISO);
+			this.timeObject = dateJSToObject(this.timeJS);
+			Mojo.Log.error("time object is %j",this.timeObject);
+			this.dayRange = dateObjectToDayRange(this.timeObject);
+			this.day = this.timeObject.year+"-"+this.timeObject.month+"-"+this.timeObject.day;
+			
+			this.selectedTime();
+					
+			
+		break;
+		default:
+			Mojo.Log.error("event,newChan is %j",event);
+		break;
+	}
+  
+};
+
+
+GuideAssistant.prototype.jumpLiveTV = function() {
+	//Attempting to play livetv - have to start livetv then change channel
+	Mojo.Log.info("Attempting to play "+this.channid+" on "+WebMyth.prefsCookieObject.currentFrontend);
+	
+	
+	if (Mojo.appInfo.skipPDK == "true") {
+		//Mojo.Controller.getAppController().showBanner("Sending command to telnet", {source: 'notification'});
+		
+		var requestUrl1 = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webmythPythonFile;
+		requestUrl1 += "?op=remote&type=jump";
+		requestUrl1 += "&host="+WebMyth.prefsCookieObject.currentFrontend+"&cmd=livetv";
+		
+		var requestUrl2 = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webmythPythonFile;
+		requestUrl2 += "?op=remote&type=play";
+		requestUrl2 += "&host="+WebMyth.prefsCookieObject.currentFrontend+"&cmd=chanid+"+this.channid;
+		
+		Mojo.Log.error("requesting 1: "+requestUrl1);
+		Mojo.Log.error("requesting 2: "+requestUrl2);
+	
+		var request1 = new Ajax.Request(requestUrl1, {
+			method: 'get',
+			onSuccess: function(transport1){
+				//OK ?
+				var request2 = new Ajax.Request(requestUrl2, {
+					method: 'get',
+					onSuccess: function(transport2){
+						//OK ?
+					},
+					onFailure: function() {
+						Mojo.Log.error("Failed AJAX: '%s'", requestURL);
+						Mojo.Controller.getAppController().showBanner("ERROR - check remote.py scipt", {source: 'notification'});
+					}
+				});
+			},
+			onFailure: function() {
+				Mojo.Log.error("Failed AJAX: '%s'", requestURL);
+				Mojo.Controller.getAppController().showBanner("ERROR - check remote.py scipt", {source: 'notification'});
+			}
+		});
+	}
+	else {
+		$('telnetPlug').SendTelnet(value);
+	}
+	
+	if(WebMyth.prefsCookieObject.playJumpRemote)  Mojo.Controller.stageController.pushScene("hostSelector", true);
+	
+				
+};
+
+
+GuideAssistant.prototype.checkLocation = function() {
+	//Attempting to play livetv - have to start livetv then change channel
+	this.host = WebMyth.prefsCookieObject.currentFrontend;
+	Mojo.Log.info("Checking current location as prep for "+this.channid+" on "+this.host);
+	
+	
+	if (Mojo.appInfo.skipPDK == "true") {
+		//Mojo.Controller.getAppController().showBanner("Sending command to telnet", {source: 'notification'});
+		
+		var requestUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webmythPythonFile;
+		requestUrl += "?op=remote&type=query";
+		requestUrl += "&host="+this.host+"&cmd=location";
+		
+		Mojo.Log.error("requesting check URL: "+requestUrl);
+	
+		var request1 = new Ajax.Request(requestUrl, {
+			method: 'get',
+			onSuccess: function(response){
+				Mojo.Log.info("got query response: %s, %s",response.responseText,response.responseText.search("LiveTV"));
+				
+				if(response.responseText.search("LiveTV") == -1) {
+					//Is not on LiveTV
+					this.jumpLive();
+				} else {
+					//Is already on LiveTV
+					this.startChannelPlay();
+				}
+			}.bind(this),
+			onFailure: function() {
+				Mojo.Log.error("Failed AJAX: '%s'", requestURL);
+				Mojo.Controller.getAppController().showBanner("ERROR - check remote.py scipt", {source: 'notification'});
+			}
+		}
+		);
+	}
+	else {
+		$('telnetPlug').SendTelnet(value);
+	}
+	
+	
+};
+
+
+
+GuideAssistant.prototype.jumpLive = function() {
+	//Attempting to play livetv - have to start livetv then change channel
+	Mojo.Log.info("jumping to live tv");
+	
+	if (Mojo.appInfo.skipPDK == "true") {
+		//Mojo.Controller.getAppController().showBanner("Sending command to telnet", {source: 'notification'});
+		
+		var requestUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webmythPythonFile;
+		requestUrl += "?op=remote&type=jump";
+		requestUrl += "&host="+this.host+"&cmd=livetv";
+		
+		Mojo.Log.error("requesting jump live : "+requestUrl);
+	
+		var request1 = new Ajax.Request(requestUrl, {
+			method: 'get',
+			onSuccess: this.startChannelPlay.bind(this),
+			onFailure: function() {
+				Mojo.Log.error("Failed AJAX: '%s'", requestURL);
+				Mojo.Controller.getAppController().showBanner("ERROR - check remote.py scipt", {source: 'notification'});
+			}
+		}
+		);
+	}
+	else {
+		$('telnetPlug').SendTelnet(value);
+	}
+	
+	
+};
+
+
+
+GuideAssistant.prototype.startChannelPlay = function() {
+	//Attempting to play livetv - have to start livetv then change channel
+	Mojo.Log.info("Playing channel "+this.channid);
+	
+	if (Mojo.appInfo.skipPDK == "true") {
+		//Mojo.Controller.getAppController().showBanner("Sending command to telnet", {source: 'notification'});
+		
+		var requestUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webmythPythonFile;
+		requestUrl += "?op=remote&type=play";
+		requestUrl += "&host="+this.host+"&cmd=chanid+"+this.channid;
+		
+		Mojo.Log.error("requesting channel URL : "+requestUrl);
+	
+		var request1 = new Ajax.Request(requestUrl, {
+			method: 'get',
+			onSuccess: function(transport1){
+				//OK ?
+			},
+			onFailure: function() {
+				Mojo.Log.error("Failed AJAX: '%s'", requestURL);
+				Mojo.Controller.getAppController().showBanner("ERROR - check remote.py scipt", {source: 'notification'});
+			}
+		});
+	}
+	else {
+		$('telnetPlug').SendTelnet(value);
+	}
+	
+	if(WebMyth.prefsCookieObject.playJumpRemote)  Mojo.Controller.stageController.pushScene("hostSelector", true);
+	
+};
+
+
+GuideAssistant.prototype.selectedChannel = function() {
+
+	this.layoutStyle = 'channel';
+					
+	//Update channel command menu label
+	this.cmdMenuModel.items[1].toggleCmd = 'do-selectChannel';
+	this.cmdMenuModel.items[1].items[2].label = 'Channel: '+this.chanNum;
+	this.controller.modelChanged(this.cmdMenuModel);
+					
+	//Update header label
+	var date = new Date(dateObjectToJS(this.timeObject));
+	this.guideViewMenuModel.items[0].items[0].icon = 'back';
+	this.guideViewMenuModel.items[0].items[0].command = 'do-guidePrevious';
+	this.guideViewMenuModel.items[0].items[1].label = date.toLocaleString().substring(0,15);
+	this.guideViewMenuModel.items[0].items[1].width = 200;
+	this.guideViewMenuModel.items[0].items[2].icon = 'forward';
+	this.guideViewMenuModel.items[0].items[2].command = 'do-guideNext';
+	this.controller.modelChanged(this.guideViewMenuModel);
+			
+	//Request and show data
+	this.controller.sceneScroller.mojo.revealTop();
+	this.filterListFunction(' ', this.controller.get('guideList'), 0, this.resultList.length);
+	this.getGuideData();
+				
+};
+
+
+GuideAssistant.prototype.selectedTime = function() {
+
+	this.layoutStyle = 'time';
+	
+	//Update command menu
+	this.cmdMenuModel.items[1].toggleCmd = 'do-selectTime';
+	this.cmdMenuModel.items[1].items[2].label = 'Channel';
+	this.controller.modelChanged(this.cmdMenuModel);
+					
+	//Update header label
+	var date = new Date(dateObjectToJS(this.timeObject));
+	this.guideViewMenuModel.items[0].items[0] = {};
+	this.guideViewMenuModel.items[0].items[1].label = date.toLocaleString().substring(0,21);
+	this.guideViewMenuModel.items[0].items[1].width = 320;
+	this.guideViewMenuModel.items[0].items[2] = {};
+	this.controller.modelChanged(this.guideViewMenuModel);
+			
+	//Request and show data
+	this.controller.sceneScroller.mojo.revealTop();
+	this.filterListFunction(' ', this.controller.get('guideList'), 0, this.resultList.length);
+	this.getGuideData();
+				
+};
+
+
+GuideAssistant.prototype.selectedNow = function() {
+
+	//Update date values
+	this.timeJS = new Date();	//defaults to now
+	this.timeObject = dateJSToObject(this.timeJS);
+	this.timeISO = dateJSToISO(this.timeJS);
+	this.dayRange = dateObjectToDayRange(this.timeObject);
+	this.day = this.timeObject.year+"-"+this.timeObject.month+"-"+this.timeObject.day;
+
+	//Update command menu
+	this.cmdMenuModel.items[1].toggleCmd = 'do-now';
+	this.cmdMenuModel.items[1].items[2].label = 'Channel';
+	this.controller.modelChanged(this.cmdMenuModel);
+		
+	//Update header label
+	this.guideViewMenuModel.items[0].items[0] = {};
+	this.guideViewMenuModel.items[0].items[1].label = "Now Airing";
+	this.guideViewMenuModel.items[0].items[1].width = 320;
+	this.guideViewMenuModel.items[0].items[2] = {};
+	this.controller.modelChanged(this.guideViewMenuModel);
+							
+	//Add popup selector later
+	this.layoutStyle = 'time';
+	this.controller.sceneScroller.mojo.revealTop();
+	this.filterListFunction(' ', this.controller.get('guideList'), 0, this.resultList.length);
+	this.getGuideData();
+				
+				
 };
 
 
@@ -400,10 +691,10 @@ GuideAssistant.prototype.setMyData = function(propertyValue, model) {
 	
 	if(model.recStatus == '-10') {
 		guideDetailsText += '<div class="palm-row multi-line guide-list-item recordingStatus'+model.recStatus+'>';
-		guideDetailsText += '<div class="palm-row-wrapper guide-list-item multi-line"><div class="palm-row guide-list-item">';
+		guideDetailsText += '<div class="palm-row-wrapper guide-list-item multi-line"><div>';
 	} else {
 		guideDetailsText += '<div class="palm-row guide-list-item-extended recordingStatus'+model.recStatus+'>';
-		guideDetailsText += '<div class="palm-row-wrapper guide-list-item-extended multi-line"><div class="palm-row guide-list-item-extended">';
+		guideDetailsText += '<div class="palm-row-wrapper guide-list-item-extended multi-line"><div class="guide-list-item">';
 	}
 	
 	
@@ -430,7 +721,7 @@ GuideAssistant.prototype.setMyData = function(propertyValue, model) {
 	if(model.recStatus == '-10') {
 		guideDetailsText += '</div></div></div>';
 	} else {
-		guideDetailsText += '<div class="title guide-recStatusText">'+model.recStatusText+'</div></div></div></div>';
+		guideDetailsText += '</div><div class="guide-recStatusRow"><div class="guide-recStatusText">'+model.recStatusText+'</div></div></div></div>';
 	}
 		
 	model.myData = guideDetailsText;
@@ -441,7 +732,7 @@ GuideAssistant.prototype.getGuideData = function() {
 	
 	//Use XML to get guide data
 	
-	var requestUrl = "http://"+WebMyth.prefsCookieObject.masterBackendIp+":6544/Myth/GetProgramGuide?Details=0";
+	var requestUrl = "http://"+WebMyth.prefsCookieObject.masterBackendIp+":6544/Myth/GetProgramGuide?Details=1";
 	
 	if(this.layoutStyle == 'time') {
 		requestUrl += "&StartTime="+this.timeISO;
@@ -551,7 +842,8 @@ GuideAssistant.prototype.readStatusSuccess = function(response) {
 						singleChannelJson = {
 							label: singleChannelNode.getAttributeNode("chanNum").nodeValue+": "+singleChannelNode.getAttributeNode("channelName").nodeValue,
 							command: "go-channel___"+singleChannelNode.getAttributeNode("chanId").nodeValue+"---"+singleChannelNode.getAttributeNode("chanNum").nodeValue,
-							"chanNumInt": parseInt(singleChannelNode.getAttributeNode("chanNum").nodeValue)
+							"chanNumInt": parseInt(singleChannelNode.getAttributeNode("chanNum").nodeValue),
+							"chanNum": singleChannelNode.getAttributeNode("chanNum").nodeValue
 						}	
 						this.channelList.push(singleChannelJson);
 						
@@ -566,28 +858,51 @@ GuideAssistant.prototype.readStatusSuccess = function(response) {
 									"callSign": singleChannelNode.getAttributeNode("callSign").nodeValue, 
 									"title": singleChannelChildNode.getAttributeNode("title").nodeValue, 
 									"subTitle": singleChannelChildNode.getAttributeNode("subTitle").nodeValue, 
+									"programFlags": singleChannelChildNode.getAttributeNode("programFlags").nodeValue, 
 									"category": singleChannelChildNode.getAttributeNode("category").nodeValue, 
+									"fileSize": singleChannelChildNode.getAttributeNode("fileSize").nodeValue, 
+									"seriesId": singleChannelChildNode.getAttributeNode("seriesId").nodeValue, 
+									"hostname": singleChannelChildNode.getAttributeNode("hostname").nodeValue, 
 									"catType": singleChannelChildNode.getAttributeNode("catType").nodeValue, 
+									"programId": singleChannelChildNode.getAttributeNode("programId").nodeValue, 
 									"repeat": singleChannelChildNode.getAttributeNode("repeat").nodeValue, 
+									"stars": singleChannelChildNode.getAttributeNode("stars").nodeValue, 
 									"endTime": singleChannelChildNode.getAttributeNode("endTime").nodeValue, 
+				//					"airdate": singleChannelChildNode.getAttributeNode("airdate").nodeValue, 
 									"startTime": singleChannelChildNode.getAttributeNode("startTime").nodeValue,
+									"lastModified": singleChannelChildNode.getAttributeNode("lastModified").nodeValue, 
+				//					"description": singleChannelChildNode.childNodes[0].nodeValue,
 									"startTimeSpace": singleChannelChildNode.getAttributeNode("startTime").nodeValue.replace("T"," "),
-									"endTimeSpace": singleChannelChildNode.getAttributeNode("endTime").nodeValue.replace("T"," "),
+									"endTimeSpace": singleChannelChildNode.getAttributeNode("endTime").nodeValue.replace("T"," "),  
 									"recStatus": "-10"
 								}
 								if(singleProgramJson.chanNumInt == NaN) singleProgramJson.chanNumInt = 0;
 								
 								for(var l = 0; l < singleChannelChildNode.childNodes.length; l++) {
 									singleProgramChildNode = singleChannelChildNode.childNodes[l];
+									
+									if(l == 0) singleProgramJson.description = singleProgramChildNode.nodeValue;
+									
 									if(singleProgramChildNode.nodeName == "Recording") {
+										singleProgramJson.recPriority = singleProgramChildNode.getAttributeNode("recPriority").nodeValue;
+										singleProgramJson.playGroup = singleProgramChildNode.getAttributeNode("playGroup").nodeValue;
 										singleProgramJson.recStatus = singleProgramChildNode.getAttributeNode("recStatus").nodeValue;
+										singleProgramJson.recStartTs = singleProgramChildNode.getAttributeNode("recStartTs").nodeValue;
+										singleProgramJson.recGroup = singleProgramChildNode.getAttributeNode("recGroup").nodeValue;
+										singleProgramJson.dupMethod = singleProgramChildNode.getAttributeNode("dupMethod").nodeValue;
+										singleProgramJson.recType = singleProgramChildNode.getAttributeNode("recType").nodeValue;
+										singleProgramJson.encoderId = singleProgramChildNode.getAttributeNode("encoderId").nodeValue;
+										singleProgramJson.recProfile = singleProgramChildNode.getAttributeNode("recProfile").nodeValue;
+										singleProgramJson.recEndTs = singleProgramChildNode.getAttributeNode("recEndTs").nodeValue;
+										singleProgramJson.recordId = singleProgramChildNode.getAttributeNode("recordId").nodeValue;
+										singleProgramJson.dupInType = singleProgramChildNode.getAttributeNode("dupInType").nodeValue;
 									}
 								}
 								
 								singleProgramJson.recStatusText = recStatusDecode(singleProgramJson.recStatus);
 								
 								this.resultList.push(singleProgramJson);
-								//Mojo.Log.error("program json is %j", singleProgramJson);
+								//Mojo.Log.error("program "+k+" json is %j", singleProgramJson);
 							}
 						}
 					}
@@ -607,10 +922,10 @@ GuideAssistant.prototype.readStatusSuccess = function(response) {
 				this.sortChanged();
 				
 				
-	//Stop spinner and hide
-	this.spinnerModel.spinning = false;
-	this.controller.modelChanged(this.spinnerModel, this);
-	$('myScrim').hide()
+				//Stop spinner and hide
+				this.spinnerModel.spinning = false;
+				this.controller.modelChanged(this.spinnerModel, this);
+				$('myScrim').hide()
 	
 				
 				break;
@@ -648,7 +963,6 @@ GuideAssistant.prototype.sortChanged = function() {
 
 GuideAssistant.prototype.timePicker = function() {
 
-	
 	this.controller.showDialog({
 		template: 'dialogs/dateAndTimePicker',
 		assistant: new DateAndTimePickerAssistant(this, this.timeObject, this.timePickerCallback.bind(this))
@@ -674,26 +988,7 @@ GuideAssistant.prototype.timePickerCallback = function(value) {
 	this.dayRange = dateObjectToDayRange(this.timeObject);
 	this.day = this.timeObject.year+"-"+this.timeObject.month+"-"+this.timeObject.day;
 	
-	Mojo.Log.error("callback JS it "+this.timeJS);
-	Mojo.Log.error("callback ISO is "+this.timeISO);
-	Mojo.Log.error("callback object is %j", this.timeObject);
-	
-
-	
-	//Update command menu
-	this.cmdMenuModel.items[1].toggleCmd = 'do-selectTime';
-	this.cmdMenuModel.items[1].items[2].label = 'Channel';
-	this.controller.modelChanged(this.cmdMenuModel);
-				
-	//Update header label
-	this.guideViewMenuModel.items[0].items[1].label = this.timeISO.replace("T", " ").substring(0,16);
-	this.controller.modelChanged(this.guideViewMenuModel);
-				
-	//Add popup selector later
-	this.layoutStyle = 'time';
-	this.controller.sceneScroller.mojo.revealTop();
-	this.filterListFunction(' ', this.controller.get('guideList'), 0, this.resultList.length);
-	this.getGuideData();
+	this.selectedTime();
 	
 };
 
