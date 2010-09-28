@@ -198,8 +198,8 @@ var double_sort_by = function(field1, field2, reverse, primer){
 
    return function(a,b){
 
-       a = a[field1]+'aaa'+a[field2];
-       b = b[field1]+'aaa'+b[field2];
+       a = a[field1]+a[field2];
+       b = b[field1]+b[field2];
 
        if (typeof(primer) != 'undefined'){
            a = primer(a);
@@ -254,7 +254,27 @@ var trimByChanidStarttime = function(fullList, chanid_in, starttime_in) {
 				//Does not match
 			}
 		}
-		return {};
+		return {"chanid_in":chanid_in, "starttime_in":starttime_in};
+
+};
+
+
+var trimGuideByChanidStarttime = function(fullList, chanid_in, starttime_in) {
+	
+		var i, s;
+	
+		for (i = 0; i < fullList.length; i++) {
+	
+			s = fullList[i];
+			if ((s.chanId == chanid_in) && (s.startTime.substring(0,16) == starttime_in.substring(0,16))) {
+				//Matches chanid and starttime
+				return s;
+			} else {
+				//Does not match
+			}
+		}
+		
+		return {"chanid_in": chanid_in, "starttime_in": starttime_in};
 
 };
 
@@ -312,7 +332,7 @@ var isEmpty = function(object) {
 };
 
 
-var isoToDate = function(isoDate) { 
+var isoSpaceToJS = function(isoDate) { 
     
 	var regexp = "([0-9]{4})(-([0-9]{2})(-([0-9]{2})" +
         "( ([0-9]{2}):([0-9]{2})(:([0-9]{2})(\.([0-9]+))?)?" +
@@ -337,6 +357,52 @@ var isoToDate = function(isoDate) {
     time = (Number(date));
 	
 	return Number(time);
+ 
+};
+
+
+var isoToJS = function(isoDate) { 
+    
+	var regexp = "([0-9]{4})(-([0-9]{2})(-([0-9]{2})" +
+        "(T([0-9]{2}):([0-9]{2})(:([0-9]{2})(\.([0-9]+))?)?" +
+        "(Z|(([-+])([0-9]{2}):([0-9]{2})))?)?)?)?";
+    var d = isoDate.match(new RegExp(regexp));
+
+    var offset = 0;
+    var date = new Date(d[1], 0, 1);
+
+    if (d[3]) { date.setMonth(d[3] - 1); }
+    if (d[5]) { date.setDate(d[5]); }
+    if (d[7]) { date.setHours(d[7]); }
+    if (d[8]) { date.setMinutes(d[8]); }
+    if (d[10]) { date.setSeconds(d[10]); }
+    if (d[12]) { date.setMilliseconds(Number("0." + d[12]) * 1000); }
+    if (d[14]) {
+        offset = (Number(d[16]) * 60) + Number(d[17]);
+        offset *= ((d[15] == '-') ? 1 : -1);
+    }
+
+    //offset -= date.getTimezoneOffset();
+    time = (Number(date));
+	
+	return Number(time);
+ 
+};
+
+
+var dateObjectToJS = function(dateObject) { 
+    
+    var newDate = new Date();
+
+    newDate.setYear(dateObject.year);
+    newDate.setMonth(dateObject.month - 1);
+    newDate.setDate(dateObject.day);
+    newDate.setHours(dateObject.hour);
+    newDate.setMinutes(dateObject.minute);
+    newDate.setSeconds(dateObject.second);
+
+	
+	return newDate;
  
 };
 
@@ -769,7 +835,7 @@ var recStatusDecode = function(recStatusInt) {
 				newStatusText = "Don't Record";
 			break;
 			case 2:		
-				newStatusText = "Previous Recording";
+				newStatusText = "Previously Recorded";
 			break;
 			case 3:		
 				newStatusText = "Current Recording";

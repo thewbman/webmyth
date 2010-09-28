@@ -27,7 +27,7 @@
 	   
 	  this.nullHandleCount = 0;
 	 
-	  this.fullResultList = [];		//Full raw data 
+	  //this.fullResultList = [];		//Full raw data 
 	  this.resultList = [];			//Filtered down list
 }
 
@@ -140,48 +140,37 @@ UpcomingAssistant.prototype.readRemoteDbTableSuccess = function(response) {
 	
 		
 	//Update the list widget
-	this.fullResultList.clear();
-	Object.extend(this.fullResultList,response.responseJSON);
-	this.fullResultList.sort(double_sort_by('starttime', 'title', false));
-	
 	this.resultList.clear();
 	Object.extend(this.resultList,response.responseJSON);
-	this.resultList.sort(double_sort_by('starttime', 'title', false));
+	//this.fullResultList.sort(double_sort_by('starttime', 'title', false));
+	
+	Mojo.Log.error("resultlist is %j",this.resultList);
+	
+	Mojo.Log.error("after full result list");
+	
+	//this.resultList.clear();
+	//Object.extend(this.resultList,response.responseJSON);
+	//this.resultList.sort(double_sort_by('starttime', 'title', false));
 	//Object.extend(this.resultList, trimByRecgroup(this.fullResultList, this.selectorsModel.currentRecgroup));
-
+	
+	
+	
 	//Initial display
 	var listWidget = this.controller.get('upcomingList');
 	this.filterListFunction('', listWidget, 0, this.resultList.length);
 	//Mojo.Controller.getAppController().showBanner("Updated with latest data", {source: 'notification'});
 	
-	/*
-	//Update the recgroup filter
-	var recgroupSql = "SELECT * FROM recgroup ORDER BY groupname;";
-	var string = "";
-    WebMyth.db.transaction( 
-		(function (transaction) {
-			transaction.executeSql( recgroupSql,  [], 
-				this.updateRecgroupList.bind(this),
-				function(transaction, error) {      // error handler
-					Mojo.Log.error("Could not get list of recgroup: " + error.message + " ... ");
-				}
-			);
-		}
-		).bind(this)
-	);
-	*/
 	
 	//Stop spinner and hide
 	this.spinnerModel.spinning = false;
 	this.controller.modelChanged(this.spinnerModel, this);
 	$('myScrim').hide()
-		
+	
+/*	
 	//Save new values back to DB
     var json = response.responseJSON;
-	var title;
-	var subtitle;
  
-	/*
+	
 	//Replace out old data
 	WebMyth.db.transaction( function (transaction) {
 		transaction.executeSql("DELETE FROM 'recorded'; ",  [], 
@@ -223,6 +212,7 @@ UpcomingAssistant.prototype.readRemoteDbTableSuccess = function(response) {
 		);
 	});
 	*/
+
 };
 
 
@@ -230,7 +220,8 @@ UpcomingAssistant.prototype.readRemoteDbTableSuccess = function(response) {
 UpcomingAssistant.prototype.filterListFunction = function(filterString, listWidget, offset, count) {
 	 
 	//Filtering function
-
+	Mojo.Log.info("Started filtering with '%s'",filterString);
+	
 	var totalSubsetSize = 0;
  
 	var i, s;
@@ -266,6 +257,9 @@ UpcomingAssistant.prototype.filterListFunction = function(filterString, listWidg
 	}
  
 	// pare down list results to the part requested by widget (starting at offset & thru count)
+	
+	Mojo.Log.info("paring down '%j'",someList);
+	
 	var cursor = 0;
 	var subset = [];
 	var totalSubsetSize = 0;
@@ -283,9 +277,13 @@ UpcomingAssistant.prototype.filterListFunction = function(filterString, listWidg
 	// use noticeUpdatedItems to update the list
 	// then update the list length 
 	// and the FilterList widget's FilterField count (displayed in the upper right corner)
+	
+	Mojo.Log.info("subset is %j",subset);
+	
 	listWidget.mojo.noticeUpdatedItems(offset, subset);
 	listWidget.mojo.setLength(totalSubsetSize);
 	listWidget.mojo.setCount(totalSubsetSize);
+	
 };	
 
 
@@ -295,7 +293,7 @@ UpcomingAssistant.prototype.goUpcomingDetails = function(event) {
 	
 	Mojo.Log.info("Selected individual recording: '%s' + '%s'", upcoming_chanid, upcoming_starttime);
 	
-	detailsObject = trimByChanidStarttime(this.fullResultList, upcoming_chanid, upcoming_starttime)
+	detailsObject = trimByChanidStarttime(this.resultList, upcoming_chanid, upcoming_starttime)
 
 	//Mojo.Log.error("Selected object is: '%j'", detailsObject);
 	
@@ -311,7 +309,7 @@ UpcomingAssistant.prototype.recorderDividerFunction = function(itemModel) {
 	//Divider function for list
     //return itemModel.title.toString()[0];	
 	//return itemModel.starttime.substring(0,10);
-	var date = new Date(isoToDate(itemModel.starttime));
+	var date = new Date(isoToJS(itemModel.starttime));
 	
 	return date.toLocaleString().substring(0,15);
 };

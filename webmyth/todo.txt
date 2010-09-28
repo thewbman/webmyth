@@ -1,9 +1,8 @@
 To Do - planned new features and updates:
 //next release 
  - check vibration settings
- - channel icon on upcoming details scene
  - comma to storage locations numbers
- - better web search sites for mobile
+ - format guide date
  
 //Future
  - new app icons/theme

@@ -53,6 +53,12 @@ UpcomingDetailsAssistant.prototype.setup = function() {
 	this.controller.setupWidget('web-menu', '', this.webMenuModel);
 	
 	
+	var channelIconUrl = "http://"+WebMyth.prefsCookieObject.masterBackendIp+":6544/Myth/GetChannelIcon?ChanId=";
+	channelIconUrl += this.upcomingObject.chanid;
+	
+	if(WebMyth.prefsCookieObject.showUpcomingChannelIcons) {
+		$('upcomingDetails-channel-icon').innerHTML = '<img class="upcomingDetails-channel-img" src="'+channelIconUrl+'" />';
+	}
 	
 	//Fill in data values
 	$('scene-title').innerText = this.upcomingObject.title;
@@ -121,7 +127,7 @@ UpcomingDetailsAssistant.prototype.openWeb = function(website) {
 		url = "http://www.themoviedb.org/search/movies?search[text]="+this.upcomingObject.title;
 	  break;
 	case 'IMDB':
-		url = "http://www.imdb.com/find?s=all&q="+this.upcomingObject.title;
+		url = "http://m.imdb.com/find?s=all&q="+this.upcomingObject.title;
 	  break;
 	case 'TheTVDB':
 		url = "http://www.thetvdb.com/?string="+this.upcomingObject.title+"&searchseriesid=&tab=listseries&function=Search";
@@ -130,7 +136,7 @@ UpcomingDetailsAssistant.prototype.openWeb = function(website) {
 		url = "http://www.tv.com/search.php?type=11&stype=all&qs="+this.upcomingObject.title;
 	  break;
 	case 'Google':
-		url = "http://www.google.com/search?q="+this.upcomingObject.title;
+		url = "http://www.google.com/m/search?client=ms-palm-webOS&channel=iss&q="+this.upcomingObject.title;
 	  break;
   };
   

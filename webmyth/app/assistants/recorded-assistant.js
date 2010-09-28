@@ -580,7 +580,7 @@ RecordedAssistant.prototype.recorderDividerFunction = function(itemModel) {
 	 
 	//Divider function for list
 	var divider = itemModel.title;				//as default
-	var date = new Date(isoToDate(itemModel.starttime));
+	var date = new Date(isoSpaceToJS(itemModel.starttime));
 	
 	switch(WebMyth.prefsCookieObject.currentRecSort) {
       case 'date-asc':
@@ -654,7 +654,7 @@ RecordedAssistant.prototype.updateRecgroupList = function(transaction, results) 
 RecordedAssistant.prototype.setMyData = function(propertyValue, model)  { 
 
 	//Mojo.Log.error('property value is %j', propertyValue);
-	//var newDate = new Date(isoToDate(model.starttime));
+	//var newDate = new Date(isoToJS(model.starttime));
 	//var modifiedDate = date.toLocaleString().substring(0,15);
 
 	var titleAndSubtitle = '<div class="recorded-title"><div class="palm-info-text title right">'+model.title+'</div></div>';

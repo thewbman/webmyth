@@ -199,6 +199,10 @@
 	height: 100px
 }
 
+.guide-scene .filter-field-container-height {
+	height: 55px;
+}
+
 .guide-list-item {
 	height: 100px
 }
@@ -208,7 +212,16 @@
 }
 
 .guide-recStatusText {
-	padding: 120px 5px 0px 5px;
+	padding: 0px;
+	margin: 0px;
+	font-size: 20px;
+	font-weight: normal;
+}
+
+.guide-recStatusRow {
+	padding: 6px;
+	height: 20px;
+	width: 100%
 }
 
 .chanNum-no-icon {
@@ -352,3 +365,12 @@
 	color: #000;
 }
 
+.upcomingDetails-channel-img {
+	padding: 3px 110px;
+	width: 100px;
+}
+
+.guideDetails-channel-img {
+	padding: 3px 110px;
+	width: 100px;
+}
