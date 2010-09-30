@@ -68,6 +68,92 @@ UpcomingAssistant.prototype.setup = function() {
 	this.controller.listen(this.controller.get( "header-menu" ), Mojo.Event.tap, function(){this.controller.sceneScroller.mojo.revealTop();}.bind(this));
 	
 	
+	this.getUpcoming();
+	
+	
+};
+
+UpcomingAssistant.prototype.activate = function(event) {
+	//Keypress event
+	Mojo.Event.listen(this.controller.sceneElement, Mojo.Event.keyup, this.handleKey.bind(this));
+	
+	//Vibrate event
+	Mojo.Event.listen(document, 'shakestart', this.handleShakestart.bindAsEventListener(this));
+};
+
+UpcomingAssistant.prototype.deactivate = function(event) {
+	//Keypress event
+	Mojo.Event.stopListening(this.controller.sceneElement, Mojo.Event.keyup, this.handleKey.bind(this));
+	
+	//Vibrate event
+	Mojo.Event.stopListening(document, 'shakestart', this.handleShakestart.bindAsEventListener(this));
+};
+
+UpcomingAssistant.prototype.cleanup = function(event) {
+	/* this function should do any cleanup needed before the scene is destroyed as 
+	   a result of being popped off the scene stack */
+};
+
+UpcomingAssistant.prototype.handleCommand = function(event) {
+
+  if(event.type == Mojo.Event.forward) {
+		Mojo.Controller.stageController.pushScene(WebMyth.prefsCookieObject.currentRemoteScene);
+  }
+  
+};
+
+UpcomingAssistant.prototype.handleKey = function(event) {
+
+	Mojo.Log.info("handleKey %o, %o", event.originalEvent.metaKey, event.originalEvent.keyCode);
+	
+	if(event.originalEvent.metaKey) {
+		switch(event.originalEvent.keyCode) {
+			case 71:
+				Mojo.Log.info("g - shortcut key to guide");
+				Mojo.Controller.stageController.swapScene("guide");	
+				break;
+			case 82:
+				Mojo.Log.info("r - shortcut key to recorded");
+				Mojo.Controller.stageController.swapScene("recorded");
+				break;
+			case 83:
+				Mojo.Log.info("s - shortcut key to status");
+				Mojo.Controller.stageController.swapScene("status");
+				break;
+			case 85:
+				Mojo.Log.info("u - shortcut key to upcoming");
+				Mojo.Controller.stageController.swapScene("upcoming");
+				break;
+			default:
+				Mojo.Log.info("No shortcut key");
+				break;
+		}
+	}
+	Event.stop(event); 
+	
+};
+
+UpcomingAssistant.prototype.handleShakestart = function(event) {
+
+	Mojo.Log.info("Start Shaking");
+	Event.stop(event);
+	
+	
+	//Stop spinner and hide
+	this.spinnerModel.spinning = true;
+	this.controller.modelChanged(this.spinnerModel, this);
+	$('myScrim').show()	
+	
+	
+	this.getUpcoming();
+  
+};
+
+
+
+
+UpcomingAssistant.prototype.getUpcoming = function(event) {
+
 	//Update list from webmyth python script
 	Mojo.Log.info('Starting upcoming data gathering');
 	
@@ -87,31 +173,6 @@ UpcomingAssistant.prototype.setup = function() {
     }
 	
 };
-
-UpcomingAssistant.prototype.activate = function(event) {
-	/* put in event handlers here that should only be in effect when this scene is active. For
-	   example, key handlers that are observing the document */
-};
-
-UpcomingAssistant.prototype.deactivate = function(event) {
-	/* remove any event handlers you added in activate and do any other cleanup that should happen before
-	   this scene is popped or another scene is pushed on top */
-};
-
-UpcomingAssistant.prototype.cleanup = function(event) {
-	/* this function should do any cleanup needed before the scene is destroyed as 
-	   a result of being popped off the scene stack */
-};
-
-
-UpcomingAssistant.prototype.handleCommand = function(event) {
-
-  if(event.type == Mojo.Event.forward) {
-		Mojo.Controller.stageController.pushScene("hostSelector", true);
-  }
-  
-};
-
 
 
 UpcomingAssistant.prototype.remoteDbTableFail = function(event) {
@@ -136,7 +197,7 @@ UpcomingAssistant.prototype.remoteDbTableFail = function(event) {
 UpcomingAssistant.prototype.readRemoteDbTableSuccess = function(response) {
 	//return true;  //can escape this function for testing purposes
     
-	Mojo.Log.info('Got Ajax response: ' + response.responseText);
+	//Mojo.Log.info('Got Ajax response: ' + response.responseText);
 	
 		
 	//Update the list widget
@@ -144,9 +205,6 @@ UpcomingAssistant.prototype.readRemoteDbTableSuccess = function(response) {
 	Object.extend(this.resultList,response.responseJSON);
 	//this.fullResultList.sort(double_sort_by('starttime', 'title', false));
 	
-	Mojo.Log.error("resultlist is %j",this.resultList);
-	
-	Mojo.Log.error("after full result list");
 	
 	//this.resultList.clear();
 	//Object.extend(this.resultList,response.responseJSON);
@@ -278,7 +336,7 @@ UpcomingAssistant.prototype.filterListFunction = function(filterString, listWidg
 	// then update the list length 
 	// and the FilterList widget's FilterField count (displayed in the upper right corner)
 	
-	Mojo.Log.info("subset is %j",subset);
+	//Mojo.Log.info("subset is %j",subset);
 	
 	listWidget.mojo.noticeUpdatedItems(offset, subset);
 	listWidget.mojo.setLength(totalSubsetSize);

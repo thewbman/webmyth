@@ -329,7 +329,8 @@ MusicAssistant.prototype.handleKey = function(event) {
 MusicAssistant.prototype.sendTelnetKey = function(value, event){
 	//this.sendTelnet("key "+value);
 	
-	this.controller.stageController.parentSceneAssistant(this).sendKey(value); 
+	//this.controller.stageController.parentSceneAssistant(this).sendKey(value); 
+	WebMyth.sendKey(value);
 	
 	if(WebMyth.prefsCookieObject.remoteVibrate) {
 		this.controller.stageController.getAppController().playSoundNotification( "vibrate", "" );

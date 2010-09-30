@@ -49,6 +49,8 @@ FlickAssistant.prototype.setup = function() {
 	Mojo.Event.listen(this.controller.sceneElement, Mojo.Event.keyup, this.handleKey.bind(this));
 	
 	
+	//Escape button
+	Mojo.Event.listen(this.controller.get("flickEscButtonId"),Mojo.Event.tap, this.handleTap.bind(this, this.controller.get("flickEscButtonId")));
 	//Nav flick button
 	Mojo.Event.listen(this.controller.get("flickNavButtonId"),Mojo.Event.tap, this.handleTap.bind(this, this.controller.get("flickNavButtonId")));
 	Mojo.Event.listen(this.controller.get("flickNavButtonId"),Mojo.Event.flick, this.handleFlick.bind(this, this.controller.get("flickNavButtonId")));
@@ -91,19 +93,24 @@ FlickAssistant.prototype.handleTap = function(element, event) {
 	
 	switch(name)
 	{
-	case flickNavButtonId:
-	  this.sendTelnetKey("enter");
-	  break;
-	case flickPlayButtonId:
-	  this.sendTelnetKey("p");
-	  break;
-	case flickVolumeButtonId:
-	  this.sendTelnetKey("f9");
-	  break;
+		case flickEscButtonId:
+			this.sendTelnetKey("escape");
+			break;
+		case flickNavButtonId:
+			this.sendTelnetKey("enter");
+			break;
+		case flickPlayButtonId:
+			this.sendTelnetKey("p");
+			break;
+		case flickVolumeButtonId:
+			this.sendTelnetKey("f9");
+			break;
 
-	  
-	default:
-	  Mojo.Controller.errorDialog("no matching command for %$s", name);
+		  
+		default:
+			Mojo.Controller.errorDialog("no matching command for %$s", name);
+			break;
+		
 	}
   
 };
@@ -298,7 +305,8 @@ FlickAssistant.prototype.sendTelnetKey = function(value, event){
 	//this.sendTelnet("key "+value);
 	
 	
-	this.controller.stageController.parentSceneAssistant(this).sendKey(value); 
+	//this.controller.stageController.parentSceneAssistant(this).sendKey(value); 
+	WebMyth.sendKey(value);
 	
 	if(WebMyth.prefsCookieObject.remoteVibrate) {
 		this.controller.stageController.getAppController().playSoundNotification( "vibrate", "" );

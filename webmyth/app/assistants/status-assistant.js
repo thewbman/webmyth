@@ -170,7 +170,87 @@ StatusAssistant.prototype.setup = function() {
 	this.controller.listen(this.controller.get("generalStatusGroup"),Mojo.Event.tap,this.toggleGeneralDrawer.bindAsEventListener(this));
 	
 	
+	this.getStatus();
 	
+};
+
+StatusAssistant.prototype.activate = function(event) {
+	//Keypress event
+	Mojo.Event.listen(this.controller.sceneElement, Mojo.Event.keyup, this.handleKey.bind(this));
+	
+	//Vibrate event
+	Mojo.Event.listen(document, 'shakestart', this.handleShakestart.bindAsEventListener(this));
+};
+
+StatusAssistant.prototype.deactivate = function(event) {
+	//Keypress event
+	Mojo.Event.stopListening(this.controller.sceneElement, Mojo.Event.keyup, this.handleKey.bind(this));
+	
+	//Vibrate event
+	Mojo.Event.stopListening(document, 'shakestart', this.handleShakestart.bindAsEventListener(this));
+};
+
+StatusAssistant.prototype.cleanup = function(event) {
+	/* this function should do any cleanup needed before the scene is destroyed as 
+	   a result of being popped off the scene stack */
+};
+
+StatusAssistant.prototype.handleCommand = function(event) {
+
+  if(event.type == Mojo.Event.forward) {
+		Mojo.Controller.stageController.pushScene("hostSelector", true);
+  }
+  
+};
+
+StatusAssistant.prototype.handleKey = function(event) {
+
+	Mojo.Log.info("handleKey %o, %o", event.originalEvent.metaKey, event.originalEvent.keyCode);
+	
+	if(event.originalEvent.metaKey) {
+		switch(event.originalEvent.keyCode) {
+			case 71:
+				Mojo.Log.info("g - shortcut key to guide");
+				Mojo.Controller.stageController.swapScene("guide");	
+				break;
+			case 82:
+				Mojo.Log.info("r - shortcut key to recorded");
+				Mojo.Controller.stageController.swapScene("recorded");
+				break;
+			case 83:
+				Mojo.Log.info("s - shortcut key to status");
+				Mojo.Controller.stageController.swapScene("status");
+				break;
+			case 85:
+				Mojo.Log.info("u - shortcut key to upcoming");
+				Mojo.Controller.stageController.swapScene("upcoming");
+				break;
+			default:
+				Mojo.Log.info("No shortcut key");
+				break;
+		}
+	}
+	Event.stop(event); 
+};
+
+StatusAssistant.prototype.handleShakestart = function(event) {
+	Mojo.Log.info("Start Shaking");
+	Event.stop(event);
+	
+	
+	//Stop spinner and hide
+	this.spinnerModel.spinning = true;
+	this.controller.modelChanged(this.spinnerModel, this);
+	$('myScrim').show()	
+	
+	
+	this.getStatus();
+  
+};
+
+
+
+StatusAssistant.prototype.getStatus = function() {
 	
 	//Getting settings information
 	Mojo.Log.info("Got master backend IP from settings: "+WebMyth.prefsCookieObject.masterBackendIp);
@@ -190,33 +270,6 @@ StatusAssistant.prototype.setup = function() {
     }
 	
 };
-
-StatusAssistant.prototype.activate = function(event) {
-	/* put in event handlers here that should only be in effect when this scene is active. For
-	   example, key handlers that are observing the document */
-};
-
-StatusAssistant.prototype.deactivate = function(event) {
-	/* remove any event handlers you added in activate and do any other cleanup that should happen before
-	   this scene is popped or another scene is pushed on top */
-};
-
-StatusAssistant.prototype.cleanup = function(event) {
-	/* this function should do any cleanup needed before the scene is destroyed as 
-	   a result of being popped off the scene stack */
-};
-
-StatusAssistant.prototype.handleCommand = function(event) {
-
-  if(event.type == Mojo.Event.forward) {
-		Mojo.Controller.stageController.pushScene("hostSelector", true);
-  }
-  
-};
-
-
-
-
 
 StatusAssistant.prototype.toggleGeneralDrawer = function() {
 	this.generalStatusDrawer.mojo.setOpenState(!this.generalStatusDrawer.mojo.getOpenState());
