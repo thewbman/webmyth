@@ -354,7 +354,8 @@ MasterRemoteAssistant.prototype.handleKey = function(event) {
 MasterRemoteAssistant.prototype.sendTelnetKey = function(value, event){
 	//this.sendTelnet("key "+value);
 	
-	this.controller.stageController.parentSceneAssistant(this).sendKey(value); 
+	//this.controller.stageController.parentSceneAssistant(this).sendKey(value); 
+	WebMyth.sendKey(value);
 	
 	if(WebMyth.prefsCookieObject.remoteVibrate) {
 		this.controller.stageController.getAppController().playSoundNotification( "vibrate", "" );
@@ -366,7 +367,8 @@ MasterRemoteAssistant.prototype.sendTelnetKey = function(value, event){
 MasterRemoteAssistant.prototype.sendJumpPoint = function(value, event){
 	//this.sendTelnet("key "+value);
 	
-	this.controller.stageController.parentSceneAssistant(this).sendJump(value); 
+	//this.controller.stageController.parentSceneAssistant(this).sendJump(value); 
+	WebMyth.sendJump(value);
 	
 	if(WebMyth.prefsCookieObject.remoteVibrate) {
 		this.controller.stageController.getAppController().playSoundNotification( "vibrate", "" );

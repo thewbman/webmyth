@@ -136,6 +136,9 @@ WelcomeAssistant.prototype.setup = function() {
 		WebMyth.prefsCookie.put(WebMyth.prefsCookieObject); 
 		//Use theme
 		this.controller.document.body.className = WebMyth.prefsCookieObject.theme;
+		this.controller.document.body.className += " device-"+Mojo.Environment.DeviceInfo.modelNameAscii;
+		this.controller.document.body.className += " width-"+Mojo.Environment.DeviceInfo.screenWidth;
+		this.controller.document.body.className += " height-"+Mojo.Environment.DeviceInfo.screenHeight;
 			
 		if(WebMyth.prefsCookieObject.webserverName == '') {
 			Mojo.Controller.getAppController().showBanner("Please configure app preferences", {source: 'notification'});
@@ -155,8 +158,10 @@ WelcomeAssistant.prototype.setup = function() {
 
 	//Hosts cookie
 	if (WebMyth.hostsCookieObject) {		//cookie exist
+		Mojo.Log.info("Hosts cookie is %j",WebMyth.hostsCookieObject);
 		//do nothing?
 	} else {
+		Mojo.Log.info("Missing hosts cookie.  Using default.");
 		WebMyth.hostsCookieObject = defaultHostsCookie();
 		WebMyth.hostsCookie.put(WebMyth.hostsCookieObject);
 	}
@@ -207,11 +212,23 @@ WelcomeAssistant.prototype.activate = function(event) {
 	} else {
 		$('masterIpAddress-title').innerHTML = WebMyth.prefsCookieObject.masterBackendIp;
 	}
+	
+	
+	//Keypress event
+	Mojo.Event.listen(this.controller.sceneElement, Mojo.Event.keyup, this.handleKey.bind(this));
+	
+	//Vibrate event
+	Mojo.Event.listen(document, 'shakestart', this.handleShakestart.bindAsEventListener(this));
+	
 };
 
 WelcomeAssistant.prototype.deactivate = function(event) {
-	/* remove any event handlers you added in activate and do any other cleanup that should happen before
-	   this scene is popped or another scene is pushed on top */
+
+	//Keypress event
+	Mojo.Event.stopListening(this.controller.sceneElement, Mojo.Event.keyup, this.handleKey.bind(this));
+	
+	//Vibrate event
+	Mojo.Event.stopListening(document, 'shakestart', this.handleShakestart.bindAsEventListener(this));
 };
 
 WelcomeAssistant.prototype.cleanup = function(event) {
@@ -224,10 +241,49 @@ WelcomeAssistant.prototype.cleanup = function(event) {
 WelcomeAssistant.prototype.handleCommand = function(event) {
 
   if(event.type == Mojo.Event.forward) {
-		Mojo.Controller.stageController.pushScene("hostSelector", true);
+		Mojo.Controller.stageController.pushScene(WebMyth.prefsCookieObject.currentRemoteScene);
   }
   
 };
+
+WelcomeAssistant.prototype.handleKey = function(event) {
+
+	Mojo.Log.info("handleKey %o, %o", event.originalEvent.metaKey, event.originalEvent.keyCode);
+	
+	if(event.originalEvent.metaKey) {
+		switch(event.originalEvent.keyCode) {
+			case 71:
+				Mojo.Log.info("g - shortcut key to guide");
+				Mojo.Controller.stageController.pushScene("guide");	
+				break;
+			case 82:
+				Mojo.Log.info("r - shortcut key to recorded");
+				Mojo.Controller.stageController.pushScene("recorded");
+				break;
+			case 83:
+				Mojo.Log.info("s - shortcut key to status");
+				Mojo.Controller.stageController.pushScene("status");
+				break;
+			case 85:
+				Mojo.Log.info("u - shortcut key to upcoming");
+				Mojo.Controller.stageController.pushScene("upcoming");
+				break;
+			default:
+				Mojo.Log.info("No shortcut key");
+				break;
+		}
+	}
+	Event.stop(event); 
+};
+
+WelcomeAssistant.prototype.handleShakestart = function(event) {
+	Mojo.Log.info("Start Shaking");
+	Event.stop(event);
+	
+};
+
+
+
 
 WelcomeAssistant.prototype.goRemote = function(event) {
 	//Start remote scene 

@@ -34,7 +34,7 @@ function RecordedDetailsAssistant(detailsObject) {
 
 RecordedDetailsAssistant.prototype.setup = function() {
 	
-	Mojo.Log.info("Starting recorded details scene '%j'", this.recordedObject);
+	//Mojo.Log.info("Starting recorded details scene '%j'", this.recordedObject);
 	
 	//App menu widget
 	this.controller.setupWidget(Mojo.Menu.appMenu, WebMyth.appMenuAttr, WebMyth.appMenuModel);
@@ -142,11 +142,15 @@ RecordedDetailsAssistant.prototype.activate = function(event) {
 	this.hostsMenuModel.items = hostsList;
 	this.controller.modelChanged(this.hostsMenuModel);
 	
+	
+	//Keypress event
+	Mojo.Event.listen(this.controller.sceneElement, Mojo.Event.keyup, this.handleKey.bind(this));
+	
 };
 
 RecordedDetailsAssistant.prototype.deactivate = function(event) {
-	/* remove any event handlers you added in activate and do any other cleanup that should happen before
-	   this scene is popped or another scene is pushed on top */
+	//Keypress event
+	Mojo.Event.stopListening(this.controller.sceneElement, Mojo.Event.keyup, this.handleKey.bind(this));
 };
 
 RecordedDetailsAssistant.prototype.cleanup = function(event) {
@@ -159,7 +163,7 @@ RecordedDetailsAssistant.prototype.handleCommand = function(event) {
   if(event.type == Mojo.Event.command) {
   	myCommand = event.command.substring(0,7);
 	mySelection = event.command.substring(8);
-	//Mojo.Log.error("command: "+myCommand+" host: "+mySelection);
+	Mojo.Log.error("command: "+myCommand+" host: "+mySelection);
 
     switch(myCommand) {
       case 'go-play':
@@ -174,9 +178,40 @@ RecordedDetailsAssistant.prototype.handleCommand = function(event) {
     }
   } else if(event.type == Mojo.Event.forward) {
 	
-		Mojo.Controller.stageController.pushScene("hostSelector", true);
+		Mojo.Controller.stageController.pushScene(WebMyth.prefsCookieObject.currentRemoteScene);
   }
   
+};
+
+
+RecordedDetailsAssistant.prototype.handleKey = function(event) {
+
+	Mojo.Log.info("handleKey %o, %o", event.originalEvent.metaKey, event.originalEvent.keyCode);
+	
+	if(event.originalEvent.metaKey) {
+		switch(event.originalEvent.keyCode) {
+			case 71:
+				Mojo.Log.info("g - shortcut key to guide");
+				Mojo.Controller.stageController.swapScene("guide");	
+				break;
+			case 82:
+				Mojo.Log.info("r - shortcut key to recorded");
+				Mojo.Controller.stageController.swapScene("recorded");
+				break;
+			case 83:
+				Mojo.Log.info("s - shortcut key to status");
+				Mojo.Controller.stageController.swapScene("status");
+				break;
+			case 85:
+				Mojo.Log.info("u - shortcut key to upcoming");
+				Mojo.Controller.stageController.swapScene("upcoming");
+				break;
+			default:
+				Mojo.Log.info("No shortcut key");
+				break;
+		}
+	}
+	Event.stop(event); 
 };
 
 
@@ -199,7 +234,10 @@ RecordedDetailsAssistant.prototype.openWeb = function(website) {
 		url = "http://www.tv.com/search.php?type=11&stype=all&qs="+this.recordedObject.title;
 	  break;
 	case 'Google':
-		url = "http://www.google.com/m/search?client=ms-palm-webOS&channel=iss&q="+this.upcomingObject.title;
+		url = "http://www.google.com/m/search?client=ms-palm-webOS&channel=iss&q="+this.recordedObject.title;
+	  break;
+	default:	
+		url = "";
 	  break;
   };
   
@@ -330,9 +368,10 @@ RecordedDetailsAssistant.prototype.downloadStream = function(response) {
 
 
 RecordedDetailsAssistant.prototype.playOnHost = function(host) {
+
 	//Attempting to play
-	Mojo.Log.info("Attempting to play on "+event.hostname);
 	var thisHostname = host;
+	WebMyth.prefsCookieObject.currentFrontend = host;
 	
 	//var clean_starttime = this.recordedObject.starttime.replace(' ','T');
 	var clean_starttime = this.recordedObject.recstartts.replace(' ','T');
@@ -341,44 +380,10 @@ RecordedDetailsAssistant.prototype.playOnHost = function(host) {
 	
 	Mojo.Log.info("Command to send is " + cmd);
 
-	var reply;
-	
-	if (Mojo.appInfo.skipPDK == "true") {
-		//Mojo.Controller.getAppController().showBanner("Sending command to telnet", {source: 'notification'});
 		
-		//Using cgi-bin on server
-		//var cmd = encodeURIComponent(cmd);
-		
-		var requestUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webmythPythonFile;
-		requestUrl += "?op=remote&type=play";
-		//requestUrl += "&host="+this.frontendTextModel.value;
-		requestUrl += "&host="+thisHostname;
-		requestUrl += "&cmd=program "+this.recordedObject.chanid+" "+clean_starttime+" resume";
-		//var requestURL="http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webserverRemoteFile+"?host="+this.frontendTextModel.value+"&cmd="+cmd;  
+	WebMyth.sendPlay(cmd);
 	
-	//Mojo.Log.error("requesting : "+requestUrl);
 	
-		var request = new Ajax.Request(requestUrl, {
-			method: 'get',
-			onSuccess: function(transport){
-				reply = transport.responseText;
-				if (reply.substring(0,5) == "ERROR") {
-					Mojo.Log.error("ERROR in response: '%s'", reply.substring(6));
-					Mojo.Controller.getAppController().showBanner(reply, {source: 'notification'});
-				} else {
-					Mojo.Log.info("Success AJAX: '%s'", reply);
-				}
-			},
-			onFailure: function() {
-				Mojo.Log.error("Failed AJAX: '%s'", requestURL);
-				Mojo.Controller.getAppController().showBanner("ERROR - check remote.py scipt", {source: 'notification'});
-			}
-		});
-	}
-	else {
-		$('telnetPlug').SendTelnet(value);
-	}
-	
-	if(WebMyth.prefsCookieObject.playJumpRemote)  Mojo.Controller.stageController.pushScene("hostSelector", true);
+	if(WebMyth.prefsCookieObject.playJumpRemote)  Mojo.Controller.stageController.pushScene(WebMyth.prefsCookieObject.currentRemoteScene);
 	
 };

@@ -196,7 +196,11 @@ HostSelectorAssistant.prototype.deleteHost = function(event) {
 	//Update cookie
 	WebMyth.hostsCookieObject.clear();
 	Object.extend(WebMyth.hostsCookieObject,newList);
-	WebMyth.hostsCookie.put(WebMyth.hostsCookieObject);
+	
+	
+	//WebMyth.hostsCookie.put(WebMyth.hostsCookieObject);
+	//WebMyth.hostsCookie.put(this.resultList);
+	WebMyth.hostsCookie.put(newList);
 	
 	/*
 	this.resultList.clear();

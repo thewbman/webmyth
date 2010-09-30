@@ -32,8 +32,16 @@ WebMyth.appMenuAttr = {omitDefaultItems: true};
 WebMyth.appMenuModel = {
 	visible: true,
 	items: [
-		{label: "About...", command: 'do-aboutApp'},
+		{label: "About", command: 'do-aboutApp'},
 		{label: "Preferences", command: 'do-prefsApp'},
+		{label: "Shortcuts", items: [
+			{label: "Remote", command: 'do-shortcutRemote', iconPath: 'images/palm/flat-button-next.png'},
+			{label: "Recorded", command: 'do-shortcutRecorded', shortcut: 'R'},
+			{label: "Upcoming", command: 'do-shortcutUpcoming', shortcut: 'U'},
+			{label: "Guide", command: 'do-shortcutGuide', shortcut: 'G'},
+			{label: "Status", command: 'do-shortcutStatus', shortcut: 'S'}
+			]
+		},
 		{label: "Help", command: 'do-helpApp'}
 	]
 };
@@ -186,6 +194,28 @@ StageAssistant.prototype.handleCommand = function(event) {
 			this.controller.pushScene("preferences");
        break;
 	   
+	   //Shortcuts
+	  case 'do-shortcutRemote':
+			this.controller.pushScene(WebMyth.prefsCookieObject.currentRemoteScene);
+       break;
+	   
+	  case 'do-shortcutRecorded':
+			this.controller.pushScene("recorded");
+       break;
+	   
+	  case 'do-shortcutUpcoming':
+			this.controller.pushScene("upcoming");
+       break;
+	   
+	  case 'do-shortcutGuide':
+			this.controller.pushScene("guide");
+       break;
+	   
+	  case 'do-shortcutStatus':
+			this.controller.pushScene("status");
+       break;
+	   
+	   //Help
 	  case 'do-helpApp':
 			//helpAlert();
 	
@@ -296,4 +326,94 @@ StageAssistant.prototype.handleCommand = function(event) {
 
     }
   }
+};
+
+
+
+
+WebMyth.sendKey = function(value){
+		
+		Mojo.Log.info("Sending key ",value);
+		
+		var cmdvalue = encodeURIComponent(value);
+		
+		var requestUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webmythPythonFile;
+		requestUrl += "?op=remote&type=key";
+		requestUrl += "&host="+WebMyth.prefsCookieObject.currentFrontend;
+		requestUrl += "&cmd="+cmdvalue;
+		
+		var request = new Ajax.Request(requestUrl, {
+			method: 'get',
+			onSuccess: function(transport){
+				reply = transport.responseText;
+				if (reply.substring(0,5) == "ERROR") {
+					Mojo.Log.error("ERROR in response: '%s'", reply.substring(6));
+					Mojo.Controller.getAppController().showBanner(reply, {source: 'notification'});
+				} else {
+					Mojo.Log.info("Success AJAX: '%s'", reply);
+				}
+			},
+			onFailure: function() {
+				Mojo.Log.error("Failed AJAX: '%s'", requestURL);
+				Mojo.Controller.getAppController().showBanner("ERROR - check remote.py scipt", {source: 'notification'});
+			}
+		});
+};
+
+
+WebMyth.sendJump = function(value) {
+
+		var cmdvalue = encodeURIComponent(value);
+		
+		var requestUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webmythPythonFile;
+		requestUrl += "?op=remote&type=jump";
+		requestUrl += "&host="+WebMyth.prefsCookieObject.currentFrontend;
+		requestUrl += "&cmd="+cmdvalue;
+		
+		var request = new Ajax.Request(requestUrl, {
+			method: 'get',
+			onSuccess: function(transport){
+				reply = transport.responseText;
+				if (reply.substring(0,5) == "ERROR") {
+					Mojo.Log.error("ERROR in response: '%s'", reply.substring(6));
+					Mojo.Controller.getAppController().showBanner(reply, {source: 'notification'});
+				} else {
+					Mojo.Log.info("Success AJAX: '%s'", reply);
+				}
+			},
+			onFailure: function() {
+				Mojo.Log.error("Failed AJAX: '%s'", requestURL);
+				Mojo.Controller.getAppController().showBanner("ERROR - check remote.py scipt", {source: 'notification'});
+			}
+		});
+	
+};
+
+
+WebMyth.sendPlay = function(value) {
+
+		var cmdvalue = encodeURIComponent(value);
+		
+		var requestUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webmythPythonFile;
+		requestUrl += "?op=remote&type=play";
+		requestUrl += "&host="+WebMyth.prefsCookieObject.currentFrontend;
+		requestUrl += "&cmd="+cmdvalue;
+		
+		var request = new Ajax.Request(requestUrl, {
+			method: 'get',
+			onSuccess: function(transport){
+				reply = transport.responseText;
+				if (reply.substring(0,5) == "ERROR") {
+					Mojo.Log.error("ERROR in response: '%s'", reply.substring(6));
+					Mojo.Controller.getAppController().showBanner(reply, {source: 'notification'});
+				} else {
+					Mojo.Log.info("Success AJAX: '%s'", reply);
+				}
+			},
+			onFailure: function() {
+				Mojo.Log.error("Failed AJAX: '%s'", requestURL);
+				Mojo.Controller.getAppController().showBanner("ERROR - check remote.py scipt", {source: 'notification'});
+			}
+		});
+	
 };

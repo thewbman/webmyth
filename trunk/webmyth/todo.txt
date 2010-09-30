@@ -1,18 +1,15 @@
 To Do - planned new features and updates:
-//next release 
- - check vibration settings
- - comma to storage locations numbers
- - format guide date
  
 //Future
  - new app icons/theme
- - make guide scene functional and show current data source
- - add guide details scene
- - add global shortcuts (meta tap)
- - notifications (remote)
  - check if incoming call and pause
  - add tips scene
  - add changelog scene (automatic on launch?)
- - cleanup flick remote scene
- - shake to reload status, guide, etc ?
- - back key on gesture scene
+ - cleanup flick remote scene w/back key
+ - Sort by category in recorded upcoming amd guide
+ - check vibration settings
+
+//Very long term
+ - New recording schedule from guide
+ - notifications (remote)
+

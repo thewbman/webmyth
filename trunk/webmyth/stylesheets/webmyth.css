@@ -74,8 +74,8 @@
 .emptybuttonRow40 {
 	width: 100%;
 	margin: 0 0px 0 0px;
-	height: 40px;
-	min-height: 40px;
+	height: 15px;
+	min-height: 15px;
 }
 
 .column1of3 {
@@ -113,7 +113,7 @@
 	width: 25%;
 }
 
-.flickNavButton {
+.flickNavButton {		/* defaults for 320x400 */
 	float: left;
 	width: 160px;
 	height: 160px;
@@ -128,14 +128,23 @@
 	text-align: center;
 	vertical-align: middle;
 	
-	
-	
 }
 
 .flickNavButton:active {
 	background-color: #222222;
 }
 
+.height-480 .flickNavButton {
+	width: 240px;
+	height: 240px;
+	margin: 10px 40px;
+	-webkit-border-radius: 120px;
+}
+
+.height-480 .emptybuttonRow40 {
+	height: 40px;
+	min-height: 40px;
+}
 
 .flickRow {
 	float: left;
@@ -157,6 +166,28 @@
 .flickRow:active {
 	background-color: #222222;
 }
+
+.flickEscButton {
+	position: absolute;
+	left: 10px;
+	height: 40px;
+	width: 40px;
+	-webkit-border-radius: 20px;
+	border-radius: 20px;
+	
+	border-style: solid;
+	border-color: #000000;
+	background-color: #333333;
+	
+	text-align: center;
+	vertical-align: middle;
+	font-size: 28px;
+}
+
+.flickEscButton:active {
+	background-color: #222222;
+}
+
 
 #recorded-header-menu-button {
 	position: absolute;
@@ -323,6 +354,9 @@
 /*
  * Welcome Scene Styles
 */
+.welcome .palm-page-header-wrapper {
+	min-height: 67px;
+}
 
 .welcome .palm-page-header-wrapper .title {
 	padding-left: 80px;
@@ -364,6 +398,54 @@
 .palm-dark .dateAndTimePicker  .mv-value {
 	color: #000;
 }
+
+.palm-dark .dateAndTimePicker .mv-picker-container,
+.palm-dark .dateAndTimePicker .mv-picker-capsule {
+  -webkit-border-image: url(../images/mv-picker/background-pill.png) 19 19 19 19 repeat repeat;
+}
+
+.palm-dark .dateAndTimePicker .active-popup .focused .mv-picker-capsule,
+.palm-dark .dateAndTimePicker .active-popup .focused .mv-picker-container {
+  -webkit-border-image: url(../images/mv-picker/background-pill-focus.png) 19 19 19 19 repeat repeat;
+}
+
+.palm-dark .dateAndTimePicker .mv-picker-capsule:focus {
+  -webkit-border-image: url(../images/mv-picker/background-pill-text-input.png) 19 19 19 19 repeat repeat;
+}
+
+.palm-dark .dateAndTimePicker .mv-picker-capsule.selected {
+  -webkit-border-image: url(../images/mv-picker/background-pill-downstate.png) 19 19 19 19 repeat repeat;
+}
+
+.palm-dark .dateAndTimePicker .mv-top-fade {
+  -webkit-border-image: url(../images/mv-picker/mv-list-top-fade.png) 0 19 0 19 repeat repeat;
+}
+
+.palm-dark .dateAndTimePicker .mv-bottom-fade {
+  -webkit-border-image: url(../images/mv-picker/mv-list-bottom-fade.png) 0 19 0 19 repeat repeat;
+}
+
+.palm-dark .dateAndTimePicker .mv-picker-capsule:focus .mv-value {
+  color: #000;
+}
+
+.palm-dark .dateAndTimePicker .picker-popup {
+  background: url(../images/mv-picker/list-separator.png) bottom left repeat-x;
+}
+
+.palm-dark .dateAndTimePicker .picker-popup.selected {
+  background: #555555;
+}
+
+
+
+
+
+
+
+
+
+
 
 .upcomingDetails-channel-img {
 	padding: 3px 110px;

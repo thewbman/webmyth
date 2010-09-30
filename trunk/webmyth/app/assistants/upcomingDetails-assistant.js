@@ -30,7 +30,8 @@ function UpcomingDetailsAssistant(detailsObject) {
 }
 
 UpcomingDetailsAssistant.prototype.setup = function() {
-	Mojo.Log.info("Starting upcoming details scene '%j'", this.upcomingObject);
+	
+	//Mojo.Log.info("Starting upcoming details scene '%j'", this.upcomingObject);
 	
 	//App menu widget
 	this.controller.setupWidget(Mojo.Menu.appMenu, WebMyth.appMenuAttr, WebMyth.appMenuModel);
@@ -111,7 +112,7 @@ UpcomingDetailsAssistant.prototype.handleCommand = function(event) {
     }
   } else if(event.type == Mojo.Event.forward) {
 	
-		Mojo.Controller.stageController.pushScene("hostSelector", true);
+		Mojo.Controller.stageController.pushScene(WebMyth.prefsCookieObject.currentRemoteScene);
   }
   
 };

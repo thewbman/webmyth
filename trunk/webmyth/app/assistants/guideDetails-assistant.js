@@ -121,11 +121,15 @@ GuideDetailsAssistant.prototype.activate = function(event) {
 			
 	}
 	
+	
+	//Keypress event
+	Mojo.Event.listen(this.controller.sceneElement, Mojo.Event.keyup, this.handleKey.bind(this));
+	
 };
 
 GuideDetailsAssistant.prototype.deactivate = function(event) {
-	/* remove any event handlers you added in activate and do any other cleanup that should happen before
-	   this scene is popped or another scene is pushed on top */
+	//Keypress event
+	Mojo.Event.stopListening(this.controller.sceneElement, Mojo.Event.keyup, this.handleKey.bind(this));
 };
 
 GuideDetailsAssistant.prototype.cleanup = function(event) {
@@ -151,9 +155,40 @@ GuideDetailsAssistant.prototype.handleCommand = function(event) {
     }
   } else if(event.type == Mojo.Event.forward) {
 	
-		Mojo.Controller.stageController.pushScene("hostSelector", true);
+		Mojo.Controller.stageController.pushScene(WebMyth.prefsCookieObject.currentRemoteScene);
   }
   
+};
+
+
+GuideDetailsAssistant.prototype.handleKey = function(event) {
+
+	Mojo.Log.info("handleKey %o, %o", event.originalEvent.metaKey, event.originalEvent.keyCode);
+	
+	if(event.originalEvent.metaKey) {
+		switch(event.originalEvent.keyCode) {
+			case 71:
+				Mojo.Log.info("g - shortcut key to guide");
+				Mojo.Controller.stageController.swapScene("guide");	
+				break;
+			case 82:
+				Mojo.Log.info("r - shortcut key to recorded");
+				Mojo.Controller.stageController.swapScene("recorded");
+				break;
+			case 83:
+				Mojo.Log.info("s - shortcut key to status");
+				Mojo.Controller.stageController.swapScene("status");
+				break;
+			case 85:
+				Mojo.Log.info("u - shortcut key to upcoming");
+				Mojo.Controller.stageController.swapScene("upcoming");
+				break;
+			default:
+				Mojo.Log.info("No shortcut key");
+				break;
+		}
+	}
+	Event.stop(event); 
 };
 
 
@@ -274,31 +309,11 @@ GuideDetailsAssistant.prototype.startChannelPlay = function(host) {
 	//Attempting to play livetv - have to start livetv then change channel
 	Mojo.Log.info("Playing channel "+this.guideObject.chanId);
 	
-	if (Mojo.appInfo.skipPDK == "true") {
-		//Mojo.Controller.getAppController().showBanner("Sending command to telnet", {source: 'notification'});
-		
-		var requestUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webmythPythonFile;
-		requestUrl += "?op=remote&type=play";
-		requestUrl += "&host="+this.host+"&cmd=chanid+"+this.guideObject.chanId;
-		
-		Mojo.Log.error("requesting channel URL : "+requestUrl);
+	var cmd = "chanid+"+this.guideObject.chanId;
+	WebMyth.sendPlay(cmd);
 	
-		var request1 = new Ajax.Request(requestUrl, {
-			method: 'get',
-			onSuccess: function(transport1){
-				//OK ?
-			},
-			onFailure: function() {
-				Mojo.Log.error("Failed AJAX: '%s'", requestURL);
-				Mojo.Controller.getAppController().showBanner("ERROR - check remote.py scipt", {source: 'notification'});
-			}
-		});
-	}
-	else {
-		$('telnetPlug').SendTelnet(value);
-	}
 	
-	if(WebMyth.prefsCookieObject.playJumpRemote)  Mojo.Controller.stageController.pushScene("hostSelector", true);
+	if(WebMyth.prefsCookieObject.playJumpRemote)  Mojo.Controller.stageController.pushScene(WebMyth.prefsCookieObject.currentRemoteScene);
 	
 };
 

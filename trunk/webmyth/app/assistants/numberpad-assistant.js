@@ -409,7 +409,8 @@ NumberpadAssistant.prototype.handleKey = function(event) {
 NumberpadAssistant.prototype.sendTelnetKey = function(value, event){
 	//this.sendTelnet("key "+value);
 	
-	this.controller.stageController.parentSceneAssistant(this).sendKey(value); 
+	//this.controller.stageController.parentSceneAssistant(this).sendKey(value); 
+	WebMyth.sendKey(value);
 	
 	if(WebMyth.prefsCookieObject.remoteVibrate) {
 		this.controller.stageController.getAppController().playSoundNotification( "vibrate", "" );
@@ -418,17 +419,6 @@ NumberpadAssistant.prototype.sendTelnetKey = function(value, event){
 	//Mojo.Log.info("Sending command '%s' to host", value);
 };
 
-NumberpadAssistant.prototype.sendJumpPoint = function(value, event){
-	//this.sendTelnet("key "+value);
-	
-	this.controller.stageController.parentSceneAssistant(this).sendJump(value); 
-	
-	if(WebMyth.prefsCookieObject.remoteVibrate) {
-		this.controller.stageController.getAppController().playSoundNotification( "vibrate", "" );
-	};
-	
-	//Mojo.Log.info("Sending command '%s' to host", value);
-};
 
 NumberpadAssistant.prototype.sendTelnet = function(value, event){
 	//$('telnetPlug').SendTelnet(value);

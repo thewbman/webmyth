@@ -106,56 +106,24 @@ RecordedAssistant.prototype.setup = function() {
 	//this.controller.listen(this.controller.get( "recordedList" ), Mojo.Event.filter, this.searchFilter.bind(this));
 		
 	
-	/*
-	//Update list from mysql script
-	Mojo.Log.info('Starting remote data gathering');
-	
-	var requestUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webMysqlFile;
- 
-    try {
-        var request = new Ajax.Request(requestUrl,{
-            method: 'post',
-			parameters: {'op': 'getRecorded'},
-            evalJSON: 'true',
-            onSuccess: this.readRemoteDbTableSuccess.bind(this),
-            onFailure: this.useLocalDataTable.bind(this)  
-        });
-    }
-    catch(e) {
-        Mojo.Log.error(e);
-    }
-	*/
-	//Update list from python script
-	Mojo.Log.info('Starting remote data gathering');
-	
-	var requestUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webmythPythonFile;
-	requestUrl += "?op=getRecorded";
- 
-    try {
-        var request = new Ajax.Request(requestUrl,{
-            method: 'get',
-            evalJSON: 'true',
-            onSuccess: this.readRemoteDbTableSuccess.bind(this),
-            onFailure: this.useLocalDataTable.bind(this)  
-        });
-    }
-    catch(e) {
-        Mojo.Log.error(e);
-    }
-	   
+	this.getRecorded();
 	
 };
 
 RecordedAssistant.prototype.activate = function(event) {
-	/* put in event handlers here that should only be in effect when this scene is active. For
-	   example, key handlers that are observing the document */
-	   
-	   
+	//Keypress event
+	Mojo.Event.listen(this.controller.sceneElement, Mojo.Event.keyup, this.handleKey.bind(this));
+	
+	//Vibrate event
+	Mojo.Event.listen(document, 'shakestart', this.handleShakestart.bindAsEventListener(this));
 };
 
 RecordedAssistant.prototype.deactivate = function(event) {
-	/* remove any event handlers you added in activate and do any other cleanup that should happen before
-	   this scene is popped or another scene is pushed on top */
+	//Keypress event
+	Mojo.Event.stopListening(this.controller.sceneElement, Mojo.Event.keyup, this.handleKey.bind(this));
+	
+	//Vibrate event
+	Mojo.Event.stopListening(document, 'shakestart', this.handleShakestart.bindAsEventListener(this));
 	   
 	   
 	WebMyth.prefsCookie.put(WebMyth.prefsCookieObject);
@@ -190,8 +158,81 @@ RecordedAssistant.prototype.handleCommand = function(event) {
     }
   } else if(event.type == Mojo.Event.forward) {
 	
-		Mojo.Controller.stageController.pushScene("hostSelector", true);
+		Mojo.Controller.stageController.pushScene(WebMyth.prefsCookieObject.currentRemoteScene);
   }
+  
+};
+
+RecordedAssistant.prototype.handleKey = function(event) {
+
+	Mojo.Log.info("handleKey %o, %o", event.originalEvent.metaKey, event.originalEvent.keyCode);
+	
+	if(event.originalEvent.metaKey) {
+		switch(event.originalEvent.keyCode) {
+			case 71:
+				Mojo.Log.info("g - shortcut key to guide");
+				Mojo.Controller.stageController.swapScene("guide");	
+				break;
+			case 82:
+				Mojo.Log.info("r - shortcut key to recorded");
+				Mojo.Controller.stageController.swapScene("recorded");
+				break;
+			case 83:
+				Mojo.Log.info("s - shortcut key to status");
+				Mojo.Controller.stageController.swapScene("status");
+				break;
+			case 85:
+				Mojo.Log.info("u - shortcut key to upcoming");
+				Mojo.Controller.stageController.swapScene("upcoming");
+				break;
+			default:
+				Mojo.Log.info("No shortcut key");
+				break;
+		}
+	}
+	Event.stop(event); 
+	
+};
+
+RecordedAssistant.prototype.handleShakestart = function(event) {
+
+	Mojo.Log.info("Start Shaking");
+	Event.stop(event);
+	
+	
+	//Stop spinner and hide
+	this.spinnerModel.spinning = true;
+	this.controller.modelChanged(this.spinnerModel, this);
+	$('myScrim').show()	
+	
+	
+	this.getRecorded();
+  
+};
+
+
+
+
+
+RecordedAssistant.prototype.getRecorded = function() {
+
+	//Update list from python script
+	Mojo.Log.info('Starting remote data gathering');
+	
+	var requestUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webmythPythonFile;
+	requestUrl += "?op=getRecorded";
+ 
+    try {
+        var request = new Ajax.Request(requestUrl,{
+            method: 'get',
+            evalJSON: 'true',
+            onSuccess: this.readRemoteDbTableSuccess.bind(this),
+            onFailure: this.useLocalDataTable.bind(this)  
+        });
+    }
+    catch(e) {
+        Mojo.Log.error(e);
+    }
   
 };
 

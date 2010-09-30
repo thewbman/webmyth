@@ -26,6 +26,7 @@ function GuideAssistant() {
 	this.timeObject, this.timeISO;
 	this.timeJS = new Date();
 	this.day, this.dayRange;
+	this.index = 10000;
 	
 	this.currentTimeObject = {};
 	this.currentTimeISO = "";
@@ -84,6 +85,7 @@ GuideAssistant.prototype.setup = function() {
 		itemTemplate: "guide/guideListItem",
 		//listTemplate: "guide/guideListTemplate",
 		dividerTemplate: "guide/guideDivider",
+		renderLimit: 10000,
 		swipeToDelete: false,
 		filterFunction: this.filterListFunction.bind(this),
 		dividerFunction: this.guideDividerFunction.bind(this),
@@ -135,13 +137,19 @@ GuideAssistant.prototype.setup = function() {
 };
 
 GuideAssistant.prototype.activate = function(event) {
-	/* put in event handlers here that should only be in effect when this scene is active. For
-	   example, key handlers that are observing the document */
+	//Keypress event
+	Mojo.Event.listen(this.controller.sceneElement, Mojo.Event.keyup, this.handleKey.bind(this));
+	
+	//Vibrate event
+	Mojo.Event.listen(document, 'shakestart', this.handleShakestart.bindAsEventListener(this));
 };
 
 GuideAssistant.prototype.deactivate = function(event) {
-	/* remove any event handlers you added in activate and do any other cleanup that should happen before
-	   this scene is popped or another scene is pushed on top */
+	//Keypress event
+	Mojo.Event.stopListening(this.controller.sceneElement, Mojo.Event.keyup, this.handleKey.bind(this));
+	
+	//Vibrate event
+	Mojo.Event.stopListening(document, 'shakestart', this.handleShakestart.bindAsEventListener(this));
 };
 
 GuideAssistant.prototype.cleanup = function(event) {
@@ -154,7 +162,7 @@ GuideAssistant.prototype.handleCommand = function(event) {
 		switch(event.command) {
 			case 'do-guidePrevious':
 				//adsf
-				Mojo.Log.error("selected guide previous");
+				Mojo.Log.info("selected guide previous");
 				
 				if(this.layoutStyle == 'channel') {
 				
@@ -177,7 +185,7 @@ GuideAssistant.prototype.handleCommand = function(event) {
 			  break;
 			case 'do-guideNext':
 				//adsf
-				Mojo.Log.error("selected guide next");
+				Mojo.Log.info("selected guide next");
 				
 				if(this.layoutStyle == 'channel') {
 				
@@ -248,9 +256,81 @@ GuideAssistant.prototype.handleCommand = function(event) {
 			  break;
 		}
 	} else if(event.type == Mojo.Event.forward) {
-		Mojo.Controller.stageController.pushScene("hostSelector", true);
+		Mojo.Controller.stageController.pushScene(WebMyth.prefsCookieObject.currentRemoteScene);
 	}
 		  
+};
+
+
+GuideAssistant.prototype.handleKey = function(event) {
+
+	Mojo.Log.info("handleKey %o, %o", event.originalEvent.metaKey, event.originalEvent.keyCode);
+	
+	if(event.originalEvent.metaKey) {
+		switch(event.originalEvent.keyCode) {
+			case 71:
+				Mojo.Log.info("g - shortcut key to guide");
+				Mojo.Controller.stageController.swapScene("guide");	
+				break;
+			case 82:
+				Mojo.Log.info("r - shortcut key to recorded");
+				Mojo.Controller.stageController.swapScene("recorded");
+				break;
+			case 83:
+				Mojo.Log.info("s - shortcut key to status");
+				Mojo.Controller.stageController.swapScene("status");
+				break;
+			case 85:
+				Mojo.Log.info("u - shortcut key to upcoming");
+				Mojo.Controller.stageController.swapScene("upcoming");
+				break;
+			default:
+				Mojo.Log.info("No shortcut key");
+				break;
+		}
+	}
+	Event.stop(event); 
+	
+};
+
+GuideAssistant.prototype.handleShakestart = function(event) {
+
+	Mojo.Log.info("Start Shaking");
+	Event.stop(event);
+	
+	
+	//Stop spinner and hide
+	this.spinnerModel.spinning = true;
+	this.controller.modelChanged(this.spinnerModel, this);
+	$('myScrim').show()	
+	
+	
+	
+	//Get system time
+	this.controller.serviceRequest('palm://com.palm.systemservice/time', {
+		method:"getSystemTime",
+		parameters:{},
+		onSuccess: function(response) {
+		
+			//Mojo.Log.info("time serivce reponse is %j", response);
+			//Mojo.Log.info("time serivce localtime is %j", response.localtime);
+		
+			this.currentTimeObject = response.localtime;
+			this.timeObject = this.currentTimeObject;
+			this.currentTimeISO = dateObjectToISO(this.currentTimeObject); 
+			this.currentDayRange = dateObjectToDayRange(this.currentTimeObject);
+			
+			//Mojo.Log.error("current time is %j", this.currentTimeObject);
+			//Mojo.Log.error("ISO date is "+this.currentTimeISO);
+			//Mojo.Log.error("current day range is %j",this.currentDayRange);
+			
+			//Update list from backend XML
+			this.getGuideData();
+		}.bind(this),
+		onFailure: function() {}
+	}); 
+	
+  
 };
 
 
@@ -319,6 +399,13 @@ GuideAssistant.prototype.filterListFunction = function(filterString, listWidget,
 	listWidget.mojo.noticeUpdatedItems(offset, this.subset);
 	listWidget.mojo.setLength(totalSubsetSize);
 	listWidget.mojo.setCount(totalSubsetSize);
+	
+	if((this.layoutStyle == "channel")&&(this.currentDayRange.EndTime == this.dayRange.EndTime)) {
+		
+		this.controller.sceneScroller.mojo.revealElement(this.controller.get("Now Airing"));
+		this.controller.sceneScroller.mojo.adjustBy(0,-300);
+		
+	}
 	
 
 };
@@ -420,7 +507,7 @@ GuideAssistant.prototype.popupHandler = function(event) {
 			
 		break;
 		default:
-			Mojo.Log.error("event,newChan is %j",event);
+			Mojo.Log.error("unknown event is %j",event);
 		break;
 	}
   
@@ -471,7 +558,7 @@ GuideAssistant.prototype.jumpLiveTV = function() {
 		$('telnetPlug').SendTelnet(value);
 	}
 	
-	if(WebMyth.prefsCookieObject.playJumpRemote)  Mojo.Controller.stageController.pushScene("hostSelector", true);
+	if(WebMyth.prefsCookieObject.playJumpRemote)  Mojo.Controller.stageController.pushScene(WebMyth.prefsCookieObject.currentRemoteScene);
 	
 				
 };
@@ -557,31 +644,12 @@ GuideAssistant.prototype.startChannelPlay = function() {
 	//Attempting to play livetv - have to start livetv then change channel
 	Mojo.Log.info("Playing channel "+this.channid);
 	
-	if (Mojo.appInfo.skipPDK == "true") {
-		//Mojo.Controller.getAppController().showBanner("Sending command to telnet", {source: 'notification'});
-		
-		var requestUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webmythPythonFile;
-		requestUrl += "?op=remote&type=play";
-		requestUrl += "&host="+this.host+"&cmd=chanid+"+this.channid;
-		
-		Mojo.Log.error("requesting channel URL : "+requestUrl);
+	var cmd = "chanid+"+this.channid;
 	
-		var request1 = new Ajax.Request(requestUrl, {
-			method: 'get',
-			onSuccess: function(transport1){
-				//OK ?
-			},
-			onFailure: function() {
-				Mojo.Log.error("Failed AJAX: '%s'", requestURL);
-				Mojo.Controller.getAppController().showBanner("ERROR - check remote.py scipt", {source: 'notification'});
-			}
-		});
-	}
-	else {
-		$('telnetPlug').SendTelnet(value);
-	}
+	WebMyth.sendPlay(cmd);
 	
-	if(WebMyth.prefsCookieObject.playJumpRemote)  Mojo.Controller.stageController.pushScene("hostSelector", true);
+	
+	if(WebMyth.prefsCookieObject.playJumpRemote)  Mojo.Controller.stageController.pushScene(WebMyth.prefsCookieObject.currentRemoteScene);
 	
 };
 
@@ -607,7 +675,7 @@ GuideAssistant.prototype.selectedChannel = function() {
 			
 	//Request and show data
 	this.controller.sceneScroller.mojo.revealTop();
-	this.filterListFunction(' ', this.controller.get('guideList'), 0, this.resultList.length);
+	//this.filterListFunction(' ', this.controller.get('guideList'), 0, this.resultList.length);
 	this.getGuideData();
 				
 };
@@ -670,6 +738,8 @@ GuideAssistant.prototype.selectedNow = function() {
 
 
 GuideAssistant.prototype.guideDividerFunction = function(itemModel) {
+
+	//Mojo.Log.error("item model is %j",itemModel);
 	
 	var divider = "Unknown";
 	
@@ -690,7 +760,7 @@ GuideAssistant.prototype.setMyData = function(propertyValue, model) {
 	var guideDetailsText = '';
 	
 	if(model.recStatus == '-10') {
-		guideDetailsText += '<div class="palm-row multi-line guide-list-item recordingStatus'+model.recStatus+'>';
+		guideDetailsText += '<div id='+model.chanId+model.startTime+' class="palm-row multi-line guide-list-item recordingStatus'+model.recStatus+'>';
 		guideDetailsText += '<div class="palm-row-wrapper guide-list-item multi-line"><div>';
 	} else {
 		guideDetailsText += '<div class="palm-row guide-list-item-extended recordingStatus'+model.recStatus+'>';
@@ -750,15 +820,15 @@ GuideAssistant.prototype.getGuideData = function() {
 		requestUrl += "&StartChanId="+this.channid;
 	}
 	
-	//Mojo.Log.info("URL is: "+requestUrl);
+	Mojo.Log.info("Guide URL is: "+requestUrl);
 	
 	
     try {
         var request = new Ajax.Request(requestUrl,{
             method: 'get',
 			evalJSON: false,
-            onSuccess: this.readStatusSuccess.bind(this),
-            onFailure: this.readStatusFail.bind(this)  
+            onSuccess: this.readGuideSuccess.bind(this),
+            onFailure: this.readGuideFail.bind(this)  
         });
     }
     catch(e) {
@@ -770,13 +840,13 @@ GuideAssistant.prototype.getGuideData = function() {
 };
 
 
-GuideAssistant.prototype.readStatusFail = function() {
+GuideAssistant.prototype.readGuideFail = function() {
 	Mojo.Log.error("Failed to get guide information");	
 	Mojo.Controller.errorDialog("Failed to get guide information");
 
 };
 
-GuideAssistant.prototype.readStatusSuccess = function(response) {
+GuideAssistant.prototype.readGuideSuccess = function(response) {
 	
 	var xmlstring = response.responseText.trim();
 	//Mojo.Log.info("Got XML guide response from backend: "+xmlstring);

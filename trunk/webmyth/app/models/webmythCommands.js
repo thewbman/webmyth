@@ -317,7 +317,7 @@ var cutoutHostname = function(fullList, myHostname) {
 		}
 		
 		if(trimmedList.length == 0) {
-			return defaultHostsList();
+			return fullList;
 		} else {
 			return trimmedList;
 		}
@@ -665,19 +665,19 @@ var dateObjectSubtractOneDay = function(dateObject) {
 				newDate.month = 7;
 			break;
 			case 9:		//sep
-				newDate.day = 30;
+				newDate.day = 31;
 				newDate.month = 8;
 			break;
 			case 10:		//oct
-				newDate.day = 31;
+				newDate.day = 30;
 				newDate.month = 9;
 			break;
 			case 11:		//nov
-				newDate.day = 30;
+				newDate.day = 31;
 				newDate.month = 10;
 			break;
 			case 12:		//dec
-				newDate.day = 31;
+				newDate.day = 30;
 				newDate.month = 11;
 			break;
 		}
