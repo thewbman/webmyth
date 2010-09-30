@@ -1,0 +1,458 @@
+/* TODO: put your application-specific CSS here */
+
+.buttonClass3 {
+	height: 30px;
+	width: 100px;
+	margin: 5px;
+	padding: 0px;
+	
+	text-align: center;
+	vertical-align: middle;
+	color: white;
+	
+	float: left;
+}
+
+.buttonClass4 {
+	height: 30px;
+	width: 93px;
+	margin: 0px -5px;
+	padding: 0px -5px;
+	
+	text-align: center;
+	vertical-align: middle;
+	color: white;
+	
+	float: left;
+}
+
+.palm-dark .masterRemote .small-button .palm-button-wrapper {
+	color: white;
+}
+
+.italics {
+	font-style: italic
+}
+
+.centered {
+	text-align: center;
+	vertical-align: middle;
+}
+
+.noButton {
+
+	height: 30px;
+	width: 90px;
+	margin: 5px;
+	padding: 0px;
+	
+	float: left;
+
+}
+
+.buttonRow3 {
+	width: 100%;
+	margin: 0 0px 0 0px;
+	height: 50px;
+	min-height: 50px;
+}
+
+.buttonRow4 {
+	width: 100%;
+	margin: 0 0px 0 0px;
+	height: 30px;
+	min-height: 30px;
+}
+
+.emptybuttonRow20 {
+	width: 100%;
+	margin: 0 0px 0 0px;
+	height: 20px;
+	min-height: 20px;
+}
+
+.emptybuttonRow40 {
+	width: 100%;
+	margin: 0 0px 0 0px;
+	height: 15px;
+	min-height: 15px;
+}
+
+.column1of3 {
+	float: left;
+	width: 33%;
+}
+
+.column2of3 {
+	float: left;
+	width: 33%;
+}
+
+.column3of3 {
+	float: left;
+	width: 33%;
+}
+
+.column1of4 {
+	float: left;
+	width: 25%;
+}
+
+.column2of4 {
+	float: left;
+	width: 25%;
+}
+
+.column3of4 {
+	float: left;
+	width: 25%;
+}
+
+.column4of4 {
+	float: left;
+	width: 25%;
+}
+
+.flickNavButton {		/* defaults for 320x400 */
+	float: left;
+	width: 160px;
+	height: 160px;
+	margin: 10px 80px 10px 80px;
+	-webkit-border-radius: 80px;
+	border-radius: 80px;
+	
+	border-style: solid;
+	border-color: #000000;
+	background-color: #333333;
+	
+	text-align: center;
+	vertical-align: middle;
+	
+}
+
+.flickNavButton:active {
+	background-color: #222222;
+}
+
+.height-480 .flickNavButton {
+	width: 240px;
+	height: 240px;
+	margin: 10px 40px;
+	-webkit-border-radius: 120px;
+}
+
+.height-480 .emptybuttonRow40 {
+	height: 40px;
+	min-height: 40px;
+}
+
+.flickRow {
+	float: left;
+	width: 260px;
+	height: 40px;
+	margin: 10px 30px 10px 30px;
+	-webkit-border-radius: 20px;
+	border-radius: 20px;
+	
+	border-style: solid;
+	border-color: #000000;
+	background-color: #333333;
+	
+	text-align: center;
+	vertical-align: middle;
+	font-size: 28px;
+}
+
+.flickRow:active {
+	background-color: #222222;
+}
+
+.flickEscButton {
+	position: absolute;
+	left: 10px;
+	height: 40px;
+	width: 40px;
+	-webkit-border-radius: 20px;
+	border-radius: 20px;
+	
+	border-style: solid;
+	border-color: #000000;
+	background-color: #333333;
+	
+	text-align: center;
+	vertical-align: middle;
+	font-size: 28px;
+}
+
+.flickEscButton:active {
+	background-color: #222222;
+}
+
+
+#recorded-header-menu-button {
+	position: absolute;
+	right: -18px;
+	top: 6px;
+	width: 100px;
+	-webkit-border-radius: 15px;
+	text-transform: none;
+	vertical-align: middle;
+	padding: 4px 4px 4px 4px;
+	color: white;
+}
+
+#welcome-header-icon {
+	background: url('../images/icon-48x48.png');
+	background-repeat: no-repeat;
+	
+	width: 64px;
+	height: 64px;
+	
+	top: 10px;
+	left: 12px;
+}
+
+.filter-field-container-height {
+	height: 96px;
+}
+
+
+/*  Recorded scene items  */
+.palm-row.multi-line.Deleted {
+	text-decoration: line-through;
+}
+
+.palm-row.multi-line.Default {
+
+}
+
+.recorded-list-item {
+	height: 100px
+}
+
+.guide-scene .filter-field-container-height {
+	height: 55px;
+}
+
+.guide-list-item {
+	height: 100px
+}
+
+.guide-list-item-extended {
+	height: 135px
+}
+
+.guide-recStatusText {
+	padding: 0px;
+	margin: 0px;
+	font-size: 20px;
+	font-weight: normal;
+}
+
+.guide-recStatusRow {
+	padding: 6px;
+	height: 20px;
+	width: 100%
+}
+
+.chanNum-no-icon {
+	padding: 40px 0px 0px 0px;
+	height: 45px;
+	text-align: center;
+}
+
+.guide-left-list-image {
+	height: 100px;
+	width: 23%;
+	float: left;
+	text-align: center;
+}
+
+.guide-right-list-text {
+	height: 100px;
+	width: 77%;
+	float: right;
+}
+
+.guide-channelicon-small {
+	padding: 10px 5px 0px 10px;
+	width: 60px;
+	height: 45px;
+	border: 0px; 
+}
+
+.upcoming-list-item {
+	height: 100px
+}
+
+.upcoming-list-title {
+	height: 26px
+}
+
+.left-list-image {
+	height: 100px;
+	width: 35%;
+	float: left;
+}
+
+.right-list-text {
+	height: 100px;
+	width: 65%;
+	float: right;
+}
+
+.left-list-text {
+	height: 60px;
+	width: 75%;
+	float: left;
+}
+
+.right-list-image {
+	height: 60px;
+	width: 25%;
+	float: right;
+}
+
+.recorded-screenshot {
+	padding: 10px;
+	width: 300px;
+	text-align: center;
+	border: 0px; 
+	-webkit-border-radius: 5px;
+}
+
+.recorded-screenshot-small {
+	padding: 2px;
+	width: 120px;
+	height: 90px;
+	text-align: center;
+	border: 0px; 
+}
+
+.upcoming-channelicon-small {
+	padding: 2px 2px;
+	width: 60px;
+	height: 45px;
+	text-align: center;
+	border: 0px; 
+}
+
+.enabled-0 {
+	innerHtml: 'Disabled'
+}
+
+.enabled-1 {
+	innerHtml: 'Enabled'
+}
+
+.palm-info-text.right {
+	text-align:right;
+}
+
+
+
+/*
+ * Welcome Scene Styles
+*/
+.welcome .palm-page-header-wrapper {
+	min-height: 67px;
+}
+
+.welcome .palm-page-header-wrapper .title {
+	padding-left: 80px;
+}
+
+.welcome .palm-page-header-wrapper .title.main {
+	font-size: 30px;
+	padding-top: 5px;
+	padding-bottom: 0px;
+}
+
+.welcome .palm-page-header-wrapper .sub {
+	padding-left: 80px;
+	font-size: 14px;
+	padding-top: 0px;
+	margin-top: 0px;
+	padding-bottom: 5px;
+}
+
+/*
+ * Status scene
+ */
+ 
+.status .scheduled-list .complete-scheduled-item {
+	height: 135px;
+}
+
+.status  .storage-list .complete-storage-item {
+	height: 150px;
+}
+
+
+
+
+.palm-dark .dateAndTimePicker  .palm-row {
+	color: #000;
+}
+
+.palm-dark .dateAndTimePicker  .mv-value {
+	color: #000;
+}
+
+.palm-dark .dateAndTimePicker .mv-picker-container,
+.palm-dark .dateAndTimePicker .mv-picker-capsule {
+  -webkit-border-image: url(../images/mv-picker/background-pill.png) 19 19 19 19 repeat repeat;
+}
+
+.palm-dark .dateAndTimePicker .active-popup .focused .mv-picker-capsule,
+.palm-dark .dateAndTimePicker .active-popup .focused .mv-picker-container {
+  -webkit-border-image: url(../images/mv-picker/background-pill-focus.png) 19 19 19 19 repeat repeat;
+}
+
+.palm-dark .dateAndTimePicker .mv-picker-capsule:focus {
+  -webkit-border-image: url(../images/mv-picker/background-pill-text-input.png) 19 19 19 19 repeat repeat;
+}
+
+.palm-dark .dateAndTimePicker .mv-picker-capsule.selected {
+  -webkit-border-image: url(../images/mv-picker/background-pill-downstate.png) 19 19 19 19 repeat repeat;
+}
+
+.palm-dark .dateAndTimePicker .mv-top-fade {
+  -webkit-border-image: url(../images/mv-picker/mv-list-top-fade.png) 0 19 0 19 repeat repeat;
+}
+
+.palm-dark .dateAndTimePicker .mv-bottom-fade {
+  -webkit-border-image: url(../images/mv-picker/mv-list-bottom-fade.png) 0 19 0 19 repeat repeat;
+}
+
+.palm-dark .dateAndTimePicker .mv-picker-capsule:focus .mv-value {
+  color: #000;
+}
+
+.palm-dark .dateAndTimePicker .picker-popup {
+  background: url(../images/mv-picker/list-separator.png) bottom left repeat-x;
+}
+
+.palm-dark .dateAndTimePicker .picker-popup.selected {
+  background: #555555;
+}
+
+
+
+
+
+
+
+
+
+
+
+.upcomingDetails-channel-img {
+	padding: 3px 110px;
+	width: 100px;
+}
+
+.guideDetails-channel-img {
+	padding: 3px 110px;
+	width: 100px;
+}

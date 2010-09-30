@@ -1,0 +1,15 @@
+To Do - planned new features and updates:
+ 
+//Future
+ - new app icons/theme
+ - check if incoming call and pause
+ - add tips scene
+ - add changelog scene (automatic on launch?)
+ - cleanup flick remote scene w/back key
+ - Sort by category in recorded upcoming amd guide
+ - check vibration settings
+
+//Very long term
+ - New recording schedule from guide
+ - notifications (remote)
+
