@@ -62,6 +62,17 @@ PreferencesAssistant.prototype.setup = function() {
          },
          this.webmythPythonFileTextModel
     ); 
+/*	//Download/Stream to device
+	this.allowDownloadStreamToggleModel = {
+             value: false
+    };
+	this.controller.setupWidget("allowDownloadStreamToggleId",
+        {
+			label: $L("Stream to Device"),
+            modelProperty: "value"
+         },
+         this.allowDownloadStreamToggleModel
+    );														*/
 	//Manual master backend
 	this.manualMasterBackendToggleModel = {
              value: false
@@ -168,6 +179,17 @@ PreferencesAssistant.prototype.setup = function() {
             modelProperty: "value"
          },
          this.playJumpRemoteToggleModel
+    ); 
+	//Remote starts when guide livetv starts
+	this.guideJumpRemoteToggleModel = {
+             value: false
+    };
+	this.controller.setupWidget("guideJumpRemoteToggleId",
+        {
+			label: $L("guideJumpRemote"),
+            modelProperty: "value"
+         },
+         this.guideJumpRemoteToggleModel
     ); 
 	
 	
@@ -300,6 +322,9 @@ PreferencesAssistant.prototype.activate = function(event) {
 			
 			
 			//Update toggles from cookie
+			//this.allowDownloadStreamToggleModel.value = WebMyth.prefsCookieObject.allowRecordedDownloads;
+			//this.controller.modelChanged(this.allowDownloadStreamToggleModel);
+			
 			this.manualMasterBackendToggleModel.value = WebMyth.prefsCookieObject.manualMasterBackend;
 			this.controller.modelChanged(this.manualMasterBackendToggleModel);
 			
@@ -314,6 +339,9 @@ PreferencesAssistant.prototype.activate = function(event) {
 			
 			this.playJumpRemoteToggleModel.value = WebMyth.prefsCookieObject.playJumpRemote;
 			this.controller.modelChanged(this.playJumpRemoteToggleModel);
+			
+			this.guideJumpRemoteToggleModel.value = WebMyth.prefsCookieObject.guideJumpRemote;
+			this.controller.modelChanged(this.guideJumpRemoteToggleModel);
 			
 			this.metrixToggleModel.value = WebMyth.prefsCookieObject.allowMetrix;
 			this.controller.modelChanged(this.metrixToggleModel);
@@ -479,6 +507,7 @@ PreferencesAssistant.prototype.checkSettings = function() {
 	
 		WebMyth.prefsCookieObject.webserverName = this.webserverTextModel.value;
 		WebMyth.prefsCookieObject.webmythPythonFile = this.webmythPythonFileTextModel.value;
+		//WebMyth.prefsCookieObject.allowRecordedDownloads = this.allowDownloadStreamToggleModel.value;
 		WebMyth.prefsCookieObject.manualMasterBackend = this.manualMasterBackendToggleModel.value;
 		WebMyth.prefsCookieObject.masterBackendIp = this.masterBackendTextModel.value;
 		
@@ -488,6 +517,7 @@ PreferencesAssistant.prototype.checkSettings = function() {
 		WebMyth.prefsCookieObject.remoteVibrate = this.vibrateToggleModel.value;
 		WebMyth.prefsCookieObject.remoteFullscreen = this.remoteFullscreenToggleModel.value;
 		WebMyth.prefsCookieObject.playJumpRemote = this.playJumpRemoteToggleModel.value;
+		WebMyth.prefsCookieObject.guideJumpRemote = this.guideJumpRemoteToggleModel.value;
 		
 		WebMyth.prefsCookieObject.allowMetrix = this.metrixToggleModel.value;
 		

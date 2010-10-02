@@ -105,6 +105,11 @@ WebMyth.hostsCookieObject = WebMyth.hostsCookie.get();
 //Cookie for remote
 WebMyth.remoteCookie = new Mojo.Model.Cookie('remote');
 WebMyth.remoteCookieObject = WebMyth.remoteCookie.get();
+	
+	
+//Cookie for guide settings
+WebMyth.guideCookie = new Mojo.Model.Cookie('quide');
+WebMyth.guideCookieObject = WebMyth.guideCookie.get();
 
 
 //Current script verion

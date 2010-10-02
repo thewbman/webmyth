@@ -136,6 +136,7 @@ function defaultCookie() {
 		masterBackendIp: '',
 		manualMasterBackend: false,
 		playJumpRemote: true,
+		guideJumpRemote: false,
 		showUpcomingChannelIcons: true
 	};
 	
@@ -688,6 +689,65 @@ var dateObjectSubtractOneDay = function(dateObject) {
 };
 
 
+var dateObjectTo30min = function(dateObject) { 
+
+	var newDate = dateObject;
+	
+	if(newDate.minute >= 30) {
+		newDate.minute = 30;
+	} else {
+		newDate.minute = 00;
+	}
+	
+	newDate.second = 01;
+		
+	return newDate;
+	
+};
+
+
+var dateObjectAdd30Min = function(dateObject) { 
+
+	var newDate = dateObject;
+	newDate.minute = 30+newDate.minute;
+	
+	if(newDate.minute == 60) {		//if we need to wrap to next hour
+		newDate.minute = 0;
+		newDate.hour++;
+		
+		if(newDate.hour == 24) {
+			newDate.hour = 0;
+			newDate = dateObjectAddOneDay(newDate);
+		}
+		
+	}
+		
+	return newDate;
+	
+};
+
+
+var dateObjectSubtract30Min = function(dateObject) { 
+
+	var newDate = dateObject;
+	newDate.minute = newDate.minute-30;
+	
+	if(newDate.minute == -30) {		//if we need to wrap to next hour
+		newDate.minute = 30;
+		newDate.hour--;
+		
+		if(newDate.hour == -1) {
+			newDate.hour = 23;
+			newDate = dateObjectSubtractOneDay(newDate);
+		}
+		
+	}
+		
+	return newDate;
+	
+};
+
+
 function doHelpEmail() {
 	
 	this.controller.serviceRequest(
@@ -866,7 +926,7 @@ var recStatusDecode = function(recStatusInt) {
 			break;
 			
 			default:
-				newStatusText = "No matching recording rule";
+				newStatusText = " No matching recording rule";
 			break;
 		}	
 		

@@ -78,6 +78,46 @@
 	min-height: 15px;
 }
 
+.dashboardColumn {
+	float: left;
+	width: 20%;
+	margin: 0px;
+	padding: 0px;
+}
+
+.dashboardButtonRow {
+	width: 100%;
+	margin: 0 0px 0 0px;
+	height: 40px;
+	min-height: 40px;
+	margin: 0px;
+	padding: 0px;
+}
+
+.dashboardButtonClass {
+	height: 30px;
+	width: 40px;
+	margin: 2px;
+	padding: 12px 0px;
+	
+    border-style: solid;
+    border-color: #000000;
+	border-radius: 4px;
+	border-width: 1px;
+
+	text-align: center;
+	vertical-align: middle;
+	color: white;
+	
+	float: left;
+}
+
+.dashboardButtonClass.disabled {
+	
+    border-style: none;
+	
+}
+
 .column1of3 {
 	float: left;
 	width: 33%;
@@ -121,6 +161,8 @@
 	-webkit-border-radius: 80px;
 	border-radius: 80px;
 	
+	background: url('../images/mine/arrows-140x140.png') center center no-repeat;
+	
 	border-style: solid;
 	border-color: #000000;
 	background-color: #333333;
@@ -139,6 +181,12 @@
 	height: 240px;
 	margin: 10px 40px;
 	-webkit-border-radius: 120px;
+	
+	background: url('../images/mine/arrows-200x200.png') center center no-repeat;
+}
+
+.height-480 .flickNavButton:active {
+	background-color: #222222;
 }
 
 .height-480 .emptybuttonRow40 {
@@ -232,6 +280,17 @@
 
 .guide-scene .filter-field-container-height {
 	height: 55px;
+}
+
+.guide-scene .guide-right-list-text .guide-list-title {
+  padding: 8px 14px 0px 0px;
+  margin: 0px;
+}
+
+.guide-scene .guide-right-list-text .palm-info-text.left {
+  padding: 0px;
+  margin: 0px 8px;
+  line-height: 16px;
 }
 
 .guide-list-item {
@@ -438,15 +497,6 @@
 }
 
 
-
-
-
-
-
-
-
-
-
 .upcomingDetails-channel-img {
 	padding: 3px 110px;
 	width: 100px;
@@ -455,4 +505,9 @@
 .guideDetails-channel-img {
 	padding: 3px 110px;
 	width: 100px;
+}
+
+
+#webmyth-dashboard-icon {
+	background: url(../images/icon-48x48.png) center left no-repeat;
 }
