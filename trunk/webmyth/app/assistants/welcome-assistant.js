@@ -116,6 +116,7 @@ WelcomeAssistant.prototype.setup = function() {
 		if (WebMyth.prefsCookieObject.manualMasterBackend == null) WebMyth.prefsCookieObject.manualMasterBackend = defaultCookie().manualMasterBackend;
 		if (WebMyth.prefsCookieObject.remoteHeaderAction == null) WebMyth.prefsCookieObject.remoteHeaderAction = defaultCookie().remoteHeaderAction;
 		if (WebMyth.prefsCookieObject.playJumpRemote == null) WebMyth.prefsCookieObject.playJumpRemote = defaultCookie().playJumpRemote;
+		if (WebMyth.prefsCookieObject.guideJumpRemote == null) WebMyth.prefsCookieObject.guideJumpRemote = defaultCookie().guideJumpRemote;
 		if (WebMyth.prefsCookieObject.showUpcomingChannelIcons == null) WebMyth.prefsCookieObject.showUpcomingChannelIcons = defaultCookie().showUpcomingChannelIcons;
 		
 		//Check if scripts need an upgrade message
@@ -183,6 +184,9 @@ WelcomeAssistant.prototype.setup = function() {
 		WebMyth.remoteCookie.put(WebMyth.remoteCookieObject);
 	}
 	
+	
+	//Start dashboard remote
+	//this.startDashboard();
 	
 };
 
@@ -392,5 +396,26 @@ WelcomeAssistant.prototype.readSettingSuccess = function(response) {
 	
 	$('masterIpAddress-title').innerHTML = masterIpAddress;
 	
+};
+
+
+
+
+WelcomeAssistant.prototype.startDashboard = function() {
+
+	dashboardStage = Mojo.Controller.getAppController().getStageController("dashboard");
+	
+	if (dashboardStage) {
+		// Dashboard stage is already open
+		Mojo.Log.info("DELEGATING TO SCENE ASST");
+		//dashboardStage.delegateToSceneAssistant("updateDashboard", launchParams.dashInfo);
+	} else {
+		Mojo.Log.info("No dashboard Stage found.");
+		pushDashboard = function (stageController) {
+			stageController.pushScene('dashboard');
+		};
+		Mojo.Controller.getAppController().createStageWithCallback({name: "dashboard", lightweight: true},
+			pushDashboard, 'dashboard');
+	}	
 	
 };

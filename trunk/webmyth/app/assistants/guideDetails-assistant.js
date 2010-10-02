@@ -313,7 +313,9 @@ GuideDetailsAssistant.prototype.startChannelPlay = function(host) {
 	WebMyth.sendPlay(cmd);
 	
 	
-	if(WebMyth.prefsCookieObject.playJumpRemote)  Mojo.Controller.stageController.pushScene(WebMyth.prefsCookieObject.currentRemoteScene);
+	if(WebMyth.prefsCookieObject.guideJumpRemote)  {
+		Mojo.Controller.stageController.pushScene(WebMyth.prefsCookieObject.currentRemoteScene);
+	}
 	
 };
 

@@ -110,3 +110,13 @@ Releaes 0.2.8:
  - Guide jumps to currently showing on channel list if today
  - Reworked how host cookie is saved, hopefully made more robust
  - Shake to reload on recorded, upcoming, guide, status list
+ - Added back key to flick scene
+ 
+Release 0.2.9: 
+ - Fix MB label in status storage
+ - Added 1/2 hour scrolling for guide
+ - Seperate settings for jump to remote on Guide
+ - Update to guide list layout
+ - Able to sort guide by title and category
+ - Saves last guide sorting choice
+ - Added image to flick navigation

@@ -78,5 +78,9 @@
     {
         "scenes": "guideDetails",
         "source": "app/assistants/guideDetails-assistant.js"
+    },
+    {
+        "scenes": "dashboard",
+        "source": "app/assistants/dashboard-assistant.js"
     }
 ]

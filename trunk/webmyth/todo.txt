@@ -5,10 +5,16 @@ To Do - planned new features and updates:
  - check if incoming call and pause
  - add tips scene
  - add changelog scene (automatic on launch?)
- - cleanup flick remote scene w/back key
  - Sort by category in recorded upcoming amd guide
  - check vibration settings
-
+ - reformat date in details and lists
+ - update current time on guide page change
+ - show arrows for started earlier or going later
+ - recent channel list in guide?
+ - reset list search on changes
+ - play/download on device (using mythweb?)
+ - add new recording schedule (via mtyhweb?)
+ 
 //Very long term
  - New recording schedule from guide
  - notifications (remote)

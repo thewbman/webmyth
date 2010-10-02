@@ -28,6 +28,8 @@ function RecordedDetailsAssistant(detailsObject) {
 	   this.recordedObject = detailsObject;
 	   this.standardFilename = '';
 	   this.downloadOrStream = '';
+	   
+	   this.timeOffsetSeconds = 0;
   
 	   
 }
@@ -87,30 +89,6 @@ RecordedDetailsAssistant.prototype.setup = function() {
 	$('channum-title').innerText = this.recordedObject.channum;
 	$('recstartts-title').innerText = this.recordedObject.recstartts;
 	
-	/*
-	var filenameRequestUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webmythPythonFile;
-	filenameRequestUrl += "?op=getCheckfile&chanid=";
-	filenameRequestUrl += this.recordedObject.chanid+"&starttime=";
-	filenameRequestUrl += this.recordedObject.recstartts;
- 
-    try {
-        var request = new Ajax.Request(filenameRequestUrl,{
-            method: 'get',
-            evalJSON: 'true',
-            onSuccess: function(transport){
-				this.standardFilename = transport.responseText;
-				Mojo.Log.error('recording filename is '+this.standardFilename);
-			},
-            onFailure: function() {
-				Mojo.Log.error("Failed AJAX: '%s'", filenameRequestUrl);
-				Mojo.Controller.getAppController().showBanner("ERROR - check remote.py scipt", {source: 'notification'});
-			} 
-        });
-    }
-    catch(e) {
-        Mojo.Log.error(e);
-    }
-	*/
 };
 
 RecordedDetailsAssistant.prototype.activate = function(event) {
@@ -119,6 +97,7 @@ RecordedDetailsAssistant.prototype.activate = function(event) {
 	var hostsList = [];
 	var i, s;
 
+	/*
 	if(WebMyth.prefsCookieObject.allowRecordedDownloads) {
 		var downloadCmd = { "label": "Download to device", "command": "go-down-download" }
 		var streamCmd = { "label": "Stream to device", "command": "go-down-stream" }
@@ -126,6 +105,7 @@ RecordedDetailsAssistant.prototype.activate = function(event) {
 		hostsList.push(downloadCmd);
 		//hostsList.push(streamCmd);
 	}	
+	*/
 	
 	for (i = 0; i < WebMyth.hostsCookieObject.length; i++) {
 
@@ -259,29 +239,22 @@ RecordedDetailsAssistant.prototype.handleDownload = function(downloadOrStream_in
 	//Mojo.Log.error("Asked to "+downloadOrStream_in+" recorded program");
 	this.downloadOrStream = downloadOrStream_in;
 	
-	var filenameRequestUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webmythPythonFile;
-	filenameRequestUrl += "?op=getCheckfile&chanid=";
-	filenameRequestUrl += this.recordedObject.chanid+"&starttime=";
-	filenameRequestUrl += this.recordedObject.recstartts;
+	var dateJS = new Date(isoSpaceToJS(this.recordedObject.recstartts));
+	
+	Mojo.Log.info("Rec date JS is %j, %s", dateJS, this.recordedObject.recstartts);
+	
+	var filenameRequestUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/mythweb/pl/stream/";
+	filenameRequestUrl += this.recordedObject.chanid+"/";
+	filenameRequestUrl += ((dateJS.getTime()/1000));
+	filenameRequestUrl += ".mp4";
+	
+	Mojo.Log.info("Download URL is "+filenameRequestUrl);
  
 	//try {
         var request = new Ajax.Request(filenameRequestUrl,{
             method: 'get',
             evalJSON: 'true',
             onSuccess: this.downloadStream.bind(this),
-		/*	function(transport){
-				this.standardFilename = transport.responseText.trim();
-				Mojo.Log.error('recording filename is *'+this.standardFilename+'*');
-				
-				if ( downloadOrStream == 'download' ) {
-					Mojo.Log.error("opening downloadRecording with "+this.standardFilename+'.mp4');
-					this.downloadRecording(this.standardFilename+'.mp4').bind(this);
-				} else if( downloadOrStream == 'stream') { 
-					Mojo.Log.error("opening streamRecording with "+this.standardFilename+'.mp4');
-					this.streamRecording(this.standardFilename+'.mp4'.bind(this));
-				}
-			},
-			*/
             onFailure: function() {
 				Mojo.Log.error("Failed AJAX: '%s'", filenameRequestUrl);
 				Mojo.Controller.getAppController().showBanner("ERROR - check remote.py scipt", {source: 'notification'});
@@ -319,7 +292,7 @@ RecordedDetailsAssistant.prototype.downloadStream = function(response) {
 				target: filenameUrl,		
 				mime: "video/mp4",
 				targetFilename: myFilename,
-				subscribe: true,	
+				subscribe: false,	
 				targetDir: "/media/internal/mythtv/"
 			},
 			onSuccess: function(response) {
