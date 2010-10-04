@@ -108,8 +108,13 @@ WebMyth.remoteCookieObject = WebMyth.remoteCookie.get();
 	
 	
 //Cookie for guide settings
-WebMyth.guideCookie = new Mojo.Model.Cookie('quide');
+WebMyth.guideCookie = new Mojo.Model.Cookie('guide3');
 WebMyth.guideCookieObject = WebMyth.guideCookie.get();
+
+	
+//Cookie for guide channels
+WebMyth.guideChannelsCookie = new Mojo.Model.Cookie('guideChannelsList6');
+WebMyth.guideChannelsCookieObject = WebMyth.guideChannelsCookie.get();
 
 
 //Current script verion
@@ -148,6 +153,11 @@ StageAssistant.prototype.setup = function() {
 	//Handle message command from plug-in
 	//$('telnetPlug').pluginMessageFunc = this.pluginMessageFunc.bind(this); 
 	
+	//Notice focus changes for doign dashbaord remote
+	window.document.addEventListener (Mojo.Event.deactivate, this.onBlurHandler.bind(this));
+	window.document.addEventListener (Mojo.Event.activate, this.onFocusHandler.bind(this));
+	
+	Mojo.Log.info("About to start first scene - welcome");
 	
 	//Start first scene
 	this.controller.pushScene("welcome");
@@ -332,6 +342,53 @@ StageAssistant.prototype.handleCommand = function(event) {
     }
   }
 };
+
+
+
+
+StageAssistant.prototype.onBlurHandler = function() {
+	
+	//Add card is minimized
+	Mojo.Log.info("Card is minimized");
+	
+	this.startDashboard();
+	
+};
+
+StageAssistant.prototype.onFocusHandler = function() {
+
+	//App card is now active
+	Mojo.Log.info("Card is active");
+	
+	dashboardStage = Mojo.Controller.getAppController().getStageController("dashboard");
+	
+	dashboardStage.delegateToSceneAssistant("closeDashboard", {});
+
+};
+
+StageAssistant.prototype.startDashboard = function() {
+
+	dashboardStage = Mojo.Controller.getAppController().getStageController("dashboard");
+	
+	if(WebMyth.prefsCookieObject.dashboardRemote) {
+	
+		if (dashboardStage) {
+			// Dashboard stage is already open
+			Mojo.Log.info("DELEGATING TO SCENE ASST");
+			//dashboardStage.delegateToSceneAssistant("updateDashboard", launchParams.dashInfo);
+		} else {
+			Mojo.Log.info("No dashboard Stage found.");
+			pushDashboard = function (stageController) {
+				stageController.pushScene('dashboard');
+			};
+			Mojo.Controller.getAppController().createStageWithCallback({name: "dashboard", lightweight: true},
+				pushDashboard, 'dashboard');
+		}	
+	
+	}
+	
+};
+
 
 
 

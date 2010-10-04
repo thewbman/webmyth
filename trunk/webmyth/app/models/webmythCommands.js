@@ -137,7 +137,9 @@ function defaultCookie() {
 		manualMasterBackend: false,
 		playJumpRemote: true,
 		guideJumpRemote: false,
-		showUpcomingChannelIcons: true
+		showUpcomingChannelIcons: true,
+		dashboardRemote: true,
+		dashboardRemoteIndex: 1
 	};
 	
 	return newCookieObject;
@@ -301,6 +303,100 @@ var trimByEnabled = function(fullList, enabled) {
 };
 
 
+var updateChannelLastUpdate = function(fullList, channid, nowDateISO) {
+
+	var updatedList = fullList;
+	var i, s;
+	
+	for (i = 0; i < updatedList.length; i++) {
+		s = updatedList[i];
+		if (s.chanId == channid) {
+			//Matches selected channel id
+			s.lastUpdate = nowDateISO;
+		} else {
+			//Does not channel id
+		}
+	}
+	
+	return updatedList;
+
+}
+
+
+var updateProgramLastUpdateFromChannels = function(fullList, channelList) {
+
+	this.updatedList = fullList;
+	
+	var i, j, s, t;
+	
+	for(i = 0; i < updatedList.length; i++) {
+		s = updatedList[i];
+		
+		for(j = 0; j < channelList.length; j++) {
+			t = channelList[j];
+			
+			if (t.chanId == s.chanId) {
+				//Matches selected channel id
+				updatedList[i].lastUpdate = t.lastUpdate;
+			} 
+		}
+		
+	}
+	
+	return updatedList;
+
+}
+
+var updateGuideChannelsFromCookie = function(fullList, cookieList) {
+
+	this.updatedList = fullList;
+	
+	var i, j, s, t;
+	
+	for(i = 0; i < updatedList.length; i++) {
+		s = updatedList[i];
+		
+		for(j = 0; j < cookieList.length; j++) {
+			t = cookieList[j];
+			
+			if (t.chanId == s.chanId) {
+				//Matches selected channel id
+				updatedList[i].lastUpdate = t.lastUpdate;
+			} 
+		}
+		
+	}
+	
+	return updatedList;
+	
+}
+
+var cleanGuideChannels = function(fullList) {
+
+	this.updatedList = [], finalList = [];
+	var listLength = 10;
+	
+	var i, j, s, t;
+	
+	for(i = 0; i < fullList.length; i++) {
+		s = fullList[i];
+		
+		t = { 'chanId': s.chanId, 'lastUpdate': s.lastUpdate } ;
+		
+		updatedList.push(t);
+		
+	}
+	
+	updatedList.sort(sort_by('lastUpdate', true));
+	
+	for(j = 0; j < listLength; j++) {
+		finalList.push(updatedList[j]);
+	}
+	
+	return finalList;
+	
+}
+		
 var cutoutHostname = function(fullList, myHostname) {
 	
 		var trimmedList = [];
@@ -706,13 +802,13 @@ var dateObjectTo30min = function(dateObject) {
 };
 
 
-var dateObjectAdd30Min = function(dateObject) { 
+function dateObjectAdd30Min(dateObject) { 
 
 	var newDate = dateObject;
 	newDate.minute = 30+newDate.minute;
 	
-	if(newDate.minute == 60) {		//if we need to wrap to next hour
-		newDate.minute = 0;
+	if(newDate.minute >= 60) {		//if we need to wrap to next hour
+		newDate.minute = newDate.minute - 60;
 		newDate.hour++;
 		
 		if(newDate.hour == 24) {
@@ -727,7 +823,7 @@ var dateObjectAdd30Min = function(dateObject) {
 };
 
 
-var dateObjectSubtract30Min = function(dateObject) { 
+function dateObjectSubtract30Min(dateObject) { 
 
 	var newDate = dateObject;
 	newDate.minute = newDate.minute-30;
