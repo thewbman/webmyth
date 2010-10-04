@@ -24,6 +24,6 @@ A: For the most part, yes.  You will have to know the IP address assigned to you
 
 A: Hopefully.  I am not much of a programmer and even less of a designer to for the most part stuff just has to be good enough for me be OK with it.  If you have any design experience or even just some random idea feel free to email me or add a comment to this page.
 
-=== Q: What if I have some other question and suggestion? ===
+=== Q: What if I have some other question and/or suggestion? ===
 
 A.  Email the developer at [mailto:webmyth.help@gmail.com webmyth.help@gmail.com].
