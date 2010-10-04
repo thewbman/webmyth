@@ -2,13 +2,12 @@ function DashboardAssistant() {
 
 	this.buttonsStarted = false;
 
-	this.dashboardRemoteIndex = 0;
-	this.maxDashboardRemoteIndex = 1;
+	this.maxDashboardRemoteIndex = 2;
 	
 	this.dashboardRemoteButtons = [
 		{ 'layoutName': 'navigation', 'buttons': [ { 'label': 'OK', 'className': '', 'type': 'key', 'key': 'enter' },
 													{'label': 'Left', 'className': '', 'type': 'key', 'key': 'left' },
-													{'label': 'Down', 'className': '', 'type': 'key', 'key': 'down' },
+													{'label': 'Dwn', 'className': '', 'type': 'key', 'key': 'down' },
 													{'label': 'Up', 'className': '', 'type': 'key', 'key': 'up' },
 													{'label': 'Right', 'className': '', 'type': 'key', 'key': 'right' }
 												] },
@@ -16,6 +15,12 @@ function DashboardAssistant() {
 													{'label': '|<', 'className': '', 'type': 'key', 'key': 'q' },
 													{'label': '||', 'className': '', 'type': 'key', 'key': 'p' },
 													{'label': '>|', 'className': '', 'type': 'key', 'key': 'z' },
+													{'label': '', 'className': 'disabled', 'type': 'key', 'key': '' }
+												] },
+		{ 'layoutName': 'volume', 'buttons': [ { 'label': '', 'className': 'disabled', 'type': 'key', 'key': '' },
+													{'label': 'Vol-', 'className': '', 'type': 'key', 'key': '[' },
+													{'label': 'Mute', 'className': '', 'type': 'key', 'key': 'f9' },
+													{'label': 'Vol+', 'className': '', 'type': 'key', 'key': ']' },
 													{'label': '', 'className': 'disabled', 'type': 'key', 'key': '' }
 												] }
 		];
@@ -55,15 +60,26 @@ DashboardAssistant.prototype.cleanup = function(event) {
 
 
 
+
+DashboardAssistant.prototype.closeDashboard = function(event) {
+
+	Mojo.Log.info("cookie object is %j",WebMyth.prefsCookieObject);
+
+	WebMyth.prefsCookie.put(WebMyth.prefsCookieObject);
+	
+	this.controller.window.close();
+
+};
+
 DashboardAssistant.prototype.nextLayout = function() {
 
-	this.dashboardRemoteIndex++;
+	WebMyth.prefsCookieObject.dashboardRemoteIndex++;
 	
-	if(this.dashboardRemoteIndex > this.maxDashboardRemoteIndex) {
-		this.dashboardRemoteIndex = 0;
+	if(WebMyth.prefsCookieObject.dashboardRemoteIndex > this.maxDashboardRemoteIndex) {
+		WebMyth.prefsCookieObject.dashboardRemoteIndex = 0;
 	}
 	
-	Mojo.Log.info("new dashboard layout index is "+this.dashboardRemoteIndex);
+	//Mojo.Log.info("new dashboard layout index is "+WebMyth.prefsCookieObject.dashboardRemoteIndex);
 	
 	this.updateLayout();
 
@@ -71,28 +87,20 @@ DashboardAssistant.prototype.nextLayout = function() {
 
 DashboardAssistant.prototype.updateLayout = function() {
 
-	Mojo.Log.info("New layout is "+this.dashboardRemoteButtons[this.dashboardRemoteIndex].layoutName);
+	Mojo.Log.info("New layout is %s,%s",WebMyth.prefsCookieObject.dashboardRemoteIndex,this.dashboardRemoteButtons[WebMyth.prefsCookieObject.dashboardRemoteIndex].layoutName);
 	
-	//Update button labels
-	/*
-	$("dashboardButtonOne").innerText = this.dashboardRemoteButtons[this.dashboardRemoteIndex].buttons[0].label;
-	$("dashboardButtonTwo").innerText = this.dashboardRemoteButtons[this.dashboardRemoteIndex].buttons[1].label;
-	$("dashboardButtonThree").innerText = this.dashboardRemoteButtons[this.dashboardRemoteIndex].buttons[2].label;
-	$("dashboardButtonFour").innerText = this.dashboardRemoteButtons[this.dashboardRemoteIndex].buttons[3].label;
-	$("dashboardButtonFive").innerText = this.dashboardRemoteButtons[this.dashboardRemoteIndex].buttons[4].label;
-	*/
 	
 	var props = {
-		class1: this.dashboardRemoteButtons[this.dashboardRemoteIndex].buttons[0].className,
-		label1: this.dashboardRemoteButtons[this.dashboardRemoteIndex].buttons[0].label, 
-		class2: this.dashboardRemoteButtons[this.dashboardRemoteIndex].buttons[1].className,
-		label2: this.dashboardRemoteButtons[this.dashboardRemoteIndex].buttons[1].label, 
-		class3: this.dashboardRemoteButtons[this.dashboardRemoteIndex].buttons[2].className,
-		label3: this.dashboardRemoteButtons[this.dashboardRemoteIndex].buttons[2].label, 
-		class4: this.dashboardRemoteButtons[this.dashboardRemoteIndex].buttons[3].className,
-		label4: this.dashboardRemoteButtons[this.dashboardRemoteIndex].buttons[3].label, 
-		class5: this.dashboardRemoteButtons[this.dashboardRemoteIndex].buttons[4].className,
-		label5: this.dashboardRemoteButtons[this.dashboardRemoteIndex].buttons[4].label, 
+		class1: this.dashboardRemoteButtons[WebMyth.prefsCookieObject.dashboardRemoteIndex].buttons[0].className,
+		label1: this.dashboardRemoteButtons[WebMyth.prefsCookieObject.dashboardRemoteIndex].buttons[0].label, 
+		class2: this.dashboardRemoteButtons[WebMyth.prefsCookieObject.dashboardRemoteIndex].buttons[1].className,
+		label2: this.dashboardRemoteButtons[WebMyth.prefsCookieObject.dashboardRemoteIndex].buttons[1].label, 
+		class3: this.dashboardRemoteButtons[WebMyth.prefsCookieObject.dashboardRemoteIndex].buttons[2].className,
+		label3: this.dashboardRemoteButtons[WebMyth.prefsCookieObject.dashboardRemoteIndex].buttons[2].label, 
+		class4: this.dashboardRemoteButtons[WebMyth.prefsCookieObject.dashboardRemoteIndex].buttons[3].className,
+		label4: this.dashboardRemoteButtons[WebMyth.prefsCookieObject.dashboardRemoteIndex].buttons[3].label, 
+		class5: this.dashboardRemoteButtons[WebMyth.prefsCookieObject.dashboardRemoteIndex].buttons[4].className,
+		label5: this.dashboardRemoteButtons[WebMyth.prefsCookieObject.dashboardRemoteIndex].buttons[4].label, 
 	};
 	
 	var messageText = Mojo.View.render({object: props, template: 'dashboard/dashboard-scene-template'});
@@ -106,7 +114,7 @@ DashboardAssistant.prototype.updateLayout = function() {
 
 DashboardAssistant.prototype.startButtonListening = function() {
 
-	Mojo.Log.info("starting to listen to buttons");
+	//Mojo.Log.info("starting to listen to buttons");
 	
 	
 	//Buttons
@@ -126,38 +134,38 @@ DashboardAssistant.prototype.buttonTap = function(element, event) {
 	{
 		//Navigation commands
 		case 'dashboardButtonOne':
-			if(this.dashboardRemoteButtons[this.dashboardRemoteIndex].buttons[0].type == 'key') {
-				this.sendTelnetKey(this.dashboardRemoteButtons[this.dashboardRemoteIndex].buttons[0].key);
+			if(this.dashboardRemoteButtons[WebMyth.prefsCookieObject.dashboardRemoteIndex].buttons[0].type == 'key') {
+				this.sendTelnetKey(this.dashboardRemoteButtons[WebMyth.prefsCookieObject.dashboardRemoteIndex].buttons[0].key);
 			} else {
-				this.sendJumpPoint(this.dashboardRemoteButtons[this.dashboardRemoteIndex].buttons[0].jump);
+				this.sendJumpPoint(this.dashboardRemoteButtons[WebMyth.prefsCookieObject.dashboardRemoteIndex].buttons[0].jump);
 			}
 		  break;
 		case 'dashboardButtonTwo':
-			if(this.dashboardRemoteButtons[this.dashboardRemoteIndex].buttons[1].type == 'key') {
-				this.sendTelnetKey(this.dashboardRemoteButtons[this.dashboardRemoteIndex].buttons[1].key);
+			if(this.dashboardRemoteButtons[WebMyth.prefsCookieObject.dashboardRemoteIndex].buttons[1].type == 'key') {
+				this.sendTelnetKey(this.dashboardRemoteButtons[WebMyth.prefsCookieObject.dashboardRemoteIndex].buttons[1].key);
 			} else {
-				this.sendJumpPoint(this.dashboardRemoteButtons[this.dashboardRemoteIndex].buttons[1].jump);
+				this.sendJumpPoint(this.dashboardRemoteButtons[WebMyth.prefsCookieObject.dashboardRemoteIndex].buttons[1].jump);
 			}
 		  break;
 		case 'dashboardButtonThree':
-			if(this.dashboardRemoteButtons[this.dashboardRemoteIndex].buttons[2].type == 'key') {
-				this.sendTelnetKey(this.dashboardRemoteButtons[this.dashboardRemoteIndex].buttons[2].key);
+			if(this.dashboardRemoteButtons[WebMyth.prefsCookieObject.dashboardRemoteIndex].buttons[2].type == 'key') {
+				this.sendTelnetKey(this.dashboardRemoteButtons[WebMyth.prefsCookieObject.dashboardRemoteIndex].buttons[2].key);
 			} else {
-				this.sendJumpPoint(this.dashboardRemoteButtons[this.dashboardRemoteIndex].buttons[2].jump);
+				this.sendJumpPoint(this.dashboardRemoteButtons[WebMyth.prefsCookieObject.dashboardRemoteIndex].buttons[2].jump);
 			}
 		  break;
 		case 'dashboardButtonFour':
-			if(this.dashboardRemoteButtons[this.dashboardRemoteIndex].buttons[3].type == 'key') {
-				this.sendTelnetKey(this.dashboardRemoteButtons[this.dashboardRemoteIndex].buttons[3].key);
+			if(this.dashboardRemoteButtons[WebMyth.prefsCookieObject.dashboardRemoteIndex].buttons[3].type == 'key') {
+				this.sendTelnetKey(this.dashboardRemoteButtons[WebMyth.prefsCookieObject.dashboardRemoteIndex].buttons[3].key);
 			} else {
-				this.sendJumpPoint(this.dashboardRemoteButtons[this.dashboardRemoteIndex].buttons[3].jump);
+				this.sendJumpPoint(this.dashboardRemoteButtons[WebMyth.prefsCookieObject.dashboardRemoteIndex].buttons[3].jump);
 			}
 		  break;
 		case 'dashboardButtonFive':
-			if(this.dashboardRemoteButtons[this.dashboardRemoteIndex].buttons[4].type == 'key') {
-				this.sendTelnetKey(this.dashboardRemoteButtons[this.dashboardRemoteIndex].buttons[4].key);
+			if(this.dashboardRemoteButtons[WebMyth.prefsCookieObject.dashboardRemoteIndex].buttons[4].type == 'key') {
+				this.sendTelnetKey(this.dashboardRemoteButtons[WebMyth.prefsCookieObject.dashboardRemoteIndex].buttons[4].key);
 			} else {
-				this.sendJumpPoint(this.dashboardRemoteButtons[this.dashboardRemoteIndex].buttons[4].jump);
+				this.sendJumpPoint(this.dashboardRemoteButtons[WebMyth.prefsCookieObject.dashboardRemoteIndex].buttons[4].jump);
 			}
 		  break;
 	

@@ -39,17 +39,17 @@ GuideDetailsAssistant.prototype.setup = function() {
 
 	// Menu grouping at bottom of scene
     this.cmdMenuModel = { label: $L('Play Menu'),
-                            items: [{},{},{label: $L('Web'), submenu:'web-menu', width: 90}]};
+                            items: [{ label: $L('Record'), command: 'go-mythweb' },{},{label: $L('Web'), submenu:'web-menu', width: 90}]};
 							
  
 	this.hostsMenuModel = { label: $L('Hosts'), items: []};
  
 	this.webMenuModel = { label: $L('WebMenu'), items: [
-			{"label": $L('themoviedb'), "command": "go-web--themoviedb"},
-			{"label": $L('IMDB'), "command": "go-web--IMDB"},
-			{"label": $L('TheTVDB'), "command": "go-web--TheTVDB"},
-			{"label": $L('TV.com'), "command": "go-web--TV.com"},
-			{"label": $L('Google'), "command": "go-web--Google"},
+			{"label": $L('themoviedb'), "command": "go-web-----themoviedb"},
+			{"label": $L('IMDB'), "command": "go-web-----IMDB"},
+			{"label": $L('TheTVDB'), "command": "go-web-----TheTVDB"},
+			{"label": $L('TV.com'), "command": "go-web-----TV.com"},
+			{"label": $L('Google'), "command": "go-web-----Google"},
 			]};
 
  
@@ -101,7 +101,7 @@ GuideDetailsAssistant.prototype.activate = function(event) {
 
 			s = { 
 				"label": $L(WebMyth.hostsCookieObject[i].hostname),
-				"command": "go-play-"+WebMyth.hostsCookieObject[i].hostname,
+				"command": "go-play----"+WebMyth.hostsCookieObject[i].hostname,
 				"hostname": WebMyth.hostsCookieObject[i].hostname,
 				"port": WebMyth.hostsCookieObject[i].port 
 			};
@@ -115,6 +115,10 @@ GuideDetailsAssistant.prototype.activate = function(event) {
 		this.cmdMenuModel.items[0].label = $L('Play');
 		this.cmdMenuModel.items[0].submenu = 'hosts-menu';
 		this.cmdMenuModel.items[0].width =  90;
+		
+		this.cmdMenuModel.items[1].label = $L('Record');
+		this.cmdMenuModel.items[1].command = 'go-mythweb';
+		
 				
 		this.controller.setupWidget('hosts-menu', '', this.hostsMenuModel);
 		this.controller.modelChanged(this.cmdMenuModel);
@@ -141,15 +145,18 @@ GuideDetailsAssistant.prototype.cleanup = function(event) {
 GuideDetailsAssistant.prototype.handleCommand = function(event) {
 
   if(event.type == Mojo.Event.command) {
-  	myCommand = event.command.substring(0,7);
-	mySelection = event.command.substring(8);
-	//Mojo.Log.error("command: "+myCommand+" host: "+mySelection);
+  	myCommand = event.command.substring(0,10);
+	mySelection = event.command.substring(11);
+	Mojo.Log.info("command: "+myCommand+" host: "+mySelection);
 
     switch(myCommand) {
-      case 'go-play':
+      case 'go-mythweb':
+		this.openMythweb();
+       break;
+      case 'go-play---':
 		this.checkLocation(mySelection);
        break;
-      case 'go-web-':
+      case 'go-web----':
 		this.openWeb(mySelection);
        break;
     }
@@ -189,6 +196,35 @@ GuideDetailsAssistant.prototype.handleKey = function(event) {
 		}
 	}
 	Event.stop(event); 
+};
+
+
+GuideDetailsAssistant.prototype.openMythweb = function() {
+
+			Mojo.Log.error("opening in mythweb");
+			
+			var dateJS = new Date(isoToJS(this.guideObject.startTime));
+			var dateUTC = dateJS.getTime()/1000;				//don't need 59 second offset?
+			
+			Mojo.Log.info("Selected time is: '%j'", dateUTC);
+			
+			var mythwebUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/mythweb/tv/detail/"
+			mythwebUrl += this.guideObject.chanId + "/";
+			mythwebUrl += dateUTC;
+			mythwebUrl += "?RESET_TMPL=true";
+			
+			Mojo.Log.info("mythweb url is "+mythwebUrl);
+			
+			this.controller.serviceRequest("palm://com.palm.applicationManager", {
+				method: "open",
+				parameters:  {
+					id: 'com.palm.app.browser',
+					params: {
+						target: mythwebUrl
+					}
+				}
+			}); 
+	
 };
 
 

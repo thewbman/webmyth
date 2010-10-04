@@ -198,7 +198,8 @@ StatusAssistant.prototype.cleanup = function(event) {
 StatusAssistant.prototype.handleCommand = function(event) {
 
   if(event.type == Mojo.Event.forward) {
-		Mojo.Controller.stageController.pushScene("hostSelector", true);
+		//Mojo.Controller.stageController.pushScene("hostSelector", true);
+		Mojo.Controller.stageController.pushScene(WebMyth.prefsCookieObject.currentRemoteScene);
   }
   
 };

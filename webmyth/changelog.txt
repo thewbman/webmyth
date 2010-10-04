@@ -120,3 +120,9 @@ Release 0.2.9:
  - Able to sort guide by title and category
  - Saves last guide sorting choice
  - Added image to flick navigation
+ 
+Releasae 0.3.0:
+ - Added dashbaord remote
+ - Added links to mythweb in guide for creating new recordings
+ - Guide now remembers last 10 channels touched
+ - Guide now shows arrows if program started earlier or goes later

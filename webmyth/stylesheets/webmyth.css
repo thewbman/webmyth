@@ -1,4 +1,55 @@
-/* TODO: put your application-specific CSS here */
+/* 
+ * General styles
+ */
+
+.italics {
+	font-style: italic
+}
+
+.centered {
+	text-align: center;
+	vertical-align: middle;
+}
+
+.filter-field-container-height {
+	height: 96px;
+}
+
+.palm-info-text.right {
+	text-align:right;
+}
+ 
+/* 
+ * Remote scenes
+ */
+
+.buttonRow3 {
+	width: 100%;
+	margin: 0 0px 0 0px;
+	height: 50px;
+	min-height: 50px;
+}
+
+.buttonRow4 {
+	width: 100%;
+	margin: 0 0px 0 0px;
+	height: 30px;
+	min-height: 30px;
+}
+
+.emptybuttonRow20 {
+	width: 100%;
+	margin: 0 0px 0 0px;
+	height: 20px;
+	min-height: 20px;
+}
+
+.emptybuttonRow40 {
+	width: 100%;
+	margin: 0 0px 0 0px;
+	height: 15px;
+	min-height: 15px;
+}
 
 .buttonClass3 {
 	height: 30px;
@@ -30,15 +81,6 @@
 	color: white;
 }
 
-.italics {
-	font-style: italic
-}
-
-.centered {
-	text-align: center;
-	vertical-align: middle;
-}
-
 .noButton {
 
 	height: 30px;
@@ -48,74 +90,6 @@
 	
 	float: left;
 
-}
-
-.buttonRow3 {
-	width: 100%;
-	margin: 0 0px 0 0px;
-	height: 50px;
-	min-height: 50px;
-}
-
-.buttonRow4 {
-	width: 100%;
-	margin: 0 0px 0 0px;
-	height: 30px;
-	min-height: 30px;
-}
-
-.emptybuttonRow20 {
-	width: 100%;
-	margin: 0 0px 0 0px;
-	height: 20px;
-	min-height: 20px;
-}
-
-.emptybuttonRow40 {
-	width: 100%;
-	margin: 0 0px 0 0px;
-	height: 15px;
-	min-height: 15px;
-}
-
-.dashboardColumn {
-	float: left;
-	width: 20%;
-	margin: 0px;
-	padding: 0px;
-}
-
-.dashboardButtonRow {
-	width: 100%;
-	margin: 0 0px 0 0px;
-	height: 40px;
-	min-height: 40px;
-	margin: 0px;
-	padding: 0px;
-}
-
-.dashboardButtonClass {
-	height: 30px;
-	width: 40px;
-	margin: 2px;
-	padding: 12px 0px;
-	
-    border-style: solid;
-    border-color: #000000;
-	border-radius: 4px;
-	border-width: 1px;
-
-	text-align: center;
-	vertical-align: middle;
-	color: white;
-	
-	float: left;
-}
-
-.dashboardButtonClass.disabled {
-	
-    border-style: none;
-	
 }
 
 .column1of3 {
@@ -152,6 +126,10 @@
 	float: left;
 	width: 25%;
 }
+
+/*
+ * Flick remote
+ */
 
 .flickNavButton {		/* defaults for 320x400 */
 	float: left;
@@ -236,17 +214,78 @@
 	background-color: #222222;
 }
 
+/*
+ * Dashboard
+ */
 
-#recorded-header-menu-button {
-	position: absolute;
-	right: -18px;
-	top: 6px;
-	width: 100px;
-	-webkit-border-radius: 15px;
-	text-transform: none;
+.dashboardColumn {
+	float: left;
+	width: 20%;
+	margin: 0px;
+	padding: 0px;
+}
+
+.dashboardButtonRow {
+	width: 100%;
+	margin: 0 0px 0 0px;
+	height: 40px;
+	min-height: 40px;
+	margin: 0px;
+	padding: 0px;
+}
+
+.dashboardButtonClass {
+	height: 30px;
+	width: 40px;
+	margin: 2px;
+	padding: 12px 0px;
+	
+    border-style: solid;
+    border-color: #000000;
+	border-radius: 4px;
+	border-width: 1px;
+
+	text-align: center;
 	vertical-align: middle;
-	padding: 4px 4px 4px 4px;
 	color: white;
+	
+	float: left;
+}
+
+.dashboardButtonClass.disabled {
+	
+    border-style: none;
+	
+}
+
+#webmyth-dashboard-icon {
+	background: url(../images/icon-40x40.png) center center no-repeat;
+}
+
+/*
+ * Welcome
+ */
+ 
+.welcome .palm-page-header-wrapper {
+	min-height: 67px;
+}
+
+.welcome .palm-page-header-wrapper .title {
+	padding-left: 80px;
+}
+
+.welcome .palm-page-header-wrapper .title.main {
+	font-size: 30px;
+	padding-top: 5px;
+	padding-bottom: 0px;
+}
+
+.welcome .palm-page-header-wrapper .sub {
+	padding-left: 80px;
+	font-size: 14px;
+	padding-top: 0px;
+	margin-top: 0px;
+	padding-bottom: 5px;
 }
 
 #welcome-header-icon {
@@ -260,12 +299,23 @@
 	left: 12px;
 }
 
-.filter-field-container-height {
-	height: 96px;
+
+/*  
+ * Recorded scene items  
+ */
+
+.left-list-image {
+	height: 100px;
+	width: 35%;
+	float: left;
 }
 
-
-/*  Recorded scene items  */
+.right-list-text {
+	height: 100px;
+	width: 65%;
+	float: right;
+}
+ 
 .palm-row.multi-line.Deleted {
 	text-decoration: line-through;
 }
@@ -278,16 +328,38 @@
 	height: 100px
 }
 
+.recorded-screenshot {
+	padding: 10px;
+	width: 300px;
+	text-align: center;
+	border: 0px; 
+	-webkit-border-radius: 5px;
+}
+
+.recorded-screenshot-small {
+	padding: 5px;
+	width: 120px;
+	
+	text-align: center;
+	border: 0px; 
+}
+
+/*
+ * Guide
+ */
+
 .guide-scene .filter-field-container-height {
 	height: 55px;
 }
 
-.guide-scene .guide-right-list-text .guide-list-title {
+.guide-scene .guide-right-list-text .guide-list-title,
+.guide-scene .guide-right-list-text-later .guide-list-title {
   padding: 8px 14px 0px 0px;
   margin: 0px;
 }
 
-.guide-scene .guide-right-list-text .palm-info-text.left {
+.guide-scene .guide-right-list-text .palm-info-text.left,
+.guide-scene .guide-right-list-text-later .palm-info-text.left {
   padding: 0px;
   margin: 0px 8px;
   line-height: 16px;
@@ -314,9 +386,28 @@
 	width: 100%
 }
 
-.chanNum-no-icon {
+.guide-scene .chanNum-no-icon {
 	padding: 40px 0px 0px 0px;
+	margin: 40px 0px 0px 0px;
 	height: 45px;
+	text-align: center;
+}
+
+.guide-left-program-earlier {
+	height: 100px;
+	width: 2%;
+	float: left;
+	text-align: center;
+}
+
+.guide-left-program-earlier .arrow {
+	margin: 40px 0px;
+}
+
+.guide-left-list-image-earlier {
+	height: 100px;
+	width: 20%;
+	float: left;
 	text-align: center;
 }
 
@@ -330,125 +421,46 @@
 .guide-right-list-text {
 	height: 100px;
 	width: 77%;
-	float: right;
+	float: left;
+}
+
+.guide-right-list-text-later {
+	height: 100px;
+	width: 74%;
+	float: left;
+}
+
+.guide-right-list-later {
+	height: 100px;
+	width: 2%;
+	float: left;
+	text-align: center;
+}
+
+.guide-right-list-later .arrow {
+	margin: 40px 0px;
 }
 
 .guide-channelicon-small {
 	padding: 10px 5px 0px 10px;
-	width: 60px;
-	height: 45px;
+	width: 48px;
+	height: 36px;
 	border: 0px; 
 }
 
-.upcoming-list-item {
-	height: 100px
+.guide-scene .guide-list-item .chanNum {
+	font-size: 16px;
 }
 
-.upcoming-list-title {
-	height: 26px
+.guide-scene  .view-menu .palm-menu-group .palm-menu-text .truncating-text {
+	margin: 0px -20px;
+	text-overflow: clip;
 }
 
-.left-list-image {
-	height: 100px;
-	width: 35%;
-	float: left;
+.guideDetails-channel-img {
+	padding: 3px 110px;
+	width: 100px;
 }
-
-.right-list-text {
-	height: 100px;
-	width: 65%;
-	float: right;
-}
-
-.left-list-text {
-	height: 60px;
-	width: 75%;
-	float: left;
-}
-
-.right-list-image {
-	height: 60px;
-	width: 25%;
-	float: right;
-}
-
-.recorded-screenshot {
-	padding: 10px;
-	width: 300px;
-	text-align: center;
-	border: 0px; 
-	-webkit-border-radius: 5px;
-}
-
-.recorded-screenshot-small {
-	padding: 2px;
-	width: 120px;
-	height: 90px;
-	text-align: center;
-	border: 0px; 
-}
-
-.upcoming-channelicon-small {
-	padding: 2px 2px;
-	width: 60px;
-	height: 45px;
-	text-align: center;
-	border: 0px; 
-}
-
-.enabled-0 {
-	innerHtml: 'Disabled'
-}
-
-.enabled-1 {
-	innerHtml: 'Enabled'
-}
-
-.palm-info-text.right {
-	text-align:right;
-}
-
-
-
-/*
- * Welcome Scene Styles
-*/
-.welcome .palm-page-header-wrapper {
-	min-height: 67px;
-}
-
-.welcome .palm-page-header-wrapper .title {
-	padding-left: 80px;
-}
-
-.welcome .palm-page-header-wrapper .title.main {
-	font-size: 30px;
-	padding-top: 5px;
-	padding-bottom: 0px;
-}
-
-.welcome .palm-page-header-wrapper .sub {
-	padding-left: 80px;
-	font-size: 14px;
-	padding-top: 0px;
-	margin-top: 0px;
-	padding-bottom: 5px;
-}
-
-/*
- * Status scene
- */
- 
-.status .scheduled-list .complete-scheduled-item {
-	height: 135px;
-}
-
-.status  .storage-list .complete-storage-item {
-	height: 150px;
-}
-
-
-
 
 .palm-dark .dateAndTimePicker  .palm-row {
 	color: #000;
@@ -496,18 +508,52 @@
   background: #555555;
 }
 
+/*
+ * Upcoming
+ */
+
+.upcoming-list-item {
+	height: 100px
+}
+
+.upcoming-list-title {
+	height: 26px
+}
+
+.left-list-text {
+	height: 60px;
+	width: 75%;
+	float: left;
+}
+
+.right-list-image {
+	height: 60px;
+	width: 25%;
+	float: right;
+}
+
+.upcoming-channelicon-small {
+	padding: 2px 2px;
+	width: 60px;
+	height: 45px;
+	text-align: center;
+	border: 0px; 
+}
 
 .upcomingDetails-channel-img {
 	padding: 3px 110px;
 	width: 100px;
 }
 
-.guideDetails-channel-img {
-	padding: 3px 110px;
-	width: 100px;
+/*
+ * Status scene
+ */
+ 
+.status .scheduled-list .complete-scheduled-item {
+	height: 135px;
 }
 
-
-#webmyth-dashboard-icon {
-	background: url(../images/icon-48x48.png) center left no-repeat;
+.status  .storage-list .complete-storage-item {
+	height: 150px;
 }
+

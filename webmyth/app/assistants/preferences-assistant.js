@@ -191,6 +191,17 @@ PreferencesAssistant.prototype.setup = function() {
          },
          this.guideJumpRemoteToggleModel
     ); 
+	//Dashboard remote when app deactivates
+	this.dashboardRemoteToggleModel = {
+             value: false
+    };
+	this.controller.setupWidget("dashboardRemoteToggleId",
+        {
+			label: $L("dashboardRemote"),
+            modelProperty: "value"
+         },
+         this.dashboardRemoteToggleModel
+    ); 
 	
 	
 	
@@ -342,6 +353,9 @@ PreferencesAssistant.prototype.activate = function(event) {
 			
 			this.guideJumpRemoteToggleModel.value = WebMyth.prefsCookieObject.guideJumpRemote;
 			this.controller.modelChanged(this.guideJumpRemoteToggleModel);
+			
+			this.dashboardRemoteToggleModel.value = WebMyth.prefsCookieObject.dashboardRemote;
+			this.controller.modelChanged(this.dashboardRemoteToggleModel);
 			
 			this.metrixToggleModel.value = WebMyth.prefsCookieObject.allowMetrix;
 			this.controller.modelChanged(this.metrixToggleModel);
@@ -518,6 +532,8 @@ PreferencesAssistant.prototype.checkSettings = function() {
 		WebMyth.prefsCookieObject.remoteFullscreen = this.remoteFullscreenToggleModel.value;
 		WebMyth.prefsCookieObject.playJumpRemote = this.playJumpRemoteToggleModel.value;
 		WebMyth.prefsCookieObject.guideJumpRemote = this.guideJumpRemoteToggleModel.value;
+		WebMyth.prefsCookieObject.dashboardRemote = this.dashboardRemoteToggleModel.value;
+		
 		
 		WebMyth.prefsCookieObject.allowMetrix = this.metrixToggleModel.value;
 		
