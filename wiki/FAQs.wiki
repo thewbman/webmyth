@@ -26,4 +26,4 @@ A: Hopefully.  I am not much of a programmer and even less of a designer to for 
 
 === Q: What if I have some other question and suggestion? ===
 
-A.  Email the developer at [webmyth.help@gmail.com].
+A.  Email the developer at [mailto:webmyth.help@gmail.com webmyth.help@gmail.com].
