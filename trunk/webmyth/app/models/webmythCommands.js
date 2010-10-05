@@ -997,7 +997,7 @@ var recStatusDecode = function(recStatusInt) {
 				newStatusText = "Current Recording";
 			break;
 			case 4:		
-				newStatusText = "Marked Don't Record";
+				newStatusText = "Don't Record";
 			break;
 			case 5:		
 				newStatusText = "Earlier Showing";

@@ -97,7 +97,7 @@ UpcomingAssistant.prototype.cleanup = function(event) {
 UpcomingAssistant.prototype.handleCommand = function(event) {
 
   if(event.type == Mojo.Event.forward) {
-		Mojo.Controller.stageController.pushScene(WebMyth.prefsCookieObject.currentRemoteScene);
+		Mojo.Controller.stageController.pushScene({name: WebMyth.prefsCookieObject.currentRemoteScene, disableSceneScroller: true});
   }
   
 };

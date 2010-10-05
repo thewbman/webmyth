@@ -170,6 +170,9 @@ StatusAssistant.prototype.setup = function() {
 	this.controller.listen(this.controller.get("generalStatusGroup"),Mojo.Event.tap,this.toggleGeneralDrawer.bindAsEventListener(this));
 	
 	
+	
+	this.controller.listen(this.controller.get( "header-menu" ), Mojo.Event.tap, function(){this.controller.sceneScroller.mojo.revealTop();}.bind(this));
+	
 	this.getStatus();
 	
 };
@@ -199,7 +202,7 @@ StatusAssistant.prototype.handleCommand = function(event) {
 
   if(event.type == Mojo.Event.forward) {
 		//Mojo.Controller.stageController.pushScene("hostSelector", true);
-		Mojo.Controller.stageController.pushScene(WebMyth.prefsCookieObject.currentRemoteScene);
+		Mojo.Controller.stageController.pushScene({name: WebMyth.prefsCookieObject.currentRemoteScene, disableSceneScroller: true});
   }
   
 };
@@ -714,14 +717,17 @@ StatusAssistant.prototype.setEncodersData = function(propertyValue, model)  {
 	
 			
 	
-	var myDataModel = '<div class="title"> ';
-    myDataModel += '<div class="textFieldClass">Encoder #'+model.id+' on '+model.hostname+' is '+state+'</div>';
-    myDataModel += '</div>';
+	var myDataModel = '<div class="palm-row-wrapper">';
+	//myDataModel += '<div class="title"> ';
+    myDataModel += '<div class="title">Encoder #'+model.id+' on '+model.hostname+' is '+state+'</div>';
+    //myDataModel += '</div>';
 	
 	if(model.title) {
-		myDataModel += '<div class="palm-info-text">'+model.title+':'+model.subTitle+'</div>';
-		myDataModel += '<div class="palm-info-text">Will finish recording at '+model.endTime+'</div>';
+		myDataModel += '<div class="palm-info-text">'+model.title+': '+model.subTitle+'<br />';
+		myDataModel += 'Will finish recording at '+model.endTime+'</div>';
 	}
+	
+	myDataModel += '</div>';
 	
 	model.myEncodersData = myDataModel;
 	

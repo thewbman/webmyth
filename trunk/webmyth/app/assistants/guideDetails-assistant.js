@@ -162,7 +162,7 @@ GuideDetailsAssistant.prototype.handleCommand = function(event) {
     }
   } else if(event.type == Mojo.Event.forward) {
 	
-		Mojo.Controller.stageController.pushScene(WebMyth.prefsCookieObject.currentRemoteScene);
+		Mojo.Controller.stageController.pushScene({name: WebMyth.prefsCookieObject.currentRemoteScene, disableSceneScroller: true});
   }
   
 };
@@ -350,7 +350,7 @@ GuideDetailsAssistant.prototype.startChannelPlay = function(host) {
 	
 	
 	if(WebMyth.prefsCookieObject.guideJumpRemote)  {
-		Mojo.Controller.stageController.pushScene(WebMyth.prefsCookieObject.currentRemoteScene);
+		Mojo.Controller.stageController.pushScene({name: WebMyth.prefsCookieObject.currentRemoteScene, disableSceneScroller: true});
 	}
 	
 };
