@@ -42,30 +42,18 @@ WebMyth.appMenuModel = {
 			{label: "Status", command: 'do-shortcutStatus', shortcut: 'S'}
 			]
 		},
-		{label: "Help", command: 'do-helpApp'}
+		{label: "Help", items: [
+			{label: "Instructions", command: 'do-helpSetup'},
+			{label: "Tips", command: 'do-helpTips'},
+			{label: "FAQs", command: 'do-helpFAQs'},
+			{label: "Changelog", command: 'do-helpChangelog'},
+			{label: "Email Developer", command: 'do-helpEmail'}
+			]
+		}
 	]
 };
 //Create WebMyth.db for use or open existing
 WebMyth.db;
-	
-
-/*
-//Setup remote commandmenu
-WebMyth.remoteCommandMenuAttr = { menuClass: 'no-fade' };	
-WebMyth.remoteCommandMenuModel = {
-	visible: true,
-	items: [{},{
-		items: [
-			{label: "Nav", command: 'go-navigation', width: 80},
-			{label: "Play", command: 'go-playback', width: 80},
-			{label: "Music", command: 'go-music', width: 80},
-			{label: "Flick", command: 'go-flick', width: 80}
-		]
-		},
-	{}
-	]
-};
-*/
 
 
 //Setup remote view menu
@@ -231,7 +219,7 @@ StageAssistant.prototype.handleCommand = function(event) {
        break;
 	   
 	   //Help
-	  case 'do-helpApp':
+	  case 'do-helpSetup':
 			//helpAlert();
 	
 			currentScene.showAlertDialog({
@@ -249,35 +237,57 @@ StageAssistant.prototype.handleCommand = function(event) {
 							}
 						}
 					);
-					} else if (value=="developer") {
-					this.controller.serviceRequest(
-						"palm://com.palm.applicationManager", {
-							method: 'open',
-							parameters: {
-								id: "com.palm.app.email",
-								params: {
-									summary: "Help with WebMyth v"+ Mojo.Controller.appInfo.version,
-									recipients: [{
-										type:"email",
-										value:"webmyth.help@gmail.com",
-										contactDisplay:"WebMyth Developer"
-									}]
-								}
-							}
-						}
-					);
-					}
+					} 
 				},
 				title: "WebMyth - v" + Mojo.Controller.appInfo.version,
 				message:  WebMyth.helpMessage, 
 				choices: [
                     {label: "OK", value: "ok"},
-					{label: "Email Instructions", value: "instructions"},
-					{label: "Contact Developer", value: "developer"}
+					{label: "Email Instructions", value: "instructions"}
 					],
 				allowHTMLMessage: true
 			});	
 			
+       break;
+	   
+	  case 'do-helpTips':
+			//Tips
+			this.controller.pushScene("tips");
+			
+       break;
+	   
+	  case 'do-helpFAQs':
+			//Changelog
+			this.controller.pushScene("faqs");
+			
+       break;
+	   
+	  case 'do-helpChangelog':
+			//Changelog
+			this.controller.pushScene("changelog");
+			
+       break;
+	   
+	  case 'do-helpEmail':
+			//Email
+			
+			currentScene.serviceRequest(
+				"palm://com.palm.applicationManager", {
+					method: 'open',
+                    parameters: {
+						id: "com.palm.app.email",
+                        params: {
+							summary: "Help with WebMyth v"+ Mojo.Controller.appInfo.version,
+                            recipients: [{
+								type:"email",
+                                value:"webmyth.help@gmail.com",
+                                contactDisplay:"WebMyth Developer"
+                            }]
+                        }
+                    }
+                 }
+             );
+
        break;
 	   
 	  case 'do-recorded':
@@ -288,7 +298,7 @@ StageAssistant.prototype.handleCommand = function(event) {
 			if(currentScene == 'navigation'){
 				Mojo.Log.info("Already on navigation");
 			} else {
-				Mojo.Controller.stageController.swapScene("navigation");
+				Mojo.Controller.stageController.swapScene({name: "navigation", disableSceneScroller: true});
 			}
 	   break;
 	   
@@ -296,7 +306,7 @@ StageAssistant.prototype.handleCommand = function(event) {
 			if(currentScene == 'playback'){
 				Mojo.Log.info("Already on playback");
 			} else {
-				Mojo.Controller.stageController.swapScene("playback");
+				Mojo.Controller.stageController.swapScene({name: "playback", disableSceneScroller: true});
 			}
 	   break;
 	   
@@ -304,7 +314,7 @@ StageAssistant.prototype.handleCommand = function(event) {
 			if(currentScene == 'music'){
 				Mojo.Log.info("Already on music");
 			} else {
-				Mojo.Controller.stageController.swapScene("music");
+				Mojo.Controller.stageController.swapScene({name: "music", disableSceneScroller: true});
 			}
 	   break;
 	   
@@ -312,20 +322,20 @@ StageAssistant.prototype.handleCommand = function(event) {
 			if(currentScene == 'flick'){
 				Mojo.Log.info("Already on flick");
 			} else {
-				Mojo.Controller.stageController.swapScene("flick");
+				Mojo.Controller.stageController.swapScene({name: "flick", disableSceneScroller: true});
 			}
 	   break;
 	   
 	  case 'go-remotePrevious':
 			var previousRemoteScene = getPreviousRemote(WebMyth.remoteCookieObject, WebMyth.prefsCookieObject.currentRemoteScene);
-			Mojo.Controller.stageController.swapScene(previousRemoteScene);
+			Mojo.Controller.stageController.swapScene({name: previousRemoteScene, disableSceneScroller: true});
 	   break;
 	   
 	  case 'go-remoteNext':
 			//Mojo.Log.error("current scene is " + WebMyth.prefsCookieObject.currentRemoteScene);
 			var nextRemoteScene = getNextRemote(WebMyth.remoteCookieObject, WebMyth.prefsCookieObject.currentRemoteScene);
 			//Mojo.Log.error("next scene is " + nextRemoteScene);
-			Mojo.Controller.stageController.swapScene(nextRemoteScene);
+			Mojo.Controller.stageController.swapScene({name: nextRemoteScene, disableSceneScroller: true});
 	   break;
 	   
 	  case 'do-remoteHeaderAction':
@@ -381,7 +391,7 @@ StageAssistant.prototype.startDashboard = function() {
 			pushDashboard = function (stageController) {
 				stageController.pushScene('dashboard');
 			};
-			Mojo.Controller.getAppController().createStageWithCallback({name: "dashboard", lightweight: true},
+			Mojo.Controller.getAppController().createStageWithCallback({name: "dashboard", lightweight: true, clickableWhenLocked: true },
 				pushDashboard, 'dashboard');
 		}	
 	

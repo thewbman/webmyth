@@ -11,8 +11,11 @@ To Do - planned new features and updates:
  - reset list search on changes
  - play/download on device (using mythweb?)
  - cleanup dashboard remote
+ - fix guide scroll in early morning programs
+ - change guide list layout based on sorting ?
+ - center guide channum with no icon
+ - add channel search to recorded and upcoming
+ - link to mythweb on upcoming
+ - make loading text add in with spinner
  
-//Very long term
- - New recording schedule from guide
- - notifications (remote)
 

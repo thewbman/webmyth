@@ -259,7 +259,7 @@ HostSelectorAssistant.prototype.startCommunication = function(event) {
 
 	
 	//Open initial communication scene
-	Mojo.Controller.stageController.pushScene(WebMyth.prefsCookieObject.currentRemoteScene);
+	Mojo.Controller.stageController.pushScene({name: WebMyth.prefsCookieObject.currentRemoteScene, disableSceneScroller: true});
 	
 };
 

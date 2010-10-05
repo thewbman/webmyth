@@ -82,5 +82,17 @@
     {
         "scenes": "dashboard",
         "source": "app/assistants/dashboard-assistant.js"
+    },
+    {
+        "scenes": "tips",
+        "source": "app/assistants/tips-assistant.js"
+    },
+    {
+        "scenes": "changelog",
+        "source": "app/assistants/changelog-assistant.js"
+    },
+    {
+        "scenes": "faqs",
+        "source": "app/assistants/faqs-assistant.js"
     }
 ]

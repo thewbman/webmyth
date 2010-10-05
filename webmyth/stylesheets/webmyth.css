@@ -155,10 +155,10 @@
 }
 
 .height-480 .flickNavButton {
-	width: 240px;
-	height: 240px;
-	margin: 10px 40px;
-	-webkit-border-radius: 120px;
+	width: 220px;
+	height: 220px;
+	margin: 10px 50px;
+	-webkit-border-radius: 110px;
 	
 	background: url('../images/mine/arrows-200x200.png') center center no-repeat;
 }
@@ -549,11 +549,75 @@
  * Status scene
  */
  
+.status .encodersDrawer .title {
+	font-size: 16px;
+	padding-bottom: 0px;
+	margin-bottom: 0px;
+}
+
+.status .encodersDrawer .palm-info-text.left {
+  padding: 0px;
+  margin: 0px 20px;
+  line-height: 16px;
+}
+
 .status .scheduled-list .complete-scheduled-item {
-	height: 135px;
+	height: 105px;
+}
+
+.status .scheduled-list .palm-info-text.left {
+  padding: 0px;
+  margin: 0px 20px;
+  line-height: 16px;
+}
+
+.status .scheduled-list .palm-info-text.right {
+  padding: 4px;
+  margin: 0px 8px;
+  line-height: 16px;
+}
+
+.status .jobqueueDrawer .jobqueue-list-item .palm-info-text.left {
+  padding: 0px;
+  margin: 0px 20px;
+  line-height: 16px;
+}
+
+.status .jobqueueDrawer .jobqueue-list-item .palm-info-text.right {
+  padding: 4px;
+  margin: 0px 8px;
+  line-height: 16px;
 }
 
 .status  .storage-list .complete-storage-item {
-	height: 150px;
+	height: 120px;
 }
 
+.status  .storage-list .complete-storage-item .palm-info-text.right {  padding: 4px;
+  margin: 0px 8px;
+  line-height: 16px;
+}
+
+/*
+ * Changelog scene
+ */
+ 
+.changelog-scene .changelog-body li{
+	font-size: 16px;
+}
+
+/*
+ * FAQs scene
+ */
+ 
+.faqs-scene .faqs-body ul{
+	font-size: 16px;
+}
+
+/*
+ * Tips scene
+ */
+ 
+.tips-scene .tips-body li{
+	font-size: 16px;
+}
