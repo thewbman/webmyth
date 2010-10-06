@@ -166,7 +166,7 @@ WelcomeAssistant.prototype.setup = function() {
 		//do nothing?
 	} else {
 		Mojo.Log.info("Missing hosts cookie.  Using default.");
-		WebMyth.hostsCookieObject = defaultHostsCookie();
+		WebMyth.hostsCookieObject = defaultHostsCookieCurrent(WebMyth.prefsCookieObject.currentFrontend);
 		WebMyth.hostsCookie.put(WebMyth.hostsCookieObject);
 	}
 	
@@ -178,7 +178,7 @@ WelcomeAssistant.prototype.setup = function() {
 			WebMyth.remoteCookieObject.push({ "name": "numberpad", "enabled": true });
 			WebMyth.remoteCookie.put(WebMyth.remoteCookieObject);
 			
-		} else if(WebMyth.remoteCookieObject.length == 5) {		//only 1st 4 remotes
+		} else if(WebMyth.remoteCookieObject.length == 5) {		//only 1st 5 remotes
 			WebMyth.remoteCookieObject.push({ "name": "numberpad", "enabled": true });
 			WebMyth.remoteCookie.put(WebMyth.remoteCookieObject);
 		}

@@ -157,6 +157,18 @@ function defaultHostsCookie() {
 	return newCookieObject;
 };
 
+function defaultHostsCookieCurrent(newName) {
+
+	//These values are initiated in 'welcome' scene if not set
+
+	var newCookieObject = [{
+		"hostname": newName,							
+		"port": "6546"
+	}];
+	
+	return newCookieObject;
+};
+
 function defaultRemoteCookie() {
 
 	//These values are initiated in 'welcome' scene if not set
@@ -841,31 +853,6 @@ function dateObjectSubtract30Min(dateObject) {
 		
 	return newDate;
 	
-};
-
-
-function doHelpEmail() {
-	
-	this.controller.serviceRequest(
-    "palm://com.palm.applicationManager", {
-        method: 'open',
-        parameters: {
-            id: "com.palm.app.email",
-            params: {
-                summary: "test subject",
-                text: "Test email text.",
-                recipients: [{
-                    type:"email",
-                    role:1,
-                    value:"adsf@asdf.com",
-                    contactDisplay:"Your name"
-                }]
-            }
-        }
-    }
-	);
-	
-	Mojo.Log.info("do send email");
 };
 
 

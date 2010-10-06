@@ -48,21 +48,21 @@ PlaybackAssistant.prototype.setup = function() {
 	//Buttons
 		//navigation
 	this.controller.setupWidget("backButton", {}, { label : "ESC", disabled: false } );
-	this.controller.setupWidget("upButton", {}, { label : "Up", disabled: false } );
-	this.controller.setupWidget("leftButton", {}, { label : "Left", disabled: false } );
+	this.controller.setupWidget("upButton", {}, { label : "-", disabled: false } );
+	this.controller.setupWidget("leftButton", {}, { label : "-", disabled: false } );
 	this.controller.setupWidget("selectButton", {}, { label : "OK", disabled: false } );
-	this.controller.setupWidget("rightButton", {}, { label : "Right", disabled: false } );
-	this.controller.setupWidget("downButton", {}, { label : "Down", disabled: false } );
+	this.controller.setupWidget("rightButton", {}, { label : "-", disabled: false } );
+	this.controller.setupWidget("downButton", {}, { label : "-", disabled: false } );
 		//general
 	//this.controller.setupWidget("infoButton", {}, { label : "Info", disabled: false } );
 	//this.controller.setupWidget("menuButton", {}, { label : "Menu", disabled: false } );
 		//playback
-	this.controller.setupWidget("playButton", {}, { label : "Play", disabled: false } );
+	this.controller.setupWidget("playButton", {}, { label : "-", disabled: false } );
 	this.controller.setupWidget("pauseButton", {}, { label : "||", disabled: false } );
-	this.controller.setupWidget("fastforwardButton", {}, { label : ">>", disabled: false } );
-	this.controller.setupWidget("rewindButton", {}, { label : "<<", disabled: false } );
-	this.controller.setupWidget("skipForwardButton", {}, { label : ">|", disabled: false } );
-	this.controller.setupWidget("skipBackButton", {}, { label : "|<", disabled: false } );
+	this.controller.setupWidget("fastforwardButton", {}, { label : "-", disabled: false } );
+	this.controller.setupWidget("rewindButton", {}, { label : "-", disabled: false } );
+	this.controller.setupWidget("skipForwardButton", {}, { label : "-", disabled: false } );
+	this.controller.setupWidget("skipBackButton", {}, { label : "-", disabled: false } );
 		//volume
 	//this.controller.setupWidget("volumeUpButton", {}, { label : "Vol+", disabled: false } );
 	//this.controller.setupWidget("volumeDownButton", {}, { label : "Vol-", disabled: false } );

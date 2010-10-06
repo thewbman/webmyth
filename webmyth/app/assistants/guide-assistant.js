@@ -47,6 +47,7 @@ GuideAssistant.prototype.setup = function() {
 		spinning: true
 	}; 
 	this.controller.setupWidget('spinner', this.spinnerAttr, this.spinnerModel);
+	$('spinner-text').innerHTML = "Loading...";
 	
 	//App menu widget
 	this.controller.setupWidget(Mojo.Menu.appMenu, WebMyth.appMenuAttr, WebMyth.appMenuModel);
@@ -1395,6 +1396,8 @@ GuideAssistant.prototype.timePickerCallback = function(value) {
 	
 	this.timeObjectPlus30 = dateObjectAdd30Min(this.timeObject);
 	this.timeISOPlus30 = dateObjectToISO(this.timeObjectPlus30);
+	
+	this.timeObject = dateObjectSubtract30Min(this.timeObject);
 	
 	this.selectedTime();
 	
