@@ -127,6 +127,54 @@
 	width: 25%;
 }
 
+.volumeDownButton .palm-button-wrapper .truncating-text {
+	background: url('../images/voldown-30x30.png') center center no-repeat; 
+}
+
+.volumeUpButton .palm-button-wrapper {
+	background: url('../images/volup-30x30.png') center center no-repeat; 
+}
+
+.muteButton .palm-button-wrapper .truncating-text {
+	background: url('../images/mute-30x30.png') center center no-repeat; 
+}
+
+.leftButton .palm-button-wrapper .truncating-text {
+	background: url('../images/left-30x30.png') center center no-repeat; 
+}
+
+.rightButton .palm-button-wrapper .truncating-text {
+	background: url('../images/right-30x30.png') center center no-repeat; 
+}
+
+.upButton .palm-button-wrapper .truncating-text {
+	background: url('../images/up-30x30.png') center center no-repeat; 
+}
+
+.downButton .palm-button-wrapper .truncating-text {
+	background: url('../images/down-30x30.png') center center no-repeat; 
+}
+
+.skipBackButton .palm-button-wrapper .truncating-text {
+	background: url('../images/jumpback-30x30.png') center center no-repeat; 
+}
+
+.skipForwardButton .palm-button-wrapper .truncating-text {
+	background: url('../images/jumpforward-30x30.png') center center no-repeat; 
+}
+
+.playButton .palm-button-wrapper .truncating-text {
+	background: url('../images/play-30x30.png') center center no-repeat; 
+}
+
+.rewindButton .palm-button-wrapper .truncating-text {
+	background: url('../images/rewind-30x30.png') center center no-repeat; 
+}
+
+.fastforwardButton .palm-button-wrapper .truncating-text {
+	background: url('../images/fastforward-30x30.png') center center no-repeat; 
+}
+
 /*
  * Flick remote
  */
@@ -139,10 +187,11 @@
 	-webkit-border-radius: 80px;
 	border-radius: 80px;
 	
-	background: url('../images/mine/arrows-140x140.png') center center no-repeat;
-	
 	border-style: solid;
 	border-color: #000000;
+	background-color: #333333;
+	
+	background: url('../images/mine/arrows-140x140-clear.png') center center no-repeat;
 	background-color: #333333;
 	
 	text-align: center;
@@ -160,7 +209,12 @@
 	margin: 10px 50px;
 	-webkit-border-radius: 110px;
 	
-	background: url('../images/mine/arrows-200x200.png') center center no-repeat;
+	border-style: solid;
+	border-color: #000000;
+	background-color: #333333;
+	
+	background: url('../images/mine/arrows-200x200-clear.png') center center no-repeat;
+	background-color: #333333;
 }
 
 .height-480 .flickNavButton:active {
@@ -238,7 +292,7 @@
 	height: 30px;
 	width: 40px;
 	margin: 2px;
-	padding: 12px 0px;
+	padding: 6px 0px;
 	
     border-style: solid;
     border-color: #000000;
@@ -258,8 +312,74 @@
 	
 }
 
+.dashboardButtonClass.disabled-thin {
+	width: 30px;
+    border-style: none;
+	
+}
+
 #webmyth-dashboard-icon {
 	background: url(../images/icon-40x40.png) center center no-repeat;
+}
+
+.dashboardButtonClass.dashboard-text{
+	padding: 10px 0px 2px 0px; 
+}
+
+.dashboardButtonClass.dashboard-text-wide{
+	padding: 10px 0px 2px 0px; 
+	width: 50px;
+}
+
+.dashboardButtonClass.dashboard-text-jump{
+	padding: 10px 0px 2px 0px; 
+	width: 53px;
+}
+
+.dashboardButtonClass.dashboard-left {
+	background: url('../images/left-30x30.png') center center no-repeat; 
+}
+
+.dashboardButtonClass.dashboard-right {
+	background: url('../images/right-30x30.png') center center no-repeat; 
+}
+
+.dashboardButtonClass.dashboard-up {
+	background: url('../images/up-30x30.png') center center no-repeat; 
+}
+
+.dashboardButtonClass.dashboard-down {
+	background: url('../images/down-30x30.png') center center no-repeat; 
+}
+
+.dashboardButtonClass.dashboard-jumpback {
+	background: url('../images/jumpback-30x30.png') center center no-repeat; 
+	width: 53px;
+}
+
+.dashboardButtonClass.dashboard-jumpforward {
+	background: url('../images/jumpforward-30x30.png') center center no-repeat; 
+	width: 53px;
+}
+
+.dashboardButtonClass.dashboard-pause {
+	background: url('../images/pause-30x30.png') center center no-repeat; 
+	width: 53px;
+}
+
+.dashboardButtonClass.dashboard-mute {
+	background: url('../images/mute-30x30.png') center center no-repeat;
+	width: 53px; 
+}
+
+.dashboardButtonClass.dashboard-volup {
+	background: url('../images/volup-30x30.png') center center no-repeat;
+	width: 53px; 
+}
+
+.dashboardButtonClass.dashboard-voldown {
+	background: url('../images/voldown-30x30.png') center center no-repeat; 
+	width: 53px;
 }
 
 /*

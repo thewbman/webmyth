@@ -46,6 +46,7 @@ WebMyth.appMenuModel = {
 			{label: "Instructions", command: 'do-helpSetup'},
 			{label: "Tips", command: 'do-helpTips'},
 			{label: "FAQs", command: 'do-helpFAQs'},
+			//{label: "Check for Updates", command: 'do-helpUpdate'},
 			{label: "Changelog", command: 'do-helpChangelog'},
 			{label: "Email Developer", command: 'do-helpEmail'}
 			]
@@ -259,6 +260,21 @@ StageAssistant.prototype.handleCommand = function(event) {
 	  case 'do-helpFAQs':
 			//Changelog
 			this.controller.pushScene("faqs");
+			
+       break;
+	   
+	  case 'do-helpUpdate':
+			//Changelog
+			currentScene.serviceRequest("palm://com.palm.applicationManager", {
+				method: "open",
+				parameters:  {
+					id: 'com.palm.app.findapps',
+					params: {
+						scene: 'page',
+						target: "http://developer.palm.com/appredirect/?packageid=com.thewbman.webmyth"
+					}
+				}
+			});
 			
        break;
 	   

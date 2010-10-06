@@ -58,16 +58,16 @@ MusicAssistant.prototype.setup = function() {
 	//this.controller.setupWidget("infoButton", {}, { label : "Info", disabled: false } );
 	//this.controller.setupWidget("menuButton", {}, { label : "Menu", disabled: false } );
 		//playback
-	this.controller.setupWidget("playButton", {}, { label : "Play", disabled: false } );
+	this.controller.setupWidget("playButton", {}, { label : "-", disabled: false } );
 	this.controller.setupWidget("pauseButton", {}, { label : "||", disabled: false } );
-	this.controller.setupWidget("fastforwardButton", {}, { label : ">>", disabled: false } );
-	this.controller.setupWidget("rewindButton", {}, { label : "<<", disabled: false } );
-	this.controller.setupWidget("skipForwardButton", {}, { label : ">|", disabled: false } );
-	this.controller.setupWidget("skipBackButton", {}, { label : "|<", disabled: false } );
+	this.controller.setupWidget("fastforwardButton", {}, { label : "-", disabled: false } );
+	this.controller.setupWidget("rewindButton", {}, { label : "-", disabled: false } );
+	this.controller.setupWidget("skipForwardButton", {}, { label : "-", disabled: false } );
+	this.controller.setupWidget("skipBackButton", {}, { label : "-", disabled: false } );
 		//volume
-	this.controller.setupWidget("volumeUpButton", {}, { label : "Vol+", disabled: false } );
-	this.controller.setupWidget("volumeDownButton", {}, { label : "Vol-", disabled: false } );
-	this.controller.setupWidget("muteButton", {}, { label : "Mute", disabled: false } );
+	this.controller.setupWidget("volumeUpButton", {}, { label : ".", disabled: false } );
+	this.controller.setupWidget("volumeDownButton", {}, { label : "-", disabled: false } );
+	this.controller.setupWidget("muteButton", {}, { label : "-", disabled: false } );
 	
 
 	

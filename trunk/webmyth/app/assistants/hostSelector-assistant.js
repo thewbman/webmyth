@@ -79,22 +79,6 @@ HostSelectorAssistant.prototype.setup = function() {
 
 
 HostSelectorAssistant.prototype.activate = function(event) {
-	/* put in event handlers here that should only be in effect when this scene is active. For
-	   example, key handlers that are observing the document */
-	
-	//Close out open telnet connections
-	//TODO: Add check to only close if a connection exists
-	//closeTelnet(this.telnetPlug);
-	
-	/*	
-	// Query `hosts` table
-	var mytext = 'select * from hosts;'
-    WebMyth.db.transaction( 
-        (function (transaction) { 
-            transaction.executeSql(mytext, [], this.queryDataHandler.bind(this), this.errorHandler.bind(this)); 
-        }).bind(this) 
-    );
-	*/
 	
 	//Populate list using cookie
 	this.resultList.clear();
@@ -143,38 +127,6 @@ HostSelectorAssistant.prototype.handleCommand = function(event) {
   };
 };
 
-HostSelectorAssistant.prototype.queryDataHandler = function(transaction, results) { 
-    // Handle the results 
-    var string = ""; 
-	
-	//Mojo.Log.info("inside queryData");
-    
-	try {
-		var list = [];
-		for (var i = 0; i < results.rows.length; i++) {
-			var row = results.rows.item(i);
-						
-			string = { id: row.id, hostname: row.hostname, port: row.port, ipChar: row.ipChar };
-
-			list.push( string );
-			//this.hostListModel.items.push( string );
-			//Mojo.Log.info("Just added '%s' to list", string);
-		}
-		//update the list widget
-		this.resultList.clear();
-		Object.extend(this.resultList,list);
-		this.controller.modelChanged(this.hostListModel);
-		
-		//Mojo.Log.info("Done with data query");
-	}
-	catch (err)
-	{
-		Mojo.Log.error("Data query failed");	
-	} 
-
-	//Mojo.Log.info("Done with data query function");
-
-}; 
 
 HostSelectorAssistant.prototype.errorHandler = function(transaction, error) { 
     Mojo.Log.error('Error was '+error.message+' (Code '+error.code+')'); 
@@ -201,27 +153,7 @@ HostSelectorAssistant.prototype.deleteHost = function(event) {
 	//WebMyth.hostsCookie.put(WebMyth.hostsCookieObject);
 	//WebMyth.hostsCookie.put(this.resultList);
 	WebMyth.hostsCookie.put(newList);
-	
-	/*
-	this.resultList.clear();
-	Object.extend(this.resultList,newList);
-	*/
-	
-	
-	/*
-	var sql = "DELETE FROM hosts WHERE id = ?";
-	
-	WebMyth.db.transaction( function (transaction) {
-	  transaction.executeSql(sql,  [hostId], 
-                         function(transaction, results) {    // success handler
-                           Mojo.Log.info("Successfully deleted record"); 
-                         },
-                         function(transaction, error) {      // error handler
-                           Mojo.Log.error("Could not delete record: " + error.message);
-                         }
- 	 );
-	});
-	*/
+
 	
 };
 

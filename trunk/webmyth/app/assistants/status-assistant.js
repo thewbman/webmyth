@@ -41,6 +41,7 @@ StatusAssistant.prototype.setup = function() {
 		spinning: true
 	}; 
 	this.controller.setupWidget('spinner', this.spinnerAttr, this.spinnerModel);
+	$('spinner-text').innerHTML = "Loading...";
 	
 	
 	//App menu widget

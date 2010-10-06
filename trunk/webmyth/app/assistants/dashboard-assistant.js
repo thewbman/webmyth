@@ -2,25 +2,37 @@ function DashboardAssistant() {
 
 	this.buttonsStarted = false;
 
-	this.maxDashboardRemoteIndex = 2;
+	this.maxDashboardRemoteIndex = 4;
 	
 	this.dashboardRemoteButtons = [
-		{ 'layoutName': 'navigation', 'buttons': [ { 'label': 'OK', 'className': '', 'type': 'key', 'key': 'enter' },
-													{'label': 'Left', 'className': '', 'type': 'key', 'key': 'left' },
-													{'label': 'Dwn', 'className': '', 'type': 'key', 'key': 'down' },
-													{'label': 'Up', 'className': '', 'type': 'key', 'key': 'up' },
-													{'label': 'Right', 'className': '', 'type': 'key', 'key': 'right' }
+		{ 'layoutName': 'navigation', 'buttons': [ { 'label': 'OK', 'className': 'dashboard-text', 'type': 'key', 'key': 'enter' },
+													{'label': '', 'className': 'dashboard-left', 'type': 'key', 'key': 'left' },
+													{'label': '', 'className': 'dashboard-down', 'type': 'key', 'key': 'down' },
+													{'label': '', 'className': 'dashboard-up', 'type': 'key', 'key': 'up' },
+													{'label': '', 'className': 'dashboard-right', 'type': 'key', 'key': 'right' }
 												] },
-		{ 'layoutName': 'playback', 'buttons': [ { 'label': '', 'className': 'disabled', 'type': 'key', 'key': '' },
-													{'label': '|<', 'className': '', 'type': 'key', 'key': 'q' },
-													{'label': '||', 'className': '', 'type': 'key', 'key': 'p' },
-													{'label': '>|', 'className': '', 'type': 'key', 'key': 'z' },
+		{ 'layoutName': 'playback', 'buttons': [ { 'label': '', 'className': 'disabled-thin', 'type': 'key', 'key': '' },
+													{'label': '', 'className': 'dashboard-jumpback', 'type': 'key', 'key': 'q' },
+													{'label': '', 'className': 'dashboard-pause', 'type': 'key', 'key': 'p' },
+													{'label': '', 'className': 'dashboard-jumpforward', 'type': 'key', 'key': 'z' },
 													{'label': '', 'className': 'disabled', 'type': 'key', 'key': '' }
 												] },
-		{ 'layoutName': 'volume', 'buttons': [ { 'label': '', 'className': 'disabled', 'type': 'key', 'key': '' },
-													{'label': 'Vol-', 'className': '', 'type': 'key', 'key': '[' },
-													{'label': 'Mute', 'className': '', 'type': 'key', 'key': 'f9' },
-													{'label': 'Vol+', 'className': '', 'type': 'key', 'key': ']' },
+		{ 'layoutName': 'volume', 'buttons': [ { 'label': '', 'className': 'disabled-thin', 'type': 'key', 'key': '' },
+													{'label': '', 'className': 'dashboard-voldown', 'type': 'key', 'key': '[' },
+													{'label': '', 'className': 'dashboard-mute', 'type': 'key', 'key': 'f9' },
+													{'label': '', 'className': 'dashboard-volup', 'type': 'key', 'key': ']' },
+													{'label': '', 'className': 'disabled', 'type': 'key', 'key': '' }
+												] },
+		{ 'layoutName': 'commands', 'buttons': [ { 'label': 'Esc', 'className': 'dashboard-text', 'type': 'key', 'key': 'escape' },
+													{'label': 'OK', 'className': 'dashboard-text', 'type': 'key', 'key': 'enter' },
+													{'label': '', 'className': 'disabled-thin', 'type': 'key', 'key': '' },
+													{'label': 'Menu', 'className': 'dashboard-text-wide', 'type': 'key', 'key': 'm' },
+													{'label': 'Info', 'className': 'dashboard-text-wide', 'type': 'key', 'key': 'i' }
+												] },
+		{ 'layoutName': 'jump', 'buttons': [ { 'label': 'LiveTV', 'className': 'dashboard-text-jump', 'type': 'jump', 'jump': 'livetv' },
+													{'label': 'Music', 'className': 'dashboard-text-jump', 'type': 'jump', 'jump': 'playmusic' },
+													{'label': 'Videos', 'className': 'dashboard-text-jump', 'type': 'jump', 'jump': 'mythvideo' },
+													{'label': 'Record', 'className': 'dashboard-text-jump', 'type': 'jump', 'jump': 'playbackrecordings' },
 													{'label': '', 'className': 'disabled', 'type': 'key', 'key': '' }
 												] }
 		];
