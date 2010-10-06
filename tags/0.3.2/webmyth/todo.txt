@@ -1,0 +1,19 @@
+To Do - planned new features and updates:
+ 
+//Future
+ - new app icons/theme
+ - check if incoming call and pause
+ - Sort by category in recorded upcoming and recorded
+ - check vibration settings
+ - reformat date in details and lists
+ - reset list search on changes
+ - play/download on device (using mythweb?)
+ - fix guide scroll in early morning programs
+ - change guide list layout based on sorting ?
+ - center guide channum with no icon
+ - add channel search to recorded and upcoming
+ - link to mythweb on upcoming
+ - check for updates link
+ 
+ 
+
