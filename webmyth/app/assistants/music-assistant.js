@@ -65,7 +65,7 @@ MusicAssistant.prototype.setup = function() {
 	this.controller.setupWidget("skipForwardButton", {}, { label : "-", disabled: false } );
 	this.controller.setupWidget("skipBackButton", {}, { label : "-", disabled: false } );
 		//volume
-	this.controller.setupWidget("volumeUpButton", {}, { label : ".", disabled: false } );
+	this.controller.setupWidget("volumeUpButton", {}, { label : "-", disabled: false } );
 	this.controller.setupWidget("volumeDownButton", {}, { label : "-", disabled: false } );
 	this.controller.setupWidget("muteButton", {}, { label : "-", disabled: false } );
 	

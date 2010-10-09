@@ -39,7 +39,7 @@ GuideDetailsAssistant.prototype.setup = function() {
 
 	// Menu grouping at bottom of scene
     this.cmdMenuModel = { label: $L('Play Menu'),
-                            items: [{ label: $L('Record'), command: 'go-mythweb' },{},{label: $L('Web'), submenu:'web-menu', width: 90}]};
+                            items: [{ label: $L('Setup'), command: 'go-mythweb' },{},{label: $L('Web'), submenu:'web-menu', width: 90}]};
 							
  
 	this.hostsMenuModel = { label: $L('Hosts'), items: []};
@@ -116,7 +116,7 @@ GuideDetailsAssistant.prototype.activate = function(event) {
 		this.cmdMenuModel.items[0].submenu = 'hosts-menu';
 		this.cmdMenuModel.items[0].width =  90;
 		
-		this.cmdMenuModel.items[1].label = $L('Record');
+		this.cmdMenuModel.items[1].label = $L('Setup');
 		this.cmdMenuModel.items[1].command = 'go-mythweb';
 		
 				
@@ -201,29 +201,30 @@ GuideDetailsAssistant.prototype.handleKey = function(event) {
 
 GuideDetailsAssistant.prototype.openMythweb = function() {
 
-			Mojo.Log.error("opening in mythweb");
+	Mojo.Log.error("opening in mythweb");
 			
-			var dateJS = new Date(isoToJS(this.guideObject.startTime));
-			var dateUTC = dateJS.getTime()/1000;				//don't need 59 second offset?
+	var dateJS = new Date(isoToJS(this.guideObject.startTime));
+	var dateUTC = dateJS.getTime()/1000;				//don't need 59 second offset?
 			
-			Mojo.Log.info("Selected time is: '%j'", dateUTC);
+	Mojo.Log.info("Selected time is: '%j'", dateUTC);
 			
-			var mythwebUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/mythweb/tv/detail/"
-			mythwebUrl += this.guideObject.chanId + "/";
-			mythwebUrl += dateUTC;
-			mythwebUrl += "?RESET_TMPL=true";
+	var mythwebUrl = "http://";
+	mythwebUrl += WebMyth.prefsCookieObject.webserverName+"/mythweb/tv/detail/"
+	mythwebUrl += this.guideObject.chanId + "/";
+	mythwebUrl += dateUTC;
+	//mythwebUrl += "?RESET_TMPL=true";
 			
-			Mojo.Log.info("mythweb url is "+mythwebUrl);
+	Mojo.Log.info("mythweb url is "+mythwebUrl);
 			
-			this.controller.serviceRequest("palm://com.palm.applicationManager", {
-				method: "open",
-				parameters:  {
-					id: 'com.palm.app.browser',
-					params: {
-						target: mythwebUrl
-					}
-				}
-			}); 
+	this.controller.serviceRequest("palm://com.palm.applicationManager", {
+		method: "open",
+		parameters:  {
+			id: 'com.palm.app.browser',
+			params: {
+				target: mythwebUrl
+			}
+		}
+	}); 
 	
 };
 

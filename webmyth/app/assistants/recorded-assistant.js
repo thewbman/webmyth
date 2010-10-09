@@ -55,6 +55,8 @@ RecordedAssistant.prototype.setup = function() {
                             items: [{label: $L('Sort'), submenu:'sort-menu', width: 90},{},{label: $L('Group'), submenu:'group-menu', width: 90}]};
  
 	this.sortMenuModel = { label: $L('Sort'), items: [
+			{"label": $L('Category-Asc'), "command": "go-sort-category-asc"},
+			{"label": $L('Category-Desc'), "command": "go-sort-category-desc"},
 			{"label": $L('Date-Asc'), "command": "go-sort-date-asc"},
 			{"label": $L('Date-Desc'), "command": "go-sort-date-desc"},
 			{"label": $L('Title-Asc'), "command": "go-sort-title-asc"},
@@ -258,6 +260,12 @@ RecordedAssistant.prototype.sortChanged = function(newSort) {
 		  break;
 		case 'date-desc':
 			this.fullResultList.sort(double_sort_by('starttime', 'title', true));
+		  break;
+		case 'category-asc':
+			this.fullResultList.sort(double_sort_by('category', 'title', false));
+		  break;
+		case 'category-desc':
+			this.fullResultList.sort(double_sort_by('category', 'title', true));
 		  break;
 		default :
 			this.fullResultList.sort(double_sort_by('starttime', 'title', false));
@@ -597,27 +605,6 @@ RecordedAssistant.prototype.filterListFunction = function(filterString, listWidg
 };	
 
 
-/*
-RecordedAssistant.prototype.addImages = function() {
-	//And img sources
-	var s, imageUrl = "", imageId = "";
-	var screenshotBaseUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webmythPythonFile+"?op=getPremadeImage&chanid=";
-	
-	for (var i = 0; i < this.subset.length; i++) {
-		s = this.subset[i];
-		imageId = 'img-'+s.chanid+'T'+s.starttime;
-		imageUrl = screenshotBaseUrl + s.chanid + "&starttime=" + s.recstartts;
-		
-		if($(imageId))
-			$(imageId).src = imageUrl;
-		//Mojo.Log.error("i is " + i + " id is "+imageId+" url is " + imageUrl);
-		//Mojo.Log.error("id is "+"img-"+s.chanid+"T"+s.starttime+" url is " + imageUrl);
-	}
-	
-};
-*/
-
-
 RecordedAssistant.prototype.recorderDividerFunction = function(itemModel) {
 	 
 	//Divider function for list
@@ -638,6 +625,12 @@ RecordedAssistant.prototype.recorderDividerFunction = function(itemModel) {
        break;
 	  case 'title-desc':
 		divider = itemModel.title;
+       break;
+	  case 'category-asc':
+		divider = itemModel.category;
+       break;
+	  case 'category-desc':
+		divider = itemModel.category;
        break;
 	}
 	 

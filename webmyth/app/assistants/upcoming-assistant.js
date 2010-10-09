@@ -224,53 +224,6 @@ UpcomingAssistant.prototype.readRemoteDbTableSuccess = function(response) {
 	this.spinnerModel.spinning = false;
 	this.controller.modelChanged(this.spinnerModel, this);
 	$('myScrim').hide()
-	
-/*	
-	//Save new values back to DB
-    var json = response.responseJSON;
- 
-	
-	//Replace out old data
-	WebMyth.db.transaction( function (transaction) {
-		transaction.executeSql("DELETE FROM 'recorded'; ",  [], 
-			function(transaction, results) {    // success handler
-				Mojo.Log.info("Successfully truncated recorded");
-			},
-			function(transaction, error) {      // error handler
-				Mojo.Log.error("Could not truncate recorded because " + error.message);
-			}
-		);
-	});
-	WebMyth.db.transaction( function (transaction) {
-		transaction.executeSql("DELETE FROM 'recgroup'; ",  [], 
-			function(transaction, results) {    // success handler
-				Mojo.Log.info("Successfully truncated recgroup");
-			},
-			function(transaction, error) {      // error handler
-				Mojo.Log.error("Could not truncate recgroup because " + error.message);
-			}
-		);
-	});
-	WebMyth.db.transaction( function (transaction) {
-		transaction.executeSql("INSERT INTO 'recgroup' (groupname, displayname) VALUES ('AllRecgroupsOn', 'All');",  [], 
-				function(transaction, results) {    // success handler
-					Mojo.Log.info("Successfully inserted AllRecgroupsOn");
-					
-					//Nest parsing actions here		
-					for(var i = 0; i < json.length; i++){
-						title = json[i].title;
-						subtitle = json[i].subtitle;
-						insertRecordedRow(json[i]);
-						//Mojo.Log.error('Row: ' + i + ' Title: ' + title + ' Subtitle: ' + subtitle);	
-					}
-					
-				},
-				function(transaction, error) {      // error handler
-					Mojo.Log.error("Could not insert AllRecgroupsOn because " + error.message);
-				}
-		);
-	});
-	*/
 
 };
 
@@ -298,6 +251,10 @@ UpcomingAssistant.prototype.filterListFunction = function(filterString, listWidg
 				someList.push(s);
 			}
 			else if (s.subtitle.toUpperCase().indexOf(filterString.toUpperCase())>=0){
+				//Mojo.Log.info("Found string in subtitle", i);
+				someList.push(s);
+			}
+			else if (s.channame.toUpperCase().indexOf(filterString.toUpperCase())>=0){
 				//Mojo.Log.info("Found string in subtitle", i);
 				someList.push(s);
 			}
@@ -377,27 +334,6 @@ UpcomingAssistant.prototype.recorderDividerFunction = function(itemModel) {
 
 UpcomingAssistant.prototype.setMyData = function(propertyValue, model) {
 	
-	//Mojo.Log.error('property value is %j', propertyValue);
-	//var newDate = new Date(isoToDate(model.starttime));
-	//var modifiedDate = date.toLocaleString().substring(0,15);
-	
-	/*
-	var titleAndSubtitle = '<div class="recorded-title"><div class="palm-info-text title right">'+model.title+'</div></div>';
-	titleAndSubtitle += '<div class="recorded-subtitle"><div class="palm-info-text title right italics">'+model.subtitle+'</div></div>';
-	
-	var timeAndSubtitle = '<div class="recorded-starttime"><div class="palm-info-text title right">'+model.starttime+'</div></div>';
-	//var timeAndSubtitle = '<div class="recorded-starttime"><div class="palm-info-text title right">'+newDate+'</div></div>';
-	timeAndSubtitle += '<div class="recorded-subtitle"><div class="palm-info-text title right italics">'+model.subtitle+'</div></div>';
-	*/
-	
-	
-	//Details text
-	//var upcomingDetailsText = '<div class="upcoming-title"><div class="palm-info-text title truncating-text left">'+model.title+'</div></div>';
-    //var upcomingDetailsText = '<div class="upcoming-subtitle"><div class="palm-info-text truncating-text left italics">'+model.subtitle+'</div></div>';
-	//upcomingDetailsText += '<div class="upcoming-starttime"><div class="palm-info-text truncating-text left">'+model.starttime+'</div></div>';
-	
-	//model.myDetailsData = upcomingDetailsText;
-	
 	
 	//And img source
 	var channelIconUrl = "http://"+WebMyth.prefsCookieObject.masterBackendIp+":6544/Myth/GetChannelIcon?ChanId=";
@@ -410,13 +346,17 @@ UpcomingAssistant.prototype.setMyData = function(propertyValue, model) {
 	
 	
 	
-	var upcomingDetailsText = '<div class="palm-info-text title truncating-text left upcoming-list-title">'+model.title+'</div>';
+	var upcomingDetailsText = '<div class="upcoming-list-item">';
+	upcomingDetailsText += '<div class="title truncating-text left upcoming-list-title">&nbsp;'+model.title+'</div>';
 	upcomingDetailsText += '<div class="palm-row-wrapper">';
 	
 	if(WebMyth.prefsCookieObject.showUpcomingChannelIcons) upcomingDetailsText += '<div class="left-list-text">';
 	
-	upcomingDetailsText += '<div class="upcoming-subtitle"><div class="palm-info-text truncating-text left italics">'+model.subtitle+'</div></div>';
-	upcomingDetailsText += '<div class="upcoming-starttime"><div class="palm-info-text truncating-text left">'+model.starttime+'</div></div>';
+	upcomingDetailsText += '<div class="palm-info-text truncating-text left">&nbsp;'+model.subtitle+'&nbsp;</div>';
+	upcomingDetailsText += '<div class="palm-info-text truncating-text left">&nbsp;&nbsp;'+model.starttime+'&nbsp;</div>';
+	upcomingDetailsText += '<div class="palm-info-text truncating-text left">&nbsp;&nbsp;&nbsp;'+model.category+'</div>';
+	upcomingDetailsText += '<div class="palm-info-text truncating-text left">&nbsp;&nbsp;&nbsp;&nbsp;'+model.channame+'</div>';
+	
 	
 	
 	if(WebMyth.prefsCookieObject.showUpcomingChannelIcons) {
@@ -427,7 +367,7 @@ UpcomingAssistant.prototype.setMyData = function(propertyValue, model) {
 		upcomingDetailsText += '</div>';
 	}
 	
-	upcomingDetailsText += '</div>';
+	upcomingDetailsText += '</div></div>';
 		
 	model.myData = upcomingDetailsText;
 	

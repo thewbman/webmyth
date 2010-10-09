@@ -47,15 +47,15 @@ MasterRemoteAssistant.prototype.setup = function() {
 	
 	//Buttons
 		//navigation
-	this.controller.setupWidget("backButton", {}, { label : "ESC", disabled: false } );
+	this.controller.setupWidget("backButton", {}, { buttonClass:'small-button', label : "ESC", disabled: false } );
 	this.controller.setupWidget("upButton", {}, { label : "-", disabled: false } );
 	this.controller.setupWidget("leftButton", {}, { label : "-", disabled: false } );
 	this.controller.setupWidget("selectButton", {}, { label : "OK", disabled: false } );
 	this.controller.setupWidget("rightButton", {}, { label : "-", disabled: false } );
 	this.controller.setupWidget("downButton", {}, { label : "-", disabled: false } );
 		//general
-	this.controller.setupWidget("infoButton", {}, { label : "Info", disabled: false } );
-	this.controller.setupWidget("menuButton", {}, { label : "Menu", disabled: false } );
+	this.controller.setupWidget("infoButton", {}, { buttonClass:'small-button', label : "Info", disabled: false } );
+	this.controller.setupWidget("menuButton", {}, { buttonClass:'small-button', label : "Menu", disabled: false } );
 		//playback
 	//this.controller.setupWidget("playButton", {}, { label : "Play", disabled: false } );
 	this.controller.setupWidget("pauseButton", {}, { label : "||", disabled: false } );
@@ -63,8 +63,9 @@ MasterRemoteAssistant.prototype.setup = function() {
 	//this.controller.setupWidget("rewindButton", {}, { label : "<<", disabled: false } );
 	this.controller.setupWidget("skipForwardButton", {}, { label : "-", disabled: false } );
 	this.controller.setupWidget("skipBackButton", {}, { label : "-", disabled: false } );
+	this.controller.setupWidget("deleteButton", {}, { buttonClass:'small-button', label : "Delete", disabled: false } );
 		//volume
-	this.controller.setupWidget("volumeUpButton", {}, { label : ".", disabled: false } );
+	this.controller.setupWidget("volumeUpButton", {}, { label : "-", disabled: false } );
 	this.controller.setupWidget("volumeDownButton", {}, { label : "-", disabled: false } );
 	this.controller.setupWidget("muteButton", {}, { label : "-", disabled: false } );
 		//jump buttons
@@ -94,12 +95,13 @@ MasterRemoteAssistant.prototype.setup = function() {
 	Mojo.Event.listen(this.controller.get("muteButton"),Mojo.Event.tap, this.sendCommand.bind(this, this.controller.get("muteButton")));
 	
 	//Playback button events
-	Mojo.Event.listen(this.controller.get("playButton"),Mojo.Event.tap, this.sendCommand.bind(this, this.controller.get("playButton")));
-	//Mojo.Event.listen(this.controller.get("pauseButton"),Mojo.Event.tap, this.sendCommand.bind(this, this.controller.get("pauseButton")));
+	//Mojo.Event.listen(this.controller.get("playButton"),Mojo.Event.tap, this.sendCommand.bind(this, this.controller.get("playButton")));
+	Mojo.Event.listen(this.controller.get("pauseButton"),Mojo.Event.tap, this.sendCommand.bind(this, this.controller.get("pauseButton")));
 	//Mojo.Event.listen(this.controller.get("fastforwardButton"),Mojo.Event.tap, this.sendCommand.bind(this, this.controller.get("fastforwardButton")));
 	//Mojo.Event.listen(this.controller.get("rewindButton"),Mojo.Event.tap, this.sendCommand.bind(this, this.controller.get("rewindButton")));
 	Mojo.Event.listen(this.controller.get("skipForwardButton"),Mojo.Event.tap, this.sendCommand.bind(this, this.controller.get("skipForwardButton")));
 	Mojo.Event.listen(this.controller.get("skipBackButton"),Mojo.Event.tap, this.sendCommand.bind(this, this.controller.get("skipBackButton")));
+	Mojo.Event.listen(this.controller.get("deleteButton"),Mojo.Event.tap, this.sendCommand.bind(this, this.controller.get("deleteButton")));
 
 	//Jump button events
 	Mojo.Event.listen(this.controller.get("livetvButton"),Mojo.Event.tap, this.sendCommand.bind(this, this.controller.get("livetvButton")));
@@ -178,15 +180,18 @@ MasterRemoteAssistant.prototype.sendCommand = function(element, event) {
 	  break;
 	  
 	//Playback Commands
-	/*
 	case pauseButton:
 	  this.sendTelnetKey("p");
 	  break;
+	/*
 	case fastforwardButton:
 	  this.sendTelnetKey(".");
 	  break;
 	case rewindButton:
 	  this.sendTelnetKey(",");
+	  break;
+	case playButton:
+	  this.sendTelnetKey("p");
 	  break;
 	  */
 	case skipForwardButton:
@@ -195,8 +200,8 @@ MasterRemoteAssistant.prototype.sendCommand = function(element, event) {
 	case skipBackButton:
 	  this.sendTelnetKey("q");
 	  break;
-	case playButton:
-	  this.sendTelnetKey("p");
+	case deleteButton:
+	  this.sendTelnetKey("d");
 	  break;
 	  
 	//Jump commands

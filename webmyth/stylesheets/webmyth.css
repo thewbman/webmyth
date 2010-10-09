@@ -64,6 +64,10 @@
 	float: left;
 }
 
+.buttonClass3.smallButtonClass {
+	margin: 15px 5px 0px 5px;
+}
+
 .buttonClass4 {
 	height: 30px;
 	width: 93px;
@@ -132,7 +136,7 @@
 }
 
 .volumeUpButton .palm-button-wrapper {
-	background: url('../images/volup-30x30.png') center center no-repeat; 
+	background: url('../images/volup-40x30.png') center center no-repeat; 
 }
 
 .muteButton .palm-button-wrapper .truncating-text {
@@ -636,10 +640,6 @@
 	height: 100px
 }
 
-.upcoming-list-title {
-	height: 26px
-}
-
 .left-list-text {
 	height: 60px;
 	width: 75%;
@@ -663,6 +663,19 @@
 .upcomingDetails-channel-img {
 	padding: 3px 110px;
 	width: 100px;
+}
+
+.upcoming-scene .upcoming-list-item .upcoming-list-title  {
+  padding: 3px 14px 0px 0px;
+  margin: 0px;
+  font-size: 20px;
+  height: 26px;
+}
+
+.upcoming-scene .upcoming-list-item .palm-info-text.left {
+  padding: 0px;
+  margin: 0px 8px;
+  line-height: 16px;
 }
 
 /*
