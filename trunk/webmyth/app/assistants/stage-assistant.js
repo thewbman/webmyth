@@ -46,9 +46,9 @@ WebMyth.appMenuModel = {
 			{label: "Instructions", command: 'do-helpSetup'},
 			{label: "Tips", command: 'do-helpTips'},
 			{label: "FAQs", command: 'do-helpFAQs'},
-			//{label: "Check for Updates", command: 'do-helpUpdate'},
 			{label: "Changelog", command: 'do-helpChangelog'},
-			{label: "Email Developer", command: 'do-helpEmail'}
+			{label: "Email Developer", command: 'do-helpEmail'},
+			{label: "Check for Updates", command: 'do-helpUpdate'}
 			]
 		}
 	]

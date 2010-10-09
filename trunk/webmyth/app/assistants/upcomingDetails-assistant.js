@@ -39,7 +39,7 @@ UpcomingDetailsAssistant.prototype.setup = function() {
 
 	// Menu grouping at bottom of scene
     this.cmdMenuModel = { label: $L('Play Menu'),
-                            items: [{},{},{label: $L('Web'), submenu:'web-menu', width: 90}]};
+                            items: [{ label: 'Setup', command: 'go-setup', width: 90 },{},{label: $L('Web'), submenu:'web-menu', width: 90}]};
  
 	this.webMenuModel = { label: $L('WebMenu'), items: [
 			{"label": $L('themoviedb'), "command": "go-web--themoviedb"},
@@ -109,12 +109,45 @@ UpcomingDetailsAssistant.prototype.handleCommand = function(event) {
       case 'go-web-':
 		this.openWeb(mySelection);
        break;
+      case 'go-setu':
+		this.openMythweb();
+       break;
     }
   } else if(event.type == Mojo.Event.forward) {
 	
 		Mojo.Controller.stageController.pushScene({name: WebMyth.prefsCookieObject.currentRemoteScene, disableSceneScroller: true});
   }
   
+};
+
+
+UpcomingDetailsAssistant.prototype.openMythweb = function() {
+
+	Mojo.Log.error("opening in mythweb");
+			
+	var dateJS = new Date(isoSpaceToJS(this.upcomingObject.starttime));
+	var dateUTC = dateJS.getTime()/1000;				//don't need 59 second offset?
+			
+	Mojo.Log.info("Selected time is: '%j'", dateUTC);
+			
+	var mythwebUrl = "http://";
+	mythwebUrl += WebMyth.prefsCookieObject.webserverName+"/mythweb/tv/detail/"
+	mythwebUrl += this.upcomingObject.chanid + "/";
+	mythwebUrl += dateUTC;
+	//mythwebUrl += "?RESET_TMPL=true";
+			
+	Mojo.Log.info("mythweb url is "+mythwebUrl);
+			
+	this.controller.serviceRequest("palm://com.palm.applicationManager", {
+		method: "open",
+		parameters:  {
+			id: 'com.palm.app.browser',
+			params: {
+				target: mythwebUrl
+			}
+		}
+	}); 
+ 
 };
 
 

@@ -12,8 +12,13 @@ To Do - planned new features and updates:
  - change guide list layout based on sorting ?
  - center guide channum with no icon
  - add channel search to recorded and upcoming
- - link to mythweb on upcoming
- - check for updates link
  
  
+//Long term
+ - plugin for remote
+ - convert recorded to XML backend
+ - upcoming to XML ?
+ - videos listing ?
+ - music listing ?
+ - selectable music and videos ?
 

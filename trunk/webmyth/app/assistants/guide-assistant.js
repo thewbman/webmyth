@@ -616,14 +616,15 @@ GuideAssistant.prototype.popupHandler = function(event) {
 			Mojo.Log.error("opening in mythweb");
 			
 			var dateJS = new Date(isoToJS(this.newStartTime));
-			var dateUTC = dateJS.getTime()/1000 -59;				//59 seconds off?
+			var dateUTC = dateJS.getTime()/1000 -59;				
 			
 			Mojo.Log.info("Selected time is: '%j'", dateUTC);
 			
-			var mythwebUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/mythweb/tv/detail/"
+			var mythwebUrl = "http://";
+			mythwebUrl += WebMyth.prefsCookieObject.webserverName+"/mythweb/tv/detail/"
 			mythwebUrl += this.newChannid + "/";
 			mythwebUrl += dateUTC;
-			mythwebUrl += "?RESET_TMPL=true";
+			//mythwebUrl += "?RESET_TMPL=true";
 			
 			Mojo.Log.info("mythweb url is "+mythwebUrl);
 			

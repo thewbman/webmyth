@@ -36,7 +36,7 @@ function RecordedDetailsAssistant(detailsObject) {
 
 RecordedDetailsAssistant.prototype.setup = function() {
 	
-	//Mojo.Log.info("Starting recorded details scene '%j'", this.recordedObject);
+	Mojo.Log.info("Starting recorded details scene '%j'", this.recordedObject);
 	
 	//App menu widget
 	this.controller.setupWidget(Mojo.Menu.appMenu, WebMyth.appMenuAttr, WebMyth.appMenuModel);
@@ -74,6 +74,7 @@ RecordedDetailsAssistant.prototype.setup = function() {
 	$('scene-title').innerText = this.recordedObject.title;
 	$('subtitle-title').innerText = this.recordedObject.subtitle;
 	$('description-title').innerText = this.recordedObject.description;
+	$('category-title').innerText = this.recordedObject.category;
 	
 	$('hostname-title').innerText = this.recordedObject.hostname;
 	$('recgroup-title').innerText = this.recordedObject.recgroup;
