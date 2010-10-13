@@ -98,15 +98,15 @@ RecordedDetailsAssistant.prototype.activate = function(event) {
 	var hostsList = [];
 	var i, s;
 
-	/*
+	
 	if(WebMyth.prefsCookieObject.allowRecordedDownloads) {
-		var downloadCmd = { "label": "Download to device", "command": "go-down-download" }
-		var streamCmd = { "label": "Stream to device", "command": "go-down-stream" }
+		var downloadCmd = { "label": "Download to phone", "command": "go-down-download" }
+		var streamCmd = { "label": "Stream to phone", "command": "go-down-stream" }
 		
 		hostsList.push(downloadCmd);
-		//hostsList.push(streamCmd);
+		hostsList.push(streamCmd);
 	}	
-	*/
+	
 	
 	for (i = 0; i < WebMyth.hostsCookieObject.length; i++) {
 
@@ -144,7 +144,7 @@ RecordedDetailsAssistant.prototype.handleCommand = function(event) {
   if(event.type == Mojo.Event.command) {
   	myCommand = event.command.substring(0,7);
 	mySelection = event.command.substring(8);
-	Mojo.Log.error("command: "+myCommand+" host: "+mySelection);
+	Mojo.Log.info("Selected command: "+myCommand+" host: "+mySelection);
 
     switch(myCommand) {
       case 'go-play':
@@ -237,7 +237,7 @@ RecordedDetailsAssistant.prototype.openWeb = function(website) {
 
 RecordedDetailsAssistant.prototype.handleDownload = function(downloadOrStream_in) {
 
-	//Mojo.Log.error("Asked to "+downloadOrStream_in+" recorded program");
+	Mojo.Log.info("Asked to "+downloadOrStream_in+" recorded program");
 	this.downloadOrStream = downloadOrStream_in;
 	
 	var dateJS = new Date(isoSpaceToJS(this.recordedObject.recstartts));
@@ -249,65 +249,27 @@ RecordedDetailsAssistant.prototype.handleDownload = function(downloadOrStream_in
 	filenameRequestUrl += ((dateJS.getTime()/1000));
 	filenameRequestUrl += ".mp4";
 	
-	Mojo.Log.info("Download URL is "+filenameRequestUrl);
- 
-	//try {
-        var request = new Ajax.Request(filenameRequestUrl,{
-            method: 'get',
-            evalJSON: 'true',
-            onSuccess: this.downloadStream.bind(this),
-            onFailure: function() {
-				Mojo.Log.error("Failed AJAX: '%s'", filenameRequestUrl);
-				Mojo.Controller.getAppController().showBanner("ERROR - check remote.py scipt", {source: 'notification'});
-			}
-        }
-		);
-	/*	
-	}
-	catch(err) {
-		Mojo.Log.error('AJAX error: ' + err.message);
-	}
-	*/	
- 
-};
-
-
-RecordedDetailsAssistant.prototype.downloadStream = function(response) {
-
-	//Mojo.Log.error("Asked to "+this.downloadOrStream+" with "+response.responseText);  
-	this.standardFilename = response.responseText.trim();
-	
-	//Want to add more options here later
-	var filename = this.standardFilename+".mp4";
-	var filenameUrl = "http://"+WebMyth.prefsCookieObject.webserverName+WebMyth.prefsCookieObject.webmythPythonFile;
-	filenameUrl += "?op=downloadFile&dir=/&filename=";
-	filenameUrl += filename;
+	Mojo.Log.info("Download/stream URL is "+filenameRequestUrl);
 	
 	var myFilename = this.recordedObject.title + "-" + this.recordedObject.subtitle + ".mp4";
 	
+	Mojo.Log.info("Filename is "+myFilename);
+ 
+ 
 	if( this.downloadOrStream == 'download' ) {
-		//Mojo.Log.error("starting download of "+filename);
+		Mojo.Log.info("starting download");
 		this.controller.serviceRequest('palm://com.palm.downloadmanager/', {
 			method: 'download',
 			parameters: {
-				target: filenameUrl,		
+				target: filenameRequestUrl,		
 				mime: "video/mp4",
 				targetFilename: myFilename,
-				subscribe: false,	
+				subscribe: true,	
 				targetDir: "/media/internal/mythtv/"
 			},
 			onSuccess: function(response) {
 				if(response.completed) {
 					this.controller.showBanner("Download finished!"+myFilename, "");
-					/*
-					this.controller.showAlertDialog({
-						onChoose: function(value){},
-						title: "Download Complete",
-						message: "\"" + response.target + "\" downloaded successfully!",
-						choices: [{label: "OK", value: "ok"}],
-						allowHTMLMessage: true
-					});
-					*/
 				} else {
 					if(response.amountReceived && response.amountTotal) {
 						var percent = (response.amountReceived / response.amountTotal)*100;
@@ -323,16 +285,16 @@ RecordedDetailsAssistant.prototype.downloadStream = function(response) {
 				}
 			}.bind(this)
 		});	
-	} else 	if( this.downloadOrStream == 'stream' ) {
+	} else if( this.downloadOrStream == 'stream' ) {
 		
-		//Mojo.Log.error("Asked to stream "+filename);
+		Mojo.Log.info("Starting to stream");
 	
 		this.controller.serviceRequest("palm://com.palm.applicationManager", {
 			method: "launch",
 			parameters:  {
 				id: 'com.palm.app.videoplayer',
 				params: {
-					target: filenameUrl	
+					target: filenameRequestUrl	
 				}
 			}
 		});	

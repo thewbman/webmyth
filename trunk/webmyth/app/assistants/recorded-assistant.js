@@ -52,7 +52,7 @@ RecordedAssistant.prototype.setup = function() {
 	
 	// Menu grouping at bottom of scene
     this.cmdMenuModel = { label: $L('Recorded Menu'),
-                            items: [{label: $L('Sort'), submenu:'sort-menu', width: 90},{},{label: $L('Group'), submenu:'group-menu', width: 90}]};
+                            items: [{label: $L('Sort'), submenu:'sort-menu', width: 90},{ icon: 'refresh', command: 'go-refresh' },{label: $L('Group'), submenu:'group-menu', width: 90}]};
  
 	this.sortMenuModel = { label: $L('Sort'), items: [
 			{"label": $L('Category-Asc'), "command": "go-sort-category-asc"},
@@ -144,19 +144,28 @@ RecordedAssistant.prototype.handleCommand = function(event) {
   if(event.type == Mojo.Event.command) {
   	myCommand = event.command.substring(0,7);
 	mySelection = event.command.substring(8);
-	//Mojo.Log.error("command: "+myCommand+" host: "+mySelection);
+	Mojo.Log.error("command: "+myCommand+" host: "+mySelection);
 
     switch(myCommand) {
-      case 'go-sort':
+      case 'go-sort':		//sort
 		//Mojo.Log.error("sorting ..."+mySelection);
 	    //Mojo.Controller.getAppController().showBanner("Sorting not yet working", {source: 'notification'});
 		this.controller.sceneScroller.mojo.revealTop();
 		this.sortChanged(mySelection);
        break;
-      case 'go-grou':
+      case 'go-grou':		//group
 		//Mojo.Log.error("group select ... "+mySelection);
 		this.controller.sceneScroller.mojo.revealTop();
 		this.recgroupChanged(mySelection);
+       break;
+      case 'go-refr':		//refresh
+	  
+		this.spinnerModel.spinning = true;
+		this.controller.modelChanged(this.spinnerModel, this);
+		$('myScrim').show();
+	
+		this.getRecorded();
+		
        break;
     }
   } else if(event.type == Mojo.Event.forward) {
@@ -222,6 +231,8 @@ RecordedAssistant.prototype.getRecorded = function() {
 	//Update list from python script
 	Mojo.Log.info('Starting remote data gathering');
 	
+	this.controller.sceneScroller.mojo.revealTop();
+	
 	var requestUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webmythPythonFile;
 	requestUrl += "?op=getRecorded";
  
@@ -273,6 +284,8 @@ RecordedAssistant.prototype.sortChanged = function(newSort) {
 	}
 	
 	this.recgroupChanged(WebMyth.prefsCookieObject.currentRecgroup);
+	
+	this.updateSortMenu();
 	   
 };
 
@@ -286,6 +299,8 @@ RecordedAssistant.prototype.recgroupChanged = function(newRecgroup) {
 	
 	var listWidget = this.controller.get('recordedList');
 	this.filterListFunction('', listWidget, 0, this.resultList.length);
+	
+	listWidget.mojo.close();
 	
 	
 	//Save selection back to cookie
@@ -312,7 +327,6 @@ RecordedAssistant.prototype.useLocalDataTable = function(event) {
 	);
 							
 };
-
 
 RecordedAssistant.prototype.queryDataHandler = function(transaction, results) { 
     // Handle the results 
@@ -386,11 +400,9 @@ RecordedAssistant.prototype.queryDataHandler = function(transaction, results) {
 
 };
 
-
 RecordedAssistant.prototype.queryErrorHandler = function(transaction, errors) { 
     Mojo.Log.error('Error was '+error.message+' (Code '+error.code+')'); 
 };
-
 
 RecordedAssistant.prototype.readRemoteDbTableSuccess = function(response) {
 	//return true;  //can escape this function for testing purposes
@@ -522,7 +534,6 @@ function insertRecordedRow(newline){
 	
 };
 
-
 RecordedAssistant.prototype.goRecordedDetails = function(event) {
 	var recorded_chanid = event.item.chanid;
 	var recorded_starttime = event.item.starttime;
@@ -538,7 +549,6 @@ RecordedAssistant.prototype.goRecordedDetails = function(event) {
 	
 
 };
-
 
 RecordedAssistant.prototype.filterListFunction = function(filterString, listWidget, offset, count) {
 	 
@@ -561,6 +571,14 @@ RecordedAssistant.prototype.filterListFunction = function(filterString, listWidg
 				someList.push(s);
 			}
 			else if (s.subtitle.toUpperCase().indexOf(filterString.toUpperCase())>=0){
+				//Mojo.Log.info("Found string in subtitle", i);
+				someList.push(s);
+			}
+			else if (s.category.toUpperCase().indexOf(filterString.toUpperCase())>=0){
+				//Mojo.Log.info("Found string in subtitle", i);
+				someList.push(s);
+			}
+			else if (s.channame.toUpperCase().indexOf(filterString.toUpperCase())>=0){
 				//Mojo.Log.info("Found string in subtitle", i);
 				someList.push(s);
 			}
@@ -603,7 +621,6 @@ RecordedAssistant.prototype.filterListFunction = function(filterString, listWidg
 	//this.addImages();
 
 };	
-
 
 RecordedAssistant.prototype.recorderDividerFunction = function(itemModel) {
 	 
@@ -648,7 +665,6 @@ RecordedAssistant.prototype.searchFilter = function(event)    {
     } 
 };
 
-
 RecordedAssistant.prototype.updateRecgroupList = function(transaction, results)  { 
 	//Mojo.Log.info('inside updateRecgroupList');
 	
@@ -685,46 +701,72 @@ RecordedAssistant.prototype.updateRecgroupList = function(transaction, results) 
 	
 };
 
-
 RecordedAssistant.prototype.setMyData = function(propertyValue, model)  { 
 
-	//Mojo.Log.error('property value is %j', propertyValue);
-	//var newDate = new Date(isoToJS(model.starttime));
-	//var modifiedDate = date.toLocaleString().substring(0,15);
-
-	var titleAndSubtitle = '<div class="recorded-title"><div class="palm-info-text title right">'+model.title+'</div></div>';
-	titleAndSubtitle += '<div class="recorded-subtitle"><div class="palm-info-text right italics">'+model.subtitle+'</div></div>';
-	
-	var timeAndSubtitle = '<div class="recorded-starttime"><div class="palm-info-text title right">'+model.starttime+'</div></div>';
-	//var timeAndSubtitle = '<div class="recorded-starttime"><div class="palm-info-text title right">'+newDate+'</div></div>';
-	timeAndSubtitle += '<div class="recorded-subtitle"><div class="palm-info-text right italics">'+model.subtitle+'</div></div>';
-	
-	//Setup list items
-	switch(WebMyth.prefsCookieObject.currentRecSort) {
-		case 'title-asc':
-			model.myData = timeAndSubtitle;
-		  break;
-		case 'title-desc':
-			model.myData = timeAndSubtitle;
-		  break;
-		case 'date-asc':
-			model.myData = titleAndSubtitle;
-		  break;
-		case 'date-desc':
-			model.myData = titleAndSubtitle;
-		  break;
-		default :
-			model.myData = titleAndSubtitle;
-		  break;
-	};
-	
-	//And img source
 	
 	var screenshotUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webmythPythonFile+"?op=getPremadeImage&chanid=";
 	screenshotUrl += model.chanid + "&starttime=" + model.recstartts;
 	
-	//Mojo.Log.error('url is ' +screenshotUrl);
-	model.myImgSrc = screenshotUrl;
 	
+	var recordedDetailsText = '<div class="recorded-list-item">';
+	recordedDetailsText += '<div class="title truncating-text left recorded-list-title">&nbsp;'+model.title+'</div>';
+	recordedDetailsText += '<div class="palm-row-wrapper">';
+	
+	recordedDetailsText += '<div class="left-list-image"><div class="left-list-image-wrapper">';
+	recordedDetailsText += '<img id="img-'+model.chanid+'T'+model.starttime+'" class="recorded-screenshot-small" src="'+screenshotUrl+'" />';
+	recordedDetailsText += '</div></div>';
+	
+	
+	recordedDetailsText += '<div class="right-list-text">';
+	recordedDetailsText += '<div class="palm-info-text truncating-text left">&nbsp;'+model.subtitle+'&nbsp;</div>';
+	recordedDetailsText += '<div class="palm-info-text truncating-text left">&nbsp;&nbsp;'+model.starttime+'&nbsp;</div>';
+	recordedDetailsText += '<div class="palm-info-text truncating-text left">&nbsp;&nbsp;&nbsp;'+model.category+'</div>';
+	recordedDetailsText += '<div class="palm-info-text truncating-text left">&nbsp;&nbsp;&nbsp;&nbsp;'+model.channum+" - "+model.channame+'</div>';
+	recordedDetailsText += '</div>';
+	
+	recordedDetailsText += '</div></div>';
+		
+	model.myData = recordedDetailsText;
+	
+};
 
+RecordedAssistant.prototype.updateSortMenu = function() {
+	
+	//Reset default sorting
+	this.sortMenuModel.items = [ 
+			{"label": $L('Category-Asc'), "command": "go-sort-category-asc"},
+			{"label": $L('Category-Desc'), "command": "go-sort-category-desc"},
+			{"label": $L('Date-Asc'), "command": "go-sort-date-asc"},
+			{"label": $L('Date-Desc'), "command": "go-sort-date-desc"},
+			{"label": $L('Title-Asc'), "command": "go-sort-title-asc"},
+			{"label": $L('Title-Desc'), "command": "go-sort-title-desc"}
+	] ;
+	
+	switch(WebMyth.prefsCookieObject.currentRecSort) {
+		case 'category-asc':
+			this.sortMenuModel.items[0].label = '- Category-Asc -';
+		  break;
+		case 'category-desc':
+			this.sortMenuModel.items[1].label = '- Category-Desc -';
+		  break;
+		case 'date-asc':
+			this.sortMenuModel.items[2].label = '- Date-Asc -';
+		  break;
+		case 'date-desc':
+			this.sortMenuModel.items[3].label = '- Date-Desc -';
+		  break;
+		case 'title-asc':
+			this.sortMenuModel.items[4].label = '- Title-Asc -';
+		  break;
+		case 'title-desc':
+			this.sortMenuModel.items[5].label = '- Title-Desc -';
+		  break;
+		default :
+			//this.sortMenuModel.items[0].label = 'Default';
+		  break;
+	}
+	
+	
+	this.controller.modelChanged(this.sortMenuModel);
+  
 };
