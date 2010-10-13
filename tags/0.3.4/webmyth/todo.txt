@@ -1,0 +1,19 @@
+To Do - planned new features and updates:
+ 
+//Future
+ - new app icons/theme
+ - reformat date in details and lists
+ - update screenshots
+ 
+ 
+//Long term
+ - plugin for remote
+ - convert recorded to XML backend
+ - upcoming to XML (use mythweb ?) ?
+ - videos listing ?
+ - music listing ?
+ - selectable music and videos ?
+ - use webview for scheudling instead of browser?
+ - play/download on device (using mythweb?)
+ - details under status scheduled
+
