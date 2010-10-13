@@ -413,13 +413,7 @@ PreferencesAssistant.prototype.manualMasterBackendChanged = function(event) {
 	Mojo.Log.error("manual backend settings changed to "+this.manualMasterBackendToggleModel.value);
 	
 	this.masterBackendTextModel.disabled = !this.manualMasterBackendToggleModel.value;
-	/*
-	if(this.manualMasterBackendToggleModel.value) {
-		this.masterBackendToggleModel.value = false
-	} else {
-		this.manualMasterBackendToggleModel.value = true
-	}
-	*/
+
 	this.controller.modelChanged(this.masterBackendTextModel);
 };
 
@@ -503,8 +497,6 @@ PreferencesAssistant.prototype.checkSettings = function() {
 	if(saveOK) {
 
 		Mojo.Log.info("New webserverName is %s", this.webserverTextModel.value);
-		//Mojo.Log.info("New remote file is %s", this.webserverRemoteFileTextModel.value);
-		//Mojo.Log.info("New mysql file is %s", this.webMysqlFileTextModel.value);
 		Mojo.Log.info("New python file is %s", this.webmythPythonFileTextModel.value);
 		Mojo.Log.info("Metrix value is %s", this.metrixToggleModel.value);
 		Mojo.Log.info("Remote vibrate value is %s", this.vibrateToggleModel.value);

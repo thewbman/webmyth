@@ -138,6 +138,7 @@ WelcomeAssistant.prototype.setup = function() {
 		
 		//Save cookie
 		WebMyth.prefsCookie.put(WebMyth.prefsCookieObject); 
+		
 		//Use theme
 		this.controller.document.body.className = WebMyth.prefsCookieObject.theme;
 		this.controller.document.body.className += " device-"+Mojo.Environment.DeviceInfo.modelNameAscii;
@@ -156,6 +157,9 @@ WelcomeAssistant.prototype.setup = function() {
 		
 		//Use theme
 		this.controller.document.body.className = WebMyth.prefsCookieObject.theme;
+		this.controller.document.body.className += " device-"+Mojo.Environment.DeviceInfo.modelNameAscii;
+		this.controller.document.body.className += " width-"+Mojo.Environment.DeviceInfo.screenWidth;
+		this.controller.document.body.className += " height-"+Mojo.Environment.DeviceInfo.screenHeight;
 		
 		this.alertNeedScript();
 	};
@@ -196,30 +200,34 @@ WelcomeAssistant.prototype.setup = function() {
 WelcomeAssistant.prototype.activate = function(event) {
 	//asdf
 	
-	$('masterIpAddress-title').innerHTML = WebMyth.prefsCookieObject.masterBackendIp;
-	
-		
-	//Get backend IP
-	//Mojo.Log.info('Getting MasterBackendIP');
-	if((WebMyth.prefsCookieObject.manualMasterBackend == null)||(WebMyth.prefsCookieObject.manualMasterBackend == false)) {
-		var requestUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webmythPythonFile;
-		requestUrl += "?op=getSetting";
-		requestUrl += "&setting=MasterServerIP";
-	
-		try {
-			var request = new Ajax.Request(requestUrl,{
-				method: 'get',
-				onSuccess: this.readSettingSuccess.bind(this),
-				onFailure: this.readSettingFail.bind(this)  
-			});
-		}
-		catch(e) {
-			Mojo.Log.error(e);
-		}
+	if(WebMyth.prefsCookieObject.webserverName == '') {
+		$('masterIpAddress-title').innerHTML = "Please configure app preferences";
 	} else {
-		$('masterIpAddress-title').innerHTML = WebMyth.prefsCookieObject.masterBackendIp;
-	}
 	
+		$('masterIpAddress-title').innerHTML = WebMyth.prefsCookieObject.masterBackendIp;
+			
+		//Get backend IP
+		//Mojo.Log.info('Getting MasterBackendIP');
+		if((WebMyth.prefsCookieObject.manualMasterBackend == null)||(WebMyth.prefsCookieObject.manualMasterBackend == false)) {
+			var requestUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webmythPythonFile;
+			requestUrl += "?op=getSetting";
+			requestUrl += "&setting=MasterServerIP";
+		
+			try {
+				var request = new Ajax.Request(requestUrl,{
+					method: 'get',
+					onSuccess: this.readSettingSuccess.bind(this),
+					onFailure: this.readSettingFail.bind(this)  
+				});
+			}
+			catch(e) {
+				Mojo.Log.error(e);
+			}
+		} else {
+			$('masterIpAddress-title').innerHTML = WebMyth.prefsCookieObject.masterBackendIp;
+		}
+	
+	}
 	
 	//Keypress event
 	Mojo.Event.listen(this.controller.sceneElement, Mojo.Event.keyup, this.handleKey.bind(this));

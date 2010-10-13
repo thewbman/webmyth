@@ -65,6 +65,7 @@ UpcomingDetailsAssistant.prototype.setup = function() {
 	$('scene-title').innerText = this.upcomingObject.title;
 	$('subtitle-title').innerText = this.upcomingObject.subtitle;
 	$('description-title').innerText = this.upcomingObject.description;
+	$('category-title').innerText = this.upcomingObject.category;
 	
 	$('hostname-title').innerText = this.upcomingObject.hostname;
 	//$('recgroup-title').innerText = this.upcomingObject.recgroup;

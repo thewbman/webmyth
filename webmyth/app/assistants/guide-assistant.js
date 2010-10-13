@@ -351,7 +351,6 @@ GuideAssistant.prototype.handleCommand = function(event) {
 		  
 };
 
-
 GuideAssistant.prototype.handleKey = function(event) {
 
 	Mojo.Log.info("handleKey %o, %o", event.originalEvent.metaKey, event.originalEvent.keyCode);
@@ -382,7 +381,6 @@ GuideAssistant.prototype.handleKey = function(event) {
 	Event.stop(event); 
 	
 };
-
 
 GuideAssistant.prototype.handleShakestart = function(event) {
 
@@ -423,6 +421,8 @@ GuideAssistant.prototype.handleShakestart = function(event) {
 	
   
 };
+
+
 
 
 GuideAssistant.prototype.filterListFunction = function(filterString, listWidget, offset, count) {
@@ -492,16 +492,21 @@ GuideAssistant.prototype.filterListFunction = function(filterString, listWidget,
 	listWidget.mojo.setLength(totalSubsetSize);
 	listWidget.mojo.setCount(totalSubsetSize);
 	
-	if((this.layoutStyle == "channel")&&(WebMyth.guideCookieObject.manualSort == false)&&(this.currentDayRange.EndTime == this.dayRange.EndTime)) {
+	if(	(this.layoutStyle == "channel")&&
+		(WebMyth.guideCookieObject.manualSort == false)&&
+		(this.currentDayRange.EndTime == this.dayRange.EndTime)&&
+		(this.currentTimeObject.hour > 2)
+		) {
 		
 		this.controller.sceneScroller.mojo.revealElement(this.controller.get("Now Airing"));
 		this.controller.sceneScroller.mojo.adjustBy(0,-300);
 		
+	} else {
+		Mojo.Log.info("Not adjusting sorting because hour is ",this.currentTimeObject.hour);
 	}
 	
 
 };
-
 
 GuideAssistant.prototype.updateSortMenu = function() {
 	
@@ -538,7 +543,6 @@ GuideAssistant.prototype.updateSortMenu = function() {
 	this.controller.modelChanged(this.sortMenuModel);
   
 };
-
 
 GuideAssistant.prototype.goGuideDetails = function(event) {
 	
@@ -587,7 +591,6 @@ GuideAssistant.prototype.goGuideDetails = function(event) {
   
 
 };
-
 
 GuideAssistant.prototype.popupHandler = function(event) {
 	
@@ -693,7 +696,6 @@ GuideAssistant.prototype.popupHandler = function(event) {
   
 };
 
-
 GuideAssistant.prototype.checkLocation = function() {
 	//Attempting to play livetv - have to start livetv then change channel
 	this.host = WebMyth.prefsCookieObject.currentFrontend;
@@ -736,7 +738,6 @@ GuideAssistant.prototype.checkLocation = function() {
 	
 };
 
-
 GuideAssistant.prototype.jumpLive = function() {
 	//Attempting to play livetv - have to start livetv then change channel
 	Mojo.Log.info("jumping to live tv");
@@ -767,7 +768,6 @@ GuideAssistant.prototype.jumpLive = function() {
 	
 };
 
-
 GuideAssistant.prototype.startChannelPlay = function() {
 	//Attempting to play livetv - have to start livetv then change channel
 	Mojo.Log.info("Playing channel "+this.channid);
@@ -782,7 +782,6 @@ GuideAssistant.prototype.startChannelPlay = function() {
 	}
 	
 };
-
 
 GuideAssistant.prototype.guidePrevious = function() {
 
@@ -817,7 +816,6 @@ GuideAssistant.prototype.guidePrevious = function() {
 	}
 				
 };
-
 
 GuideAssistant.prototype.guideNext = function() {
 
@@ -857,7 +855,6 @@ GuideAssistant.prototype.guideNext = function() {
 				
 };
 
-
 GuideAssistant.prototype.selectedChannel = function() {
 
 	this.layoutStyle = 'channel';
@@ -880,11 +877,14 @@ GuideAssistant.prototype.selectedChannel = function() {
 			
 	//Request and show data
 	this.controller.sceneScroller.mojo.revealTop();
-	//this.filterListFunction(' ', this.controller.get('guideList'), 0, this.resultList.length);
+	
+	var listWidget = this.controller.get('guideList');
+	this.filterListFunction('', listWidget, 0, this.resultList.length);
+	listWidget.mojo.close();
+	
 	this.getGuideData();
 				
 };
-
 
 GuideAssistant.prototype.selectedTime = function() {
 
@@ -909,11 +909,14 @@ GuideAssistant.prototype.selectedTime = function() {
 			
 	//Request and show data
 	this.controller.sceneScroller.mojo.revealTop();
-	this.filterListFunction(' ', this.controller.get('guideList'), 0, this.resultList.length);
+	
+	var listWidget = this.controller.get('guideList');
+	this.filterListFunction('', listWidget, 0, this.resultList.length);
+	listWidget.mojo.close();
+	
 	this.getGuideData();
 				
 };
-
 
 GuideAssistant.prototype.selectedNow = function() {
 
@@ -949,12 +952,15 @@ GuideAssistant.prototype.selectedNow = function() {
 	//Add popup selector later
 	this.layoutStyle = 'time';
 	this.controller.sceneScroller.mojo.revealTop();
-	this.filterListFunction(' ', this.controller.get('guideList'), 0, this.resultList.length);
+	
+	var listWidget = this.controller.get('guideList');
+	this.filterListFunction('', listWidget, 0, this.resultList.length);
+	listWidget.mojo.close();
+	
 	this.getGuideData();
 				
 				
 };
-
 
 GuideAssistant.prototype.guideDividerFunction = function(itemModel) {
 
@@ -981,7 +987,6 @@ GuideAssistant.prototype.guideDividerFunction = function(itemModel) {
 	
 	return divider;
 };
-
 
 GuideAssistant.prototype.updateChannelListCookie = function() {
 
@@ -1020,7 +1025,6 @@ GuideAssistant.prototype.updateChannelListCookie = function() {
 	
 };
 
-
 GuideAssistant.prototype.setMyData = function(propertyValue, model) {
 	
 	//Mojo.Log.info("setting my data");
@@ -1052,7 +1056,7 @@ GuideAssistant.prototype.setMyData = function(propertyValue, model) {
 		guideDetailsText += '<div class="title truncating-text chanNum">'+model.chanNum+'</div>';
 		guideDetailsText += '</div>';
 	} else {
-		guideDetailsText += '<div class="title truncating-text chanNum chanNum-no-icon">'+model.chanNum+'</div>';
+		guideDetailsText += '<div class="title chanNum chanNum-no-icon">'+model.chanNum+'</div>';
 		guideDetailsText += '</div>';
 	}
 	
@@ -1079,7 +1083,6 @@ GuideAssistant.prototype.setMyData = function(propertyValue, model) {
 		
 	model.myData = guideDetailsText;
 };
-
 
 GuideAssistant.prototype.getGuideData = function() {
 	
@@ -1124,13 +1127,11 @@ GuideAssistant.prototype.getGuideData = function() {
 		
 };
 
-
 GuideAssistant.prototype.readGuideFail = function() {
 	Mojo.Log.error("Failed to get guide information");	
 	Mojo.Controller.errorDialog("Failed to get guide information");
 
 };
-
 
 GuideAssistant.prototype.readGuideSuccess = function(response) {
 	
@@ -1311,7 +1312,6 @@ GuideAssistant.prototype.readGuideSuccess = function(response) {
 
 };
 
-
 GuideAssistant.prototype.sortChanged = function() {
 
 	var originalSortType = ''
@@ -1364,9 +1364,10 @@ GuideAssistant.prototype.sortChanged = function() {
 	
 	var listWidget = this.controller.get('guideList');
 	this.filterListFunction('', listWidget, 0, this.resultList.length);
+	
+	listWidget.mojo.close();
 	   
 };
-
 
 GuideAssistant.prototype.timePicker = function() {
 
@@ -1376,7 +1377,6 @@ GuideAssistant.prototype.timePicker = function() {
 	});
 	
 };
-
 
 GuideAssistant.prototype.timePickerCallback = function(value) {
 
@@ -1408,6 +1408,7 @@ GuideAssistant.prototype.timePickerCallback = function(value) {
 /*
 	Small controller class used for the date and time picker.
 */
+
 var DateAndTimePickerAssistant = Class.create({
 	
 	initialize: function(sceneAssistant, timeObject2, callbackFunc) {

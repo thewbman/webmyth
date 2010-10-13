@@ -375,7 +375,7 @@ StageAssistant.prototype.handleCommand = function(event) {
 StageAssistant.prototype.onBlurHandler = function() {
 	
 	//Add card is minimized
-	Mojo.Log.info("Card is minimized");
+	//Mojo.Log.info("Card is minimized");
 	
 	this.startDashboard();
 	
@@ -384,7 +384,7 @@ StageAssistant.prototype.onBlurHandler = function() {
 StageAssistant.prototype.onFocusHandler = function() {
 
 	//App card is now active
-	Mojo.Log.info("Card is active");
+	//Mojo.Log.info("Card is active");
 	
 	dashboardStage = Mojo.Controller.getAppController().getStageController("dashboard");
 	
@@ -403,7 +403,7 @@ StageAssistant.prototype.startDashboard = function() {
 			Mojo.Log.info("DELEGATING TO SCENE ASST");
 			//dashboardStage.delegateToSceneAssistant("updateDashboard", launchParams.dashInfo);
 		} else {
-			Mojo.Log.info("No dashboard Stage found.");
+			//Mojo.Log.info("No dashboard Stage found.");
 			pushDashboard = function (stageController) {
 				stageController.pushScene('dashboard');
 			};

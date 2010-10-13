@@ -75,7 +75,7 @@ DashboardAssistant.prototype.cleanup = function(event) {
 
 DashboardAssistant.prototype.closeDashboard = function(event) {
 
-	Mojo.Log.info("cookie object is %j",WebMyth.prefsCookieObject);
+	//Mojo.Log.info("cookie object is %j",WebMyth.prefsCookieObject);
 
 	WebMyth.prefsCookie.put(WebMyth.prefsCookieObject);
 	
@@ -99,7 +99,7 @@ DashboardAssistant.prototype.nextLayout = function() {
 
 DashboardAssistant.prototype.updateLayout = function() {
 
-	Mojo.Log.info("New layout is %s,%s",WebMyth.prefsCookieObject.dashboardRemoteIndex,this.dashboardRemoteButtons[WebMyth.prefsCookieObject.dashboardRemoteIndex].layoutName);
+	//Mojo.Log.info("New layout is %s, %s",WebMyth.prefsCookieObject.dashboardRemoteIndex,this.dashboardRemoteButtons[WebMyth.prefsCookieObject.dashboardRemoteIndex].layoutName);
 	
 	
 	var props = {
@@ -195,7 +195,7 @@ DashboardAssistant.prototype.sendTelnetKey = function(value) {
 		this.controller.stageController.getAppController().playSoundNotification( "vibrate", "" );
 	};
 	
-	Mojo.Log.info("Sending command '%s' to host", value);
+	//Mojo.Log.info("Sending command '%s' to host", value);
 };
 
 DashboardAssistant.prototype.sendJumpPoint = function(value){
@@ -208,5 +208,5 @@ DashboardAssistant.prototype.sendJumpPoint = function(value){
 		this.controller.stageController.getAppController().playSoundNotification( "vibrate", "" );
 	};
 	
-	Mojo.Log.info("Sending jump '%s' to host", value);
+	//Mojo.Log.info("Sending jump '%s' to host", value);
 };

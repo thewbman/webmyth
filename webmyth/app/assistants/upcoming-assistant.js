@@ -47,6 +47,13 @@ UpcomingAssistant.prototype.setup = function() {
 	this.controller.setupWidget(Mojo.Menu.appMenu, WebMyth.appMenuAttr, WebMyth.appMenuModel);
 	
 	
+	// Menu grouping at bottom of scene
+    this.cmdMenuModel = { label: $L('Upcoming Menu'),
+                            items: [{},{},{ icon: 'refresh', command: 'go-refresh' }]};
+
+	this.controller.setupWidget(Mojo.Menu.commandMenu, {menuClass: 'no-fade'}, this.cmdMenuModel);
+	
+	
 	// 'upcoming' widget filter list
 	this.upcomingListAttribs = {
 		itemTemplate: "upcoming/upcomingListItem",
@@ -98,8 +105,23 @@ UpcomingAssistant.prototype.cleanup = function(event) {
 UpcomingAssistant.prototype.handleCommand = function(event) {
 
   if(event.type == Mojo.Event.forward) {
-		Mojo.Controller.stageController.pushScene({name: WebMyth.prefsCookieObject.currentRemoteScene, disableSceneScroller: true});
-  }
+  
+	Mojo.Controller.stageController.pushScene({name: WebMyth.prefsCookieObject.currentRemoteScene, disableSceneScroller: true});
+	
+  } else if(event.type == Mojo.Event.command) {
+
+		switch(event.command) {
+		  case 'go-refresh':		
+		  
+			this.spinnerModel.spinning = true;
+			this.controller.modelChanged(this.spinnerModel, this);
+			$('myScrim').show();
+		
+			this.getUpcoming();
+			
+		   break;
+		}
+	}
   
 };
 
@@ -158,6 +180,8 @@ UpcomingAssistant.prototype.getUpcoming = function(event) {
 	//Update list from webmyth python script
 	Mojo.Log.info('Starting upcoming data gathering');
 	
+	this.controller.sceneScroller.mojo.revealTop();
+	
 	var requestUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webmythPythonFile;
 	requestUrl += "?op=getUpcoming";
 	
@@ -174,7 +198,6 @@ UpcomingAssistant.prototype.getUpcoming = function(event) {
     }
 	
 };
-
 
 UpcomingAssistant.prototype.remoteDbTableFail = function(event) {
 	Mojo.Log.error('Failed to get Ajax response');
@@ -193,7 +216,6 @@ UpcomingAssistant.prototype.remoteDbTableFail = function(event) {
 	$('myScrim').hide()	
 	//$('failtext').innerHtml = "Failed to connect to remote script.  Please check you script setup.";
 };
-
 
 UpcomingAssistant.prototype.readRemoteDbTableSuccess = function(response) {
 	//return true;  //can escape this function for testing purposes
@@ -217,6 +239,7 @@ UpcomingAssistant.prototype.readRemoteDbTableSuccess = function(response) {
 	//Initial display
 	var listWidget = this.controller.get('upcomingList');
 	this.filterListFunction('', listWidget, 0, this.resultList.length);
+	listWidget.mojo.close();
 	//Mojo.Controller.getAppController().showBanner("Updated with latest data", {source: 'notification'});
 	
 	
@@ -226,8 +249,6 @@ UpcomingAssistant.prototype.readRemoteDbTableSuccess = function(response) {
 	$('myScrim').hide()
 
 };
-
-
 
 UpcomingAssistant.prototype.filterListFunction = function(filterString, listWidget, offset, count) {
 	 
@@ -302,7 +323,6 @@ UpcomingAssistant.prototype.filterListFunction = function(filterString, listWidg
 	
 };	
 
-
 UpcomingAssistant.prototype.goUpcomingDetails = function(event) {
 	var upcoming_chanid = event.item.chanid;
 	var upcoming_starttime = event.item.starttime;
@@ -318,8 +338,6 @@ UpcomingAssistant.prototype.goUpcomingDetails = function(event) {
 	
 };
 
-
-
 UpcomingAssistant.prototype.recorderDividerFunction = function(itemModel) {
 	 
 	//Divider function for list
@@ -329,8 +347,6 @@ UpcomingAssistant.prototype.recorderDividerFunction = function(itemModel) {
 	
 	return date.toLocaleString().substring(0,15);
 };
-
-
 
 UpcomingAssistant.prototype.setMyData = function(propertyValue, model) {
 	
@@ -355,7 +371,7 @@ UpcomingAssistant.prototype.setMyData = function(propertyValue, model) {
 	upcomingDetailsText += '<div class="palm-info-text truncating-text left">&nbsp;'+model.subtitle+'&nbsp;</div>';
 	upcomingDetailsText += '<div class="palm-info-text truncating-text left">&nbsp;&nbsp;'+model.starttime+'&nbsp;</div>';
 	upcomingDetailsText += '<div class="palm-info-text truncating-text left">&nbsp;&nbsp;&nbsp;'+model.category+'</div>';
-	upcomingDetailsText += '<div class="palm-info-text truncating-text left">&nbsp;&nbsp;&nbsp;&nbsp;'+model.channame+'</div>';
+	upcomingDetailsText += '<div class="palm-info-text truncating-text left">&nbsp;&nbsp;&nbsp;&nbsp;'+model.channum+" - "+model.channame+'</div>';
 	
 	
 	
@@ -371,6 +387,5 @@ UpcomingAssistant.prototype.setMyData = function(propertyValue, model) {
 		
 	model.myData = upcomingDetailsText;
 	
-
 	
 };

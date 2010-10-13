@@ -19,6 +19,11 @@
 	text-align:right;
 }
  
+.view-menu .palm-menu-group .palm-menu-text .truncating-text {
+	margin: 0px -20px;
+	text-overflow: clip;
+}
+
 /* 
  * Remote scenes
  */
@@ -429,23 +434,31 @@
  */
 
 .left-list-image {
-	height: 100px;
-	width: 35%;
+	height: 60px;
+	width: 33%;
 	float: left;
+	margin-left: auto;
+	margin-right: auto;
+}
+
+.left-list-image-wrapper {
+	height: 60px;
+	position:relative;
+	
+	float: right;
+	
+	margin-left: auto;
+	margin-right: auto;
 }
 
 .right-list-text {
-	height: 100px;
-	width: 65%;
-	float: right;
+	height: 60px;
+	width: 67%;
+	float: left;
 }
  
 .palm-row.multi-line.Deleted {
 	text-decoration: line-through;
-}
-
-.palm-row.multi-line.Default {
-
 }
 
 .recorded-list-item {
@@ -461,12 +474,33 @@
 }
 
 .recorded-screenshot-small {
-	padding: 5px;
-	width: 120px;
+	padding: 3px 5px;
+	/*width: 100px;
+	height: 60px;*/
+	height: 100%;
+	
+	position:relative;
 	
 	text-align: center;
 	border: 0px; 
+	
+	margin-left: auto;
+	margin-right: auto;
 }
+
+.recorded-scene .recorded-list-item .recorded-list-title  {
+  padding: 0px 14px 0px 0px;
+  margin: 0px;
+  font-size: 18px;
+  height: 26px;
+}
+
+.recorded-scene .recorded-list-item .palm-info-text.left {
+  padding: 0px;
+  margin: 0px 8px;
+  line-height: 16px;
+}
+
 
 /*
  * Guide
@@ -510,9 +544,8 @@
 	width: 100%
 }
 
-.guide-scene .chanNum-no-icon {
+.guide-scene .chanNum.chanNum-no-icon {
 	padding: 40px 0px 0px 0px;
-	margin: 40px 0px 0px 0px;
 	height: 45px;
 	text-align: center;
 }
@@ -653,7 +686,7 @@
 }
 
 .upcoming-channelicon-small {
-	padding: 2px 2px;
+	padding: 12px 2px;
 	width: 60px;
 	height: 45px;
 	text-align: center;
