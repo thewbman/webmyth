@@ -226,6 +226,11 @@ UpcomingAssistant.prototype.readRemoteDbTableSuccess = function(response) {
 	//Update the list widget
 	this.resultList.clear();
 	Object.extend(this.resultList,response.responseJSON);
+	
+	for(var i = 0; i < this.resultList.length; i++) {
+		this.resultList[i].startTime = this.resultList[i].starttime;
+		this.resultList[i].chanId = this.resultList[i].chanid;
+	}
 	//this.fullResultList.sort(double_sort_by('starttime', 'title', false));
 	
 	

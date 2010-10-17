@@ -28,7 +28,7 @@
 	  this.nullHandleCount = 0;
 	 
 	  this.fullResultList = [];		//Full raw data 
-	  this.resultList = [];			//Filtered down based on 'recgroup'
+	  this.resultList = [];			//Filtered down based on 'recgroupXML'
 	  
 	  this.subset = [];				//Actually displayed list
 	  
@@ -75,6 +75,7 @@ RecordedAssistant.prototype.setup = function() {
 		listTemplate: "recorded/recordedListTemplate",
 		dividerTemplate: "recorded/recordedDivider",
 		swipeToDelete: false,
+		renderLimit: 10,
 		filterFunction: this.filterListFunction.bind(this),
 		dividerFunction: this.recorderDividerFunction.bind(this),
 		formatters:{myData: this.setMyData.bind(this)}
@@ -228,26 +229,55 @@ RecordedAssistant.prototype.handleShakestart = function(event) {
 
 RecordedAssistant.prototype.getRecorded = function() {
 
-	//Update list from python script
-	Mojo.Log.info('Starting remote data gathering');
+	if(Mojo.appInfo.useXML == "true") {
 	
-	this.controller.sceneScroller.mojo.revealTop();
+		//Update list from XML backend
+		Mojo.Log.info('Starting remote data gathering from XMl backend');
+		
+		this.controller.sceneScroller.mojo.revealTop();
+		
+		var requestUrl = "http://"+WebMyth.prefsCookieObject.masterBackendIp+":6544/Myth/GetRecorded";
+
+		Mojo.Log.info("XML Recorded URL is: "+requestUrl);
+			
+		try {
+			var request = new Ajax.Request(requestUrl,{
+				method: 'get',
+				evalJSON: false,
+				onSuccess: this.readRecordedXMLSuccess.bind(this),
+				onFailure: this.useLocalDataTable.bind(this)  
+			});
+		}
+		catch(e) {
+			Mojo.Log.error(e);
+		}
 	
-	var requestUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webmythPythonFile;
-	requestUrl += "?op=getRecorded";
- 
-    try {
-        var request = new Ajax.Request(requestUrl,{
-            method: 'get',
-            evalJSON: 'true',
-            onSuccess: this.readRemoteDbTableSuccess.bind(this),
-            onFailure: this.useLocalDataTable.bind(this)  
-        });
-    }
-    catch(e) {
-        Mojo.Log.error(e);
-    }
+	} else {
+	
+		//Update list from python script
+		Mojo.Log.info('Starting remote data gathering from script');
+		
+		this.controller.sceneScroller.mojo.revealTop();
+		
+		var requestUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webmythPythonFile;
+		requestUrl += "?op=getRecorded";
+	 
+		try {
+			var request = new Ajax.Request(requestUrl,{
+				method: 'get',
+				evalJSON: 'true',
+				onSuccess: this.readRemoteScriptSuccess.bind(this),
+				onFailure: this.useLocalDataTable.bind(this)  
+			});
+		}
+		catch(e) {
+			Mojo.Log.error(e);
+		}
   
+	}
+	
+	
+	
 };
 
 RecordedAssistant.prototype.sortChanged = function(newSort) {
@@ -255,22 +285,22 @@ RecordedAssistant.prototype.sortChanged = function(newSort) {
 	WebMyth.prefsCookieObject.currentRecSort = newSort;
 	//WebMyth.prefsCookie.put(WebMyth.prefsCookieObject);   //done immediately after in recgroupChanged
 	
-	//Mojo.Log.error("The current sorting has changed to "+WebMyth.prefsCookieObject.currentRecSort);
+	//Mojo.Log.info("The current sorting has changed to "+WebMyth.prefsCookieObject.currentRecSort);
 	
 	
 	//Sort list by selection
 	switch(WebMyth.prefsCookieObject.currentRecSort) {
 		case 'title-asc':
-			this.fullResultList.sort(double_sort_by('title', 'starttime', false));
+			this.fullResultList.sort(double_sort_by('title', 'startTime', false));
 		  break;
 		case 'title-desc':
-			this.fullResultList.sort(double_sort_by('title', 'starttime', true));
+			this.fullResultList.sort(double_sort_by('title', 'startTime', true));
 		  break;
 		case 'date-asc':
-			this.fullResultList.sort(double_sort_by('starttime', 'title', false));
+			this.fullResultList.sort(double_sort_by('startTime', 'title', false));
 		  break;
 		case 'date-desc':
-			this.fullResultList.sort(double_sort_by('starttime', 'title', true));
+			this.fullResultList.sort(double_sort_by('startTime', 'title', true));
 		  break;
 		case 'category-asc':
 			this.fullResultList.sort(double_sort_by('category', 'title', false));
@@ -279,32 +309,41 @@ RecordedAssistant.prototype.sortChanged = function(newSort) {
 			this.fullResultList.sort(double_sort_by('category', 'title', true));
 		  break;
 		default :
-			this.fullResultList.sort(double_sort_by('starttime', 'title', false));
+			this.fullResultList.sort(double_sort_by('startTime', 'title', false));
 		  break;
 	}
+
 	
 	this.recgroupChanged(WebMyth.prefsCookieObject.currentRecgroup);
 	
 	this.updateSortMenu();
-	   
+	
+   
 };
 
 RecordedAssistant.prototype.recgroupChanged = function(newRecgroup) {
+	
 	WebMyth.prefsCookieObject.currentRecgroup = newRecgroup;
-	//Mojo.Log.error("The current recgroup has changed to "+WebMyth.prefsCookieObject.currentRecgroup);
+	
+	//Mojo.Log.info("The current recgroup has changed to "+WebMyth.prefsCookieObject.currentRecgroup);
 	
 	//Update results list from filter
 	this.resultList.clear();
 	Object.extend(this.resultList, trimByRecgroup(this.fullResultList, WebMyth.prefsCookieObject.currentRecgroup));
+	//Object.extend(this.resultList, this.fullResultList);
 	
 	var listWidget = this.controller.get('recordedList');
 	this.filterListFunction('', listWidget, 0, this.resultList.length);
-	
 	listWidget.mojo.close();
 	
+	//listWidget.mojo.close();
+	
+	//Mojo.Log.info("Finished filtering function");
 	
 	//Save selection back to cookie
 	WebMyth.prefsCookie.put(WebMyth.prefsCookieObject);
+	
+	//Mojo.Log.info("Finished saving cookie");
 
 	   
 };
@@ -315,7 +354,7 @@ RecordedAssistant.prototype.useLocalDataTable = function(event) {
 	Mojo.Log.error('Failed to get Ajax response - using previoius saved data');
 	
 	// Query recorded table
-	var mytext = 'SELECT * FROM recorded ORDER BY starttime;'
+	var mytext = 'SELECT * FROM recordedXML ORDER BY startTime;'
 	WebMyth.db.transaction( 
 		(function (transaction) { 
 			transaction.executeSql(mytext, [], 
@@ -333,6 +372,8 @@ RecordedAssistant.prototype.queryDataHandler = function(transaction, results) {
     var string = ""; 
 	
 	//Mojo.Log.error("Inside queryData with '%s' rows", results.rows.length);
+	
+	
     
 	try {
 		var list = [];
@@ -340,14 +381,15 @@ RecordedAssistant.prototype.queryDataHandler = function(transaction, results) {
 			var row = results.rows.item(i);
 						
 			string = {
-				chanid: row.chanid, starttime: row.starttime, endtime: row.endtime, title: row.title, subtitle: row.subtitle, 
-				description: row.description, category: row.category, hostname: row.hostname, bookmark: row.bookmark, editing: row.editing, 
-				cutlist: row.cutlist, autoexpire: row.autoexpire, commflagged: row.commflagged, recgroup: row.recgroup, recordid: row.recordid, 
-				seriesid: row.seriesid, programid: row.programid, lastmodified: row.lastmodified, filesize: row.filesize, stars: row.stars, 
-				previouslyshown: row.previouslyshown, originalairdate: row.originalairdate, preserve: row.preserve, findid: row.findid,	deletepending: row.deletepending, 
-				transcoder: row.transcoder, timestretch: row.timestretch, recpriority: row.recpriority, basename: row.basename,	progstart: row.progstart, 
-				progend: row.progend, playgroup: row.playgroup, profile: row.profile, duplicate: row.duplicate, transcoded: row.transcoded, 
-				watched: row.watched, storagegroup: row.storagegroup, bookmarkupdate: row.bookmarkupdate, channum: row.channum, name: row.name
+				title: row.title, subTitle: row.subTitle, programFlags: row.programFlags, category: row.category, fileSize: row.fileSize, 
+				seriesid: row.seriesid, hostname: row.hostname, catType: row.catType, programid: row.programid, repeat: row.repeat,
+				endTime: row.endTime, startTime: row.startTime, lastmodified: row.lastmodified, startTimeSpace: row.startTimeSpace,
+				endTimeSpace: row.endTimeSpace, startTimeHourMinute: row.startTimeHourMinute, endTimeHourMinute: row.endTimeHourMinute, 
+				stars: row.stars, airdate: row.airdate, description: row.description, inputId: row.inputId, chanFilters: row.chanFilters, 
+				commFree: row.commFree, channelName: row.channelName, sourceId: row.sourceId, chanId: row.chanId, chanNum: row.chanNum,
+				callSign: row.callSign, recPriority: row.recPriority, playGroup: row.playGroup, recStatus: row.recStatus, recStartTs: row.recStartTs,
+				recGroup: row.recGroup, dupMethod: row.dupMethod, recType: row.recType, encoderID: row.encoderID, recProfile: row.recProfile,
+				recEndTs: row.recEndTs, recordId: row.recordId, dupInType: row.dupInType
 			 };
 			 
 			list.push( string );
@@ -358,7 +400,7 @@ RecordedAssistant.prototype.queryDataHandler = function(transaction, results) {
 		//Update the list widget
 		this.fullResultList.clear();
 		Object.extend(this.fullResultList,list);
-		this.fullResultList.sort(double_sort_by('title', 'starttime', false));
+		this.fullResultList.sort(double_sort_by('title', 'startTime', false));
 		
 		this.resultList.clear();
 		Object.extend(this.resultList, trimByRecgroup(this.fullResultList, WebMyth.prefsCookieObject.currentRecgroup));
@@ -404,38 +446,21 @@ RecordedAssistant.prototype.queryErrorHandler = function(transaction, errors) {
     Mojo.Log.error('Error was '+error.message+' (Code '+error.code+')'); 
 };
 
-RecordedAssistant.prototype.readRemoteDbTableSuccess = function(response) {
-	//return true;  //can escape this function for testing purposes
-    
-	//Mojo.Log.error('Got Ajax response: ' + response.responseText);
-	
-		
-	//Update the list widget
-	this.fullResultList.clear();
-	Object.extend(this.fullResultList,response.responseJSON);
+RecordedAssistant.prototype.finishedReadingRecorded = function(event) {	
+
+	Mojo.Log.info("Finished getting data, now saving");
 	
 	this.sortChanged(WebMyth.prefsCookieObject.currentRecSort);
-	
-	/*
-	this.resultList.clear();
-	Object.extend(this.resultList, trimByRecgroup(this.fullResultList, WebMyth.prefsCookieObject.currentRecgroup));
 
-	//Initial display
-	var listWidget = this.controller.get('recordedList');
-	this.filterListFunction('', listWidget, 0, this.resultList.length);
-	//Mojo.Controller.getAppController().showBanner("Updated with latest data", {source: 'notification'});
-	*/
-	
-	
 	//Update the recgroup filter
-	var recgroupSql = "SELECT * FROM recgroup ORDER BY groupname;";
+	var recgroupSql = "SELECT * FROM recgroupXML ORDER BY groupname;";
 	var string = "";
     WebMyth.db.transaction( 
 		(function (transaction) {
 			transaction.executeSql( recgroupSql,  [], 
 				this.updateRecgroupList.bind(this),
 				function(transaction, error) {      // error handler
-					Mojo.Log.error("Could not get list of recgroup: " + error.message + " ... ");
+					Mojo.Log.error("Could not get list of recgroupXML: " + error.message + " ... ");
 				}
 			);
 		}
@@ -449,14 +474,14 @@ RecordedAssistant.prototype.readRemoteDbTableSuccess = function(response) {
 	$('myScrim').hide()
 		
 	//Save new values back to DB
-    var json = response.responseJSON;
+    var json = this.fullResultList;
 	//var title;
-	//var subtitle;
+	//var subTitle;
  
  
 	//Replace out old data
 	WebMyth.db.transaction( function (transaction) {
-		transaction.executeSql("DELETE FROM 'recorded'; ",  [], 
+		transaction.executeSql("DELETE FROM 'recordedXML'; ",  [], 
 			function(transaction, results) {    // success handler
 				Mojo.Log.info("Successfully truncated recorded");
 			},
@@ -465,8 +490,9 @@ RecordedAssistant.prototype.readRemoteDbTableSuccess = function(response) {
 			}
 		);
 	});
+
 	WebMyth.db.transaction( function (transaction) {
-		transaction.executeSql("DELETE FROM 'recgroup'; ",  [], 
+		transaction.executeSql("DELETE FROM 'recgroupXML'; ",  [], 
 			function(transaction, results) {    // success handler
 				Mojo.Log.info("Successfully truncated recgroup");
 			},
@@ -476,16 +502,16 @@ RecordedAssistant.prototype.readRemoteDbTableSuccess = function(response) {
 		);
 	});
 	WebMyth.db.transaction( function (transaction) {
-		transaction.executeSql("INSERT INTO 'recgroup' (groupname, displayname) VALUES ('AllRecgroupsOn', 'All');",  [], 
+		transaction.executeSql("INSERT INTO 'recgroupXML' (groupname, displayname) VALUES ('AllRecgroupsOn', 'All');",  [], 
 				function(transaction, results) {    // success handler
 					Mojo.Log.info("Successfully inserted AllRecgroupsOn");
 					
 					//Nest parsing actions here		
 					for(var i = 0; i < json.length; i++){
 						title = json[i].title;
-						subtitle = json[i].subtitle;
+						subTitle = json[i].subTitle;
 						insertRecordedRow(json[i]);
-						//Mojo.Log.error('Row: ' + i + ' Title: ' + title + ' Subtitle: ' + subtitle);	
+						//Mojo.Log.error('Row: ' + i + ' Title: ' + title + ' subTitle: ' + subTitle);	
 					}
 					
 				},
@@ -494,25 +520,182 @@ RecordedAssistant.prototype.readRemoteDbTableSuccess = function(response) {
 				}
 		);
 	});
+	
+	
+};
+
+RecordedAssistant.prototype.readRemoteScriptSuccess = function(response) {
+
+	Mojo.Log.info("Successfully gotten data from script %j",response.responseJSON);
+
+	//Update the list widget
+	this.fullResultList.clear();
+	Object.extend(this.fullResultList,response.responseJSON);
+	
+	this.finishedReadingRecorded();
+	
+	Mojo.Log.info("After finished reading recorded");
+};
+
+RecordedAssistant.prototype.readRecordedXMLSuccess = function(response) {
+	
+	Mojo.Log.info("About to start parsing recorded from XML");
+	
+	var xmlstring = response.responseText.trim();
+	var xmlobject = (new DOMParser()).parseFromString(xmlstring, "text/xml");
+	
+	
+	//Local variables
+	var topNode, topNodesCount, topSingleNode, programsNode, programsNode;
+	var singleProgramNode, singleProgramJson;
+	var singleProgramChildNode;
+	var Count, AsOf, Version, ProtoVer;
+	
+	var s = {};		//individual JSON for each program parsing
+	
+	
+	this.fullResultList.clear();
+	//this.channelList.clear();
+	
+	//Start parsing
+	topNode = xmlobject.getElementsByTagName("GetRecordedResponse")[0];
+	var topNodesCount = topNode.childNodes.length;
+	for(var i = 0; i < topNodesCount; i++) {
+		topSingleNode = topNode.childNodes[i];
+		switch(topSingleNode.nodeName) {
+			case 'Count':
+				Count = topSingleNode.childNodes[0].nodeValue;
+				break;
+			case 'AsOf':
+				AsOf = topSingleNode.childNodes[0].nodeValue;
+				break;
+			case 'Version':
+				Version = topSingleNode.childNodes[0].nodeValue;
+				break;
+			case 'ProtoVer':
+				ProtoVer = topSingleNode.childNodes[0].nodeValue;
+				break;
+			case 'Recorded':
+				//Mojo.Log.info('Starting to parse Recorded');
+				programsNode = topSingleNode.childNodes[0];
+				for(var j = 0; j < programsNode.childNodes.length; j++) {
+					programsSingleNode = programsNode.childNodes[j];
+					//Mojo.Log.info("Node name is "+programsSingleNode.nodeName);
+					if(programsSingleNode.nodeName == 'Program') {
+						//Mojo.Log.info('Inside Program if');
+						singleProgramNode = programsSingleNode;
+						
+								singleProgramJson = {
+									"title": singleProgramNode.getAttributeNode("title").nodeValue, 
+									"subTitle": singleProgramNode.getAttributeNode("subTitle").nodeValue, 
+									"programFlags": singleProgramNode.getAttributeNode("programFlags").nodeValue, 
+									"category": singleProgramNode.getAttributeNode("category").nodeValue, 
+									"fileSize": singleProgramNode.getAttributeNode("fileSize").nodeValue, 
+									"seriesId": singleProgramNode.getAttributeNode("seriesId").nodeValue, 
+									"hostname": singleProgramNode.getAttributeNode("hostname").nodeValue, 
+									"catType": singleProgramNode.getAttributeNode("catType").nodeValue, 
+									"programId": singleProgramNode.getAttributeNode("programId").nodeValue, 
+									"repeat": singleProgramNode.getAttributeNode("repeat").nodeValue, 
+				//					"stars": singleProgramNode.getAttributeNode("stars").nodeValue, 
+									"endTime": singleProgramNode.getAttributeNode("endTime").nodeValue, 
+				//					"airdate": singleProgramNode.getAttributeNode("airdate").nodeValue, 
+									"startTime": singleProgramNode.getAttributeNode("startTime").nodeValue,
+									"lastModified": singleProgramNode.getAttributeNode("lastModified").nodeValue, 
+									"startTimeSpace": singleProgramNode.getAttributeNode("startTime").nodeValue.replace("T"," "),
+									"endTimeSpace": singleProgramNode.getAttributeNode("endTime").nodeValue.replace("T"," "),  
+									"startTimeHourMinute": singleProgramNode.getAttributeNode("startTime").nodeValue.substring(11,16),
+									"endTimeHourMinute": singleProgramNode.getAttributeNode("endTime").nodeValue.substring(11,16)
+								}
+								
+								try {
+									singleProgramJson.stars = singleProgramNode.getAttributeNode("stars").nodeValue;
+									singleProgramJson.airdate = singleProgramNode.getAttributeNode("airdate").nodeValue;
+								} catch(e) {
+									Mojo.Log.info("Error with getting airdate and stars");
+									singleProgramJson.stars = "";
+									singleProgramJson.airdate = "";
+								}
+								
+								for(var l = 0; l < singleProgramNode.childNodes.length; l++) {
+									singleProgramChildNode = singleProgramNode.childNodes[l];
+									
+									if(l == 0) singleProgramJson.description = singleProgramChildNode.nodeValue;
+									
+									
+									if(singleProgramChildNode.nodeName == "Channel") {
+										singleProgramJson.inputId = singleProgramChildNode.getAttributeNode("inputId").nodeValue;
+										singleProgramJson.chanFilters = singleProgramChildNode.getAttributeNode("chanFilters").nodeValue;
+										singleProgramJson.commFree = singleProgramChildNode.getAttributeNode("commFree").nodeValue;
+										singleProgramJson.channelName = singleProgramChildNode.getAttributeNode("channelName").nodeValue;
+										singleProgramJson.sourceId = singleProgramChildNode.getAttributeNode("sourceId").nodeValue;
+										singleProgramJson.chanId = singleProgramChildNode.getAttributeNode("chanId").nodeValue;
+										singleProgramJson.chanNum = singleProgramChildNode.getAttributeNode("chanNum").nodeValue;
+										singleProgramJson.callSign = singleProgramChildNode.getAttributeNode("callSign").nodeValue;
+									} 
+									
+									if(singleProgramChildNode.nodeName == "Recording") {
+										singleProgramJson.recPriority = singleProgramChildNode.getAttributeNode("recPriority").nodeValue;
+										singleProgramJson.playGroup = singleProgramChildNode.getAttributeNode("playGroup").nodeValue;
+										singleProgramJson.recStatus = singleProgramChildNode.getAttributeNode("recStatus").nodeValue;
+										singleProgramJson.recStartTs = singleProgramChildNode.getAttributeNode("recStartTs").nodeValue;
+										singleProgramJson.recGroup = singleProgramChildNode.getAttributeNode("recGroup").nodeValue;
+										singleProgramJson.dupMethod = singleProgramChildNode.getAttributeNode("dupMethod").nodeValue;
+										singleProgramJson.recType = singleProgramChildNode.getAttributeNode("recType").nodeValue;
+										singleProgramJson.encoderId = singleProgramChildNode.getAttributeNode("encoderId").nodeValue;
+										singleProgramJson.recProfile = singleProgramChildNode.getAttributeNode("recProfile").nodeValue;
+										singleProgramJson.recEndTs = singleProgramChildNode.getAttributeNode("recEndTs").nodeValue;
+										singleProgramJson.recordId = singleProgramChildNode.getAttributeNode("recordId").nodeValue;
+										singleProgramJson.dupInType = singleProgramChildNode.getAttributeNode("dupInType").nodeValue;
+									}
+									
+								}
+								
+								this.fullResultList.push(singleProgramJson);
+								//Mojo.Log.info("Program json is %j", singleProgramJson);
+							
+						
+					}
+				}
+				Mojo.Log.info('Done parsing Recorded');
+				//Mojo.Log.error("Recorded full json is %j", this.fullResultList);
+	
+				
+				break;
+			default:
+				//Mojo.Log.error("node name is "+topSingleNode.nodeName);
+				break;
+		}
+	}
+	
+	Mojo.Log.info("Exited XML parsing");
+	
+	this.finishedReadingRecorded();
+
 };
 
 function insertRecordedRow(newline){
 
 	//added channel fields are not working for some reason
 
-	var recorded_sql = "INSERT INTO 'recorded' (chanid, starttime, endtime, title, subtitle, description, category, hostname, bookmark, editing, cutlist, autoexpire, commflagged, recgroup, recordid, seriesid, programid, lastmodified, filesize, stars, previouslyshown, originalairdate, preserve, findid, deletepending, transcoder, timestretch, recpriority, basename, progstart, progend, playgroup, profile, duplicate, transcoded, watched, storagegroup, bookmarkupdate) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
-	var recgroup_sql = "REPLACE INTO 'recgroup' (groupname, displayname) VALUES (?, ?);";
+	var recorded_sql = "INSERT INTO 'recordedXML' (title, subTitle, programFlags, category, fileSize, seriesid, hostname, catType, programid, repeat, endTime, startTime, lastmodified, startTimeSpace, endTimeSpace, startTimeHourMinute, endTimeHourMinute, stars, airdate, description, inputId, chanFilters, commFree, channelName, sourceId, chanId, chanNum, callSign, recPriority, playGroup, recStatus, recStartTs, recGroup, dupMethod, recType, encoderID, recProfile, recEndTs, recordId, dupInType) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
+	var recgroup_sql = "REPLACE INTO 'recgroupXML' (groupname, displayname) VALUES (?, ?);";
 	
-	var linerecgroup = newline.recgroup;
+	var linerecgroup = newline.recGroup;
 	
 	//Insert into WebMyth.db
 	WebMyth.db.transaction( function (transaction) {
-		transaction.executeSql(recorded_sql,  [newline.chanid, newline.starttime, newline.endtime, newline.title, newline.subtitle, newline.description, newline.category, newline.hostname, newline.bookmark, newline.editing,
-									newline.cutlist, newline.autoexpire, newline.commflagged, newline.recgroup, newline.recordid, newline.seriesid, newline.programid, newline.lastmodified, newline.filesize, newline.stars, 
-									newline.previouslyshown, newline.originalairdate, newline.preserve, newline.findid, newline.deletepending, newline.transcoder, newline.timestretch, newline.recpriority, newline.basename, newline.progstart, 
-									newline.progend, newline.playgroup, newline.profile, newline.duplicate, newline.transcoded, newline.watched, newline.storagegroup, newline.bookmarkupdate], 
+		transaction.executeSql(recorded_sql,  [newline.title, newline.subTitle, newline.programFlags, newline.category, newline.fileSize, 
+												newline.seriesid, newline.hostname, newline.catType, newline.programid, newline.repeat,
+												newline.endTime, newline.startTime, newline.lastmodified, newline.startTimeSpace,
+												newline.endTimeSpace, newline.startTimeHourMinute, newline.endTimeHourMinute, 
+												newline.stars, newline.airdate, newline.description, newline.inputId, newline.chanFilters, 
+												newline.commFree, newline.channelName, newline.sourceId, newline.chanId, newline.chanNum,
+												newline.callSign, newline.recPriority, newline.playGroup, newline.recStatus, newline.recStartTs,
+												newline.recGroup, newline.dupMethod, newline.recType, newline.encoderID, newline.recProfile,
+												newline.recEndTs, newline.recordId, newline.dupInType
+											], 
 			function(transaction, results) {    // success handler
-				//Mojo.Log.info('Entered Row - Title: ' + newline.title + ' Subtitle: ' + newline.subtitle);
+				//Mojo.Log.info('Entered Row - Title: ' + newline.title + ' subTitle: ' + newline.subTitle);
 			},
 			function(transaction, error) {      // error handler
 				Mojo.Log.error("Could not insert in recorded: " + error.message);
@@ -522,7 +705,7 @@ function insertRecordedRow(newline){
 	
 	//Update recgroups table
 	WebMyth.db.transaction( function (transaction) {
-		transaction.executeSql(recgroup_sql,  [newline.recgroup, linerecgroup], 
+		transaction.executeSql(recgroup_sql,  [newline.recGroup, linerecgroup], 
 			function(transaction, results) {    // success handler
 				//Mojo.Log.info('Entered new recgroup: ' + newline.recgroup);
 			},
@@ -535,12 +718,12 @@ function insertRecordedRow(newline){
 };
 
 RecordedAssistant.prototype.goRecordedDetails = function(event) {
-	var recorded_chanid = event.item.chanid;
-	var recorded_starttime = event.item.starttime;
+	var recorded_chanid = event.item.chanId;
+	var recorded_startTime = event.item.startTime;
 	
-	Mojo.Log.info("Selected individual recording: '%s' + '%s'", recorded_chanid, recorded_starttime);
+	Mojo.Log.info("Selected individual recording: '%s' + '%s'", recorded_chanid, recorded_startTime);
 	
-	detailsObject = trimByChanidStarttime(this.fullResultList, recorded_chanid, recorded_starttime)
+	detailsObject = trimByChanidStarttime(this.fullResultList, recorded_chanid, recorded_startTime)
 
 	//Mojo.Log.info("Selected object is: '%j'", detailsObject);
 	
@@ -563,6 +746,7 @@ RecordedAssistant.prototype.filterListFunction = function(filterString, listWidg
  
 		var len = this.resultList.length;
  
+ 
 		//find the items that include the filterstring 
 		for (i = 0; i < len; i++) {
 			s = this.resultList[i];
@@ -570,23 +754,23 @@ RecordedAssistant.prototype.filterListFunction = function(filterString, listWidg
 				//Mojo.Log.info("Found string in title", i);
 				someList.push(s);
 			}
-			else if (s.subtitle.toUpperCase().indexOf(filterString.toUpperCase())>=0){
-				//Mojo.Log.info("Found string in subtitle", i);
+			else if (s.subTitle.toUpperCase().indexOf(filterString.toUpperCase())>=0){
+				//Mojo.Log.info("Found string in subTitle", i);
 				someList.push(s);
 			}
 			else if (s.category.toUpperCase().indexOf(filterString.toUpperCase())>=0){
-				//Mojo.Log.info("Found string in subtitle", i);
+				//Mojo.Log.info("Found string in subTitle", i);
 				someList.push(s);
 			}
-			else if (s.channame.toUpperCase().indexOf(filterString.toUpperCase())>=0){
-				//Mojo.Log.info("Found string in subtitle", i);
+			else if (s.channelName.toUpperCase().indexOf(filterString.toUpperCase())>=0){
+				//Mojo.Log.info("Found string in subTitle", i);
 				someList.push(s);
 			}
 		}
 	}
 	else {
 
-		Mojo.Log.info("No filter string");
+		Mojo.Log.info("No filter string - length of "+this.resultList.length);
 
 		var len = this.resultList.length;
  
@@ -614,9 +798,14 @@ RecordedAssistant.prototype.filterListFunction = function(filterString, listWidg
 	// use noticeUpdatedItems to update the list
 	// then update the list length 
 	// and the FilterList widget's FilterField count (displayed in the upper right corner)
+	
+	Mojo.Log.info("done filtering down - now displaying");
+	
 	listWidget.mojo.noticeUpdatedItems(offset, this.subset);
 	listWidget.mojo.setLength(totalSubsetSize);
 	listWidget.mojo.setCount(totalSubsetSize);
+	
+	Mojo.Log.info("done displaying");
 	
 	//this.addImages();
 
@@ -626,15 +815,15 @@ RecordedAssistant.prototype.recorderDividerFunction = function(itemModel) {
 	 
 	//Divider function for list
 	var divider = itemModel.title;				//as default
-	var date = new Date(isoSpaceToJS(itemModel.starttime));
+	var date = new Date(isoSpaceToJS(itemModel.startTime));
 	
 	switch(WebMyth.prefsCookieObject.currentRecSort) {
       case 'date-asc':
-		//divider = itemModel.starttime.substring(0,10);
+		//divider = itemModel.startTime.substring(0,10);
 		divider = date.toLocaleString().substring(0,15);
        break;
 	  case 'date-desc':
-		//divider = itemModel.starttime.substring(0,10);
+		//divider = itemModel.startTime.substring(0,10);
 		divider = date.toLocaleString().substring(0,15);
        break;
 	  case 'title-asc':
@@ -650,6 +839,7 @@ RecordedAssistant.prototype.recorderDividerFunction = function(itemModel) {
 		divider = itemModel.category;
        break;
 	}
+
 	 
 	return divider;
 };
@@ -703,25 +893,29 @@ RecordedAssistant.prototype.updateRecgroupList = function(transaction, results) 
 
 RecordedAssistant.prototype.setMyData = function(propertyValue, model)  { 
 
+	if(Mojo.appInfo.useXML == "true") {
+		var screenshotUrl = "http://"+getBackendIP(WebMyth.backendsCookieObject,model.hostname,WebMyth.prefsCookieObject.masterBackendIp)+":6544/Myth/GetPreviewImage?ChanId=";
+		//var screenshotUrl = "http://"+WebMyth.prefsCookieObject.masterBackendIp+":6544/Myth/GetPreviewImage?ChanId=";
+		screenshotUrl += model.chanId + "&StartTime=" + model.recStartTs;
+	} else {
+		var screenshotUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webmythPythonFile+"?op=getPremadeImage&chanid=";
+		screenshotUrl += model.chanid + "&startTime=" + model.recstartts;
+	}
 	
-	var screenshotUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webmythPythonFile+"?op=getPremadeImage&chanid=";
-	screenshotUrl += model.chanid + "&starttime=" + model.recstartts;
-	
-	
-	var recordedDetailsText = '<div class="recorded-list-item">';
+	var recordedDetailsText = '<div class="recorded-list-item '+model.recGroup+'">';
 	recordedDetailsText += '<div class="title truncating-text left recorded-list-title">&nbsp;'+model.title+'</div>';
 	recordedDetailsText += '<div class="palm-row-wrapper">';
 	
 	recordedDetailsText += '<div class="left-list-image"><div class="left-list-image-wrapper">';
-	recordedDetailsText += '<img id="img-'+model.chanid+'T'+model.starttime+'" class="recorded-screenshot-small" src="'+screenshotUrl+'" />';
+	recordedDetailsText += '<img id="img-'+model.chanid+'T'+model.startTime+'" class="recorded-screenshot-small" src="'+screenshotUrl+'" />';
 	recordedDetailsText += '</div></div>';
 	
 	
 	recordedDetailsText += '<div class="right-list-text">';
-	recordedDetailsText += '<div class="palm-info-text truncating-text left">&nbsp;'+model.subtitle+'&nbsp;</div>';
-	recordedDetailsText += '<div class="palm-info-text truncating-text left">&nbsp;&nbsp;'+model.starttime+'&nbsp;</div>';
+	recordedDetailsText += '<div class="palm-info-text truncating-text left">&nbsp;'+model.subTitle+'&nbsp;</div>';
+	recordedDetailsText += '<div class="palm-info-text truncating-text left">&nbsp;&nbsp;'+model.startTimeSpace+'&nbsp;</div>';
 	recordedDetailsText += '<div class="palm-info-text truncating-text left">&nbsp;&nbsp;&nbsp;'+model.category+'</div>';
-	recordedDetailsText += '<div class="palm-info-text truncating-text left">&nbsp;&nbsp;&nbsp;&nbsp;'+model.channum+" - "+model.channame+'</div>';
+	recordedDetailsText += '<div class="palm-info-text truncating-text left">&nbsp;&nbsp;&nbsp;&nbsp;'+model.chanNum+" - "+model.channelName+'</div>';
 	recordedDetailsText += '</div>';
 	
 	recordedDetailsText += '</div></div>';

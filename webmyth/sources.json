@@ -94,5 +94,9 @@
     {
         "scenes": "faqs",
         "source": "app/assistants/faqs-assistant.js"
+    },
+    {
+        "scenes": "webview",
+        "source": "app/assistants/webview-assistant.js"
     }
 ]

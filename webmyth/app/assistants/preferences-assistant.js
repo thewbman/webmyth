@@ -61,18 +61,7 @@ PreferencesAssistant.prototype.setup = function() {
             focus: false
          },
          this.webmythPythonFileTextModel
-    ); 
-/*	//Download/Stream to device
-	this.allowDownloadStreamToggleModel = {
-             value: false
-    };
-	this.controller.setupWidget("allowDownloadStreamToggleId",
-        {
-			label: $L("Stream to Device"),
-            modelProperty: "value"
-         },
-         this.allowDownloadStreamToggleModel
-    );														*/
+    ); 													
 	//Manual master backend
 	this.manualMasterBackendToggleModel = {
              value: false
@@ -99,6 +88,18 @@ PreferencesAssistant.prototype.setup = function() {
          },
          this.masterBackendTextModel
     ); 
+	//Download/Stream to device
+	this.allowDownloadStreamToggleModel = {
+             value: false
+    };
+	this.controller.setupWidget("allowDownloadStreamToggleId",
+        {
+			label: $L("Stream to Device"),
+            modelProperty: "value"
+         },
+         this.allowDownloadStreamToggleModel
+    );	
+	this.controller.listen("allowDownloadStreamToggleId", Mojo.Event.propertyChange, this.streamChanged.bindAsEventListener(this));
 	
 	
 	
@@ -333,8 +334,8 @@ PreferencesAssistant.prototype.activate = function(event) {
 			
 			
 			//Update toggles from cookie
-			//this.allowDownloadStreamToggleModel.value = WebMyth.prefsCookieObject.allowRecordedDownloads;
-			//this.controller.modelChanged(this.allowDownloadStreamToggleModel);
+			this.allowDownloadStreamToggleModel.value = WebMyth.prefsCookieObject.allowRecordedDownloads;
+			this.controller.modelChanged(this.allowDownloadStreamToggleModel);
 			
 			this.manualMasterBackendToggleModel.value = WebMyth.prefsCookieObject.manualMasterBackend;
 			this.controller.modelChanged(this.manualMasterBackendToggleModel);
@@ -359,7 +360,6 @@ PreferencesAssistant.prototype.activate = function(event) {
 			
 			this.metrixToggleModel.value = WebMyth.prefsCookieObject.allowMetrix;
 			this.controller.modelChanged(this.metrixToggleModel);
-			
 			
 			
 		} 
@@ -415,6 +415,33 @@ PreferencesAssistant.prototype.manualMasterBackendChanged = function(event) {
 	this.masterBackendTextModel.disabled = !this.manualMasterBackendToggleModel.value;
 
 	this.controller.modelChanged(this.masterBackendTextModel);
+};
+
+PreferencesAssistant.prototype.streamChanged = function(event) {
+	Mojo.Log.error("Stream/download settings changed to "+this.allowDownloadStreamToggleModel.value);
+	
+	var streamMessage = 'The ability to download and/or stream a recording to your phone is still a work in progress and will take some extra work to setup. <hr />';
+	streamMessage += 'You will need to first transcode your recordings to a format playable on the phone. ';
+	streamMessage += 'Then you can stream the recording to your phone using the mythweb stream interface.<hr />';
+	streamMessage += 'Please see the <a href="http://code.google.com/p/webmyth/wiki/DownloadAndStreaming">homepage</a> to setup.';
+	
+	if(this.allowDownloadStreamToggleModel.value) {
+		
+			this.controller.showAlertDialog({
+				onChoose: function(value) {if (value=="instructions") {
+					//Mojo.Log.error("appPath:" + Mojo.appPath);
+					} 
+				},
+				title: "Streaming/Downloading",
+				message:  streamMessage, 
+				choices: [
+                    {label: "OK", value: "ok"}
+					],
+				allowHTMLMessage: true
+			});	
+			
+	};	
+	
 };
 
 PreferencesAssistant.prototype.themeChanged = function(event) {
@@ -513,7 +540,7 @@ PreferencesAssistant.prototype.checkSettings = function() {
 	
 		WebMyth.prefsCookieObject.webserverName = this.webserverTextModel.value;
 		WebMyth.prefsCookieObject.webmythPythonFile = this.webmythPythonFileTextModel.value;
-		//WebMyth.prefsCookieObject.allowRecordedDownloads = this.allowDownloadStreamToggleModel.value;
+		WebMyth.prefsCookieObject.allowRecordedDownloads = this.allowDownloadStreamToggleModel.value;
 		WebMyth.prefsCookieObject.manualMasterBackend = this.manualMasterBackendToggleModel.value;
 		WebMyth.prefsCookieObject.masterBackendIp = this.masterBackendTextModel.value;
 		
