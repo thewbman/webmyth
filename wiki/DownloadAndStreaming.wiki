@@ -9,7 +9,7 @@
 
 == Transcoding recordings ==
   * Basically you need to make a H.264 recording for each recording you want to download and the filename needs to be the same base filename as the original recording but with an .mp4 extension.  e.g. a recording with an original filename of '3691_20101015022700.mpg' would need to have a transcoded filename of '3691_20101015022700.mp4'
-  * I wrote a small script to use the HandBrake conversion program to create the files with the correct file extension.  You can get the script in the download section on this website.
+  * I wrote a small script to use the [http://handbrake.fr/ HandBrake] conversion program to create the files with the correct file extension.  You can get the script in the download section on this website.
   * You will want to setup on of MythTV's user jobs to run the program that generates the transcoded recording.  It may vary depending on your script, but on my setup I have the user job command as _'/usr/local/bin/mythHandbrake "%DIR%" "%FILE%"'_
 
 == Removing old transcoded files ==
