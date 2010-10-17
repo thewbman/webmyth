@@ -1,0 +1,22 @@
+To Do - planned new features and updates:
+ 
+//Future
+ - new app icons/theme
+ - reformat date in details and lists
+ - update screenshots
+ - show count on recorded and upcoming list header
+ - add support for pin on backend
+ - fix pixelated icon
+ - progress scrobble on remote ?
+ - fix regorded grouping
+ 
+ 
+//Long term
+ - plugin for remote
+ - upcoming to XML (use mythweb ?) ?
+ - videos listing (wait for mysql) ?
+ - music listing (wait for mysql) ?
+ - selectable music and videos (wait for mysql) ?
+ - play/download on device (using mythweb?)
+ - details under status scheduled
+
