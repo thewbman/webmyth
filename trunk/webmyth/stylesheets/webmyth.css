@@ -428,7 +428,6 @@
 	left: 12px;
 }
 
-
 /*  
  * Recorded scene items  
  */
@@ -457,12 +456,12 @@
 	float: left;
 }
  
-.palm-row.multi-line.Deleted {
-	text-decoration: line-through;
-}
-
 .recorded-list-item {
 	height: 100px
+}
+
+.recorded-scene .recorded-list-item .Deleted {
+	text-decoration: line-through;
 }
 
 .recorded-screenshot {

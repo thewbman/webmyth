@@ -42,9 +42,12 @@ function createHostnameDb() {
 	
 	//Recorded table
 	newdb.transaction(function(tx2) {
-    tx2.executeSql('CREATE TABLE IF NOT EXISTS recorded(id INTEGER PRIMARY KEY, chanid INTEGER, starttime TEXT, endtime TEXT, title TEXT, subtitle TEXT, description TEXT, category TEXT, hostname TEXT, bookmark INTEGER, editing INTEGER, cutlist INTEGER, autoexpire INTEGER, commflagged INTEGER, recgroup TEXT, recordid INTEGER, seriesid TEXT, programid TEXT, lastmodified TEXT, filesize INTEGER, stars REAL, previouslyshown INTEGER, originalairdate TEXT, preserve INTEGER, findid INTEGER, deletepending INTEGER, transcoder INTEGER, timestretch REAL, recpriority INTEGER, basename TEXT, progstart TEXT, progend TEXT, playgroup TEXT, profile TEXT, duplicate INTEGER, transcoded INTEGER, watched INTEGER, storagegroup TEXT, bookmarkupdate TEXT,  channnum TEXT, name TEXT)', 
+    tx2.executeSql('CREATE TABLE IF NOT EXISTS recordedXML(id INTEGER PRIMARY KEY, title TEXT, subTitle TEXT, programFlags TEXT, category TEXT, fileSize TEXT, seriesId TEXT, hostname TEXT, catType TEXT, programId TEXT, repeat TEXT, endTime TEXT, startTime TEXT, lastModified TEXT, startTimeSpace TEXT, endTimeSpace TEXT, startTimeHourMinute TEXT, endTimeHourMinute TEXT, stars TEXT, airdate TEXT, description TEXT, inputId TEXT, chanFilters TEXT, commFree TEXT, channelName TEXT, sourceId TEXT, chanId TEXT, chanNum TEXT, callSign TEXT, recPriority TEXT, playGroup TEXT, recStatus TEXT, recStartTs TEXT, recGroup TEXT, dupMethod TEXT, recType TEXT, encoderID TEXT, recProfile TEXT, recEndTs TEXT, recordId TEXT, dupInType TEXT )', 
       []);
     });
+	
+								
+	
 	//Release 0.1.7 add in channel columns
 	newdb.transaction(function(tx4) {
     tx4.executeSql('ALTER TABLE recorded ADD channnum TEXT', 
@@ -58,7 +61,7 @@ function createHostnameDb() {
 	
 	//Recgroup table for filtering of recorded table
 	newdb.transaction(function(tx3) {
-    tx3.executeSql('CREATE TABLE IF NOT EXISTS recgroup(groupname TEXT PRIMARY KEY, displayname TEXT)', 
+    tx3.executeSql('CREATE TABLE IF NOT EXISTS recgroupXML(groupname TEXT PRIMARY KEY, displayname TEXT)', 
       []);
     });
 	} catch (err) {
@@ -185,7 +188,6 @@ function defaultRemoteCookie() {
 	return newCookieObject;
 };
 
-
 var sort_by = function(field, reverse, primer){
 
    reverse = (reverse) ? -1 : 1;
@@ -229,7 +231,6 @@ var double_sort_by = function(field1, field2, reverse, primer){
    }
 };
 
-
 var trimByRecgroup = function(fullList, myRecgroup) {
 	
 	//Check for keyword for no filtering
@@ -243,7 +244,7 @@ var trimByRecgroup = function(fullList, myRecgroup) {
 		for (i = 0; i < fullList.length; i++) {
 	
 			s = fullList[i];
-			if (s.recgroup == myRecgroup) {
+			if ((s.recgroup == myRecgroup)||(s.recGroup == myRecgroup)) {
 				//Matches selected recgroup
 				trimmedList.push(s);
 			} else {
@@ -254,7 +255,6 @@ var trimByRecgroup = function(fullList, myRecgroup) {
 	}
 };
 
-
 var trimByChanidStarttime = function(fullList, chanid_in, starttime_in) {
 	
 		var i, s;
@@ -262,7 +262,7 @@ var trimByChanidStarttime = function(fullList, chanid_in, starttime_in) {
 		for (i = 0; i < fullList.length; i++) {
 	
 			s = fullList[i];
-			if ((s.chanid == chanid_in) && (s.starttime == starttime_in)) {
+			if ((s.chanId == chanid_in) && (s.startTime == starttime_in)) {
 				//Matches chanid and starttime
 				return s;
 			} else {
@@ -272,7 +272,6 @@ var trimByChanidStarttime = function(fullList, chanid_in, starttime_in) {
 		return {"chanid_in":chanid_in, "starttime_in":starttime_in};
 
 };
-
 
 var trimGuideByChanidStarttime = function(fullList, chanid_in, starttime_in) {
 	
@@ -292,7 +291,6 @@ var trimGuideByChanidStarttime = function(fullList, chanid_in, starttime_in) {
 		return {"chanid_in": chanid_in, "starttime_in": starttime_in};
 
 };
-
 
 var trimByEnabled = function(fullList, enabled) {
 	
@@ -314,6 +312,28 @@ var trimByEnabled = function(fullList, enabled) {
 
 };
 
+var cleanupBackendsList = function(fullList, masterIP) {
+	
+		var trimmedList = [];
+		var i, s;
+	
+		for (i = 0; i < fullList.length; i++) {
+			s = fullList[i];
+			
+			if (s.ip == "") {
+				//Does not have IP address
+			} else {
+				//Has IP address
+				if(s.ip == masterIP) {
+					s.master = true;
+				}
+				
+				trimmedList.push(s);
+			}
+		}
+		return trimmedList;
+
+};
 
 var updateChannelLastUpdate = function(fullList, channid, nowDateISO) {
 
@@ -333,7 +353,6 @@ var updateChannelLastUpdate = function(fullList, channid, nowDateISO) {
 	return updatedList;
 
 }
-
 
 var updateProgramLastUpdateFromChannels = function(fullList, channelList) {
 
@@ -432,14 +451,12 @@ var cutoutHostname = function(fullList, myHostname) {
 		}
 };
 
-
 var isEmpty = function(object) { 
 	for(var i in object) { 
 		return false; 
 	};
 	return true; 
 };
-
 
 var isoSpaceToJS = function(isoDate) { 
     
@@ -469,7 +486,6 @@ var isoSpaceToJS = function(isoDate) {
  
 };
 
-
 var isoToJS = function(isoDate) { 
     
 	var regexp = "([0-9]{4})(-([0-9]{2})(-([0-9]{2})" +
@@ -497,7 +513,6 @@ var isoToJS = function(isoDate) {
 	return Number(time);
  
 };
-
 
 var dateObjectToJS = function(dateObject) { 
     
@@ -609,7 +624,6 @@ var dateJSToObject = function(dateJS) {
 	
 };
 
-
 var dateObjectToDayRange = function(dateObject) { 
 
 	var newDateStart = dateObject.year;
@@ -645,7 +659,6 @@ var dateObjectToDayRange = function(dateObject) {
 	return {'StartTime': newDateStart, 'EndTime': newDateEnd};
 	
 };
-
 
 var dateObjectAddOneDay = function(dateObject) { 
 
@@ -732,7 +745,6 @@ var dateObjectAddOneDay = function(dateObject) {
 	
 };
 
-
 var dateObjectSubtractOneDay = function(dateObject) { 
 
 	var newDate = dateObject;
@@ -796,7 +808,6 @@ var dateObjectSubtractOneDay = function(dateObject) {
 	
 };
 
-
 var dateObjectTo30min = function(dateObject) { 
 
 	var newDate = dateObject;
@@ -812,7 +823,6 @@ var dateObjectTo30min = function(dateObject) {
 	return newDate;
 	
 };
-
 
 function dateObjectAdd30Min(dateObject) { 
 
@@ -834,7 +844,6 @@ function dateObjectAdd30Min(dateObject) {
 	
 };
 
-
 function dateObjectSubtract30Min(dateObject) { 
 
 	var newDate = dateObject;
@@ -854,7 +863,6 @@ function dateObjectSubtract30Min(dateObject) {
 	return newDate;
 	
 };
-
 
 var getPreviousRemote = function(fullRemoteList, currentRemote) {   
 	
@@ -898,7 +906,6 @@ var getPreviousRemote = function(fullRemoteList, currentRemote) {
 
 };
 
-
 var getNextRemote = function(fullRemoteList, currentRemote) {   
 	
 	var listLength = fullRemoteList.length;
@@ -941,6 +948,30 @@ var getNextRemote = function(fullRemoteList, currentRemote) {
 
 };
 
+var getBackendIP = function(fullBackendList, backendName, masterBackend) {   
+	
+	var returnIP = "unknown";
+	var i = 0;
+	
+	for(i = 0; i < fullBackendList.length; i++) {
+		s = fullBackendList[i];
+		
+		if ((s.hostname == backendName)) {
+			//Matches backend name
+			if(s.master == true) {
+				returnIP = masterBackend;
+			} else {
+				returnIP = s.ip;
+			}
+		} else {
+			//Does not match
+		}	
+	
+	}
+	
+	return returnIP;
+
+};
 
 var recStatusDecode = function(recStatusInt) { 
 

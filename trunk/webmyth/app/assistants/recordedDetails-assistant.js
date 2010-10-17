@@ -60,35 +60,39 @@ RecordedDetailsAssistant.prototype.setup = function() {
 	this.controller.setupWidget('hosts-menu', '', this.hostsMenuModel);
 	this.controller.setupWidget('web-menu', '', this.webMenuModel);
 
-
 	
-	var screenshotUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webmythPythonFile;
-	screenshotUrl += "?op=getPremadeImage";
-	screenshotUrl += "&chanid="+this.recordedObject.chanid;
-	screenshotUrl += "&starttime="+this.recordedObject.recstartts;
+	if(Mojo.appInfo.useXML == "true") {
+		var screenshotUrl = "http://"+getBackendIP(WebMyth.backendsCookieObject,this.recordedObject.hostname,WebMyth.prefsCookieObject.masterBackendIp)+":6544/Myth/GetPreviewImage?ChanId=";
+		screenshotUrl += this.recordedObject.chanId + "&StartTime=" + this.recordedObject.recStartTs.replace("T"," ");
+	} else {
+		var screenshotUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webmythPythonFile+"?op=getPremadeImage&ChanId=";
+		screenshotUrl += this.recordedObject.chanId + "&startTime=" + this.recordedObject.recStartTs.replace("T"," ");
+	}
+	
+	Mojo.Log.info("Screenshot URL is "+ screenshotUrl);
 
 	
 	//Fill in data values
 	$('recorded-screenshot').src = screenshotUrl;
 	
 	$('scene-title').innerText = this.recordedObject.title;
-	$('subtitle-title').innerText = this.recordedObject.subtitle;
+	$('subtitle-title').innerText = this.recordedObject.subTitle;
 	$('description-title').innerText = this.recordedObject.description;
 	$('category-title').innerText = this.recordedObject.category;
 	
 	$('hostname-title').innerText = this.recordedObject.hostname;
-	$('recgroup-title').innerText = this.recordedObject.recgroup;
-	$('starttime-title').innerText = this.recordedObject.starttime;
-	$('endtime-title').innerText = this.recordedObject.endtime;
+	$('recgroup-title').innerText = this.recordedObject.recGroup;
+	$('starttime-title').innerText = this.recordedObject.startTime;
+	$('endtime-title').innerText = this.recordedObject.endTime;
 	$('airdate-title').innerText = this.recordedObject.airdate;
 	//$('storagegroup-title').innerText = this.recordedObject.storagegroup;
 	//$('playgroup-title').innerText = this.recordedObject.playgroup;
 	//$('programflags-title').innerText = this.recordedObject.programflags;
-	$('programid-title').innerText = this.recordedObject.programid;
-	$('seriesid-title').innerText = this.recordedObject.seriesid;
-	$('channame-title').innerText = this.recordedObject.channame;
-	$('channum-title').innerText = this.recordedObject.channum;
-	$('recstartts-title').innerText = this.recordedObject.recstartts;
+	$('programid-title').innerText = this.recordedObject.programId;
+	$('seriesid-title').innerText = this.recordedObject.seriesId;
+	$('channame-title').innerText = this.recordedObject.channelName;
+	$('channum-title').innerText = this.recordedObject.chanNum;
+	$('recstartts-title').innerText = this.recordedObject.recStartTs.replace("T"," ");
 	
 };
 
@@ -100,8 +104,8 @@ RecordedDetailsAssistant.prototype.activate = function(event) {
 
 	
 	if(WebMyth.prefsCookieObject.allowRecordedDownloads) {
-		var downloadCmd = { "label": "Download to phone", "command": "go-down-download" }
-		var streamCmd = { "label": "Stream to phone", "command": "go-down-stream" }
+		var downloadCmd = { "label": "Download to Phone", "command": "go-down-download" }
+		var streamCmd = { "label": "Stream to Phone", "command": "go-down-stream" }
 		
 		hostsList.push(downloadCmd);
 		hostsList.push(streamCmd);
@@ -240,18 +244,18 @@ RecordedDetailsAssistant.prototype.handleDownload = function(downloadOrStream_in
 	Mojo.Log.info("Asked to "+downloadOrStream_in+" recorded program");
 	this.downloadOrStream = downloadOrStream_in;
 	
-	var dateJS = new Date(isoSpaceToJS(this.recordedObject.recstartts));
+	var dateJS = new Date(isoToJS(this.recordedObject.recStartTs));
 	
-	Mojo.Log.info("Rec date JS is %j, %s", dateJS, this.recordedObject.recstartts);
+	Mojo.Log.info("Rec date JS is %j, %s", dateJS, this.recordedObject.recStartTs);
 	
 	var filenameRequestUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/mythweb/pl/stream/";
-	filenameRequestUrl += this.recordedObject.chanid+"/";
+	filenameRequestUrl += this.recordedObject.chanId+"/";
 	filenameRequestUrl += ((dateJS.getTime()/1000));
 	filenameRequestUrl += ".mp4";
 	
 	Mojo.Log.info("Download/stream URL is "+filenameRequestUrl);
 	
-	var myFilename = this.recordedObject.title + "-" + this.recordedObject.subtitle + ".mp4";
+	var myFilename = this.recordedObject.title + "-" + this.recordedObject.subTitle + ".mp4";
 	
 	Mojo.Log.info("Filename is "+myFilename);
  
@@ -269,7 +273,7 @@ RecordedDetailsAssistant.prototype.handleDownload = function(downloadOrStream_in
 			},
 			onSuccess: function(response) {
 				if(response.completed) {
-					this.controller.showBanner("Download finished!"+myFilename, "");
+					this.controller.showBanner("Download finished! "+myFilename, "");
 				} else {
 					if(response.amountReceived && response.amountTotal) {
 						var percent = (response.amountReceived / response.amountTotal)*100;
@@ -310,9 +314,9 @@ RecordedDetailsAssistant.prototype.playOnHost = function(host) {
 	WebMyth.prefsCookieObject.currentFrontend = host;
 	
 	//var clean_starttime = this.recordedObject.starttime.replace(' ','T');
-	var clean_starttime = this.recordedObject.recstartts.replace(' ','T');
+	var clean_starttime = this.recordedObject.recStartTs;
 	
-	var cmd = "program "+this.recordedObject.chanid+" "+clean_starttime+" resume";
+	var cmd = "program "+this.recordedObject.chanId+" "+clean_starttime+" resume";
 	
 	Mojo.Log.info("Command to send is " + cmd);
 

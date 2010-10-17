@@ -86,9 +86,14 @@ WebMyth.prefsCookie = new Mojo.Model.Cookie('prefs');
 WebMyth.prefsCookieObject = WebMyth.prefsCookie.get();
 	
 	
-//Cookie for hosts
+//Cookie for hosts (frontends)
 WebMyth.hostsCookie = new Mojo.Model.Cookie('hosts');
 WebMyth.hostsCookieObject = WebMyth.hostsCookie.get();
+	
+	
+//Cookie for hosts (frontends)
+WebMyth.backendsCookie = new Mojo.Model.Cookie('backends');
+WebMyth.backendsCookieObject = WebMyth.backendsCookie.get();
 	
 	
 //Cookie for remote

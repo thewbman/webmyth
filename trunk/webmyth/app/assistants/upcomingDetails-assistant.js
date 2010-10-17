@@ -131,14 +131,20 @@ UpcomingDetailsAssistant.prototype.openMythweb = function() {
 			
 	Mojo.Log.info("Selected time is: '%j'", dateUTC);
 			
-	var mythwebUrl = "http://";
-	mythwebUrl += WebMyth.prefsCookieObject.webserverName+"/mythweb/tv/detail/"
+	
+	//var mythwebUrl = "http://";
+	//mythwebUrl += WebMyth.prefsCookieObject.webserverName;
+	var mythwebUrl = "/mythweb/tv/detail/";
 	mythwebUrl += this.upcomingObject.chanid + "/";
 	mythwebUrl += dateUTC;
 	//mythwebUrl += "?RESET_TMPL=true";
 			
 	Mojo.Log.info("mythweb url is "+mythwebUrl);
-			
+	
+	Mojo.Controller.stageController.pushScene("webview", mythwebUrl, "Edit Upcoming Recording");
+	
+	
+	/*		
 	this.controller.serviceRequest("palm://com.palm.applicationManager", {
 		method: "open",
 		parameters:  {
@@ -148,6 +154,7 @@ UpcomingDetailsAssistant.prototype.openMythweb = function() {
 			}
 		}
 	}); 
+	*/
  
 };
 
