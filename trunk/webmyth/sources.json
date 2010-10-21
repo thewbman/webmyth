@@ -98,5 +98,17 @@
     {
         "scenes": "webview",
         "source": "app/assistants/webview-assistant.js"
+    },
+    {
+        "scenes": "upcomingDetailsXML",
+        "source": "app/assistants/upcomingDetailsXML-assistant.js"
+    },
+    {
+        "scenes": "imageview",
+        "source": "app/assistants/imageview-assistant.js"
+    },
+    {
+        "scenes": "upcomingXML",
+        "source": "app/assistants/upcomingXML-assistant.js"
     }
 ]

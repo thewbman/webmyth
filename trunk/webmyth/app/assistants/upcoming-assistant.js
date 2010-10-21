@@ -82,11 +82,13 @@ UpcomingAssistant.prototype.setup = function() {
 };
 
 UpcomingAssistant.prototype.activate = function(event) {
+
 	//Keypress event
 	Mojo.Event.listen(this.controller.sceneElement, Mojo.Event.keyup, this.handleKey.bind(this));
 	
 	//Vibrate event
 	Mojo.Event.listen(document, 'shakestart', this.handleShakestart.bindAsEventListener(this));
+	
 };
 
 UpcomingAssistant.prototype.deactivate = function(event) {
@@ -227,6 +229,8 @@ UpcomingAssistant.prototype.readRemoteDbTableSuccess = function(response) {
 	this.resultList.clear();
 	Object.extend(this.resultList,response.responseJSON);
 	
+	$("scene-title").innerHTML = "Upcoming Recordings ("+this.resultList.length+" items)";
+	
 	for(var i = 0; i < this.resultList.length; i++) {
 		this.resultList[i].startTime = this.resultList[i].starttime;
 		this.resultList[i].chanId = this.resultList[i].chanid;
@@ -281,7 +285,11 @@ UpcomingAssistant.prototype.filterListFunction = function(filterString, listWidg
 				someList.push(s);
 			}
 			else if (s.channame.toUpperCase().indexOf(filterString.toUpperCase())>=0){
-				//Mojo.Log.info("Found string in subtitle", i);
+				//Mojo.Log.info("Found string in channel name", i);
+				someList.push(s);
+			}
+			else if (s.category.toUpperCase().indexOf(filterString.toUpperCase())>=0){
+				//Mojo.Log.info("Found string in category", i);
 				someList.push(s);
 			}
 		}
@@ -300,7 +308,7 @@ UpcomingAssistant.prototype.filterListFunction = function(filterString, listWidg
  
 	// pare down list results to the part requested by widget (starting at offset & thru count)
 	
-	Mojo.Log.info("paring down '%j'",someList);
+	//Mojo.Log.info("paring down '%j'",someList);
 	
 	var cursor = 0;
 	var subset = [];
@@ -338,8 +346,9 @@ UpcomingAssistant.prototype.goUpcomingDetails = function(event) {
 
 	//Mojo.Log.error("Selected object is: '%j'", detailsObject);
 	
-	//Open recordedDetails communication scene
-	Mojo.Controller.stageController.pushScene("upcomingDetails", detailsObject);
+	//Open upcomingDetails communication scene
+	//Mojo.Controller.stageController.pushScene("upcomingDetails", detailsObject);
+	Mojo.Controller.stageController.pushScene("upcomingDetailsXML", upcoming_chanid, upcoming_starttime);
 	
 };
 

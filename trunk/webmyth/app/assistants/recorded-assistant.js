@@ -336,6 +336,8 @@ RecordedAssistant.prototype.recgroupChanged = function(newRecgroup) {
 	this.filterListFunction('', listWidget, 0, this.resultList.length);
 	listWidget.mojo.close();
 	
+	$("scene-title").innerHTML = "Recorded Shows ("+this.resultList.length+" items)";
+	
 	//listWidget.mojo.close();
 	
 	//Mojo.Log.info("Finished filtering function");
@@ -351,7 +353,7 @@ RecordedAssistant.prototype.recgroupChanged = function(newRecgroup) {
 RecordedAssistant.prototype.useLocalDataTable = function(event) {
 	//Fall back to local data if cannot connect to remote server
 	Mojo.Controller.getAppController().showBanner("Failed to get new data, using saved", {source: 'notification'});
-	Mojo.Log.error('Failed to get Ajax response - using previoius saved data');
+	Mojo.Log.error('Failed to get Ajax response - using previous saved data');
 	
 	// Query recorded table
 	var mytext = 'SELECT * FROM recordedXML ORDER BY startTime;'
@@ -451,7 +453,59 @@ RecordedAssistant.prototype.finishedReadingRecorded = function(event) {
 	Mojo.Log.info("Finished getting data, now saving");
 	
 	this.sortChanged(WebMyth.prefsCookieObject.currentRecSort);
+		
+		
+	//Save new values back to DB
+ 
+	//Replace out old data
+	WebMyth.db.transaction( function (transaction) {
+		transaction.executeSql("DELETE FROM 'recordedXML'; ",  [], 
+			function(transaction, results) {    // success handler
+				Mojo.Log.info("Successfully truncated recorded");
+			},
+			function(transaction, error) {      // error handler
+				Mojo.Log.error("Could not truncate recorded because " + error.message);
+			}
+		);
+	});
+	WebMyth.db.transaction( function (transaction) {
+		transaction.executeSql("DELETE FROM 'recgroupXML'; ",  [], 
+			function(transaction, results) {    // success handler
+				Mojo.Log.info("Successfully truncated recgroup");
+			},
+			function(transaction, error) {      // error handler
+				Mojo.Log.error("Could not truncate recgroup because " + error.message);
+			}
+		);
+	});
+	
+	//Insert new data
+	WebMyth.db.transaction( 
+		(function (transaction) {
+			transaction.executeSql("INSERT INTO 'recgroupXML' (groupname, displayname) VALUES ('AllRecgroupsOn', 'All');",  [], 
+					this.saveResults.bind(this),
+					function(transaction, error) {      // error handler
+						Mojo.Log.error("Could not insert AllRecgroupsOn because " + error.message);
+					}
+			);
+		}
+		).bind(this)
+	);
+	
+};
 
+RecordedAssistant.prototype.saveResults = function(transaction, results) {
+
+	Mojo.Log.info("Saving results back to DB");
+
+	for(var i = 0; i < this.fullResultList.length; i++){
+		title = this.fullResultList[i].title;
+		subTitle = this.fullResultList[i].subTitle;
+		insertRecordedRow(this.fullResultList[i]);
+		//Mojo.Log.info('Row: ' + i + ' Title: ' + title + ' subTitle: ' + subTitle);	
+	}
+					
+					
 	//Update the recgroup filter
 	var recgroupSql = "SELECT * FROM recgroupXML ORDER BY groupname;";
 	var string = "";
@@ -467,62 +521,8 @@ RecordedAssistant.prototype.finishedReadingRecorded = function(event) {
 		).bind(this)
 	);
 	
-	
-	//Stop spinner and hide
-	this.spinnerModel.spinning = false;
-	this.controller.modelChanged(this.spinnerModel, this);
-	$('myScrim').hide()
-		
-	//Save new values back to DB
-    var json = this.fullResultList;
-	//var title;
-	//var subTitle;
- 
- 
-	//Replace out old data
-	WebMyth.db.transaction( function (transaction) {
-		transaction.executeSql("DELETE FROM 'recordedXML'; ",  [], 
-			function(transaction, results) {    // success handler
-				Mojo.Log.info("Successfully truncated recorded");
-			},
-			function(transaction, error) {      // error handler
-				Mojo.Log.error("Could not truncate recorded because " + error.message);
-			}
-		);
-	});
-
-	WebMyth.db.transaction( function (transaction) {
-		transaction.executeSql("DELETE FROM 'recgroupXML'; ",  [], 
-			function(transaction, results) {    // success handler
-				Mojo.Log.info("Successfully truncated recgroup");
-			},
-			function(transaction, error) {      // error handler
-				Mojo.Log.error("Could not truncate recgroup because " + error.message);
-			}
-		);
-	});
-	WebMyth.db.transaction( function (transaction) {
-		transaction.executeSql("INSERT INTO 'recgroupXML' (groupname, displayname) VALUES ('AllRecgroupsOn', 'All');",  [], 
-				function(transaction, results) {    // success handler
-					Mojo.Log.info("Successfully inserted AllRecgroupsOn");
 					
-					//Nest parsing actions here		
-					for(var i = 0; i < json.length; i++){
-						title = json[i].title;
-						subTitle = json[i].subTitle;
-						insertRecordedRow(json[i]);
-						//Mojo.Log.error('Row: ' + i + ' Title: ' + title + ' subTitle: ' + subTitle);	
-					}
-					
-				},
-				function(transaction, error) {      // error handler
-					Mojo.Log.error("Could not insert AllRecgroupsOn because " + error.message);
-				}
-		);
-	});
-	
-	
-};
+}
 
 RecordedAssistant.prototype.readRemoteScriptSuccess = function(response) {
 
@@ -669,6 +669,7 @@ RecordedAssistant.prototype.readRecordedXMLSuccess = function(response) {
 	
 	Mojo.Log.info("Exited XML parsing");
 	
+	
 	this.finishedReadingRecorded();
 
 };
@@ -677,12 +678,13 @@ function insertRecordedRow(newline){
 
 	//added channel fields are not working for some reason
 
-	var recorded_sql = "INSERT INTO 'recordedXML' (title, subTitle, programFlags, category, fileSize, seriesid, hostname, catType, programid, repeat, endTime, startTime, lastmodified, startTimeSpace, endTimeSpace, startTimeHourMinute, endTimeHourMinute, stars, airdate, description, inputId, chanFilters, commFree, channelName, sourceId, chanId, chanNum, callSign, recPriority, playGroup, recStatus, recStartTs, recGroup, dupMethod, recType, encoderID, recProfile, recEndTs, recordId, dupInType) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
+	//var recorded_sql = "INSERT INTO 'recordedXML' (title, subTitle, programFlags, category, fileSize, seriesid, hostname, catType, programid, repeat, endTime, startTime, lastmodified, startTimeSpace, endTimeSpace, startTimeHourMinute, endTimeHourMinute, stars, airdate, description, inputId, chanFilters, commFree, channelName, sourceId, chanId, chanNum, callSign, recPriority, playGroup, recStatus, recStartTs, recGroup, dupMethod, recType, encoderID, recProfile, recEndTs, recordId, dupInType) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
 	var recgroup_sql = "REPLACE INTO 'recgroupXML' (groupname, displayname) VALUES (?, ?);";
 	
 	var linerecgroup = newline.recGroup;
 	
-	//Insert into WebMyth.db
+	/*
+	//Insert individual recording into WebMyth.db
 	WebMyth.db.transaction( function (transaction) {
 		transaction.executeSql(recorded_sql,  [newline.title, newline.subTitle, newline.programFlags, newline.category, newline.fileSize, 
 												newline.seriesid, newline.hostname, newline.catType, newline.programid, newline.repeat,
@@ -702,6 +704,7 @@ function insertRecordedRow(newline){
 			}
 		);	
 	});
+	*/
 	
 	//Update recgroups table
 	WebMyth.db.transaction( function (transaction) {
@@ -714,6 +717,8 @@ function insertRecordedRow(newline){
 			}
 		);
 	});
+	
+	
 	
 };
 
@@ -856,7 +861,8 @@ RecordedAssistant.prototype.searchFilter = function(event)    {
 };
 
 RecordedAssistant.prototype.updateRecgroupList = function(transaction, results)  { 
-	//Mojo.Log.info('inside updateRecgroupList');
+	
+	//Mojo.Log.info('Updating RecgroupList with %j', results.rows);
 	
 	var updatedList = [];
 	var string = "";
@@ -887,6 +893,13 @@ RecordedAssistant.prototype.updateRecgroupList = function(transaction, results) 
 	
 	this.groupMenuModel.items = updatedList;
 	this.controller.modelChanged(this.groupMenuModel);
+	
+	
+	
+	//Stop spinner and hide
+	this.spinnerModel.spinning = false;
+	this.controller.modelChanged(this.spinnerModel, this);
+	$('myScrim').hide()
 
 	
 };
