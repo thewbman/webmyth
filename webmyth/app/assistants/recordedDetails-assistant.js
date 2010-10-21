@@ -55,25 +55,28 @@ RecordedDetailsAssistant.prototype.setup = function() {
 			{"label": $L('Google'), "command": "go-web--Google"}
 			]};
 
- 
 	this.controller.setupWidget(Mojo.Menu.commandMenu, {menuClass: 'no-fade'}, this.cmdMenuModel);
 	this.controller.setupWidget('hosts-menu', '', this.hostsMenuModel);
 	this.controller.setupWidget('web-menu', '', this.webMenuModel);
 
 	
 	if(Mojo.appInfo.useXML == "true") {
-		var screenshotUrl = "http://"+getBackendIP(WebMyth.backendsCookieObject,this.recordedObject.hostname,WebMyth.prefsCookieObject.masterBackendIp)+":6544/Myth/GetPreviewImage?ChanId=";
-		screenshotUrl += this.recordedObject.chanId + "&StartTime=" + this.recordedObject.recStartTs.replace("T"," ");
+		this.screenshotUrl = "http://"+getBackendIP(WebMyth.backendsCookieObject,this.recordedObject.hostname,WebMyth.prefsCookieObject.masterBackendIp)+":6544/Myth/GetPreviewImage?ChanId=";
+		this.screenshotUrl += this.recordedObject.chanId + "&StartTime=" + this.recordedObject.recStartTs.replace("T"," ");
 	} else {
-		var screenshotUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webmythPythonFile+"?op=getPremadeImage&ChanId=";
-		screenshotUrl += this.recordedObject.chanId + "&startTime=" + this.recordedObject.recStartTs.replace("T"," ");
+		this.screenshotUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webmythPythonFile+"?op=getPremadeImage&ChanId=";
+		this.screenshotUrl += this.recordedObject.chanId + "&startTime=" + this.recordedObject.recStartTs.replace("T"," ");
 	}
 	
-	Mojo.Log.info("Screenshot URL is "+ screenshotUrl);
+	
+
+	
+	
+	Mojo.Log.info("Screenshot URL is "+ this.screenshotUrl);
 
 	
 	//Fill in data values
-	$('recorded-screenshot').src = screenshotUrl;
+	$('recorded-screenshot').src = this.screenshotUrl;
 	
 	$('scene-title').innerText = this.recordedObject.title;
 	$('subtitle-title').innerText = this.recordedObject.subTitle;
@@ -82,8 +85,8 @@ RecordedDetailsAssistant.prototype.setup = function() {
 	
 	$('hostname-title').innerText = this.recordedObject.hostname;
 	$('recgroup-title').innerText = this.recordedObject.recGroup;
-	$('starttime-title').innerText = this.recordedObject.startTime;
-	$('endtime-title').innerText = this.recordedObject.endTime;
+	$('starttime-title').innerText = this.recordedObject.startTime.replace("T"," ");
+	$('endtime-title').innerText = this.recordedObject.endTime.replace("T"," ");
 	$('airdate-title').innerText = this.recordedObject.airdate;
 	//$('storagegroup-title').innerText = this.recordedObject.storagegroup;
 	//$('playgroup-title').innerText = this.recordedObject.playgroup;
@@ -93,10 +96,15 @@ RecordedDetailsAssistant.prototype.setup = function() {
 	$('channame-title').innerText = this.recordedObject.channelName;
 	$('channum-title').innerText = this.recordedObject.chanNum;
 	$('recstartts-title').innerText = this.recordedObject.recStartTs.replace("T"," ");
+	$('filesize-title').innerText = Mojo.Format.formatNumber(parseInt(this.recordedObject.fileSize.substring(0,this.recordedObject.fileSize.length - 6)))+" MB";
+	
+	//Mojo.Event.listen(this.controller.get("recorded-screenshot"),Mojo.Event.tap, this.goScreenshot.bind(this));
 	
 };
 
 RecordedDetailsAssistant.prototype.activate = function(event) {
+	
+
 	
 	//Update list of current hosts
 	var hostsList = [];
@@ -168,7 +176,6 @@ RecordedDetailsAssistant.prototype.handleCommand = function(event) {
   
 };
 
-
 RecordedDetailsAssistant.prototype.handleKey = function(event) {
 
 	Mojo.Log.info("handleKey %o, %o", event.originalEvent.metaKey, event.originalEvent.keyCode);
@@ -198,7 +205,6 @@ RecordedDetailsAssistant.prototype.handleKey = function(event) {
 	}
 	Event.stop(event); 
 };
-
 
 RecordedDetailsAssistant.prototype.openWeb = function(website) {
 
@@ -237,7 +243,6 @@ RecordedDetailsAssistant.prototype.openWeb = function(website) {
  });  
  
 };
-
 
 RecordedDetailsAssistant.prototype.handleDownload = function(downloadOrStream_in) {
 
@@ -306,7 +311,6 @@ RecordedDetailsAssistant.prototype.handleDownload = function(downloadOrStream_in
  
 };
 
-
 RecordedDetailsAssistant.prototype.playOnHost = function(host) {
 
 	//Attempting to play
@@ -325,5 +329,11 @@ RecordedDetailsAssistant.prototype.playOnHost = function(host) {
 	
 	
 	if(WebMyth.prefsCookieObject.playJumpRemote)  Mojo.Controller.stageController.pushScene({name: WebMyth.prefsCookieObject.currentRemoteScene, disableSceneScroller: true});
+	
+};
+
+RecordedDetailsAssistant.prototype.goScreenshot = function() {
+	
+	Mojo.Controller.stageController.pushScene('imageview', this.screenshotUrl);
 	
 };

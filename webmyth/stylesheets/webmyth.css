@@ -502,6 +502,28 @@
 
 
 /*
+ * Imageview
+ */
+ 
+.imageview-scene  {
+	background: black;
+	height: 400px;
+	width: 320px;
+}
+
+.height-480 .imageview-scene {
+	background: black;
+	height: 480px;
+	width: 320px;
+}
+
+.imageview-scene .myImage {
+	-webkit-transform: rotate(90deg);
+	
+}
+
+
+/*
  * Guide
  */
 

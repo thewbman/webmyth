@@ -623,18 +623,18 @@ GuideAssistant.prototype.popupHandler = function(event) {
 			
 			Mojo.Log.info("Selected time is: '%j'", dateUTC);
 			
-			//var mythwebUrl = "http://";
-			//mythwebUrl += WebMyth.prefsCookieObject.webserverName;
-			var mythwebUrl = "/mythweb/tv/detail/"
+			var mythwebUrl = "http://";
+			mythwebUrl += WebMyth.prefsCookieObject.webserverName;
+			mythwebUrl += "/mythweb/tv/detail/"
 			mythwebUrl += this.newChannid + "/";
 			mythwebUrl += dateUTC;
 			//mythwebUrl += "?RESET_TMPL=true";
 			
 			Mojo.Log.info("mythweb url is "+mythwebUrl);
 			
-			Mojo.Controller.stageController.pushScene("webview", mythwebUrl, "Setup Recording");
+			//Mojo.Controller.stageController.pushScene("webview", mythwebUrl, "Setup Recording");
 			
-			/*
+			
 			this.controller.serviceRequest("palm://com.palm.applicationManager", {
 				method: "open",
 				parameters:  {
@@ -645,7 +645,7 @@ GuideAssistant.prototype.popupHandler = function(event) {
 				}
 			});
 
-			*/			
+						
 
 		break;
 		case 'do-pickChannel':

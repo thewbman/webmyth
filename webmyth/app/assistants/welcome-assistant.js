@@ -65,7 +65,17 @@ WelcomeAssistant.prototype.setup = function() {
          }
      );
 	Mojo.Event.listen(this.controller.get("goUpcomingButtonId"),Mojo.Event.tap, this.goUpcoming.bind(this));
-	
+	/*
+	//View upcoming XML button
+	this.controller.setupWidget("goUpcomingXMLButtonId",
+         {},
+         {
+             label : "Upcoming Recordings XML",
+             disabled: false
+         }
+     );
+	Mojo.Event.listen(this.controller.get("goUpcomingXMLButtonId"),Mojo.Event.tap, this.goUpcomingXML.bind(this));
+	*/
 	
 	//View guide button
 	this.controller.setupWidget("goGuideButtonId",
@@ -328,6 +338,11 @@ WelcomeAssistant.prototype.goRecorded = function(event) {
 WelcomeAssistant.prototype.goUpcoming = function(event) {
 	//Start upcoming scene
 	Mojo.Controller.stageController.pushScene("upcoming");
+};
+
+WelcomeAssistant.prototype.goUpcomingXML = function(event) {
+	//Start upcoming scene
+	Mojo.Controller.stageController.pushScene("upcomingXML");
 };
 
 WelcomeAssistant.prototype.goGuide = function(event) {
