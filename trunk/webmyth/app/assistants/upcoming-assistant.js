@@ -185,12 +185,18 @@ UpcomingAssistant.prototype.getUpcoming = function(event) {
 	this.controller.sceneScroller.mojo.revealTop();
 	
 	var requestUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webmythPythonFile;
-	requestUrl += "?op=getUpcoming";
+	requestUrl += "?op=getUpcoming";				//will record
+	//requestUrl += "?op=getPending";				//matches any reocrding rule
+	//requestUrl += "?op=getScheduled";				//includes recording rules that don't match anything
+	
+	//requestHeaders: {Authorization: 'Basic ' + Base64.encode(WebMyth.prefsCookieObject.webserverUsername + ":" + WebMyth.prefsCookieObject.webserverPassword)},
+	
 	
     try {
         var request = new Ajax.Request(requestUrl,{
             method: 'get',
             evalJSON: 'true',
+			requestHeaders: {Authorization: 'Basic ' + Base64.encode(WebMyth.prefsCookieObject.webserverUsername + ":" + WebMyth.prefsCookieObject.webserverPassword)},
             onSuccess: this.readRemoteDbTableSuccess.bind(this),
             onFailure: this.remoteDbTableFail.bind(this)  
         });

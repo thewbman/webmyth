@@ -23,7 +23,7 @@ myDBPassword = 'mythtv'
 # end of configuration
 #
 
-version = 4
+version = 6
 
 import cgi
 import cgitb
@@ -42,14 +42,14 @@ form = cgi.FieldStorage()
 MythLog._setlevel('none')
 #mythDB = MythDB()
 mythDB = MythDB(args=(('DBHostName',myDBHostName),('DBName',myDBName),('DBUserName',myDBUserName),('DBPassword',myDBPassword)))
-mythXML = MythXML()
-mythVideo = MythVideo()
+mythXML = MythXML(db=mythDB)
+mythVideo = MythVideo(db=mythDB)
 
 try :
 	myBackend = form['backend'].value
-	mythBE = MythBE(myBackend)
+	mythBE = MythBE(myBackend, db=mythDB)
 except KeyError:
-	mythBE = MythBE()
+	mythBE = MythBE(db=mythDB)
 
 
 createJson = 0
@@ -222,6 +222,28 @@ elif op == 'getVideoFanart':
 	vid = mythVideo.getVideo(file=filename)
 	
 	myFile = vid.openFanart()
+	#alldata = mythVideo.searchVideos(insertedafter='2010-08-30 00:08:09')
+
+elif op == 'getVideoCoverart':
+	#asking for a single video coverart
+	header = 'filePointer'
+	
+	filename = form['filename'].value
+	
+	vid = mythVideo.getVideo(file=filename)
+	
+	myFile = vid.openCoverart()
+	#alldata = mythVideo.searchVideos(insertedafter='2010-08-30 00:08:09')
+
+elif op == 'getVideoBanner':
+	#asking for a single video banner
+	header = 'filePointer'
+	
+	filename = form['filename'].value
+	
+	vid = mythVideo.getVideo(file=filename)
+	
+	myFile = vid.openBanner()
 	#alldata = mythVideo.searchVideos(insertedafter='2010-08-30 00:08:09')
 	
 elif op == 'scanVideos':
@@ -405,4 +427,6 @@ elif header == 'download' :
 	print ""
 	#print str(os.path.getsize(dir+filename))
 	print file(dir+filename, "r").read()
+	
+
 	

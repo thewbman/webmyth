@@ -638,6 +638,7 @@ RecordedAssistant.prototype.readRecordedXMLSuccess = function(response) {
 										singleProgramJson.playGroup = singleProgramChildNode.getAttributeNode("playGroup").nodeValue;
 										singleProgramJson.recStatus = singleProgramChildNode.getAttributeNode("recStatus").nodeValue;
 										singleProgramJson.recStartTs = singleProgramChildNode.getAttributeNode("recStartTs").nodeValue;
+										singleProgramJson.recStartTsSpace = singleProgramChildNode.getAttributeNode("recStartTs").nodeValue.replace("T"," ");
 										singleProgramJson.recGroup = singleProgramChildNode.getAttributeNode("recGroup").nodeValue;
 										singleProgramJson.dupMethod = singleProgramChildNode.getAttributeNode("dupMethod").nodeValue;
 										singleProgramJson.recType = singleProgramChildNode.getAttributeNode("recType").nodeValue;
@@ -909,11 +910,13 @@ RecordedAssistant.prototype.setMyData = function(propertyValue, model)  {
 	if(Mojo.appInfo.useXML == "true") {
 		var screenshotUrl = "http://"+getBackendIP(WebMyth.backendsCookieObject,model.hostname,WebMyth.prefsCookieObject.masterBackendIp)+":6544/Myth/GetPreviewImage?ChanId=";
 		//var screenshotUrl = "http://"+WebMyth.prefsCookieObject.masterBackendIp+":6544/Myth/GetPreviewImage?ChanId=";
-		screenshotUrl += model.chanId + "&StartTime=" + model.recStartTs;
+		screenshotUrl += model.chanId + "&StartTime=" + model.recStartTsSpace;
 	} else {
 		var screenshotUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webmythPythonFile+"?op=getPremadeImage&chanid=";
 		screenshotUrl += model.chanid + "&startTime=" + model.recstartts;
 	}
+	
+	//Mojo.Log.error("Screenshot URL is "+screenshotUrl);
 	
 	var recordedDetailsText = '<div class="recorded-list-item '+model.recGroup+'">';
 	recordedDetailsText += '<div class="title truncating-text left recorded-list-title">&nbsp;'+model.title+'</div>';

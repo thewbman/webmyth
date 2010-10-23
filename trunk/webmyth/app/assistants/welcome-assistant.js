@@ -35,6 +35,7 @@ WelcomeAssistant.prototype.setup = function() {
 	this.controller.setupWidget(Mojo.Menu.appMenu, WebMyth.appMenuAttr, WebMyth.appMenuModel);
 	
 	
+	
 	//Remote button
 	this.controller.setupWidget("goRemoteButtonId",
          {},
@@ -44,6 +45,7 @@ WelcomeAssistant.prototype.setup = function() {
          }
      );
 	Mojo.Event.listen(this.controller.get("goRemoteButtonId"),Mojo.Event.tap, this.goRemote.bind(this));
+	
 	
 	//View recorded button
 	this.controller.setupWidget("goRecordedButtonId",
@@ -58,24 +60,14 @@ WelcomeAssistant.prototype.setup = function() {
 	
 	//View upcoming button
 	this.controller.setupWidget("goUpcomingButtonId",
-         {},
-         {
-             label : "Upcoming Recordings",
-             disabled: false
-         }
-     );
+		 {},
+		 {
+			 label : "Upcoming Recordings",
+			 disabled: false
+		 }
+	 );
 	Mojo.Event.listen(this.controller.get("goUpcomingButtonId"),Mojo.Event.tap, this.goUpcoming.bind(this));
-	/*
-	//View upcoming XML button
-	this.controller.setupWidget("goUpcomingXMLButtonId",
-         {},
-         {
-             label : "Upcoming Recordings XML",
-             disabled: false
-         }
-     );
-	Mojo.Event.listen(this.controller.get("goUpcomingXMLButtonId"),Mojo.Event.tap, this.goUpcomingXML.bind(this));
-	*/
+	
 	
 	//View guide button
 	this.controller.setupWidget("goGuideButtonId",
@@ -99,7 +91,6 @@ WelcomeAssistant.prototype.setup = function() {
 	Mojo.Event.listen(this.controller.get("goStatusButtonId"),Mojo.Event.tap, this.goStatus.bind(this));
 	
 	
-	
 
 	if (WebMyth.prefsCookieObject) {		//cookie exists
 			
@@ -109,6 +100,7 @@ WelcomeAssistant.prototype.setup = function() {
 			//Metrix command
 			WebMyth.Metrix.postDeviceData();
 		};
+		
 		
 		//Setup default settings if missing due to old cookie versions
 		if (WebMyth.prefsCookieObject.webserverRemoteFile == null) WebMyth.prefsCookieObject.webserverRemoteFile = defaultCookie().webserverRemoteFile;
@@ -121,7 +113,7 @@ WelcomeAssistant.prototype.setup = function() {
 		if (WebMyth.prefsCookieObject.currentRemoteScene == null) WebMyth.prefsCookieObject.currentRemoteScene = defaultCookie().currentRemoteScene;
 		if (WebMyth.prefsCookieObject.allowRecordedDownloads == null) WebMyth.prefsCookieObject.allowRecordedDownloads = defaultCookie().allowRecordedDownloads;
 		if (WebMyth.prefsCookieObject.recordedDownloadsUrl == null) WebMyth.prefsCookieObject.recordedDownloadsUrl = defaultCookie().recordedDownloadsUrl;
-		if (WebMyth.prefsCookieObject.theme == null) WebMyth.prefsCookieObject.theme = defaultCookie().theme;
+		//if (WebMyth.prefsCookieObject.theme == null) WebMyth.prefsCookieObject.theme = defaultCookie().theme;
 		if (WebMyth.prefsCookieObject.remoteVibrate == null) WebMyth.prefsCookieObject.remoteVibrate = defaultCookie().remoteVibrate;
 		if (WebMyth.prefsCookieObject.remoteFullscreen == null) WebMyth.prefsCookieObject.remoteFullscreen = defaultCookie().remoteFullscreen;
 		if (WebMyth.prefsCookieObject.masterBackendIp == null) WebMyth.prefsCookieObject.masterBackendIp = defaultCookie().masterBackendIp;
@@ -132,6 +124,9 @@ WelcomeAssistant.prototype.setup = function() {
 		if (WebMyth.prefsCookieObject.showUpcomingChannelIcons == null) WebMyth.prefsCookieObject.showUpcomingChannelIcons = defaultCookie().showUpcomingChannelIcons;
 		if (WebMyth.prefsCookieObject.dashboardRemote == null) WebMyth.prefsCookieObject.dashboardRemote = defaultCookie().dashboardRemote;
 		if (WebMyth.prefsCookieObject.dashboardRemoteIndex == null) WebMyth.prefsCookieObject.dashboardRemoteIndex = defaultCookie().dashboardRemoteIndex;
+		if (WebMyth.prefsCookieObject.useWebmythScript == null) WebMyth.prefsCookieObject.useWebmythScript = defaultCookie().useWebmythScript;
+		if (WebMyth.prefsCookieObject.showUpcoming == null) WebMyth.prefsCookieObject.showUpcoming = defaultCookie().showUpcoming;
+		if (WebMyth.prefsCookieObject.showVideos == null) WebMyth.prefsCookieObject.showVideos = defaultCookie().showVideos;
 		
 		
 		//Check if scripts need an upgrade message
@@ -152,7 +147,7 @@ WelcomeAssistant.prototype.setup = function() {
 		WebMyth.prefsCookie.put(WebMyth.prefsCookieObject); 
 		
 		//Use theme
-		this.controller.document.body.className = WebMyth.prefsCookieObject.theme;
+		this.controller.document.body.className = 'palm-dark';
 		this.controller.document.body.className += " device-"+Mojo.Environment.DeviceInfo.modelNameAscii;
 		this.controller.document.body.className += " width-"+Mojo.Environment.DeviceInfo.screenWidth;
 		this.controller.document.body.className += " height-"+Mojo.Environment.DeviceInfo.screenHeight;
@@ -168,7 +163,7 @@ WelcomeAssistant.prototype.setup = function() {
 		WebMyth.prefsCookie.put(WebMyth.prefsCookieObject);
 		
 		//Use theme
-		this.controller.document.body.className = WebMyth.prefsCookieObject.theme;
+		this.controller.document.body.className = 'palm-dark';
 		this.controller.document.body.className += " device-"+Mojo.Environment.DeviceInfo.modelNameAscii;
 		this.controller.document.body.className += " width-"+Mojo.Environment.DeviceInfo.screenWidth;
 		this.controller.document.body.className += " height-"+Mojo.Environment.DeviceInfo.screenHeight;
@@ -214,18 +209,16 @@ WelcomeAssistant.prototype.setup = function() {
 	}
 	
 	
-	//Start dashboard remote
-	//this.startDashboard();
-	
 	this.startBackendGathering();
 	
 };
 
 WelcomeAssistant.prototype.activate = function(event) {
-	//asdf
 	
 	if(WebMyth.prefsCookieObject.webserverName == '') {
-		$('masterIpAddress-title').innerHTML = "Please configure app preferences";
+	
+		$('masterIpAddress-title').innerHTML = "Please configure app preferences in menu at top-left";
+		
 	} else {
 	
 		$('masterIpAddress-title').innerHTML = WebMyth.prefsCookieObject.masterBackendIp;
@@ -254,11 +247,17 @@ WelcomeAssistant.prototype.activate = function(event) {
 	}
 	
 	
+	this.showButtons();
+	
+	
 	//Keypress event
 	Mojo.Event.listen(this.controller.sceneElement, Mojo.Event.keyup, this.handleKey.bind(this));
 	
 	//Vibrate event
 	Mojo.Event.listen(document, 'shakestart', this.handleShakestart.bindAsEventListener(this));
+	
+	//Help button
+	Mojo.Event.listen(this.controller.get("helpButton"),Mojo.Event.tap, this.doHelpButton.bind(this));
 	
 };
 
@@ -325,6 +324,18 @@ WelcomeAssistant.prototype.handleShakestart = function(event) {
 
 
 
+
+
+WelcomeAssistant.prototype.showButtons = function() {
+	
+	if((WebMyth.prefsCookieObject.showUpcoming)&&(WebMyth.prefsCookieObject.useWebmythScript)) {
+		$('goUpcomingButtonId').show();
+	} else {
+		$('goUpcomingButtonId').hide();
+	}
+	
+};
+
 WelcomeAssistant.prototype.goRemote = function(event) {
 	//Start remote scene 
 	Mojo.Controller.stageController.pushScene("hostSelector", false);
@@ -374,6 +385,106 @@ WelcomeAssistant.prototype.alertNeedScript = function() {
     });
 	
 };
+
+
+WelcomeAssistant.prototype.doHelpButton = function(event) {
+	
+		Mojo.Log.info("Inside doHelpButton");
+	
+		this.controller.showAlertDialog({
+			onChoose: function(value) {
+				switch(value) {
+					case 'faqs':
+					
+						//FAQs
+						Mojo.Controller.stageController.pushScene("faqs");
+						
+					break;
+					case 'instructions':
+						
+						this.controller.showAlertDialog({
+							onChoose: function(value) {if (value=="instructions") {
+								//Mojo.Log.error("appPath:" + Mojo.appPath);
+								this.controller.serviceRequest(
+									"palm://com.palm.applicationManager", {
+										method: 'open',
+										parameters: {
+											id: "com.palm.app.email",
+											params: {
+												summary: "WebMyth setup instructions",
+												text: WebMyth.helpEmailText
+											}
+										}
+									}
+								);
+								} 
+							},
+							title: "WebMyth - v" + Mojo.Controller.appInfo.version,
+							message:  WebMyth.helpMessage, 
+							choices: [
+								{label: "OK", value: "ok"},
+								{label: "Email Instructions", value: "instructions"}
+								],
+							allowHTMLMessage: true
+						});	
+						
+					break;
+					case 'tips':
+								
+						//Tips
+						Mojo.Controller.stageController.pushScene("tips");
+						
+					break;
+					case 'email':
+					
+						var request = new Mojo.Service.Request( "palm://com.palm.applicationManager", {
+								method: 'open',
+								parameters: {
+									id: "com.palm.app.email",
+									params: {
+										summary: "Help with WebMyth v"+ Mojo.Controller.appInfo.version,
+										recipients: [{
+											type:"email",
+											value:"webmyth.help@gmail.com",
+											contactDisplay:"WebMyth Developer"
+										}]
+									}
+								}
+							 }
+						 );
+						 
+					break;
+					case 'updates':
+									
+						//Check for updates
+						var request = new Mojo.Service.Request("palm://com.palm.applicationManager", {
+							method: "open",
+							parameters:  {
+								id: 'com.palm.app.findapps',
+								params: {
+									scene: 'page',
+									target: "http://developer.palm.com/appredirect/?packageid=com.thewbman.webmyth"
+								}
+							}
+						});
+									
+					break;
+					}
+				},
+			title: "WebMyth - v" + Mojo.Controller.appInfo.version,
+			//message:  script_message, 
+			choices: [
+					{label: "FAQs", value: 'faqs'},
+                    {label: "Instructions", value: 'instructions'},
+					{label: "Tips", value: 'tips'},
+					{label: "Email Developer", value: 'email'},
+					{label: "Check for updates", value: 'updates'}
+					],
+			allowHTMLMessage: true
+		});
+
+	
+}
 
 WelcomeAssistant.prototype.alertScriptUpdate = function(oldversion) {
 	
@@ -540,7 +651,6 @@ WelcomeAssistant.prototype.readHostsSuccess = function(response) {
 	this.getBackendIPs();
 	
 };
-
 
 WelcomeAssistant.prototype.getBackendIPs = function() {
 
@@ -716,3 +826,63 @@ WelcomeAssistant.prototype.readMasterBackendIPSuccess = function(response) {
 	
 	
 };
+
+
+
+
+/*
+	Small controller class for help button
+*/
+
+var HelpButtonAssistant = Class.create({
+	
+	initialize: function(sceneAssistant, timeObject2, callbackFunc) {
+		this.sceneAssistant = sceneAssistant;
+		this.controller = sceneAssistant.controller;
+		
+		this.timeObject2 = timeObject2;
+		this.callbackFunc = callbackFunc;
+	},
+	
+	setup : function(widget) {
+	
+		this.widget = widget;
+		
+		Mojo.Log.error("time object 2 is %j", this.timeObject2);
+		
+		this.newTime = new Date(this.timeObject2.year, (this.timeObject2.month-1), this.timeObject2.day, this.timeObject2.hour, this.timeObject2.minute, this.timeObject2.second);
+		Mojo.Log.error("time is %j", this.newTime);
+		
+		this.controller.setupWidget("datepickerid",
+        this.dateAttributes = {
+             modelProperty: 'time' 
+        },
+        this.dateModel = {
+            time: this.newTime
+        }
+		); 
+		this.controller.setupWidget("timepickerid",
+        this.timeAttributes = {
+             modelProperty: 'time' 
+        },
+        this.timeModel = {
+            time: this.newTime
+        }
+		); 
+		
+		Mojo.Event.listen(this.controller.get('goDate_button'),Mojo.Event.tap,this.okButton.bind(this));
+
+		
+	},
+	
+	okButton: function() {
+	
+		this.callbackFunc(this.newTime);
+
+		this.widget.mojo.close();
+	}
+	
+	
+});
+
+

@@ -23,6 +23,13 @@
 	   additional parameters (after the scene name) that were passed to pushScene. The reference
 	   to the scene controller (this.controller) has not be established yet, so any initialization
 	   that needs the scene controller should be done in the setup function below. */
+	   
+	   
+		//useWebmythScript;
+		//showUpcoming;
+		//showVideos;
+	   
+	   
 }
 
 PreferencesAssistant.prototype.setup = function() {
@@ -34,7 +41,7 @@ PreferencesAssistant.prototype.setup = function() {
 		
 	//Widgets
 	
-	//Server configuration
+	//Server address
 	this.webserverTextModel = {
              value: "",
              disabled: false
@@ -44,11 +51,68 @@ PreferencesAssistant.prototype.setup = function() {
             hintText: $L(""),
             multiline: true,
             enterSubmits: false,
-            focus: false
+            focus: false,
+			textCase: Mojo.Widget.steModeLowerCase
          },
          this.webserverTextModel
     ); 
-	//Script location
+	//Username
+	this.usernameTextModel = {
+             value: "",
+             disabled: false
+    };
+	this.controller.setupWidget("usernameFieldId",
+        {
+            hintText: $L("  Leave blank"),
+            multiline: false,
+            enterSubmits: false,
+            focus: false,
+			textCase: Mojo.Widget.steModeLowerCase
+         },
+         this.usernameTextModel
+    );				
+	//Password
+	this.passwordTextModel = {
+             value: "",
+             disabled: false
+    };
+	this.controller.setupWidget("passwordFieldId",
+        {
+            hintText: $L("  if unsecured"),
+            multiline: false,
+            enterSubmits: false,
+            focus: false,
+			textCase: Mojo.Widget.steModeLowerCase
+         },
+         this.passwordTextModel
+    );	
+	//Download/Stream to device
+	this.allowDownloadStreamToggleModel = {
+             value: false
+    };
+	this.controller.setupWidget("allowDownloadStreamToggleId",
+        {
+			label: $L("Stream to Device"),
+            modelProperty: "value"
+         },
+         this.allowDownloadStreamToggleModel
+    );	
+	this.controller.listen("allowDownloadStreamToggleId", Mojo.Event.propertyChange, this.streamChanged.bindAsEventListener(this));
+/*	
+	//Use script file
+	this.useWebmythScriptToggleModel = {
+             value: false
+    };
+	this.controller.setupWidget("useWebmythScriptToggleId",
+        {
+			label: $L("Use script file"),
+            modelProperty: "value"
+         },
+         this.useWebmythScriptToggleModel
+    );
+	this.controller.listen('useWebmythScriptToggleId', Mojo.Event.propertyChange, this.useWebmythScriptChanged.bindAsEventListener(this));
+*/
+	//Script filename
 	this.webmythPythonFileTextModel = {
              value: "/cgi-bin/webmyth.py",
              disabled: false
@@ -58,10 +122,39 @@ PreferencesAssistant.prototype.setup = function() {
             hintText: $L("/cgi-bin/webmyth.py"),
             multiline: false,
             enterSubmits: false,
-            focus: false
+            focus: false,
+			textCase: Mojo.Widget.steModeLowerCase
          },
          this.webmythPythonFileTextModel
-    ); 													
+    ); 						
+	//Show upcoming recordings
+	this.showUpcomingToggleModel = {
+             value: false
+    };
+	this.controller.setupWidget("showUpcomingToggleId",
+        {
+			label: $L("show upcoming"),
+            modelProperty: "value"
+         },
+         this.showUpcomingToggleModel
+    );		
+/*	
+	//Show videos
+	this.showVideosToggleModel = {
+             value: false
+    };
+	this.controller.setupWidget("showVideosToggleId",
+        {
+			label: $L("show videos"),
+            modelProperty: "value"
+         },
+         this.showVideosToggleModel
+    );
+*/
+
+	
+	
+	
 	//Manual master backend
 	this.manualMasterBackendToggleModel = {
              value: false
@@ -84,25 +177,14 @@ PreferencesAssistant.prototype.setup = function() {
             hintText: $L(""),
             multiline: true,
             enterSubmits: false,
-            focus: false
+            focus: false,
+			textCase: Mojo.Widget.steModeLowerCase
          },
          this.masterBackendTextModel
     ); 
-	//Download/Stream to device
-	this.allowDownloadStreamToggleModel = {
-             value: false
-    };
-	this.controller.setupWidget("allowDownloadStreamToggleId",
-        {
-			label: $L("Stream to Device"),
-            modelProperty: "value"
-         },
-         this.allowDownloadStreamToggleModel
-    );	
-	this.controller.listen("allowDownloadStreamToggleId", Mojo.Event.propertyChange, this.streamChanged.bindAsEventListener(this));
 	
 	
-	
+/*	
 	//Theme
 	this.themeModel = {
 			value: WebMyth.prefsCookieObject.theme,
@@ -120,6 +202,7 @@ PreferencesAssistant.prototype.setup = function() {
 		this.themeModel
 	);
 	this.controller.listen('theme', Mojo.Event.propertyChange, this.themeChanged.bindAsEventListener(this));
+*/
 	//Channel Icons in upcoming
 	this.upcomingChannelIconsToggleModel = {
              value: false
@@ -143,8 +226,7 @@ PreferencesAssistant.prototype.setup = function() {
 				{label:$L("Pause"),      value:'Pause'},
 				{label:$L("Mute"),         value:'Mute'},
 				{label:$L("Nothing"),         value:'Nothing'}
-			]//,
-			//modelProperty: 'theme'
+			]
 		},
 		this.remoteHeaderActionModel
 	);
@@ -279,66 +361,48 @@ PreferencesAssistant.prototype.setup = function() {
          this.metrixToggleModel
     ); 
 	
-	/*
-	//Save button
-	this.controller.setupWidget("saveWebserverButtonId",
-         {},
-         {
-             label : "SAVE",
-             disabled: false
-         }
-     );
-	
-	Mojo.Event.listen(this.controller.get("saveWebserverButtonId"),Mojo.Event.tap, this.saveWebserver.bind(this));
-	*/
 };
 
 PreferencesAssistant.prototype.activate = function(event) {
 
-		if (WebMyth.prefsCookieObject) {	
-			Mojo.Log.info("Existing webserverName is %s", WebMyth.prefsCookieObject.webserverName);
+		if (WebMyth.prefsCookieObject) {
 			
-			//Update webserver address from cookie
+			
+			//Update settings from cookie
 			this.webserverTextModel.value = WebMyth.prefsCookieObject.webserverName;
 			this.controller.modelChanged(this.webserverTextModel);
+			
+			this.usernameTextModel.value = WebMyth.prefsCookieObject.webserverUsername;
+			this.controller.modelChanged(this.usernameTextModel);
+			
+			this.passwordTextModel.value = WebMyth.prefsCookieObject.webserverPassword;
+			this.controller.modelChanged(this.passwordTextModel);
+			
+			this.allowDownloadStreamToggleModel.value = WebMyth.prefsCookieObject.allowRecordedDownloads;
+			this.controller.modelChanged(this.allowDownloadStreamToggleModel);
+			
+			//this.useWebmythScriptToggleModel.value = WebMyth.prefsCookieObject.useWebmythScript;
+			//this.controller.modelChanged(this.useWebmythScriptToggleModel);
+			
+			this.webmythPythonFileTextModel.value = WebMyth.prefsCookieObject.webmythPythonFile;
+			this.controller.modelChanged(this.useWebmythScriptToggleModel);
+			
+			this.showUpcomingToggleModel.value = WebMyth.prefsCookieObject.showUpcoming;
+			this.controller.modelChanged(this.showUpcomingToggleModel);
+			
+			//this.showVideosToggleModel.value = WebMyth.prefsCookieObject.showVideos;
+			//this.controller.modelChanged(this.showVideosToggleModel);
+			
+			
+			
+			this.manualMasterBackendToggleModel.value = WebMyth.prefsCookieObject.manualMasterBackend;
+			this.controller.modelChanged(this.manualMasterBackendToggleModel);
 			
 			this.masterBackendTextModel.value = WebMyth.prefsCookieObject.masterBackendIp;
 			this.masterBackendTextModel.disabled = !WebMyth.prefsCookieObject.manualMasterBackend;
 			this.controller.modelChanged(this.masterBackendTextModel);
 			
 			
-			//Update filenames on web server if set
-			/*
-			if ( WebMyth.prefsCookieObject.webserverRemoteFile == null ) {
-				Mojo.Log.error("Did not find remote file in cookie");
-			} else {
-				Mojo.Log.info("Found remote file in cookie '%s'", WebMyth.prefsCookieObject.webserverRemoteFile);
-				this.webserverRemoteFileTextModel.value = WebMyth.prefsCookieObject.webserverRemoteFile;
-				this.controller.modelChanged(this.webserverRemoteFileTextModel);
-			}
-			if ( WebMyth.prefsCookieObject.webMysqlFile == null ) {
-				Mojo.Log.error("Did not find mysql file in cookie");
-			} else {
-				Mojo.Log.info("Found mysql file in cookie '%s'", WebMyth.prefsCookieObject.webMysqlFile);
-				this.webMysqlFileTextModel.value = WebMyth.prefsCookieObject.webMysqlFile;
-				this.controller.modelChanged(this.webMysqlFileTextModel);
-			}
-			*/
-			if ( WebMyth.prefsCookieObject.webmythPythonFile == null ) {
-				Mojo.Log.error("Did not find python file in cookie");
-			} else {
-				Mojo.Log.info("Found python file in cookie '%s'", WebMyth.prefsCookieObject.webmythPythonFile);
-				this.webmythPythonFileTextModel.value = WebMyth.prefsCookieObject.webmythPythonFile;
-				this.controller.modelChanged(this.webmythPythonFileTextModel);
-			}
-			
-			
-			//Update toggles from cookie
-			this.allowDownloadStreamToggleModel.value = WebMyth.prefsCookieObject.allowRecordedDownloads;
-			this.controller.modelChanged(this.allowDownloadStreamToggleModel);
-			
-			this.manualMasterBackendToggleModel.value = WebMyth.prefsCookieObject.manualMasterBackend;
-			this.controller.modelChanged(this.manualMasterBackendToggleModel);
 			
 			this.upcomingChannelIconsToggleModel.value = WebMyth.prefsCookieObject.showUpcomingChannelIcons;
 			this.controller.modelChanged(this.upcomingChannelIconsToggleModel);
@@ -357,6 +421,8 @@ PreferencesAssistant.prototype.activate = function(event) {
 			
 			this.dashboardRemoteToggleModel.value = WebMyth.prefsCookieObject.dashboardRemote;
 			this.controller.modelChanged(this.dashboardRemoteToggleModel);
+			
+			
 			
 			this.metrixToggleModel.value = WebMyth.prefsCookieObject.allowMetrix;
 			this.controller.modelChanged(this.metrixToggleModel);
@@ -384,7 +450,9 @@ PreferencesAssistant.prototype.activate = function(event) {
 			
 			this.remoteNumberpadToggleModel.value = WebMyth.remoteCookieObject[5].enabled;
 			this.controller.modelChanged(this.remoteNumberpadToggleModel);
+			
 		}
+		
 };
 
 PreferencesAssistant.prototype.deactivate = function(event) {
@@ -410,15 +478,40 @@ PreferencesAssistant.prototype.handleCommand = function(event) {
 
 
 PreferencesAssistant.prototype.manualMasterBackendChanged = function(event) {
-	Mojo.Log.error("manual backend settings changed to "+this.manualMasterBackendToggleModel.value);
+
+	Mojo.Log.info("manual backend settings changed to "+this.manualMasterBackendToggleModel.value);
 	
 	this.masterBackendTextModel.disabled = !this.manualMasterBackendToggleModel.value;
 
 	this.controller.modelChanged(this.masterBackendTextModel);
+	
+};
+
+PreferencesAssistant.prototype.useWebmythScriptChanged = function(event) {
+
+	var scriptMessage = 'Currently the app requires the webmyth.py script available on the app homepage.';
+	
+	if(this.allowDownloadStreamToggleModel.value) {
+		
+			this.controller.showAlertDialog({
+				onChoose: function(value) {if (value=="instructions") {
+					//Mojo.Log.error("appPath:" + Mojo.appPath);
+					} 
+				},
+				title: "Script",
+				message:  scriptMessage, 
+				choices: [
+                    {label: "OK", value: "ok"}
+					],
+				allowHTMLMessage: true
+			});	
+			
+	};
+	
 };
 
 PreferencesAssistant.prototype.streamChanged = function(event) {
-	Mojo.Log.error("Stream/download settings changed to "+this.allowDownloadStreamToggleModel.value);
+	Mojo.Log.info("Stream/download settings changed to "+this.allowDownloadStreamToggleModel.value);
 	
 	var streamMessage = 'The ability to download and/or stream a recording to your phone is still a work in progress and will take some extra work to setup. <hr />';
 	streamMessage += 'You will need to first transcode your recordings to a format playable on the phone. ';
@@ -445,7 +538,9 @@ PreferencesAssistant.prototype.streamChanged = function(event) {
 };
 
 PreferencesAssistant.prototype.themeChanged = function(event) {
+
 	this.controller.document.body.className = event.value;
+	
 };
 
 PreferencesAssistant.prototype.checkSettings = function() {
@@ -503,7 +598,7 @@ PreferencesAssistant.prototype.checkSettings = function() {
 	
 	}
 	
-	Mojo.Log.error("remote error is "+remoteError+" and current remote scene is: "+WebMyth.prefsCookieObject.currentRemoteScene);
+	//Mojo.Log.error("remote error is "+remoteError+" and current remote scene is: "+WebMyth.prefsCookieObject.currentRemoteScene);
 	
 	if(remoteError) {
 		
@@ -528,7 +623,7 @@ PreferencesAssistant.prototype.checkSettings = function() {
 		Mojo.Log.info("Metrix value is %s", this.metrixToggleModel.value);
 		Mojo.Log.info("Remote vibrate value is %s", this.vibrateToggleModel.value);
 		Mojo.Log.info("Remote fullscreen value is %s", this.remoteFullscreenToggleModel.value);
-		Mojo.Log.info("Theme value is %s", this.themeModel.value);
+		//Mojo.Log.info("Theme value is %s", this.themeModel.value);
 
 		if (WebMyth.prefsCookieObject) {
 			//Nothing
@@ -539,12 +634,20 @@ PreferencesAssistant.prototype.checkSettings = function() {
 		}
 	
 		WebMyth.prefsCookieObject.webserverName = this.webserverTextModel.value;
-		WebMyth.prefsCookieObject.webmythPythonFile = this.webmythPythonFileTextModel.value;
+		WebMyth.prefsCookieObject.webserverUsername = this.usernameTextModel.value;
+		WebMyth.prefsCookieObject.webserverPassword = this.passwordTextModel.value;
 		WebMyth.prefsCookieObject.allowRecordedDownloads = this.allowDownloadStreamToggleModel.value;
+		//WebMyth.prefsCookieObject.useWebmythScript = this.useWebmythScriptToggleModel.value;
+		WebMyth.prefsCookieObject.webmythPythonFile = this.webmythPythonFileTextModel.value;
+		WebMyth.prefsCookieObject.showUpcoming = this.showUpcomingToggleModel.value;
+		//WebMyth.prefsCookieObject.showVideos = this.showVideosToggleModel.value;
+		
+		
 		WebMyth.prefsCookieObject.manualMasterBackend = this.manualMasterBackendToggleModel.value;
 		WebMyth.prefsCookieObject.masterBackendIp = this.masterBackendTextModel.value;
 		
-		WebMyth.prefsCookieObject.theme = this.themeModel.value;
+		
+		//WebMyth.prefsCookieObject.theme = this.themeModel.value;
 		WebMyth.prefsCookieObject.showUpcomingChannelIcons = this.upcomingChannelIconsToggleModel.value;
 		WebMyth.prefsCookieObject.remoteHeaderAction = this.remoteHeaderActionModel.value;
 		WebMyth.prefsCookieObject.remoteVibrate = this.vibrateToggleModel.value;
@@ -556,7 +659,11 @@ PreferencesAssistant.prototype.checkSettings = function() {
 		
 		WebMyth.prefsCookieObject.allowMetrix = this.metrixToggleModel.value;
 		
+		
 		WebMyth.prefsCookie.put(WebMyth.prefsCookieObject);
+		
+		
+		//Mojo.Log.info("Prefs cookie is %j",WebMyth.prefsCookieObject);
 	
 	
 		//Enabled remote scenes

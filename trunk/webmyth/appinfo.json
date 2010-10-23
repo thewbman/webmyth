@@ -1,6 +1,6 @@
 {
 	"id": "com.thewbman.webmyth",
-	"version": "0.3.6",
+	"version": "0.3.8",
 	"vendor": "thewbman",
 	"type": "web",
 	"main": "index.html",

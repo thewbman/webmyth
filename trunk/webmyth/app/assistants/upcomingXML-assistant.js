@@ -180,9 +180,12 @@ UpcomingXMLAssistant.prototype.getUpcoming = function(event) {
 	
 	var requestUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/mythweb/tv/upcoming";
 	
+	//Mojo.Log.info("Upcoming XML request URL is "+requestUrl);
+	
     try {
         var request = new Ajax.Request(requestUrl,{
-            method: 'get',
+            method: 'post',
+			requestHeaders: {Authorization: 'Basic ' + Base64.encode(WebMyth.prefsCookieObject.webserverUsername + ":" + WebMyth.prefsCookieObject.webserverPassword)},
             evalJSON: false,
             evalXML: true,
             onSuccess: this.readRemoteDbTableSuccess.bind(this),
@@ -214,6 +217,9 @@ UpcomingXMLAssistant.prototype.readRemoteDbTableFail = function(response) {
 UpcomingXMLAssistant.prototype.readRemoteDbTableSuccess = function(response) {
 
 	this.failedGet = false;
+	
+	var hasScheduledHD = true, hasScheduledSD = true, hasConflictHD = true, hasConflictSD = true;
+	var scheduledMatches1 = [], scheduledMatches2 = [], conflictMatches1 = [], conflictMatches2 = [];
     
 	//Mojo.Log.info('Got HTML response: %j%', response.responseText);
 	Mojo.Log.info('Got HTML response');
@@ -223,79 +229,295 @@ UpcomingXMLAssistant.prototype.readRemoteDbTableSuccess = function(response) {
 	this.fullResultList.clear();
 	
 	
-	var scheduledPattern1 = /(<tr class="scheduled">[\s]+<td class="list">&nbsp;<\/td>[\s]+<td class=[^>]*>[-A-Za-z0-9_]+<\/td>[\s]+<td[^>]*><span[^>]*>[-A-Za-z0-9_\s]+<\/span><a[^>]*>[-A-Za-z0-9_\s:,\(\)]+<\/a>[\s]+<\/td>[\s]+<td[^>]*>[-A-Za-z0-9_\s:,\(\)]+<\/td>[\s]+<td[^>]*>[-A-Za-z0-9_\s:,\(\)]+<\/td>[\s]+<td[^>]*>[-A-Za-z0-9_\s:,\(\)]+<\/td>)/g;
-	var scheduledMatches1 = response.responseText.match(scheduledPattern1);
-	Mojo.Log.info("%s scheduled matches1 span are %j", scheduledMatches1.length, scheduledMatches1[0]);
+	var statusPattern = /(x-status)\s+([-A-Za-z0-9_]+)\s+([-A-Za-z0-9_]+)\s+([-A-Za-z0-9_]+)/;
+	var categoryPattern = /(cat_[-A-Za-z0-9_]+)/;
 	
 	
-	var scheduledPattern2 = /(<tr class="scheduled">[\s]+<td class="list">&nbsp;<\/td>[\s]+<td class=[^>]*>[-A-Za-z0-9_]+<\/td>[\s]+<td[^>]*><a[^>]*>[-A-Za-z0-9_\s:,\(\)]+<\/a>[\s]+<\/td>[\s]+<td[^>]*>[-A-Za-z0-9_\s:,\(\)]+<\/td>[\s]+<td[^>]*>[-A-Za-z0-9_\s:,\(\)]+<\/td>[\s]+<td[^>]*>[-A-Za-z0-9_\s:,\(\)]+<\/td>)/g;
-	var scheduledMatches2 = response.responseText.match(scheduledPattern2);	
-	Mojo.Log.info("%s scheduled matches2 a are %j", scheduledMatches2.length, scheduledMatches2[0]);
+	//<td class="x-status rec_class will_record Recording">HD-C</td>
+    //<td class="x-status rec_class will_record WillRecord">HD-C</td>
 	
-	
-	//Parse recordings with HD
-	var i = 0;
-	for(i = 0; i < scheduledMatches1.length; i++) {
-		//Mojo.Log.info("Parsing span match "+i);
-		var match = scheduledMatches1[i].replace("&nbsp;"," ").replace("nowrap","") + "</tr>";
-		//Mojo.Log.info("Text is "+match);
-		
-		var xmlobject = (new DOMParser()).parseFromString(match, "text/xml");
-		
-		var tableRowNode = xmlobject.childNodes[0];
-		
-		/*
-		for(var j = 0; j < tableRowNode.childNodes.length; j++) {
-			if(tableRowNode.childNodes[j].nodeName == "td") {
-				//Mojo.Log.info("Node name "+j+" is "+tableRowNode.childNodes[j].nodeName+" and value is "+tableRowNode.childNodes[j].childNodes[0].nodeValue);
-			} else {
-				//Mojo.Log.info("Node name "+j+" is "+tableRowNode.childNodes[j].nodeName+" and value is "+tableRowNode.childNodes[j].nodeValue);
-			}
-		}
-		*/
-		
-		var singleUpcomingJson = {
-			
-			hdtv: true,
-			
-			//child node 1 is blank list spacer
-			encoderId: tableRowNode.childNodes[3].childNodes[0].nodeValue,
-			program: tableRowNode.childNodes[5].childNodes[1].getAttributeNode("id").nodeValue,
-			chanId: tableRowNode.childNodes[5].childNodes[1].getAttributeNode("id").nodeValue.split("-")[1],
-			startEpoch: tableRowNode.childNodes[5].childNodes[1].getAttributeNode("id").nodeValue.split("-")[2],
-			recording: tableRowNode.childNodes[5].childNodes[1].childNodes[0].nodeValue,
-			title: tableRowNode.childNodes[5].childNodes[1].childNodes[0].nodeValue.split(":")[0],
-			subTitle: tableRowNode.childNodes[5].childNodes[1].childNodes[0].nodeValue.split(":")[1],
-			channel: tableRowNode.childNodes[7].childNodes[0].nodeValue,
-			startDate: tableRowNode.childNodes[9].childNodes[0].nodeValue,
-			length: tableRowNode.childNodes[11].childNodes[0].nodeValue
-		
-		}
-		
-		try {
-			var myDate = new Date(parseInt(tableRowNode.childNodes[5].childNodes[1].getAttributeNode("id").nodeValue.split("-")[2])*1000);
-			singleUpcomingJson.startTime = dateJSToISO(myDate).replace("T"," ");
-		} catch(e) {
-			singleUpcomingJson.startTime = tableRowNode.childNodes[5].childNodes[1].getAttributeNode("id").nodeValue.split("-")[2];
-		}
-		
-		if(singleUpcomingJson.subTitle) {
-			singleUpcomingJson.subTitle = singleUpcomingJson.subTitle.trim();
-		} else {
-			singleUpcomingJson.subTitle = "";
-		}
-		
-		//Mojo.Log.info("Recording json is %j",singleUpcomingJson);
-		
-		this.fullResultList.push(singleUpcomingJson);
-		
+	try {
+		var scheduledPattern1 = /(<tr class="scheduled">[\s]+<td class="list">&nbsp;<\/td>[\s]+<td class=[^>]*>[-A-Za-z0-9_\s:,\(\)',;!/\?]+<\/td>[\s]+<td[^>]*><span[^>]*>[-A-Za-z0-9_\s:,\(\)',;!/\?]+<\/span><a[^>]*>[-A-Za-z0-9_\s:,\(\)',;!/\?]+<\/a>[\s]+<\/td>[\s]+<td[^>]*>[-A-Za-z0-9_\s:,\(\)',;!/\?]+<\/td>[\s]+<td[^>]*>[-A-Za-z0-9_\s:,\(\)',;!/\?]+<\/td>[\s]+<td[^>]*>[-A-Za-z0-9_\s:,\(\)',;!/\?]+<\/td>)/g;
+		scheduledMatches1 = response.responseText.match(scheduledPattern1);
+		Mojo.Log.info("%s scheduled HD matches", scheduledMatches1.length);
+	} catch(e) {
+		hasScheduledHD = false;
+		Mojo.Log.info("No matching HD schedules");
 	}
 	
 	
+	try {
+		var scheduledPattern2 = /(<tr class="scheduled">[\s]+<td class="list">&nbsp;<\/td>[\s]+<td class=[^>]*>[-A-Za-z0-9_\s:,\(\)',;!/\?]+<\/td>[\s]+<td[^>]*><a[^>]*>[-A-Za-z0-9_\s:,\(\)',;!/\?]+<\/a>[\s]+<\/td>[\s]+<td[^>]*>[-A-Za-z0-9_\s:,\(\)',;!/\?]+<\/td>[\s]+<td[^>]*>[-A-Za-z0-9_\s:,\(\)',;!/\?]+<\/td>[\s]+<td[^>]*>[-A-Za-z0-9_\s:,\(\)',;!/\?]+<\/td>)/g;
+		scheduledMatches2 = response.responseText.match(scheduledPattern2);	
+		Mojo.Log.info("%s scheduled SD matches", scheduledMatches2.length);
+	} catch(e) {
+		hasScheduledSD = false;
+		Mojo.Log.info("No matching SD schedules");
+	}
+	
+	
+	try {
+		var conflictPattern1 = /(<tr class="conflict">[\s]+<td class="list">&nbsp;<\/td>[\s]+<td class=[^>]*>[-A-Za-z0-9_\s:,\(\)',;!/\?]+<\/td>[\s]+<td[^>]*><span[^>]*>[-A-Za-z0-9_\s:,\(\)',;!/\?]+<\/span><a[^>]*>[-A-Za-z0-9_\s:,\(\)',;!/\?]+<\/a>[\s]+<\/td>[\s]+<td[^>]*>[-A-Za-z0-9_\s:,\(\)',;!/\?]+<\/td>[\s]+<td[^>]*>[-A-Za-z0-9_\s:,\(\)',;!/\?]+<\/td>[\s]+<td[^>]*>[-A-Za-z0-9_\s:,\(\)',;!/\?]+<\/td>)/g;
+		conflictMatches1 = response.responseText.match(conflictPattern1);
+		Mojo.Log.info("%s conflicting HD matches", conflictMatches1.length);
+	} catch(e) {
+		hasConflictHD = false;
+		Mojo.Log.info("No matching HD conflicts");
+	}
+
+	
+	try {
+		var conflictPattern2 = /(<tr class="conflict">[\s]+<td class="list">&nbsp;<\/td>[\s]+<td class=[^>]*>[-A-Za-z0-9_\s:,\(\)',;!/\?]+<\/td>[\s]+<td[^>]*><a[^>]*>[-A-Za-z0-9_\s:,\(\)',;!/\?]+<\/a>[\s]+<\/td>[\s]+<td[^>]*>[-A-Za-z0-9_\s:,\(\)',;!/\?]+<\/td>[\s]+<td[^>]*>[-A-Za-z0-9_\s:,\(\)',;!/\?]+<\/td>[\s]+<td[^>]*>[-A-Za-z0-9_\s:,\(\)',;!/\?]+<\/td>)/g;
+		conflictMatches2 = response.responseText.match(conflictPattern2);	
+		Mojo.Log.info("%s conflicting SD matches", conflictMatches2.length);
+	} catch(e) {
+		hasConflictSD = false;
+		Mojo.Log.info("No matching SD conflicts");
+	}
+	
+	//Parse recordings with HD
+	var i = 0;
+	if(hasScheduledHD) {
+		for(i = 0; i < scheduledMatches1.length; i++) {
+			//Mojo.Log.info("Parsing HD match "+i);
+			var upcomingMatch = scheduledMatches1[i].replace("&nbsp;"," ").replace("nowrap","") + "</tr>";
+			//Mojo.Log.info("Text is "+upcomingMatch);
+			
+			var statusMatch = upcomingMatch.match(new RegExp(statusPattern));
+			//Mojo.Log.info("Recording status regex 4 is ",statusMatch[4]);
+		
+			
+			var xmlobject = (new DOMParser()).parseFromString(upcomingMatch, "text/xml");
+			
+			var tableRowNode = xmlobject.childNodes[0];
+			
+			var singleUpcomingJson = {
+				
+				hdtv: true,
+				
+				//child node 1 is blank list spacer
+				encoderId: tableRowNode.childNodes[3].childNodes[0].nodeValue,
+				program: tableRowNode.childNodes[5].childNodes[1].getAttributeNode("id").nodeValue,
+				chanId: tableRowNode.childNodes[5].childNodes[1].getAttributeNode("id").nodeValue.split("-")[1],
+				startEpoch: tableRowNode.childNodes[5].childNodes[1].getAttributeNode("id").nodeValue.split("-")[2],
+				recording: tableRowNode.childNodes[5].childNodes[1].childNodes[0].nodeValue,
+				title: tableRowNode.childNodes[5].childNodes[1].childNodes[0].nodeValue.split(":")[0],
+				subTitle: tableRowNode.childNodes[5].childNodes[1].childNodes[0].nodeValue.split(":")[1],
+				channel: tableRowNode.childNodes[7].childNodes[0].nodeValue,
+				startDate: tableRowNode.childNodes[9].childNodes[0].nodeValue,
+				length: tableRowNode.childNodes[11].childNodes[0].nodeValue,
+				recStatus: statusMatch[4]
+			
+			}
+			
+			try {
+				var myDate = new Date(parseInt(tableRowNode.childNodes[5].childNodes[1].getAttributeNode("id").nodeValue.split("-")[2])*1000);
+				singleUpcomingJson.startTime = dateJSToISO(myDate).replace("T"," ");
+			} catch(e) {
+				singleUpcomingJson.startTime = tableRowNode.childNodes[5].childNodes[1].getAttributeNode("id").nodeValue.split("-")[2];
+			}
+			
+			if(singleUpcomingJson.subTitle) {
+				singleUpcomingJson.subTitle = singleUpcomingJson.subTitle.trim();
+			} else {
+				singleUpcomingJson.subTitle = "";
+			}
+			
+			singleUpcomingJson.category = upcomingMatch.match(categoryPattern)[0].replace("cat_","");
+			
+			//Mojo.Log.info("Recording json is %j",singleUpcomingJson);
+			
+			this.fullResultList.push(singleUpcomingJson);
+			
+		}
+		
+		Mojo.Log.info("Done parsing scheduled HD");
+	}
+	
+	
+	//Parse recordings with SD
+	var j = 0;
+	if(hasScheduledSD) {
+		for(j = 0; j < scheduledMatches2.length; j++) {
+			//Mojo.Log.info("Parsing SD match "+j);
+			var upcomingMatch = scheduledMatches2[j].replace("&nbsp;"," ").replace("nowrap","") + "</tr>";
+			//Mojo.Log.info("Text is "+upcomingMatch);
+			
+			var statusMatch = upcomingMatch.match(new RegExp(statusPattern));
+			//Mojo.Log.info("Recording status regex 4 is ",statusMatch[4]);
+			
+			var xmlobject = (new DOMParser()).parseFromString(upcomingMatch, "text/xml");
+			
+			var tableRowNode = xmlobject.childNodes[0];
+			
+			var singleUpcomingJson = {
+				
+				hdtv: false,
+				
+				//child node 1 is blank list spacer
+				encoderId: tableRowNode.childNodes[3].childNodes[0].nodeValue,
+				program: tableRowNode.childNodes[5].childNodes[0].getAttributeNode("id").nodeValue,
+				chanId: tableRowNode.childNodes[5].childNodes[0].getAttributeNode("id").nodeValue.split("-")[1],
+				startEpoch: tableRowNode.childNodes[5].childNodes[0].getAttributeNode("id").nodeValue.split("-")[2],
+				recording: tableRowNode.childNodes[5].childNodes[0].childNodes[0].nodeValue,
+				title: tableRowNode.childNodes[5].childNodes[0].childNodes[0].nodeValue.split(":")[0],
+				subTitle: tableRowNode.childNodes[5].childNodes[0].childNodes[0].nodeValue.split(":")[1],
+				channel: tableRowNode.childNodes[7].childNodes[0].nodeValue,
+				startDate: tableRowNode.childNodes[9].childNodes[0].nodeValue,
+				length: tableRowNode.childNodes[11].childNodes[0].nodeValue,
+				recStatus: statusMatch[4]
+			
+			}
+			
+			try {
+				var myDate = new Date(parseInt(tableRowNode.childNodes[5].childNodes[0].getAttributeNode("id").nodeValue.split("-")[2])*1000);
+				singleUpcomingJson.startTime = dateJSToISO(myDate).replace("T"," ");
+			} catch(e) {
+				singleUpcomingJson.startTime = tableRowNode.childNodes[5].childNodes[0].getAttributeNode("id").nodeValue.split("-")[2];
+			}
+			
+			if(singleUpcomingJson.subTitle) {
+				singleUpcomingJson.subTitle = singleUpcomingJson.subTitle.trim();
+			} else {
+				singleUpcomingJson.subTitle = "";
+			}
+			
+			singleUpcomingJson.category = upcomingMatch.match(categoryPattern)[0].replace("cat_","");
+			
+			//Mojo.Log.info("Recording SD json is %j",singleUpcomingJson);
+			
+			this.fullResultList.push(singleUpcomingJson);
+			
+		}
+		
+		Mojo.Log.info("Done parsing scheduled SD");
+	}
+	
+	
+	//Parse conflict with HD
+	var k = 0;
+	if(hasConflictHD) {
+		//Mojo.Log.info("starting to parse conflicting HD match");
+		for(k = 0; k < conflictMatches1.length; k++) {
+			Mojo.Log.info("Parsing conflicting HD match "+k);
+			var upcomingMatch = conflictMatches1[k].replace("&nbsp;"," ").replace("nowrap","") + "</tr>";
+			//Mojo.Log.info("Text is "+upcomingMatch);
+			
+			var statusMatch = upcomingMatch.match(new RegExp(statusPattern));
+			//Mojo.Log.info("Recording status regex 4 is ",statusMatch[4]);
+		
+			
+			var xmlobject = (new DOMParser()).parseFromString(upcomingMatch, "text/xml");
+			
+			var tableRowNode = xmlobject.childNodes[0];
+			
+			var singleUpcomingJson = {
+				
+				hdtv: true,
+				
+				//child node 1 is blank list spacer
+				encoderId: tableRowNode.childNodes[3].childNodes[0].nodeValue,
+				program: tableRowNode.childNodes[5].childNodes[1].getAttributeNode("id").nodeValue,
+				chanId: tableRowNode.childNodes[5].childNodes[1].getAttributeNode("id").nodeValue.split("-")[1],
+				startEpoch: tableRowNode.childNodes[5].childNodes[1].getAttributeNode("id").nodeValue.split("-")[2],
+				recording: tableRowNode.childNodes[5].childNodes[1].childNodes[0].nodeValue,
+				title: tableRowNode.childNodes[5].childNodes[1].childNodes[0].nodeValue.split(":")[0],
+				subTitle: tableRowNode.childNodes[5].childNodes[1].childNodes[0].nodeValue.split(":")[1],
+				channel: tableRowNode.childNodes[7].childNodes[0].nodeValue,
+				startDate: tableRowNode.childNodes[9].childNodes[0].nodeValue,
+				length: tableRowNode.childNodes[11].childNodes[0].nodeValue,
+				recStatus: statusMatch[4]
+			
+			}
+			
+			try {
+				var myDate = new Date(parseInt(tableRowNode.childNodes[5].childNodes[1].getAttributeNode("id").nodeValue.split("-")[2])*1000);
+				singleUpcomingJson.startTime = dateJSToISO(myDate).replace("T"," ");
+			} catch(e) {
+				singleUpcomingJson.startTime = tableRowNode.childNodes[5].childNodes[1].getAttributeNode("id").nodeValue.split("-")[2];
+			}
+			
+			if(singleUpcomingJson.subTitle) {
+				singleUpcomingJson.subTitle = singleUpcomingJson.subTitle.trim();
+			} else {
+				singleUpcomingJson.subTitle = "";
+			}
+			
+			singleUpcomingJson.category = upcomingMatch.match(categoryPattern)[0].replace("cat_","");
+			
+			//Mojo.Log.info("Recording json is %j",singleUpcomingJson);
+			
+			this.fullResultList.push(singleUpcomingJson);
+			
+		}
+		
+		Mojo.Log.info("Done parsing conflict HD");
+	}
+	
+	
+	//Parse conflicts with SD
+	var m = 0;
+	if(hasConflictSD == true) {
+		//Mojo.Log.info("starting to parse conflicting SD match");
+		for(m = 0; m < conflictMatches2.length; m++) {
+			//Mojo.Log.info("Parsing conflicting SD match "+m);
+			var upcomingMatch = conflictMatches2[m].replace("&nbsp;"," ").replace("nowrap","") + "</tr>";
+			//Mojo.Log.info("Text is "+upcomingMatch);
+			
+			var statusMatch = upcomingMatch.match(new RegExp(statusPattern));
+			//Mojo.Log.info("Recording status regex 4 is ",statusMatch[4]);
+			
+			var xmlobject = (new DOMParser()).parseFromString(upcomingMatch, "text/xml");
+			
+			var tableRowNode = xmlobject.childNodes[0];
+			
+			var singleUpcomingJson = {
+				
+				hdtv: false,
+				
+				//child node 1 is blank list spacer
+				encoderId: tableRowNode.childNodes[3].childNodes[0].nodeValue,
+				program: tableRowNode.childNodes[5].childNodes[0].getAttributeNode("id").nodeValue,
+				chanId: tableRowNode.childNodes[5].childNodes[0].getAttributeNode("id").nodeValue.split("-")[1],
+				startEpoch: tableRowNode.childNodes[5].childNodes[0].getAttributeNode("id").nodeValue.split("-")[2],
+				recording: tableRowNode.childNodes[5].childNodes[0].childNodes[0].nodeValue,
+				title: tableRowNode.childNodes[5].childNodes[0].childNodes[0].nodeValue.split(":")[0],
+				subTitle: tableRowNode.childNodes[5].childNodes[0].childNodes[0].nodeValue.split(":")[1],
+				channel: tableRowNode.childNodes[7].childNodes[0].nodeValue,
+				startDate: tableRowNode.childNodes[9].childNodes[0].nodeValue,
+				length: tableRowNode.childNodes[11].childNodes[0].nodeValue,
+				recStatus: statusMatch[4]
+			
+			}
+			
+			try {
+				var myDate = new Date(parseInt(tableRowNode.childNodes[5].childNodes[0].getAttributeNode("id").nodeValue.split("-")[2])*1000);
+				singleUpcomingJson.startTime = dateJSToISO(myDate).replace("T"," ");
+			} catch(e) {
+				singleUpcomingJson.startTime = tableRowNode.childNodes[5].childNodes[0].getAttributeNode("id").nodeValue.split("-")[2];
+			}
+			
+			if(singleUpcomingJson.subTitle) {
+				singleUpcomingJson.subTitle = singleUpcomingJson.subTitle.trim();
+			} else {
+				singleUpcomingJson.subTitle = "";
+			}
+			
+			singleUpcomingJson.category = upcomingMatch.match(categoryPattern)[0].replace("cat_","");
+			
+			//Mojo.Log.info("Recording SD json is %j",singleUpcomingJson);
+			
+			this.fullResultList.push(singleUpcomingJson);
+			
+		}
+		
+		Mojo.Log.info("Done parsing conflict SD");
+	}
 	
 	
 	Mojo.Log.info("Done parsing HTML");
 	
+	this.fullResultList.sort(double_sort_by('startEpoch', 'chanId', false));
 	
 	this.finishedReadingUpcoming();
 	
@@ -363,12 +585,16 @@ UpcomingXMLAssistant.prototype.filterListFunction = function(filterString, listW
 			else if (s.channel.toUpperCase().indexOf(filterString.toUpperCase())>=0){
 				//Mojo.Log.info("Found string in channel name", i);
 				someList.push(s);
-			}/*
+			}
 			else if (s.category.toUpperCase().indexOf(filterString.toUpperCase())>=0){
 				//Mojo.Log.info("Found string in category", i);
 				someList.push(s);
 			}
-			*/
+			else if (s.recStatus.toUpperCase().indexOf(filterString.toUpperCase())>=0){
+				//Mojo.Log.info("Found string in recStatus", i);
+				someList.push(s);
+			}
+			
 		}
 	}
 	else {
@@ -465,16 +691,23 @@ UpcomingXMLAssistant.prototype.setMyData = function(propertyValue, model) {
 		upcomingDetailsText += '</div></div>';
 	
 	} else {
-		var upcomingDetailsText = '<div class="upcoming-list-item">';
-		upcomingDetailsText += '<div class="title truncating-text left upcoming-list-title">&nbsp;'+model.title+'</div>';
+		var upcomingDetailsText = '<div class="upcoming-list-item '+model.recStatus+'">';
+		upcomingDetailsText += '<div class="title truncating-text left upcoming-list-title '+model.recStatus+'">&nbsp;'+model.title+'</div>';
 		upcomingDetailsText += '<div class="palm-row-wrapper">';
 		
 		if(WebMyth.prefsCookieObject.showUpcomingChannelIcons) upcomingDetailsText += '<div class="left-list-text">';
 		
 		upcomingDetailsText += '<div class="palm-info-text truncating-text left">&nbsp;'+model.subTitle+'&nbsp;</div>';
 		upcomingDetailsText += '<div class="palm-info-text truncating-text left">&nbsp;&nbsp;'+model.startTime+'&nbsp;</div>';
-		//asdf fix category
-		upcomingDetailsText += '<div class="palm-info-text truncating-text left">&nbsp;&nbsp;&nbsp;'+model.length+'</div>';
+		
+		if(model.recStatus == 'conflicting') {
+			upcomingDetailsText += '<div class="palm-info-text truncating-text left">&nbsp;&nbsp;&nbsp;CONFLICTING</div>';
+		} else if (model.recStatus == 'Recording') {
+			upcomingDetailsText += '<div class="palm-info-text truncating-text left Recording">&nbsp;&nbsp;&nbsp;NOW RECORDING</div>';
+		} else {
+			upcomingDetailsText += '<div class="palm-info-text truncating-text left">&nbsp;&nbsp;&nbsp;'+model.category+'</div>';
+		}
+		
 		upcomingDetailsText += '<div class="palm-info-text truncating-text left">&nbsp;&nbsp;&nbsp;&nbsp;'+model.channel+'</div>';
 		
 		
