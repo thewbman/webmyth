@@ -263,13 +263,14 @@ StageAssistant.prototype.handleCommand = function(event) {
        break;
 	   
 	  case 'do-helpFAQs':
-			//Changelog
+			//FAQs
 			this.controller.pushScene("faqs");
 			
        break;
 	   
 	  case 'do-helpUpdate':
-			//Changelog
+	  
+			//Check for updates
 			currentScene.serviceRequest("palm://com.palm.applicationManager", {
 				method: "open",
 				parameters:  {
@@ -453,7 +454,6 @@ WebMyth.sendKey = function(value){
 		});
 };
 
-
 WebMyth.sendJump = function(value) {
 
 		var cmdvalue = encodeURIComponent(value);
@@ -482,7 +482,6 @@ WebMyth.sendJump = function(value) {
 	
 };
 
-
 WebMyth.sendPlay = function(value) {
 
 		var cmdvalue = encodeURIComponent(value);
@@ -508,5 +507,45 @@ WebMyth.sendPlay = function(value) {
 				Mojo.Controller.getAppController().showBanner("ERROR - check remote.py scipt", {source: 'notification'});
 			}
 		});
+	
+};
+
+WebMyth.downloadToPhone = function(input_parameters) {
+
+	Mojo.Log.info("about to start downloading %j",input_parameters);
+
+		var request = new Mojo.Service.Request('palm://com.palm.downloadmanager/', {
+			method: 'download',
+			parameters: input_parameters,
+			onSuccess: function(response) {
+				if(response.completed) {
+					Mojo.Controller.getAppController().showBanner("Finished: "+myFilename, "");
+					
+					this.controller.serviceRequest('palm://com.palm.applicationManager', {
+						method:'launch',							
+						parameters: {
+							id:"com.palm.app.videoplayer",
+							params:{
+								target: "file: ///media/internal/mythtv/"+input_parameters.myFilename,
+								videoTitle: input_parameters.myFilename
+							}
+						}
+					});	
+					
+				} else {
+					if(response.amountReceived && response.amountTotal) {
+						var percent = (response.amountReceived / response.amountTotal)*100;
+						percent = Math.round(percent);
+						if(percent!=NaN) {
+							if(this.currProgress != percent) {
+								this.currProgress = percent;
+								Mojo.Controller.getAppController().showBanner("Downloading: " + percent + "%", "");
+							}
+						}
+					}
+					
+				}
+			}.bind(this)
+		});	
 	
 };

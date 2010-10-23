@@ -48,6 +48,7 @@ RecordedDetailsAssistant.prototype.setup = function() {
  
 	this.hostsMenuModel = { label: $L('Hosts'), items: []};
 	this.webMenuModel = { label: $L('WebMenu'), items: [
+			{"label": $L('Wikipedia'), "command": "go-web--Wikipedia"},
 			{"label": $L('themoviedb'), "command": "go-web--themoviedb"},
 			{"label": $L('IMDB'), "command": "go-web--IMDB"},
 			{"label": $L('TheTVDB'), "command": "go-web--TheTVDB"},
@@ -212,6 +213,9 @@ RecordedDetailsAssistant.prototype.openWeb = function(website) {
   var url = "";
   
   switch(website) {
+	case 'Wikipedia':
+		url = "http://en.m.wikipedia.org/wiki/Special:Search?search="+this.recordedObject.title;
+	  break;
 	case 'themoviedb':
 		url = "http://www.themoviedb.org/search/movies?search[text]="+this.recordedObject.title;
 	  break;
@@ -253,7 +257,10 @@ RecordedDetailsAssistant.prototype.handleDownload = function(downloadOrStream_in
 	
 	Mojo.Log.info("Rec date JS is %j, %s", dateJS, this.recordedObject.recStartTs);
 	
-	var filenameRequestUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/mythweb/pl/stream/";
+	//requestHeaders: {Authorization: 'Basic ' + Base64.encode(WebMyth.prefsCookieObject.webserverUsername + ":" + WebMyth.prefsCookieObject.webserverPassword)},
+	
+	var filenameRequestUrl = "http://"+WebMyth.prefsCookieObject.webserverUsername + ":" + WebMyth.prefsCookieObject.webserverPassword+"@";
+	filenameRequestUrl += WebMyth.prefsCookieObject.webserverName+"/mythweb/pl/stream/";
 	filenameRequestUrl += this.recordedObject.chanId+"/";
 	filenameRequestUrl += ((dateJS.getTime()/1000));
 	filenameRequestUrl += ".mp4";
@@ -267,6 +274,18 @@ RecordedDetailsAssistant.prototype.handleDownload = function(downloadOrStream_in
  
 	if( this.downloadOrStream == 'download' ) {
 		Mojo.Log.info("starting download");
+		
+		parameters = {
+				target: filenameRequestUrl,		
+				mime: "video/mp4",
+				targetFilename: myFilename,
+				subscribe: true,	
+				targetDir: "/media/internal/mythtv/"
+			};
+		
+		//WebMyth.downloadToPhone(parameters);
+		
+		
 		this.controller.serviceRequest('palm://com.palm.downloadmanager/', {
 			method: 'download',
 			parameters: {
@@ -279,6 +298,14 @@ RecordedDetailsAssistant.prototype.handleDownload = function(downloadOrStream_in
 			onSuccess: function(response) {
 				if(response.completed) {
 					this.controller.showBanner("Download finished! "+myFilename, "");
+					
+					this.controller.serviceRequest('palm://com.palm.applicationManager', {
+						method:'launch',							
+						parameters: {
+							id:"com.palm.app.videoplayer"
+						}
+					});	
+						
 				} else {
 					if(response.amountReceived && response.amountTotal) {
 						var percent = (response.amountReceived / response.amountTotal)*100;
@@ -294,6 +321,9 @@ RecordedDetailsAssistant.prototype.handleDownload = function(downloadOrStream_in
 				}
 			}.bind(this)
 		});	
+		
+		
+		
 	} else if( this.downloadOrStream == 'stream' ) {
 		
 		Mojo.Log.info("Starting to stream");

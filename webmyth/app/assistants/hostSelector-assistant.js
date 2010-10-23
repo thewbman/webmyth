@@ -32,24 +32,23 @@ function HostSelectorAssistant(jumpRemote) {
 	  this.resultList = [];
 };
 
-//Setup remote commandmenu
-HostSelectorAssistant.hostsCommandMenuModel = {
-	visible: true,
-	items: [
-		{ items: [ { label: "Add", command: 'go-addHost', width: 90 } ] },
-		{},
-		{ items: [ { label: "Search", command: 'go-searchHost', width: 90 } ] }
-	]
-};
 
 HostSelectorAssistant.prototype.setup = function() {
 	
 	//App menu widget
 	this.controller.setupWidget(Mojo.Menu.appMenu, WebMyth.appMenuAttr, WebMyth.appMenuModel);
 	
+	this.hostsCommandMenuModel = {
+		visible: true,
+		items: [
+			{ items: [ { label: "Add", command: 'go-addHost', width: 90 } ] },
+			{},
+			{ items: [ { label: "Search", command: 'go-searchHost', width: 90 } ] }
+		]
+	};
 	
 	//Bottom of page menu widget
-	this.controller.setupWidget( Mojo.Menu.commandMenu, {menuClass: 'no-fade'}, HostSelectorAssistant.hostsCommandMenuModel );
+	this.controller.setupWidget( Mojo.Menu.commandMenu, {menuClass: 'no-fade'}, this.hostsCommandMenuModel );
 	
 	
 	//List of hosts widget
@@ -64,8 +63,6 @@ HostSelectorAssistant.prototype.setup = function() {
 	this.controller.setupWidget( "hostlist" , this.hostListAttribs, this.hostListModel);
 	
 	
-	
-	/* add event handlers to listen to events from widgets */
 	
 	//Tap a host from list
 	this.controller.listen(this.controller.get( "hostlist" ), Mojo.Event.listTap,

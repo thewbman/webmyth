@@ -42,6 +42,7 @@ UpcomingDetailsAssistant.prototype.setup = function() {
                             items: [{ label: 'Setup', command: 'go-setup', width: 90 },{},{label: $L('Web'), submenu:'web-menu', width: 90}]};
  
 	this.webMenuModel = { label: $L('WebMenu'), items: [
+			{"label": $L('Wikipedia'), "command": "go-web--Wikipedia"},
 			{"label": $L('themoviedb'), "command": "go-web--themoviedb"},
 			{"label": $L('IMDB'), "command": "go-web--IMDB"},
 			{"label": $L('TheTVDB'), "command": "go-web--TheTVDB"},
@@ -132,19 +133,18 @@ UpcomingDetailsAssistant.prototype.openMythweb = function() {
 	Mojo.Log.info("Selected time is: '%j'", dateUTC);
 			
 	
-	//var mythwebUrl = "http://";
-	//mythwebUrl += WebMyth.prefsCookieObject.webserverName;
-	var mythwebUrl = "/mythweb/tv/detail/";
+	var mythwebUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/mythweb/tv/detail/";
+	//var mythwebUrl = "/mythweb/tv/detail/";
 	mythwebUrl += this.upcomingObject.chanid + "/";
 	mythwebUrl += dateUTC;
 	//mythwebUrl += "?RESET_TMPL=true";
 			
 	Mojo.Log.info("mythweb url is "+mythwebUrl);
 	
-	Mojo.Controller.stageController.pushScene("webview", mythwebUrl, "Edit Upcoming Recording");
+	//Mojo.Controller.stageController.pushScene("webview", mythwebUrl, "Edit Upcoming Recording");
 	
 	
-	/*		
+			
 	this.controller.serviceRequest("palm://com.palm.applicationManager", {
 		method: "open",
 		parameters:  {
@@ -154,7 +154,7 @@ UpcomingDetailsAssistant.prototype.openMythweb = function() {
 			}
 		}
 	}); 
-	*/
+	
  
 };
 
@@ -165,6 +165,9 @@ UpcomingDetailsAssistant.prototype.openWeb = function(website) {
   var url = "";
   
   switch(website) {
+	case 'Wikipedia':
+		url = "http://en.m.wikipedia.org/wiki/Special:Search?search="+this.upcomingObject.title;
+	  break;
 	case 'themoviedb':
 		url = "http://www.themoviedb.org/search/movies?search[text]="+this.upcomingObject.title;
 	  break;

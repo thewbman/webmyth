@@ -4,17 +4,18 @@ To Do - planned new features and updates:
  - new app icons/theme
  - reformat date in details and lists
  - update screenshots
- - add support for pin on backend
  - fix pixelated icon
- - add controls to webview
+ - non-email feedback?
  
  
 //Long term
  - plugin for remote
- - upcoming to XML (use mythweb ?) ?
- - videos listing (wait for mysql) ?
+ - videos listing (wait for mysql or script) ?
  - music listing (wait for mysql) ?
  - selectable music and videos (wait for mysql) ?
  - details under status scheduled
  - progress scrobble on remote ?
+ - demo video(s)
+ - fade command menus (looks bad with palm-dark)
+ - add support for pin on backend ?
 

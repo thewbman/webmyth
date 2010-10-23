@@ -1066,6 +1066,8 @@ GuideAssistant.prototype.setMyData = function(propertyValue, model) {
 		guideDetailsText += '</div>';
 	}
 	
+	//Mojo.Log.error("Guide channel icon URL is :"+'http://'+WebMyth.prefsCookieObject.masterBackendIp+':6544/Myth/GetChannelIcon?ChanId='+model.chanId);
+	
 	guideDetailsText += '<div class="guide-right-list-text-later">';
 	
 	guideDetailsText += '<div class="title truncating-text left guide-list-title">'+model.title+'</div>';
@@ -1252,6 +1254,17 @@ GuideAssistant.prototype.readGuideSuccess = function(response) {
 									"recStatus": "-10"
 								}
 								if(singleProgramJson.chanNumInt == NaN) singleProgramJson.chanNumInt = 0;
+								
+								try {
+									singleProgramJson.airdate = singleChannelChildNode.getAttributeNode("airdate").nodeValue;
+									singleProgramJson.stars = singleChannelChildNode.getAttributeNode("stars").nodeValue; 
+								} catch(e) {
+									singleProgramJson.airdate = "";
+									singleProgramJson.stars = ""; 
+								}
+								
+								
+								singleProgramJson.description = "";
 								
 								for(var l = 0; l < singleChannelChildNode.childNodes.length; l++) {
 									singleProgramChildNode = singleChannelChildNode.childNodes[l];

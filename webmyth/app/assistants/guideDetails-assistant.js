@@ -39,12 +39,13 @@ GuideDetailsAssistant.prototype.setup = function() {
 
 	// Menu grouping at bottom of scene
     this.cmdMenuModel = { label: $L('Play Menu'),
-                            items: [{ label: $L('Setup'), command: 'go-mythweb' },{},{label: $L('Web'), submenu:'web-menu', width: 90}]};
+                            items: [{ label: $L('Setup'), command: 'go-mythweb', width: 90 },{ icon: 'refresh', command: 'go-refresh' },{label: $L('Web'), submenu:'web-menu', width: 90}]};
 							
  
 	this.hostsMenuModel = { label: $L('Hosts'), items: []};
  
 	this.webMenuModel = { label: $L('WebMenu'), items: [
+			{"label": $L('Wikipedia'), "command": "go-web-----Wikipedia"},
 			{"label": $L('themoviedb'), "command": "go-web-----themoviedb"},
 			{"label": $L('IMDB'), "command": "go-web-----IMDB"},
 			{"label": $L('TheTVDB'), "command": "go-web-----TheTVDB"},
@@ -74,7 +75,7 @@ GuideDetailsAssistant.prototype.setup = function() {
 	$('starttime-title').innerText = this.guideObject.startTimeSpace;
 	$('endtime-title').innerText = this.guideObject.endTimeSpace;
 	$('recstatustext-title').innerText = this.guideObject.recStatusText;
-	//$('airdate-title').innerText = this.guideObject.airdate;
+	$('airdate-title').innerText = this.guideObject.airdate;
 	//$('storagegroup-title').innerText = this.guideObject.storagegroup;
 	//$('playgroup-title').innerText = this.guideObject.playgroup;
 	//$('programflags-title').innerText = this.guideObject.programflags;
@@ -118,6 +119,8 @@ GuideDetailsAssistant.prototype.activate = function(event) {
 		
 		this.cmdMenuModel.items[1].label = $L('Setup');
 		this.cmdMenuModel.items[1].command = 'go-mythweb';
+		this.cmdMenuModel.items[1].width =  90;
+		this.cmdMenuModel.items[1].icon =  '';
 		
 				
 		this.controller.setupWidget('hosts-menu', '', this.hostsMenuModel);
@@ -159,6 +162,9 @@ GuideDetailsAssistant.prototype.handleCommand = function(event) {
       case 'go-web----':
 		this.openWeb(mySelection);
        break;
+      case 'go-refresh':
+		this.refreshData();
+       break;
     }
   } else if(event.type == Mojo.Event.forward) {
 	
@@ -197,6 +203,9 @@ GuideDetailsAssistant.prototype.handleKey = function(event) {
 	}
 	Event.stop(event); 
 };
+
+
+
 
 
 GuideDetailsAssistant.prototype.openMythweb = function() {
@@ -240,6 +249,9 @@ GuideDetailsAssistant.prototype.openWeb = function(website) {
   var url = "";
   
   switch(website) {
+	case 'Wikipedia':
+		url = "http://en.m.wikipedia.org/wiki/Special:Search?search="+this.guideObject.title;
+	  break;
 	case 'themoviedb':
 		url = "http://www.themoviedb.org/search/movies?search[text]="+this.guideObject.title;
 	  break;
@@ -361,3 +373,201 @@ GuideDetailsAssistant.prototype.startChannelPlay = function(host) {
 	
 };
 
+
+GuideDetailsAssistant.prototype.refreshData = function() {
+
+	//Update details from XML backend
+	Mojo.Log.info('Starting details data gathering from XML backend');
+		
+	this.requestUrl = "http://"+WebMyth.prefsCookieObject.masterBackendIp+":6544/Myth/GetProgramDetails?StartTime=";
+	this.requestUrl += this.guideObject.startTime;
+	this.requestUrl += "&ChanId=";
+	this.requestUrl += this.guideObject.chanId;
+
+	Mojo.Log.info("XML details URL is: "+this.requestUrl);
+			
+	try {
+		var request = new Ajax.Request(this.requestUrl,{
+			method: 'get',
+			evalJSON: false,
+			onSuccess: this.readDetailsXMLSuccess.bind(this),
+			onFailure: this.readDetailsXMLFailure.bind(this)  
+		});
+	}
+	catch(e) {
+		Mojo.Log.error(e);
+	}
+	
+};
+
+
+
+GuideDetailsAssistant.prototype.readDetailsXMLFailure = function(response) {
+
+	//Stop spinner and hide
+	this.spinnerModel.spinning = false;
+	this.controller.modelChanged(this.spinnerModel, this);
+	$('myScrim').hide()
+	
+	Mojo.Controller.getAppController().showBanner("Failed to get program information", {source: 'notification'});
+	Mojo.Log.error('Failed to get Ajax response for program details because %j', response.responseText);
+	
+}
+
+GuideDetailsAssistant.prototype.readDetailsXMLSuccess = function(response) {
+
+	
+	Mojo.Log.info("About to start parsing recorded from XML");
+	
+	var xmlstring = response.responseText.trim();
+	var xmlobject = (new DOMParser()).parseFromString(xmlstring, "text/xml");
+	
+	
+	//Local variables
+	var topNode, topNodesCount, topSingleNode, programDetailsNode;
+	var programNode, programChildNode;
+	
+	var StartTime, ChanId, Count, AsOf, Version, ProtoVer;
+	
+	
+	var s = {};
+	
+	
+	//Start parsing
+	topNode = xmlobject.getElementsByTagName("GetProgramDetailsResponse")[0];
+	var topNodesCount = topNode.childNodes.length;
+	for(var i = 0; i < topNodesCount; i++) {
+		topSingleNode = topNode.childNodes[i];
+		switch(topSingleNode.nodeName) {
+			case 'StartTime':
+				StartTime = topSingleNode.childNodes[0].nodeValue;
+				break;
+			case 'ChanId':
+				ChanId = topSingleNode.childNodes[0].nodeValue;
+				break;
+			case 'Count':
+				Count = topSingleNode.childNodes[0].nodeValue;
+				break;
+			case 'AsOf':
+				AsOf = topSingleNode.childNodes[0].nodeValue;
+				break;
+			case 'Version':
+				Version = topSingleNode.childNodes[0].nodeValue;
+				break;
+			case 'ProtoVer':
+				ProtoVer = topSingleNode.childNodes[0].nodeValue;
+				break;
+			case 'ProgramDetails':
+				//Mojo.Log.info('Starting to parse ProgramDetails');
+				programNode = topSingleNode.childNodes[0];
+				
+				this.newGuideObject = {
+					"title": programNode.getAttributeNode("title").nodeValue, 
+					"subTitle": programNode.getAttributeNode("subTitle").nodeValue, 
+					"programFlags": programNode.getAttributeNode("programFlags").nodeValue, 
+					"category": programNode.getAttributeNode("category").nodeValue, 
+					"fileSize": programNode.getAttributeNode("fileSize").nodeValue, 
+					"seriesId": programNode.getAttributeNode("seriesId").nodeValue, 
+					"hostname": programNode.getAttributeNode("hostname").nodeValue, 
+					"catType": programNode.getAttributeNode("catType").nodeValue, 
+					"programId": programNode.getAttributeNode("programId").nodeValue, 
+					"repeat": programNode.getAttributeNode("repeat").nodeValue, 
+				//	"stars": programNode.getAttributeNode("stars").nodeValue, 
+					"endTime": programNode.getAttributeNode("endTime").nodeValue, 
+				//	"airdate": programNode.getAttributeNode("airdate").nodeValue, 
+					"startTime": programNode.getAttributeNode("startTime").nodeValue,
+					"lastModified": programNode.getAttributeNode("lastModified").nodeValue
+				};
+				
+				try {
+					this.newGuideObject.stars = programNode.getAttributeNode("stars").nodeValue;
+					this.newGuideObject.airdate = programNode.getAttributeNode("airdate").nodeValue;
+				} catch(e) {
+					Mojo.Log.info("Error with getting airdate and stars");
+					this.newGuideObject.stars = "";
+					this.newGuideObject.airdate = "";
+				}
+				
+				for(var j = 0; j < programNode.childNodes.length; j++) {
+					programChildNode = programNode.childNodes[j];
+					//Mojo.Log.info("Node name is "+programChildNode.nodeName);
+					
+					if(j == 0) this.newGuideObject.description =programChildNode.nodeValue;
+									
+					if(programChildNode.nodeName == 'Channel') {
+						//Mojo.Log.info('Inside channel if');
+
+						this.newGuideObject.inputId = programChildNode.getAttributeNode("inputId").nodeValue;
+						this.newGuideObject.chanFilters = programChildNode.getAttributeNode("chanFilters").nodeValue;
+						this.newGuideObject.commFree = programChildNode.getAttributeNode("commFree").nodeValue;
+						this.newGuideObject.channelName = programChildNode.getAttributeNode("channelName").nodeValue;
+						this.newGuideObject.sourceId = programChildNode.getAttributeNode("sourceId").nodeValue;
+						this.newGuideObject.chanId = programChildNode.getAttributeNode("chanId").nodeValue;
+						this.newGuideObject.chanNum = programChildNode.getAttributeNode("chanNum").nodeValue;
+						this.newGuideObject.callSign = programChildNode.getAttributeNode("callSign").nodeValue;
+					}
+					
+									
+					if(programChildNode.nodeName == "Recording") {
+						//Mojo.Log.info('Inside recording if');
+						
+						this.newGuideObject.recPriority = programChildNode.getAttributeNode("recPriority").nodeValue;
+						this.newGuideObject.playGroup = programChildNode.getAttributeNode("playGroup").nodeValue;
+						this.newGuideObject.recStatus = programChildNode.getAttributeNode("recStatus").nodeValue;
+						this.newGuideObject.recStartTs = programChildNode.getAttributeNode("recStartTs").nodeValue;
+						this.newGuideObject.recGroup = programChildNode.getAttributeNode("recGroup").nodeValue;
+						this.newGuideObject.dupMethod = programChildNode.getAttributeNode("dupMethod").nodeValue;
+						this.newGuideObject.recType = programChildNode.getAttributeNode("recType").nodeValue;
+						this.newGuideObject.encoderId = programChildNode.getAttributeNode("encoderId").nodeValue;
+						this.newGuideObject.recProfile = programChildNode.getAttributeNode("recProfile").nodeValue;
+						this.newGuideObject.recEndTs = programChildNode.getAttributeNode("recEndTs").nodeValue;
+						this.newGuideObject.recordId = programChildNode.getAttributeNode("recordId").nodeValue;
+						this.newGuideObject.dupInType = programChildNode.getAttributeNode("dupInType").nodeValue;
+						
+						this.newGuideObject.recStatusText = recStatusDecode(this.newGuideObject.recStatus);
+								
+					} 
+						
+				}
+				
+				if(this.newGuideObject.recStatusText == null) this.newGuideObject.recStatusText = recStatusDecode(-10);
+				
+				Mojo.Log.info('Done parsing programDetails');
+				Mojo.Log.info("full upcoming details json is %j", this.newGuideObject); 
+				
+			break;
+				
+			default:
+				//Mojo.Log.error("node name is "+topSingleNode.nodeName);
+				break;
+		}
+	}
+	
+	this.finishedReadingDetails();
+
+}
+
+
+GuideDetailsAssistant.prototype.finishedReadingDetails = function() {
+
+	//Fill in data values
+	$('scene-title').innerText = this.newGuideObject.title;
+	$('subtitle-title').innerText = this.newGuideObject.subTitle;
+	$('description-title').innerText = this.newGuideObject.description;
+	
+	//$('hostname-title').innerText = this.newGuideObject.hostname;
+	//$('recgroup-title').innerText = this.newGuideObject.recgroup;
+	$('starttime-title').innerText = this.newGuideObject.startTime.replace("T"," ");
+	$('endtime-title').innerText = this.newGuideObject.endTime.replace("T"," ");
+	$('recstatustext-title').innerText = this.newGuideObject.recStatusText;
+	$('airdate-title').innerText = this.newGuideObject.airdate;
+	//$('storagegroup-title').innerText = this.newGuideObject.storagegroup;
+	//$('playgroup-title').innerText = this.newGuideObject.playgroup;
+	//$('programflags-title').innerText = this.newGuideObject.programflags;
+	$('programid-title').innerText = this.newGuideObject.programId;
+	//$('seriesid-title').innerText = this.newGuideObject.seriesId;
+	$('channame-title').innerText = this.newGuideObject.channelName;
+	$('channum-title').innerText = this.newGuideObject.chanNum;
+	//$('recstartts-title').innerText = this.newGuideObject.recStartTs;
+	
+}

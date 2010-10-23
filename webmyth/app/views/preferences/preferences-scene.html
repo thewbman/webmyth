@@ -21,20 +21,75 @@
 	<div class="palm-row">
 		<div class="palm-row-wrapper textfield-group" x-mojo-focus-highlight="true">
 			<div class="title">                            
-				<div class="label">Script</div>
-				<div x-mojo-element="TextField" id="webmythPythonFieldId" class="textFieldClass"></div>
+				<div class="label">Username</div>
+				<div x-mojo-element="TextField" id="usernameFieldId" class="textFieldClass"></div>
+			</div>
+		</div>
+	</div>
+	
+	<div class="palm-row">
+		<div class="palm-row-wrapper textfield-group" x-mojo-focus-highlight="true">
+			<div class="title">                            
+				<div class="label">Password</div>
+				<div x-mojo-element="PasswordField" id="passwordFieldId" class="passwordClass"></div>
 			</div>
 		</div>
 	</div>
 	
 	<div class="palm-row">
 		<div class="palm-row-wrapper" x-mojo-focus-highlight="true">         
+			<div class="label right">Stream to Device</div>
+			<div x-mojo-element="ToggleButton" id="allowDownloadStreamToggleId" class="left"></div>
+		</div>
+	</div>
+<!--
+	<div class="palm-row">
+		<div class="palm-row-wrapper" x-mojo-focus-highlight="true">         
+			<div class="label right">Use script file</div>
+			<div x-mojo-element="ToggleButton" id="useWebmythScriptToggleId" class="left"></div>
+		</div>
+	</div>
+-->
+	<div class="palm-row">
+		<div class="palm-row-wrapper textfield-group" x-mojo-focus-highlight="true">
+			<div class="title">                            
+				<div class="label">Script</div>
+				<div x-mojo-element="TextField" id="webmythPythonFieldId" class="textFieldClass"></div>
+			</div>
+		</div>
+	</div>
+
+	<div class="palm-row last">
+		<div class="palm-row-wrapper" x-mojo-focus-highlight="true">         
+			<div class="label right">show upcoming</div>
+			<div x-mojo-element="ToggleButton" id="showUpcomingToggleId" class="left"></div>
+		</div>
+	</div>
+<!--
+	<div class="palm-row">
+		<div class="palm-row-wrapper" x-mojo-focus-highlight="true">         
+			<div class="label right">Show videos</div>
+			<div x-mojo-element="ToggleButton" id="showVideosToggleId" class="left"></div>
+		</div>
+	</div>
+-->
+
+  </div>
+</div>
+
+
+<div class="palm-group">        
+ <div class="palm-group-title"><span x-mojo-loc="">Master Backend</span></div>
+  <div class="palm-list">
+	
+	<div class="palm-row first">
+		<div class="palm-row-wrapper" x-mojo-focus-highlight="true">         
 			<div class="label right">Manual Backend IP</div>
 			<div x-mojo-element="ToggleButton" id="manualMasterBackendToggleId" class="left"></div>
 		</div>
 	</div>
 	
-	<div class="palm-row">
+	<div class="palm-row last">
 		<div class="palm-row-wrapper textfield-group" x-mojo-focus-highlight="true">
 			<div class="title">                            
 				<div class="label">Master Backend</div>
@@ -43,27 +98,22 @@
 		</div>
 	</div>
 
-	<div class="palm-row last">
-		<div class="palm-row-wrapper" x-mojo-focus-highlight="true">         
-			<div class="label right">Stream to Device</div>
-			<div x-mojo-element="ToggleButton" id="allowDownloadStreamToggleId" class="left"></div>
-		</div>
-	</div>
-
   </div>
 </div>
+
 
 <div class="palm-group">
 	<div class="palm-group-title" id="preferences-global">General</div>
 	<div class="palm-list">
-        
+   
+<!--   
 		<div class="palm-row first"> 
 			<div class="palm-row-wrapper">
 				<div id="theme" x-mojo-element="ListSelector"></div>
             </div>
         </div>
-		
-		<div class="palm-row">
+-->
+		<div class="palm-row first">
 			<div class="palm-row-wrapper" x-mojo-focus-highlight="true">         
 				<div x-mojo-element="ToggleButton" id="upcomingChannelIconsToggleId"></div>
 				<div class="title left">Show Channel Icons</div>

@@ -53,6 +53,7 @@ UpcomingDetailsXMLAssistant.prototype.setup = function() {
                             items: [{ label: 'Setup', command: 'go-setup', width: 90 },{ icon: 'refresh', command: 'go-refresh' },{label: $L('Web'), submenu:'web-menu', width: 90}]};
  
 	this.webMenuModel = { label: $L('WebMenu'), items: [
+			{"label": $L('Wikipedia'), "command": "go-web--Wikipedia"},
 			{"label": $L('themoviedb'), "command": "go-web--themoviedb"},
 			{"label": $L('IMDB'), "command": "go-web--IMDB"},
 			{"label": $L('TheTVDB'), "command": "go-web--TheTVDB"},
@@ -166,6 +167,9 @@ UpcomingDetailsXMLAssistant.prototype.openWeb = function(website) {
   var url = "";
   
   switch(website) {
+	case 'Wikipedia':
+		url = "http://en.m.wikipedia.org/wiki/Special:Search?search="+this.upcomingObject.title;
+	  break;
 	case 'themoviedb':
 		url = "http://www.themoviedb.org/search/movies?search[text]="+this.upcomingObject.title;
 	  break;

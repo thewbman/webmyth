@@ -452,8 +452,11 @@ StatusAssistant.prototype.readStatusSuccess = function(response) {
 									"id" : singleJobqueueNode.getAttributeNode("id").nodeValue,
 									"status" : singleJobqueueNode.getAttributeNode("status").nodeValue,
 									"type" : singleJobqueueNode.getAttributeNode("type").nodeValue,
+									"hostname" : singleJobqueueNode.getAttributeNode("hostname").nodeValue,
 									"comments" : singleJobqueueNode.childNodes[0].nodeValue,
-									"title" : singleJobqueueProgramNode.getAttributeNode("title").nodeValue
+									"title" : singleJobqueueProgramNode.getAttributeNode("title").nodeValue,
+									"subTitle" : singleJobqueueProgramNode.getAttributeNode("subTitle").nodeValue,
+									"fullTitle" : singleJobqueueProgramNode.getAttributeNode("title").nodeValue+": "+singleJobqueueProgramNode.getAttributeNode("subTitle").nodeValue
 								};
 			//Mojo.Log.info("Added jobqueue %j to list", singleJobqueueJson);
 			tempJobsList.push(singleJobqueueJson);
@@ -665,9 +668,9 @@ StatusAssistant.prototype.setJobqueueData = function(propertyValue, model)  {
 	};
 			
 	
-	var myDataModel = '<div class="title truncating-text left">'+model.title+'</div>';
+	var myDataModel = '<div class="title truncating-text left">'+model.fullTitle+'</div>';
     myDataModel += '<div class="palm-info-text left">'+model.startTime+'</div>';
-    myDataModel += '<div class="palm-info-text right italics">'+jobType+'</div>';
+    myDataModel += '<div class="palm-info-text right italics">'+jobType+' on '+model.hostname+'</div>';
     myDataModel += '<div class="palm-info-text right italics">'+status+'</div>';
 	
 	if(model.comments) myDataModel += '<div class="title truncating-text right italics">'+model.comments+'</div>';

@@ -142,7 +142,11 @@ function defaultCookie() {
 		guideJumpRemote: false,
 		showUpcomingChannelIcons: true,
 		dashboardRemote: true,
-		dashboardRemoteIndex: 1
+		dashboardRemoteIndex: 1,
+		useWebmythScript: true,
+		showUpcoming: true,
+		showVideos: false
+		
 	};
 	
 	return newCookieObject;
@@ -177,9 +181,9 @@ function defaultRemoteCookie() {
 	//These values are initiated in 'welcome' scene if not set
 
 	var newCookieObject = [
-		{ "name": "navigation", "enabled": true } ,
-		{ "name": "playback", "enabled": true } ,
-		{ "name": "music", "enabled": true } ,
+		{ "name": "navigation", "enabled": false } ,
+		{ "name": "playback", "enabled": false } ,
+		{ "name": "music", "enabled": false } ,
 		{ "name": "flick", "enabled": true } ,
 		{ "name": "masterRemote", "enabled": true } ,
 		{ "name": "numberpad", "enabled": true } 
