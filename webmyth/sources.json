@@ -111,5 +111,13 @@
     {
         "scenes": "upcomingXML",
         "source": "app/assistants/upcomingXML-assistant.js"
+    },
+    {
+        "scenes": "videos",
+        "source": "app/assistants/videos-assistant.js"
+    },
+    {
+        "scenes": "videosDetails",
+        "source": "app/assistants/videosDetails-assistant.js"
     }
 ]

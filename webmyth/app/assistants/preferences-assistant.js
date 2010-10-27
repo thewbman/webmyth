@@ -138,7 +138,7 @@ PreferencesAssistant.prototype.setup = function() {
          },
          this.showUpcomingToggleModel
     );		
-/*	
+	
 	//Show videos
 	this.showVideosToggleModel = {
              value: false
@@ -150,7 +150,7 @@ PreferencesAssistant.prototype.setup = function() {
          },
          this.showVideosToggleModel
     );
-*/
+
 
 	
 	
@@ -390,8 +390,8 @@ PreferencesAssistant.prototype.activate = function(event) {
 			this.showUpcomingToggleModel.value = WebMyth.prefsCookieObject.showUpcoming;
 			this.controller.modelChanged(this.showUpcomingToggleModel);
 			
-			//this.showVideosToggleModel.value = WebMyth.prefsCookieObject.showVideos;
-			//this.controller.modelChanged(this.showVideosToggleModel);
+			this.showVideosToggleModel.value = WebMyth.prefsCookieObject.showVideos;
+			this.controller.modelChanged(this.showVideosToggleModel);
 			
 			
 			
@@ -640,7 +640,7 @@ PreferencesAssistant.prototype.checkSettings = function() {
 		//WebMyth.prefsCookieObject.useWebmythScript = this.useWebmythScriptToggleModel.value;
 		WebMyth.prefsCookieObject.webmythPythonFile = this.webmythPythonFileTextModel.value;
 		WebMyth.prefsCookieObject.showUpcoming = this.showUpcomingToggleModel.value;
-		//WebMyth.prefsCookieObject.showVideos = this.showVideosToggleModel.value;
+		WebMyth.prefsCookieObject.showVideos = this.showVideosToggleModel.value;
 		
 		
 		WebMyth.prefsCookieObject.manualMasterBackend = this.manualMasterBackendToggleModel.value;

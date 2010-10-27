@@ -768,6 +768,27 @@
 }
 
 /*
+ * Videos
+ */
+
+.videos-list-item {
+	height: 100px
+}
+
+.videos-scene .videos-list-item .videos-list-title  {
+  padding: 3px 14px 0px 0px;
+  margin: 0px;
+  font-size: 20px;
+  height: 26px;
+}
+
+.videos-scene .videos-list-item .palm-info-text.left {
+  padding: 0px;
+  margin: 0px 8px;
+  line-height: 16px;
+}
+
+/*
  * Status scene
  */
  
