@@ -17,26 +17,22 @@
  *   with this program; if not, write to the Free Software Foundation, Inc.,
  *   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
+ 
+ 
+function VideosDetailsAssistant(detailsObject, videoBase) {
 
-
-function RecordedDetailsAssistant(detailsObject) {
-	/* this is the creator function for your scene assistant object. It will be passed all the 
-	   additional parameters (after the scene name) that were passed to pushScene. The reference
-	   to the scene controller (this.controller) has not be established yet, so any initialization
-	   that needs the scene controller should be done in the setup function below. */
+	   this.videosObject = detailsObject;
+	   this.videoBase = videoBase;
 	   
-	   this.recordedObject = detailsObject;
 	   this.standardFilename = '';
 	   this.downloadOrStream = '';
 	   
 	   this.timeOffsetSeconds = 0;
-  
-	   
 }
 
-RecordedDetailsAssistant.prototype.setup = function() {
-	
-	Mojo.Log.info("Starting recorded details scene '%j'", this.recordedObject);
+VideosDetailsAssistant.prototype.setup = function() {
+
+	//Mojo.Log.info("Starting videos details scene '%j'", this.videosObject);
 	
 	//App menu widget
 	this.controller.setupWidget(Mojo.Menu.appMenu, WebMyth.appMenuAttr, WebMyth.appMenuModel);
@@ -47,71 +43,54 @@ RecordedDetailsAssistant.prototype.setup = function() {
                             items: [{label: $L('Play'), submenu:'hosts-menu', width: 90},{},{label: $L('Web'), submenu:'web-menu', width: 90}]};
  
 	this.hostsMenuModel = { label: $L('Hosts'), items: []};
-	this.webMenuModel = { label: $L('WebMenu'), items: [
-			{"label": $L('Wikipedia'), "command": "go-web--Wikipedia"},
-			{"label": $L('themoviedb'), "command": "go-web--themoviedb"},
-			{"label": $L('IMDB'), "command": "go-web--IMDB"},
-			{"label": $L('TheTVDB'), "command": "go-web--TheTVDB"},
-			{"label": $L('TV.com'), "command": "go-web--TV.com"},
-			{"label": $L('Google'), "command": "go-web--Google"}
-			]};
+	this.webMenuModel = { label: $L('WebMenu'), items: []};
 
 	this.controller.setupWidget(Mojo.Menu.commandMenu, {menuClass: 'no-fade'}, this.cmdMenuModel);
 	this.controller.setupWidget('hosts-menu', '', this.hostsMenuModel);
 	this.controller.setupWidget('web-menu', '', this.webMenuModel);
 
 	
-	if(Mojo.appInfo.useXML == "true") {
-		this.screenshotUrl = "http://"+getBackendIP(WebMyth.backendsCookieObject,this.recordedObject.hostname,WebMyth.prefsCookieObject.masterBackendIp)+":6544/Myth/GetPreviewImage?ChanId=";
-		this.screenshotUrl += this.recordedObject.chanId + "&StartTime=" + this.recordedObject.recStartTs.replace("T"," ");
-	} else {
-		this.screenshotUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webmythPythonFile+"?op=getPremadeImage&ChanId=";
-		this.screenshotUrl += this.recordedObject.chanId + "&startTime=" + this.recordedObject.recStartTs.replace("T"," ");
-	}
-	
-	
-
-	
-	
-	Mojo.Log.info("Screenshot URL is "+ this.screenshotUrl);
 
 	
 	//Fill in data values
-	$('recorded-screenshot').src = this.screenshotUrl;
 	
-	$('scene-title').innerText = this.recordedObject.title;
-	$('subtitle-title').innerText = this.recordedObject.subTitle;
-	$('description-title').innerText = this.recordedObject.description;
-	$('category-title').innerText = this.recordedObject.category;
 	
-	$('hostname-title').innerText = this.recordedObject.hostname;
-	$('recgroup-title').innerText = this.recordedObject.recGroup;
-	$('starttime-title').innerText = this.recordedObject.startTime.replace("T"," ");
-	$('endtime-title').innerText = this.recordedObject.endTime.replace("T"," ");
-	$('airdate-title').innerText = this.recordedObject.airdate;
-	//$('storagegroup-title').innerText = this.recordedObject.storagegroup;
-	//$('playgroup-title').innerText = this.recordedObject.playgroup;
-	//$('programflags-title').innerText = this.recordedObject.programflags;
-	$('programid-title').innerText = this.recordedObject.programId;
-	$('seriesid-title').innerText = this.recordedObject.seriesId;
-	$('channame-title').innerText = this.recordedObject.channelName;
-	$('channum-title').innerText = this.recordedObject.chanNum;
-	$('recstartts-title').innerText = this.recordedObject.recStartTs.replace("T"," ");
-	$('filesize-title').innerText = Mojo.Format.formatNumber(parseInt(this.recordedObject.fileSize.substring(0,this.recordedObject.fileSize.length - 6)))+" MB";
+	$('scene-title').innerText = this.videosObject.title;
+	$('subtitle-title').innerText = this.videosObject.subtitle;
+	$('fullEpisode-title').innerText = this.videosObject.fullEpisode;
+	$('plot-title').innerText = this.videosObject.plot;
+	$('category-title').innerText = this.videosObject.category;
 	
-	//Mojo.Event.listen(this.controller.get("recorded-screenshot"),Mojo.Event.tap, this.goScreenshot.bind(this));
+	$('director-title').innerText = this.videosObject.director;
+	$('rating-title').innerText = this.videosObject.rating;
+	$('year-title').innerText = this.videosObject.year;
+	$('releasedate-title').innerText = this.videosObject.releasedate;
+	$('length-title').innerText = this.videosObject.length;
+	
+	$('insertdate-title').innerText = this.videosObject.insertdate.substring(0,10);
+	$('host-title').innerText = this.videosObject.host;
+	$('filename-title').innerText = this.videosObject.filename;
+	$('coverfile-title').innerText = this.videosObject.coverfile;
+	$('screenshot-title').innerText = this.videosObject.screenshot;
+	$('banner-title').innerText = this.videosObject.banner;
+	$('fanart-title').innerText = this.videosObject.fanart;
+	
+	//$('channum-title').innerText = this.videosObject.chanNum;
+	//$('recstartts-title').innerText = this.videosObject.recStartTs.replace("T"," ");
+	//$('filesize-title').innerText = Mojo.Format.formatNumber(parseInt(this.videosObject.fileSize.substring(0,this.videosObject.fileSize.length - 6)))+" MB";
+	
+	
 	
 };
 
-RecordedDetailsAssistant.prototype.activate = function(event) {
-	
+VideosDetailsAssistant.prototype.activate = function(event) {
 
 	
 	//Update list of current hosts
 	var hostsList = [];
 	var i, s;
 
-	
+	/*
 	if(WebMyth.prefsCookieObject.allowRecordedDownloads) {
 		var downloadCmd = { "label": "Download to Phone", "command": "go-down-download" }
 		var streamCmd = { "label": "Stream to Phone", "command": "go-down-stream" }
@@ -119,6 +98,7 @@ RecordedDetailsAssistant.prototype.activate = function(event) {
 		hostsList.push(downloadCmd);
 		hostsList.push(streamCmd);
 	}	
+	*/
 	
 	
 	for (i = 0; i < WebMyth.hostsCookieObject.length; i++) {
@@ -137,22 +117,42 @@ RecordedDetailsAssistant.prototype.activate = function(event) {
 	this.controller.modelChanged(this.hostsMenuModel);
 	
 	
+	
+	var webList = [];
+	
+	if(this.videosObject.homepage != "None") {
+		webList.push({"label": "Homepage", "command": "go-web--Homepage"});
+	}
+	
+	webList.push({"label": $L('Wikipedia'), "command": "go-web--Wikipedia"});
+	webList.push({"label": $L('themoviedb'), "command": "go-web--themoviedb"});
+	webList.push({"label": $L('IMDB'), "command": "go-web--IMDB"});
+	webList.push({"label": $L('TheTVDB'), "command": "go-web--TheTVDB"});
+	webList.push({"label": $L('TV.com'), "command": "go-web--TV.com"});
+	webList.push({"label": $L('Google'), "command": "go-web--Google"});
+			
+	this.webMenuModel.items = webList;
+	this.controller.modelChanged(this.webMenuModel);
+	
+	
 	//Keypress event
 	Mojo.Event.listen(this.controller.sceneElement, Mojo.Event.keyup, this.handleKey.bind(this));
 	
 };
 
-RecordedDetailsAssistant.prototype.deactivate = function(event) {
+VideosDetailsAssistant.prototype.deactivate = function(event) {
+
 	//Keypress event
 	Mojo.Event.stopListening(this.controller.sceneElement, Mojo.Event.keyup, this.handleKey.bind(this));
+	
 };
 
-RecordedDetailsAssistant.prototype.cleanup = function(event) {
+VideosDetailsAssistant.prototype.cleanup = function(event) {
 	/* this function should do any cleanup needed before the scene is destroyed as 
 	   a result of being popped off the scene stack */
 };
 
-RecordedDetailsAssistant.prototype.handleCommand = function(event) {
+VideosDetailsAssistant.prototype.handleCommand = function(event) {
 
   if(event.type == Mojo.Event.command) {
   	myCommand = event.command.substring(0,7);
@@ -177,7 +177,7 @@ RecordedDetailsAssistant.prototype.handleCommand = function(event) {
   
 };
 
-RecordedDetailsAssistant.prototype.handleKey = function(event) {
+VideosDetailsAssistant.prototype.handleKey = function(event) {
 
 	Mojo.Log.info("handleKey %o, %o", event.originalEvent.metaKey, event.originalEvent.keyCode);
 	
@@ -210,67 +210,73 @@ RecordedDetailsAssistant.prototype.handleKey = function(event) {
 
 
 
-RecordedDetailsAssistant.prototype.openWeb = function(website) {
 
-  //Mojo.Log.error('got to openWeb with : '+website);
-  var url = "";
-  
-  switch(website) {
-	case 'Wikipedia':
-		url = "http://en.m.wikipedia.org/wiki/Special:Search?search="+this.recordedObject.title;
-	  break;
-	case 'themoviedb':
-		url = "http://www.themoviedb.org/search/movies?search[text]="+this.recordedObject.title;
-	  break;
-	case 'IMDB':
-		url = "http://m.imdb.com/find?s=all&q="+this.recordedObject.title;
-	  break;
-	case 'TheTVDB':
-		url = "http://www.thetvdb.com/?string="+this.recordedObject.title+"&searchseriesid=&tab=listseries&function=Search";
-	  break;
-	case 'TV.com':
-		url = "http://www.tv.com/search.php?type=11&stype=all&qs="+this.recordedObject.title;
-	  break;
-	case 'Google':
-		url = "http://www.google.com/m/search?client=ms-palm-webOS&channel=iss&q="+this.recordedObject.title;
-	  break;
-	default:	
-		url = "";
-	  break;
-  };
-  
-  this.controller.serviceRequest("palm://com.palm.applicationManager", {
-   method: "open",
-   parameters:  {
-       id: 'com.palm.app.browser',
-       params: {
-           target: url
-       }
-   }
- });  
+VideosDetailsAssistant.prototype.openWeb = function(website) {
+
+	  //Mojo.Log.error('got to openWeb with : '+website);
+	  var url = "";
+	  
+	  switch(website) {
+		case 'Homepage':
+			url = this.videosObject.homepage;
+		  break;
+		case 'Wikipedia':
+			url = "http://en.m.wikipedia.org/wiki/Special:Search?search="+this.videosObject.title;
+		  break;
+		case 'themoviedb':
+			url = "http://www.themoviedb.org/search/movies?search[text]="+this.videosObject.title;
+		  break;
+		case 'IMDB':
+			url = "http://m.imdb.com/find?s=all&q="+this.videosObject.title;
+		  break;
+		case 'TheTVDB':
+			url = "http://www.thetvdb.com/?string="+this.videosObject.title+"&searchseriesid=&tab=listseries&function=Search";
+		  break;
+		case 'TV.com':
+			url = "http://www.tv.com/search.php?type=11&stype=all&qs="+this.videosObject.title;
+		  break;
+		case 'Google':
+			url = "http://www.google.com/m/search?client=ms-palm-webOS&channel=iss&q="+this.videosObject.title;
+		  break;
+		default:	
+			url = "";
+		  break;
+	  };
+	  
+	  this.controller.serviceRequest("palm://com.palm.applicationManager", {
+	   method: "open",
+	   parameters:  {
+		   id: 'com.palm.app.browser',
+		   params: {
+			   target: url
+		   }
+	   }
+	 });  
  
 };
 
-RecordedDetailsAssistant.prototype.handleDownload = function(downloadOrStream_in) {
+VideosDetailsAssistant.prototype.handleDownload = function(downloadOrStream_in) {
 
 	Mojo.Log.info("Asked to "+downloadOrStream_in+" recorded program");
+	/*
+	
 	this.downloadOrStream = downloadOrStream_in;
 	
-	var dateJS = new Date(isoToJS(this.recordedObject.recStartTs));
+	var dateJS = new Date(isoToJS(this.videosObject.recStartTs));
 	
-	Mojo.Log.info("Rec date JS is %j, %s", dateJS, this.recordedObject.recStartTs);
+	Mojo.Log.info("Rec date JS is %j, %s", dateJS, this.videosObject.recStartTs);
 	
 	//requestHeaders: {Authorization: 'Basic ' + Base64.encode(WebMyth.prefsCookieObject.webserverUsername + ":" + WebMyth.prefsCookieObject.webserverPassword)},
 	
 	var filenameRequestUrl = "http://"+WebMyth.prefsCookieObject.webserverUsername + ":" + WebMyth.prefsCookieObject.webserverPassword+"@";
 	filenameRequestUrl += WebMyth.prefsCookieObject.webserverName+"/mythweb/pl/stream/";
-	filenameRequestUrl += this.recordedObject.chanId+"/";
+	filenameRequestUrl += this.videosObject.chanId+"/";
 	filenameRequestUrl += ((dateJS.getTime()/1000));
 	filenameRequestUrl += ".mp4";
 	
 	Mojo.Log.info("Download/stream URL is "+filenameRequestUrl);
 	
-	var myFilename = this.recordedObject.title + "-" + this.recordedObject.subTitle + ".mp4";
+	var myFilename = this.videosObject.title + "-" + this.videosObject.subTitle + ".mp4";
 	
 	Mojo.Log.info("Filename is "+myFilename);
  
@@ -341,32 +347,28 @@ RecordedDetailsAssistant.prototype.handleDownload = function(downloadOrStream_in
 			}
 		});	
 	}
+	*/
  
 };
 
-RecordedDetailsAssistant.prototype.playOnHost = function(host) {
+VideosDetailsAssistant.prototype.playOnHost = function(host) {
 
 	//Attempting to play
 	var thisHostname = host;
 	WebMyth.prefsCookieObject.currentFrontend = host;
 	
-	//var clean_starttime = this.recordedObject.starttime.replace(' ','T');
-	var clean_starttime = this.recordedObject.recStartTs;
+	//var clean_starttime = this.videosObject.starttime.replace(' ','T');
+	var clean_starttime = this.videosObject.recStartTs;
 	
-	var cmd = "program "+this.recordedObject.chanId+" "+clean_starttime+" resume";
+	var cmd = "file "+this.videoBase+"/"+this.videosObject.filename+"'";
 	
 	Mojo.Log.info("Command to send is " + cmd);
-
+	
+	
 		
 	WebMyth.sendPlay(cmd);
 	
 	
 	if(WebMyth.prefsCookieObject.playJumpRemote)  Mojo.Controller.stageController.pushScene({name: WebMyth.prefsCookieObject.currentRemoteScene, disableSceneScroller: true});
-	
-};
-
-RecordedDetailsAssistant.prototype.goScreenshot = function() {
-	
-	Mojo.Controller.stageController.pushScene('imageview', this.screenshotUrl);
 	
 };

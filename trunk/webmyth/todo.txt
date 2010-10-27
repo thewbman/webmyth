@@ -2,17 +2,17 @@ To Do - planned new features and updates:
  
 //Future
  - new app icons/theme
- - reformat date in details and lists
  - update screenshots
  - fix pixelated icon
  - non-email feedback?
+ - build video file tree?
+ - add video images ?
+ - use icons for asc desc
  
  
 //Long term
  - plugin for remote
- - videos listing (wait for mysql or script) ?
  - music listing (wait for mysql) ?
- - selectable music and videos (wait for mysql) ?
  - details under status scheduled
  - progress scrobble on remote ?
  - demo video(s)

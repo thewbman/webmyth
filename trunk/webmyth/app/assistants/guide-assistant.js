@@ -1362,7 +1362,7 @@ GuideAssistant.prototype.sortChanged = function() {
 				this.resultList.sort(double_sort_by('category', originalSortType, false));
 			  break;
 			case 'status':
-				this.resultList.sort(double_sort_by('recStatusText', originalSortType, true));
+				this.resultList.sort(triple_sort_by('recStatusText', 'chanNumInt', 'startTime', true));
 			  break;
 			case 'recent':
 				//have to update program list with channel list 'lastUpdate'

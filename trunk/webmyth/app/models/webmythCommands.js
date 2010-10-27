@@ -145,7 +145,9 @@ function defaultCookie() {
 		dashboardRemoteIndex: 1,
 		useWebmythScript: true,
 		showUpcoming: true,
-		showVideos: false
+		showVideos: true,
+		currentVideosSort: 'title-asc',
+		currentVideosGroup: 'all'
 		
 	};
 	
@@ -235,6 +237,28 @@ var double_sort_by = function(field1, field2, reverse, primer){
    }
 };
 
+var triple_sort_by = function(field1, field2, field3, reverse, primer){
+
+   reverse = (reverse) ? -1 : 1;
+
+   return function(a,b){
+
+       a = a[field1]+"_"+a[field2]+"_"+a[field3];
+       b = b[field1]+"_"+b[field2]+"_"+b[field3];
+
+       if (typeof(primer) != 'undefined'){
+           a = primer(a);
+           b = primer(b);
+       }
+
+       if (a<b) return reverse * -1;
+       if (a>b) return reverse * 1;
+       
+	   return 0;
+
+   }
+};
+
 var trimByRecgroup = function(fullList, myRecgroup) {
 	
 	//Check for keyword for no filtering
@@ -253,6 +277,30 @@ var trimByRecgroup = function(fullList, myRecgroup) {
 				trimmedList.push(s);
 			} else {
 				//Does not match recgroup
+			}
+		}
+		return trimmedList;
+	}
+};
+
+var trimByVideoType = function(fullList, myVideoType) {
+	
+	//Check for keyword for no filtering
+	if (myVideoType == 'all') {
+		return fullList;
+	} else {
+	
+		var trimmedList = [];
+		var i, s;
+	
+		for (i = 0; i < fullList.length; i++) {
+	
+			s = fullList[i];
+			if ((s.videoType == myVideoType)||(s.videoType == myVideoType)) {
+				//Matches video type
+				trimmedList.push(s);
+			} else {
+				//Does not match
 			}
 		}
 		return trimmedList;
@@ -313,6 +361,44 @@ var trimByEnabled = function(fullList, enabled) {
 			}
 		}
 		return trimmedList;
+
+};
+
+var trimByIntid = function(fullList, intid_in) {
+	
+		var i, s;
+	
+		for (i = 0; i < fullList.length; i++) {
+	
+			s = fullList[i];
+			if ((s.intid == intid_in)) {
+				//Matches id
+				return s;
+			} else {
+				//Does not match
+			}
+		}
+		
+		return {};
+
+};
+
+var trimByHostnameGroupname = function(fullList, hostname_in, groupname_in) {
+	
+		var i, s;
+	
+		for (i = 0; i < fullList.length; i++) {
+	
+			s = fullList[i];
+			if ((s.hostname == hostname_in) && (s.groupname == groupname_in)) {
+				//Matches
+				return s;
+			} else {
+				//Does not match
+			}
+		}
+		
+		return {};
 
 };
 
@@ -427,6 +513,82 @@ var cleanGuideChannels = function(fullList) {
 	for(j = 0; j < listLength; j++) {
 		finalList.push(updatedList[j]);
 	}
+	
+	return finalList;
+	
+}
+
+var cleanVideos = function(fullList) {
+
+	finalList = [];
+	
+	var i, j, s, t = [];
+	
+	for(i = 0; i < fullList.length; i++) {
+		s = fullList[i];
+		
+		if(s.season == 0) {
+			if(s.episode == 0) {	
+				//No TV data - assuming full movie
+				s.fullEpisode = 'N/A';
+				s.season = "None";
+				s.videoType = "Video";
+			} else if(s.episode < 10) {
+				//Specials as listed on thetvdb.com
+				s.fullEpisode = 'Special0'+s.episode;
+				s.season = "Specials";
+				s.videoType = "Special";
+			} else {
+				//Specials as listed on thetvdb.com
+				s.fullEpisode = 'Special'+s.episode;
+				s.season = "Specials";
+				s.videoType = "Special";
+			}
+		} else {
+			//TV episodes
+			if(s.season < 10) {
+				s.fullEpisode = "s0"+s.season;
+			} else {
+				s.fullEpisode = "s"+s.season;
+			}
+			
+			if(s.episode < 10) {
+				s.fullEpisode += "e0"+s.episode;
+			} else {
+				s.fullEpisode += "e"+s.episode;
+			}
+			
+			if(s.season < 10) {
+				s.season = "Season  "+s.season;
+			} else {
+				s.season = "Season "+s.season;
+			}
+			
+			s.videoType = "TV";
+				
+		}
+		
+		//Break down file name
+		t = s.filename.split("/");
+		
+		s.fileLevels = t.length;
+		
+		s.level1 = t[0];
+		s.level2 = t[0]+"/"+t[1];
+		s.level3 = t[0]+"/"+t[1]+"/"+t[2];
+		s.level4 = t[0]+"/"+t[1]+"/"+t[2]+"/"+t[3];
+		s.level5 = t[0]+"/"+t[1]+"/"+t[2]+"/"+t[3]+"/"+t[4];
+		s.level6 = t[0]+"/"+t[1]+"/"+t[2]+"/"+t[3]+"/"+t[4]+"/"+t[5];
+			
+			
+		//Fix some blank values
+		if(s.subtitle == 'None') s.subtitle = '';
+		if(s.plot == 'None') s.plot = '';
+		
+		finalList.push(s);
+		
+	}
+	
 	
 	return finalList;
 	

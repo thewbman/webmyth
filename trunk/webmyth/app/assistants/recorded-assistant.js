@@ -534,7 +534,7 @@ RecordedAssistant.prototype.readRemoteScriptSuccess = function(response) {
 	
 	this.finishedReadingRecorded();
 	
-	Mojo.Log.info("After finished reading recorded");
+	//Mojo.Log.info("After finished reading recorded");
 };
 
 RecordedAssistant.prototype.readRecordedXMLSuccess = function(response) {
