@@ -1,0 +1,123 @@
+[
+    {"source": "app/assistants/stage-assistant.js"},
+    {"source": "app/models/webmythCommands.js"},
+    {"source": "app/models/metrix.js"},
+    {"source": "app/models/Base64.js"},
+    {"source": "app/models/asyncWrappers.js"},
+    {
+        "scenes": "hostSelector",
+        "source": "app/assistants/hostSelector-assistant.js"
+    },
+    {
+        "scenes": "navigation",
+        "source": "app/assistants/navigation-assistant.js"
+    },
+    {
+        "scenes": "addHost",
+        "source": "app/assistants/addHost-assistant.js"
+    },
+    {
+        "scenes": "music",
+        "source": "app/assistants/music-assistant.js"
+    },
+    {
+        "scenes": "playback",
+        "source": "app/assistants/playback-assistant.js"
+    },
+    {
+        "scenes": "about",
+        "source": "app/assistants/about-assistant.js"
+    },
+    {
+        "scenes": "preferences",
+        "source": "app/assistants/preferences-assistant.js"
+    },
+    {
+        "scenes": "recorded",
+        "source": "app/assistants/recorded-assistant.js"
+    },
+    {
+        "scenes": "welcome",
+        "source": "app/assistants/welcome-assistant.js"
+    },
+    {
+        "scenes": "recordedDetails",
+        "source": "app/assistants/recordedDetails-assistant.js"
+    },
+    {
+        "scenes": "searchHosts",
+        "source": "app/assistants/searchHosts-assistant.js"
+    },
+    {
+        "scenes": "upcoming",
+        "source": "app/assistants/upcoming-assistant.js"
+    },
+    {
+        "scenes": "upcomingDetails",
+        "source": "app/assistants/upcomingDetails-assistant.js"
+    },
+    {
+        "scenes": "flick",
+        "source": "app/assistants/flick-assistant.js"
+    },
+    {
+        "scenes": "status",
+        "source": "app/assistants/status-assistant.js"
+    },
+    {
+        "scenes": "guide",
+        "source": "app/assistants/guide-assistant.js"
+    },
+    {
+        "scenes": "masterRemote",
+        "source": "app/assistants/masterRemote-assistant.js"
+    },
+    {
+        "scenes": "numberpad",
+        "source": "app/assistants/numberpad-assistant.js"
+    },
+    {
+        "scenes": "guideDetails",
+        "source": "app/assistants/guideDetails-assistant.js"
+    },
+    {
+        "scenes": "dashboard",
+        "source": "app/assistants/dashboard-assistant.js"
+    },
+    {
+        "scenes": "tips",
+        "source": "app/assistants/tips-assistant.js"
+    },
+    {
+        "scenes": "changelog",
+        "source": "app/assistants/changelog-assistant.js"
+    },
+    {
+        "scenes": "faqs",
+        "source": "app/assistants/faqs-assistant.js"
+    },
+    {
+        "scenes": "webview",
+        "source": "app/assistants/webview-assistant.js"
+    },
+    {
+        "scenes": "upcomingDetailsXML",
+        "source": "app/assistants/upcomingDetailsXML-assistant.js"
+    },
+    {
+        "scenes": "imageview",
+        "source": "app/assistants/imageview-assistant.js"
+    },
+    {
+        "scenes": "upcomingXML",
+        "source": "app/assistants/upcomingXML-assistant.js"
+    },
+    {
+        "scenes": "videos",
+        "source": "app/assistants/videos-assistant.js"
+    },
+    {
+        "scenes": "videosDetails",
+        "source": "app/assistants/videosDetails-assistant.js"
+    }
+]
