@@ -8,6 +8,9 @@ A: Yes.  Currently the SDK provided by Palm does not allow for the direct telnet
 
 A: The server script that this app uses relies on the python bindings included with MythTV.  By using the actual python bindings the script itself can be simpler and frankly easier for me to write.  But unfortunately the python bindings for MythTV was drastically reworked for MythTV for 0.23, making the script not backwards compatible with MythTV 0.22.  The !MythVideo requirement is somewhat arbitrary and you can comment out the two lines in the script that include the function call "!MythVideo(...)" if you do not have !MythVideo installed on your system.
 
+=== Q: Does this app work with MythTV 0.24? ===
+A: Hopefully.  I don't have a 0.24 system to test it on.  If someone does have a 0.24 setup please let me know if the app works for you.
+
 === Q: The recordings and frontend searches are not working ===
 
 A: First double check you installed the script file is installed on a local web server.  And that you changed the hardcoded to yoru specific system.  You can get the variables you need by looking at /etc/mythtv/mysql.txt on a functioning frontend or backend.  You can see if it is accessible by trying to view it from a web browser (i.e [http://my-server/cgi-bin/webmyth.py?op=getHosts]).  If your browser tries to download a file then that much is working.  If you get a 500 error from your browser you can try looking at the apache error log ("/var/log/apache2/error.log") for information.  
@@ -27,6 +30,9 @@ A: You will need to reset the template in mythweb to the default template in ord
 === Q: I don't like the way the app looks, will it get better? ===
 
 A: Hopefully.  I am not much of a programmer and even less of a designer to for the most part stuff just has to be good enough for me be OK with it.  If you have any design experience or even just some random idea feel free to email me or add a comment to this page.
+
+=== Q: Why doesn't video playback work for all videos? ===
+A: I haven't found a way to reliably play back video files from remote storage directories.  Hopefully playback of video files that are not in sub-directories of your Videos storage group will work remotely, but if the video is in a sub-directory the app gets the frontend to try and play the file locally.  For now I recommend mounting the remote Videos storage group locally via NFS for playback.  (And I know having MythTV show video information during playback is not working.)
 
 === Q: What if I have some other question and/or suggestion? ===
 
