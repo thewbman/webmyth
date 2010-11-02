@@ -116,6 +116,11 @@ WebMyth.guideChannelsCookieObject = WebMyth.guideChannelsCookie.get();
 WebMyth.currentScriptVersion = 4;
 
 
+//Current frontend location
+WebMyth.currentLocation = "";
+WebMyth.usePlugin = false;
+
+
 //Help and first-run message
 WebMyth.helpMessage = "This app requires the installation of 1 script on a local webserver on your network.  ";
 WebMyth.helpMessage += "You can get the file <a href='http://code.google.com/p/webmyth/downloads/list'>here</a><hr/>";
@@ -144,12 +149,19 @@ StageAssistant.prototype.setup = function() {
 	//Setup db
 	WebMyth.db = createHostnameDb();
 	
-	//Handle message command from plug-in
-	//$('telnetPlug').pluginMessageFunc = this.pluginMessageFunc.bind(this); 
 	
 	//Notice focus changes for doign dashbaord remote
 	window.document.addEventListener (Mojo.Event.deactivate, this.onBlurHandler.bind(this));
 	window.document.addEventListener (Mojo.Event.activate, this.onFocusHandler.bind(this));
+	
+	
+	//Setup plugin connection
+	//this.handleConnect();
+	
+	//$('telnet_plugin_id').didReceiveData = this.didReceiveData.bind(this);
+	//$('telnet_plugin_id').didQueryLocation = this.didQueryLocation.bind(this);
+	//$('telnet_plugin_id').socketIsClosed = this.socketIsClosed.bind(this);
+	
 	
 	Mojo.Log.info("About to start first scene - welcome");
 	
@@ -421,6 +433,36 @@ StageAssistant.prototype.startDashboard = function() {
 	
 };
 
+StageAssistant.prototype.handleConnect = function(event) {
+
+	$('telnet_plugin_id').openSocket(WebMyth.prefsCookieObject.currentFrontendAddress, WebMyth.prefsCookieObject.currentRemotePort);
+	
+	Mojo.Log.info("opening telnet socket");
+	
+};
+
+StageAssistant.prototype.didReceiveData = function(a) {
+
+	Mojo.Log.error("plugin response of %s", a);
+	Mojo.Controller.getAppController().showBanner(a, {source: 'notification'});
+	
+};
+
+StageAssistant.prototype.didQueryLocation = function(a) {
+
+	//Mojo.Log.error("query location plugin response of %s", a);
+	WebMyth.currentLocation = a;
+	
+};
+
+StageAssistant.prototype.socketIsClosed = function(a) {
+
+	Mojo.Log.error("socket is closed response of %s", a);
+	Mojo.Controller.getAppController().showBanner(a, {source: 'notification'});
+	
+};
+
+
 
 
 
@@ -429,6 +471,13 @@ WebMyth.sendKey = function(value){
 		
 		Mojo.Log.info("Sending key ",value);
 		
+		var fullCmd = "key "+value
+	
+	if(WebMyth.usePlugin){
+		//$('telnet_plugin_id').sendData(fullCmd);
+		
+	} else {
+	
 		var cmdvalue = encodeURIComponent(value);
 		
 		var requestUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webmythPythonFile;
@@ -452,10 +501,19 @@ WebMyth.sendKey = function(value){
 				Mojo.Controller.getAppController().showBanner("ERROR - check remote.py scipt", {source: 'notification'});
 			}
 		});
+	
+	}
+	
 };
 
 WebMyth.sendJump = function(value) {
 
+	
+	if(WebMyth.usePlugin){
+		//$('telnet_plugin_id').sendData("jump "+value);
+		
+	} else {
+	
 		var cmdvalue = encodeURIComponent(value);
 		
 		var requestUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webmythPythonFile;
@@ -479,11 +537,18 @@ WebMyth.sendJump = function(value) {
 				Mojo.Controller.getAppController().showBanner("ERROR - check remote.py scipt", {source: 'notification'});
 			}
 		});
+		
+	}	
 	
 };
 
 WebMyth.sendPlay = function(value) {
-
+	
+	if(WebMyth.usePlugin){
+		//$('telnet_plugin_id').sendData("play "+value);
+		
+	} else {
+	
 		var cmdvalue = encodeURIComponent(value);
 		
 		var requestUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webmythPythonFile;
@@ -507,6 +572,21 @@ WebMyth.sendPlay = function(value) {
 				Mojo.Controller.getAppController().showBanner("ERROR - check remote.py scipt", {source: 'notification'});
 			}
 		});
+	
+	}
+	
+};
+
+WebMyth.sendQuery = function(value) {
+	
+	var response = $('telnet_plugin_id').sendDataWithResponse("query "+value);
+	
+	
+	Mojo.Log.error("inside query response of "+response);
+	
+	return response;
+	
+	
 	
 };
 
@@ -549,3 +629,4 @@ WebMyth.downloadToPhone = function(input_parameters) {
 		});	
 	
 };
+

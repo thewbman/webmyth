@@ -820,13 +820,18 @@
   line-height: 16px;
 }
 
-.status .jobqueueDrawer .jobqueue-list-item .palm-info-text.left {
+.status .jobqueue-list .jobqueue-list-item .title.left {
+  font-size: 18px;
+  line-height: 20px;
+}
+
+.status .jobqueue-list .jobqueue-list-item .palm-info-text.left {
   padding: 0px;
   margin: 0px 20px;
   line-height: 16px;
 }
 
-.status .jobqueueDrawer .jobqueue-list-item .palm-info-text.right {
+.status .jobqueue-list .jobqueue-list-item .palm-info-text.right {
   padding: 4px;
   margin: 0px 8px;
   line-height: 16px;

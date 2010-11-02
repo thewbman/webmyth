@@ -74,7 +74,6 @@ HostSelectorAssistant.prototype.setup = function() {
 	
 };
 
-
 HostSelectorAssistant.prototype.activate = function(event) {
 	
 	//Populate list using cookie
@@ -125,11 +124,11 @@ HostSelectorAssistant.prototype.handleCommand = function(event) {
 };
 
 
+
 HostSelectorAssistant.prototype.errorHandler = function(transaction, error) { 
     Mojo.Log.error('Error was '+error.message+' (Code '+error.code+')'); 
     return true;
 };
-
 
 HostSelectorAssistant.prototype.deleteHost = function(event) {
 	
@@ -154,43 +153,35 @@ HostSelectorAssistant.prototype.deleteHost = function(event) {
 	
 };
 
-
 HostSelectorAssistant.prototype.chooseList = function(event) {
-	Mojo.Log.info("Selected host.");
+	Mojo.Log.info("Selected host: "+event.item.hostname);
 	
 	WebMyth.prefsCookieObject.currentFrontend = event.item.hostname;
+	WebMyth.prefsCookieObject.currentFrontendAddress = event.item.address;
 	WebMyth.prefsCookieObject.currentRemotePort = event.item.port;
 	WebMyth.prefsCookie.put(WebMyth.prefsCookieObject);
 	 
+	//if(Mojo.Controller.appInfo.usePlugin){
+	//	$('telnet_plugin_id').closeSocket();
+	//	$('telnet_plugin_id').openSocket(WebMyth.prefsCookieObject.currentFrontendAddress, WebMyth.prefsCookieObject.currentRemotePort);
+	//}
 	
 	this.startCommunication();
 	
 };
 
-
 HostSelectorAssistant.prototype.startCommunication = function(event) {
 	
 	Mojo.Log.info("Starting communication ...");
 	
-	//Start telnet communication with selected host
-	if (Mojo.appInfo.skipPDK == "true") {
-		//Do nothing if not using plug-in
-	}
-	else {
-		Mojo.Log.info("Opened telnet connection to %s", WebMyth.prefsCookieObject.currentFrontend);
-		//Mojo.Controller.getAppController().showBanner("Opened telnet connection",{source: 'notification'});
-		
-		$('telnetPlug').OpenTelnetConnection(WebMyth.prefsCookieObject.currentFrontend, WebMyth.prefsCookieObject.currentRemotePort);
-	
-		$('telnetPlug').SendTelnet("asdf");
-		$('telnetPlug').SendTelnet("asdf");
-	}
-
 	
 	//Open initial communication scene
 	Mojo.Controller.stageController.pushScene({name: WebMyth.prefsCookieObject.currentRemoteScene, disableSceneScroller: true});
 	
 };
+
+
+
 
 
 HostSelectorAssistant.prototype.sendTelnet = function(value){
@@ -229,8 +220,6 @@ HostSelectorAssistant.prototype.sendTelnet = function(value){
 	}
 };
 
-
-
 HostSelectorAssistant.prototype.sendKey = function(value){
 		
 		var cmdvalue = encodeURIComponent(value);
@@ -259,8 +248,6 @@ HostSelectorAssistant.prototype.sendKey = function(value){
 		});
 };
 
-
-
 HostSelectorAssistant.prototype.sendJump = function(value){
 		
 		var cmdvalue = encodeURIComponent(value);
@@ -288,4 +275,3 @@ HostSelectorAssistant.prototype.sendJump = function(value){
 			}
 		});
 };
-

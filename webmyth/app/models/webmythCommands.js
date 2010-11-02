@@ -80,40 +80,6 @@ function is_int(value){
 	 }
 };
 
-function openTelnet(telnetPlug, hostname, port) {
-	//Start telnet communication
-	Mojo.Controller.errorDialog("Connecting to %s", $('telnetPlug'));
-	telnetPlug.OpenTelnetConnection(hostname, port);
-	Mojo.Log.info("Opened telnet connection to %s", hostname);
-};
-
-function sendKey(telnetPlug, value) {
-	//Send key command to telnet host
-	sendCommand(telnetPlug, "key "+value);
-};
-
-function sendCommand(telnetPlug, value) {
-	//Send command to telnet host
-	$('telnetPlug').SendTelnet(value);
-	
-	Mojo.Log.info("Sending command '%s' to host", value);
-};
-
-function sendCommandwithReply(telnetPlug, value) {
-	//Not currently working ...
-	var response = telnetPlug.SendTelnetWithReply(value);
-	//var reponse = "response";
-	
-	return response;
-};
-
-function closeTelnet(telnetPlug) {
-	//Close out telnet connection
-	telnetPlug.CloseTelnetConnection();
-	
-	Mojo.Log.info("Closing telnet connection");
-};
-
 function defaultCookie() {
 
 	//These values are initiated in 'welcome' scene if not set
@@ -127,6 +93,7 @@ function defaultCookie() {
 		currentRecgroup: 'Default',
 		currentRecSort: 'date-desc',
 		currentFrontend: 'frontend',
+		currentFrontendAddress: 'frontend-address',
 		currentRemotePort: '6546',
 		currentRemoteScene: 'masterRemote',
 		previousScriptVersion: 0,
@@ -159,7 +126,8 @@ function defaultHostsCookie() {
 	//These values are initiated in 'welcome' scene if not set
 
 	var newCookieObject = [{
-		"hostname": "frontend",							
+		"hostname": "frontend",		
+		"address": "frontend-address",						
 		"port": "6546"
 	}];
 	
@@ -171,7 +139,8 @@ function defaultHostsCookieCurrent(newName) {
 	//These values are initiated in 'welcome' scene if not set
 
 	var newCookieObject = [{
-		"hostname": newName,							
+		"hostname": newName,
+		"address": newName,							
 		"port": "6546"
 	}];
 	
@@ -322,6 +291,24 @@ var trimByChanidStarttime = function(fullList, chanid_in, starttime_in) {
 			}
 		}
 		return {"chanid_in":chanid_in, "starttime_in":starttime_in};
+
+};
+
+var trimByChanidRecstartts = function(fullList, chanid_in, recstartts_in) {
+	
+		var i, s;
+	
+		for (i = 0; i < fullList.length; i++) {
+	
+			s = fullList[i];
+			if ((s.chanId == chanid_in) && (s.recStartTs == recstartts_in)) {
+				//Matches chanid and starttime
+				return s;
+			} else {
+				//Does not match
+			}
+		}
+		return {"chanid_in":chanid_in, "recstartts_in":recstartts_in};
 
 };
 
@@ -547,15 +534,15 @@ var cleanVideos = function(fullList) {
 		} else {
 			//TV episodes
 			if(s.season < 10) {
-				s.fullEpisode = "s0"+s.season;
+				s.fullEpisode = "S0"+s.season;
 			} else {
-				s.fullEpisode = "s"+s.season;
+				s.fullEpisode = "S"+s.season;
 			}
 			
 			if(s.episode < 10) {
-				s.fullEpisode += "e0"+s.episode;
+				s.fullEpisode += "E0"+s.episode;
 			} else {
-				s.fullEpisode += "e"+s.episode;
+				s.fullEpisode += "E"+s.episode;
 			}
 			
 			if(s.season < 10) {
@@ -589,6 +576,27 @@ var cleanVideos = function(fullList) {
 		
 	}
 	
+	
+	return finalList;
+	
+}
+
+var cleanHostsCookie = function(fullList) {
+
+	finalList = [];
+	
+	var i, s = {};
+	
+	for(i = 0; i < fullList.length; i++) {
+		s = fullList[i];
+		
+		if(s.address == null) {
+			s.address = s.hostname;
+		}
+		
+		finalList.push(s);
+		
+	}
 	
 	return finalList;
 	

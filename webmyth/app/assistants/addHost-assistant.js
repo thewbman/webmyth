@@ -52,6 +52,21 @@ AddHostAssistant.prototype.setup = function() {
     ); 
 	
 	
+	this.addressTextModel = {
+             value: "",
+             disabled: false
+    };
+	this.controller.setupWidget("addressTextFieldId",
+        {
+            hintText: $L(""),
+            multiline: false,
+            enterSubmits: false,
+            focus: false
+         },
+         this.addressTextModel
+    ); 
+	
+	
 	this.portTextModel = {
              value: "6546",
              disabled: false
@@ -98,6 +113,7 @@ AddHostAssistant.prototype.submitNewHost = function(event) {
 	//Returns data to host selector scene
 	var newHost = {
 		'hostname': this.hostTextModel.value,
+		'address': this.addressTextModel.value,
 		'port': this.portTextModel.value
 	};
 	

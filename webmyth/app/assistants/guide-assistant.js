@@ -19,7 +19,7 @@
  */
 
  
-function GuideAssistant() {
+function GuideAssistant(starttime_in) {
 
 	this.layoutStyle = "time";
 	this.channid, this.chanNum;
@@ -29,12 +29,17 @@ function GuideAssistant() {
 	this.index = 10000;
 	
 	this.currentTimeObject = {};
-	this.currentTimeISO = "";
 	this.currentDayRange = {};
+	
+	this.newStartTime = "";
 	
 	this.resultList = [];			//Results from XML
 	this.channelList = [];			//List of channels
 	this.subset = [];				//Actually displayed list
+
+	if(starttime_in) {
+		this.newStartTime = starttime_in;
+	}
 	
 }
 
@@ -121,46 +126,69 @@ GuideAssistant.prototype.setup = function() {
 	//Event listeners
 	this.controller.listen(this.controller.get( "guideList" ), Mojo.Event.listTap, this.goGuideDetails.bind(this));
 	
-	//Get system time
+	
+	//Get system time, not passed anything	
 	this.controller.serviceRequest('palm://com.palm.systemservice/time', {
 		method:"getSystemTime",
 		parameters:{},
 		onSuccess: function(response) {
-		
+			
 			//Mojo.Log.info("time serivce reponse is %j", response);
 			//Mojo.Log.info("time serivce localtime is %j", response.localtime);
-		
+			
 			this.currentTimeObject = response.localtime;
 			this.currentTimeISO = dateObjectToISO(this.currentTimeObject); 
 			this.currentDayRange = dateObjectToDayRange(this.currentTimeObject);
 			this.day = this.currentTimeObject.year+"-"+this.currentTimeObject.month+"-"+this.currentTimeObject.day;
 				
-			//Update header
-			this.guideViewMenuModel.items[0].items[1].label = "Now: "+dateObjectToJS(response.localtime).toLocaleString().substring(0,21);
-			this.controller.modelChanged(this.guideViewMenuModel);
+			if(this.newStartTime == "") {
+				//Not passed anything
+					
+				//Update header
+				this.guideViewMenuModel.items[0].items[1].label = "Now: "+dateObjectToJS(response.localtime).toLocaleString().substring(0,21);
+				this.controller.modelChanged(this.guideViewMenuModel);
+				
+				//Set variables to current
+				this.timeObject = dateObjectTo30min(this.currentTimeObject);
+				this.timeISO = this.currentTimeISO;
+				
+				this.timeObjectPlus30 = dateObjectAdd30Min(this.timeObject);
+				this.timeISOPlus30 = dateObjectToISO(this.timeObjectPlus30);
+				
+				this.timeObject = dateObjectSubtract30Min(this.timeObject);
+				
+				this.dayRange = this.currentDayRange;
+				
+				
+				//Mojo.Log.error("current time is %j", this.currentTimeObject);
+				//Mojo.Log.error("ISO date is "+this.currentTimeISO);
+				//Mojo.Log.error("current day range is %j",this.currentDayRange);
+				
+				//Update list from backend XML
+				this.getGuideData();
+				
+			} else {
+				//Used the passed starttime
+				Mojo.Log.info("Got starttime of "+this.newStartTime);
+				
+				this.timeJS = new Date(isoToJS(this.newStartTime));
+				this.timeISO = this.newStartTime;
+				this.timeObject = dateJSToObject(this.timeJS);
+				this.dayRange = dateObjectToDayRange(this.timeObject);
+				this.day = this.timeObject.year+"-"+this.timeObject.month+"-"+this.timeObject.day;
+					
+				this.timeObjectPlus30 = dateObjectAdd30Min(this.timeObject);
+				this.timeISOPlus30 = dateObjectToISO(this.timeObjectPlus30);
+					
+				this.selectedTime();
+			}
 			
-			//Set variables to current
-			this.timeObject = dateObjectTo30min(this.currentTimeObject);
-			this.timeISO = this.currentTimeISO;
-			
-			this.timeObjectPlus30 = dateObjectAdd30Min(this.timeObject);
-			this.timeISOPlus30 = dateObjectToISO(this.timeObjectPlus30);
-			
-			this.timeObject = dateObjectSubtract30Min(this.timeObject);
-			
-			this.dayRange = this.currentDayRange;
-			
-			
-			//Mojo.Log.error("current time is %j", this.currentTimeObject);
-			//Mojo.Log.error("ISO date is "+this.currentTimeISO);
-			//Mojo.Log.error("current day range is %j",this.currentDayRange);
-			
-			//Update list from backend XML
-			this.getGuideData();
 		}.bind(this),
 		onFailure: function() {}
 	}); 
-	
+		
+
+
 };
 
 GuideAssistant.prototype.activate = function(event) {
@@ -415,7 +443,9 @@ GuideAssistant.prototype.handleShakestart = function(event) {
 			
 			//Update list from backend XML
 			this.getGuideData();
+			
 		}.bind(this),
+		
 		onFailure: function() {}
 	}); 
 	
@@ -428,7 +458,7 @@ GuideAssistant.prototype.handleShakestart = function(event) {
 GuideAssistant.prototype.filterListFunction = function(filterString, listWidget, offset, count) {
 	 
 	//Filtering function
-	Mojo.Log.info("Filter string is "+filterString);
+	//Mojo.Log.info("Filter string is "+filterString);
 	
 	var totalSubsetSize = 0;
  
@@ -502,7 +532,7 @@ GuideAssistant.prototype.filterListFunction = function(filterString, listWidget,
 		this.controller.sceneScroller.mojo.adjustBy(0,-300);
 		
 	} else {
-		Mojo.Log.info("Not adjusting sorting because hour is ",this.currentTimeObject.hour);
+		//Mojo.Log.info("Not adjusting sorting because hour is ",this.currentTimeObject.hour);
 	}
 	
 
@@ -596,7 +626,7 @@ GuideAssistant.prototype.popupHandler = function(event) {
 	
 	switch(event) {
 		case 'do-playNow':
-			Mojo.Log.error("playing on livetv");
+			//Mojo.Log.info("playing on livetv");
 			
 			this.channid = this.newChannid;
 			this.chanNum = this.newChanNum;
@@ -605,23 +635,23 @@ GuideAssistant.prototype.popupHandler = function(event) {
 			
 		break;
 		case 'do-pickDetails':
-			Mojo.Log.error("showing details scene");
+			//Mojo.Log.info("showing details scene");
 			
 			var detailsObject = trimGuideByChanidStarttime(this.resultList, this.newChannid, this.newStartTime)
 
-			Mojo.Log.info("Selected object is: '%j'", detailsObject);
+			//Mojo.Log.info("Selected object is: '%j'", detailsObject);
 			
 			//Open guideDetails communication scene
 			Mojo.Controller.stageController.pushScene("guideDetails", detailsObject);
 			
 		break;
 		case 'do-pickOpenMythweb':
-			Mojo.Log.error("opening in mythweb");
+			//Mojo.Log.info("opening in mythweb");
 			
 			var dateJS = new Date(isoToJS(this.newStartTime));
 			var dateUTC = dateJS.getTime()/1000 -59;				
 			
-			Mojo.Log.info("Selected time is: '%j'", dateUTC);
+			//Mojo.Log.info("Selected time is: '%j'", dateUTC);
 			
 			var mythwebUrl = "http://";
 			mythwebUrl += WebMyth.prefsCookieObject.webserverName;
@@ -630,7 +660,7 @@ GuideAssistant.prototype.popupHandler = function(event) {
 			mythwebUrl += dateUTC;
 			//mythwebUrl += "?RESET_TMPL=true";
 			
-			Mojo.Log.info("mythweb url is "+mythwebUrl);
+			//Mojo.Log.info("mythweb url is "+mythwebUrl);
 			
 			//Mojo.Controller.stageController.pushScene("webview", mythwebUrl, "Setup Recording");
 			
@@ -649,7 +679,7 @@ GuideAssistant.prototype.popupHandler = function(event) {
 
 		break;
 		case 'do-pickChannel':
-			//Mojo.Log.error("showing channel list"+this.newChannid+this.newChanNum);
+			//Mojo.Log.info("showing channel list"+this.newChannid+this.newChanNum);
 			
 			//Restart spinner and show
 			this.spinnerModel.spinning = true;
@@ -675,7 +705,7 @@ GuideAssistant.prototype.popupHandler = function(event) {
 			
 		break;
 		case 'do-pickTime':
-			Mojo.Log.error("showing time list");
+			//Mojo.Log.info("showing time list");
 			
 			//Restart spinner and show
 			this.spinnerModel.spinning = true;
@@ -705,22 +735,21 @@ GuideAssistant.prototype.popupHandler = function(event) {
 GuideAssistant.prototype.checkLocation = function() {
 	//Attempting to play livetv - have to start livetv then change channel
 	this.host = WebMyth.prefsCookieObject.currentFrontend;
-	Mojo.Log.info("Checking current location as prep for "+this.channid+" on "+this.host);
+	//Mojo.Log.info("Checking current location as prep for "+this.channid+" on "+this.host);
 	
 	
-	if (Mojo.appInfo.skipPDK == "true") {
 		//Mojo.Controller.getAppController().showBanner("Sending command to telnet", {source: 'notification'});
 		
 		var requestUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webmythPythonFile;
 		requestUrl += "?op=remote&type=query";
 		requestUrl += "&host="+this.host+"&cmd=location";
 		
-		Mojo.Log.error("requesting check URL: "+requestUrl);
+		//Mojo.Log.error("requesting check URL: "+requestUrl);
 	
 		var request1 = new Ajax.Request(requestUrl, {
 			method: 'get',
 			onSuccess: function(response){
-				Mojo.Log.info("got query response: %s, %s",response.responseText,response.responseText.search("LiveTV"));
+				//Mojo.Log.info("got query response: %s, %s",response.responseText,response.responseText.search("LiveTV"));
 				
 				if(response.responseText.search("LiveTV") == -1) {
 					//Is not on LiveTV
@@ -736,26 +765,41 @@ GuideAssistant.prototype.checkLocation = function() {
 			}
 		}
 		);
-	}
-	else {
-		$('telnetPlug').SendTelnet(value);
+	
+	
+	/*
+	var location = WebMyth.sendQuery("location");
+	
+	Mojo.Log.error("queried location is "+location);
+	
+	if(location.search("LiveTV") == -1) {
+		//Is not on LiveTV
+		this.jumpLive();
+	} else {
+		//Is already on LiveTV
+		this.startChannelPlay();
 	}
 	
+	
+	Mojo.Log.error("queried location is "+location);
+	*/
 	
 };
 
 GuideAssistant.prototype.jumpLive = function() {
 	//Attempting to play livetv - have to start livetv then change channel
-	Mojo.Log.info("jumping to live tv");
+	//Mojo.Log.info("jumping to live tv");
 	
-	if (Mojo.appInfo.skipPDK == "true") {
-		//Mojo.Controller.getAppController().showBanner("Sending command to telnet", {source: 'notification'});
+	//WebMyth.sendJump("livetv");
+	
+	this.startChannelPlay();
+	
 		
 		var requestUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webmythPythonFile;
 		requestUrl += "?op=remote&type=jump";
 		requestUrl += "&host="+this.host+"&cmd=livetv";
 		
-		Mojo.Log.error("requesting jump live : "+requestUrl);
+		//Mojo.Log.error("requesting jump live : "+requestUrl);
 	
 		var request1 = new Ajax.Request(requestUrl, {
 			method: 'get',
@@ -766,10 +810,6 @@ GuideAssistant.prototype.jumpLive = function() {
 			}
 		}
 		);
-	}
-	else {
-		$('telnetPlug').SendTelnet(value);
-	}
 	
 	
 };
@@ -778,7 +818,7 @@ GuideAssistant.prototype.startChannelPlay = function() {
 	//Attempting to play livetv - have to start livetv then change channel
 	Mojo.Log.info("Playing channel "+this.channid);
 	
-	var cmd = "chanid+"+this.channid;
+	var cmd = "chanid "+this.channid;
 	
 	WebMyth.sendPlay(cmd);
 	
@@ -851,7 +891,7 @@ GuideAssistant.prototype.guideNext = function() {
 			
 			this.timeObject = dateObjectSubtract30Min(this.timeObject);
 			
-			Mojo.Log.info("time added 30 min to %j",this.timeObject);
+			//Mojo.Log.info("time added 30 min to %j",this.timeObject);
 						
 			this.selectedTime();
 						
@@ -996,16 +1036,16 @@ GuideAssistant.prototype.guideDividerFunction = function(itemModel) {
 
 GuideAssistant.prototype.updateChannelListCookie = function() {
 
-	Mojo.Log.error("Updateing channel list with cookie");
+	//Mojo.Log.error("Updateing channel list with cookie");
 	
 	//Guide channels cookie
 	if (WebMyth.guideChannelsCookieObject) {		//cookie exists
 	
-		Mojo.Log.info("Cookie exists, updating last update");
+		//Mojo.Log.info("Cookie exists, updating last update");
 		
-		Mojo.Log.info("channels cookie is %j",WebMyth.guideChannelsCookieObject);
+		//Mojo.Log.info("channels cookie is %j",WebMyth.guideChannelsCookieObject);
 		
-		Mojo.Log.info("lengths are "+this.channelList.length+" and "+WebMyth.guideChannelsCookieObject.length);
+		//Mojo.Log.info("lengths are "+this.channelList.length+" and "+WebMyth.guideChannelsCookieObject.length);
 		
 		//Update channel list from cookie
 		this.channelList = updateGuideChannelsFromCookie(this.channelList,WebMyth.guideChannelsCookieObject);
@@ -1023,7 +1063,7 @@ GuideAssistant.prototype.updateChannelListCookie = function() {
 		WebMyth.guideChannelsCookie.put(WebMyth.guideChannelsCookieObject);
 	}
 	
-	Mojo.Log.info("Done with if-else in update cookie list");
+	//Mojo.Log.info("Done with if-else in update cookie list");
 	
 	Object.extend(this.channelMenuModel.items,this.channelList);
 					
@@ -1116,7 +1156,7 @@ GuideAssistant.prototype.getGuideData = function() {
 		requestUrl += "&StartChanId="+this.channid;
 	}
 	
-	Mojo.Log.info("Guide URL is: "+requestUrl);
+	//Mojo.Log.info("Guide URL is: "+requestUrl);
 	
 	
     try {
@@ -1296,11 +1336,12 @@ GuideAssistant.prototype.readGuideSuccess = function(response) {
 						}
 					}
 				}
-				Mojo.Log.info('Done parsing ProgramGuide');
+				//Mojo.Log.info('Done parsing ProgramGuide');
 				//Mojo.Log.error("full json is %j", this.resultList);
 				//Mojo.Log.error("channels json is %j", this.channelList);
+				
 				if(this.channelMenuModel.items.length == 0) {
-					Mojo.Log.info("Didn't find any channels - adding now");
+					//Mojo.Log.info("Didn't find any channels - adding now");
 					this.channelList = newChannelList;
 					
 					this.channelList.sort(sort_by('chanNumInt', false));
@@ -1442,10 +1483,10 @@ var DateAndTimePickerAssistant = Class.create({
 	
 		this.widget = widget;
 		
-		Mojo.Log.error("time object 2 is %j", this.timeObject2);
+		//Mojo.Log.error("time object 2 is %j", this.timeObject2);
 		
 		this.newTime = new Date(this.timeObject2.year, (this.timeObject2.month-1), this.timeObject2.day, this.timeObject2.hour, this.timeObject2.minute, this.timeObject2.second);
-		Mojo.Log.error("time is %j", this.newTime);
+		//Mojo.Log.error("time is %j", this.newTime);
 		
 		this.controller.setupWidget("datepickerid",
         this.dateAttributes = {

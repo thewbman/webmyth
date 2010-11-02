@@ -114,9 +114,9 @@ WelcomeAssistant.prototype.setup = function() {
 		
 		
 		//Setup default settings if missing due to old cookie versions
-		if (WebMyth.prefsCookieObject.webserverRemoteFile == null) WebMyth.prefsCookieObject.webserverRemoteFile = defaultCookie().webserverRemoteFile;
+		//if (WebMyth.prefsCookieObject.webserverRemoteFile == null) WebMyth.prefsCookieObject.webserverRemoteFile = defaultCookie().webserverRemoteFile;
 		//if (WebMyth.prefsCookieObject.webMysqlFile == null) WebMyth.prefsCookieObject.webMysqlFile = defaultCookie().webMysqlFile;
-		//if (WebMyth.prefsCookieObject.webmythPythonFile == null) WebMyth.prefsCookieObject.webmythPythonFile = defaultCookie().webmythPythonFile;
+		if (WebMyth.prefsCookieObject.webmythPythonFile == null) WebMyth.prefsCookieObject.webmythPythonFile = defaultCookie().webmythPythonFile;
 		if (WebMyth.prefsCookieObject.currentRecgroup == null) WebMyth.prefsCookieObject.currentRecgroup = defaultCookie().currentRecgroup;
 		if (WebMyth.prefsCookieObject.currentRecSort == null) WebMyth.prefsCookieObject.currentRecSort = defaultCookie().currentRecSort;
 		if (WebMyth.prefsCookieObject.currentFrontend == null) WebMyth.prefsCookieObject.currentFrontend = defaultCookie().currentFrontend;
@@ -140,6 +140,7 @@ WelcomeAssistant.prototype.setup = function() {
 		if (WebMyth.prefsCookieObject.showVideos == null) WebMyth.prefsCookieObject.showVideos = defaultCookie().showVideos;
 		if (WebMyth.prefsCookieObject.currentVideosSort == null) WebMyth.prefsCookieObject.currentVideosSort = defaultCookie().currentVideosSort;
 		if (WebMyth.prefsCookieObject.currentVideosGroup == null) WebMyth.prefsCookieObject.currentVideosGroup = defaultCookie().currentVideosGroup;
+		if (WebMyth.prefsCookieObject.currentFrontendAddress == null) WebMyth.prefsCookieObject.currentFrontendAddress = defaultCookie().currentFrontend;
 		
 		
 		//Check if scripts need an upgrade message
@@ -187,12 +188,15 @@ WelcomeAssistant.prototype.setup = function() {
 	//Hosts cookie
 	if (WebMyth.hostsCookieObject) {		//cookie exist
 		//Mojo.Log.info("Hosts cookie is %j",WebMyth.hostsCookieObject);
-		//do nothing?
+		cleanHostsCookie(WebMyth.hostsCookieObject);
+		WebMyth.hostsCookie.put(WebMyth.hostsCookieObject);
 	} else {
 		Mojo.Log.info("Missing hosts cookie.  Using default.");
 		WebMyth.hostsCookieObject = defaultHostsCookieCurrent(WebMyth.prefsCookieObject.currentFrontend);
 		WebMyth.hostsCookie.put(WebMyth.hostsCookieObject);
 	}
+	Mojo.Log.error("Hosts cookie is %j",WebMyth.hostsCookieObject);
+	
 
 	//Backends cookie
 	if (WebMyth.backendsCookieObject) {		//cookie exist
@@ -266,6 +270,7 @@ WelcomeAssistant.prototype.activate = function(event) {
 	this.showButtons();
 	
 	
+	
 	//Keypress event
 	Mojo.Event.listen(this.controller.sceneElement, Mojo.Event.keyup, this.handleKey.bind(this));
 	
@@ -336,6 +341,7 @@ WelcomeAssistant.prototype.handleShakestart = function(event) {
 	Event.stop(event);
 	
 };
+
 
 
 
