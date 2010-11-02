@@ -670,8 +670,8 @@ StatusAssistant.prototype.setJobqueueData = function(propertyValue, model)  {
 	
 	var myDataModel = '<div class="title truncating-text left">'+model.fullTitle+'</div>';
     myDataModel += '<div class="palm-info-text left">'+model.startTime+'</div>';
-    myDataModel += '<div class="palm-info-text right italics">'+jobType+' on '+model.hostname+'</div>';
-    myDataModel += '<div class="palm-info-text right italics">'+status+'</div>';
+    myDataModel += '<div class="palm-info-text right italics">'+jobType+' on '+model.hostname;
+    myDataModel += '<br />'+status+'</div>';
 	
 	if(model.comments) myDataModel += '<div class="title truncating-text right italics">'+model.comments+'</div>';
 	

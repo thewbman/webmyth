@@ -360,14 +360,21 @@ VideosDetailsAssistant.prototype.playOnHost = function(host) {
 	//var clean_starttime = this.videosObject.starttime.replace(' ','T');
 	var clean_starttime = this.videosObject.recStartTs;
 	
-	var cmd = "file "+this.videoBase+"/"+this.videosObject.filename+"'";
+	var cmd = "file ";
+	
+	if(this.videosObject.filename == this.videosObject.level1) {
+		//Try using a myth:// URL when not using subdirectories
+		cmd += "myth://"+this.videosObject.host+"/"+this.videosObject.filename+"'";
+	} else {
+		//Use a direct file reference as a backup
+		cmd += this.videoBase+"/"+this.videosObject.filename+"'";
+	}
+	
+	
 	
 	Mojo.Log.info("Command to send is " + cmd);
-	
-	
 		
 	WebMyth.sendPlay(cmd);
-	
 	
 	if(WebMyth.prefsCookieObject.playJumpRemote)  Mojo.Controller.stageController.pushScene({name: WebMyth.prefsCookieObject.currentRemoteScene, disableSceneScroller: true});
 	

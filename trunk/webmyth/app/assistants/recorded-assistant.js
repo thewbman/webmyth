@@ -726,10 +726,11 @@ function insertRecordedRow(newline){
 RecordedAssistant.prototype.goRecordedDetails = function(event) {
 	var recorded_chanid = event.item.chanId;
 	var recorded_startTime = event.item.startTime;
+	var recorded_recStartTs = event.item.recStartTs;
 	
-	Mojo.Log.info("Selected individual recording: '%s' + '%s'", recorded_chanid, recorded_startTime);
+	Mojo.Log.info("Selected individual recording: '%s' + '%s'", recorded_chanid, recorded_recStartTs);
 	
-	detailsObject = trimByChanidStarttime(this.fullResultList, recorded_chanid, recorded_startTime)
+	detailsObject = trimByChanidRecstartts(this.fullResultList, recorded_chanid, recorded_recStartTs)
 
 	//Mojo.Log.info("Selected object is: '%j'", detailsObject);
 	

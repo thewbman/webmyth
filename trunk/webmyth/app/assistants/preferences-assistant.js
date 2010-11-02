@@ -367,6 +367,7 @@ PreferencesAssistant.prototype.activate = function(event) {
 
 		if (WebMyth.prefsCookieObject) {
 			
+			Mojo.Log.error("initial cookie is %j", WebMyth.prefsCookieObject);
 			
 			//Update settings from cookie
 			this.webserverTextModel.value = WebMyth.prefsCookieObject.webserverName;
@@ -385,7 +386,7 @@ PreferencesAssistant.prototype.activate = function(event) {
 			//this.controller.modelChanged(this.useWebmythScriptToggleModel);
 			
 			this.webmythPythonFileTextModel.value = WebMyth.prefsCookieObject.webmythPythonFile;
-			this.controller.modelChanged(this.useWebmythScriptToggleModel);
+			this.controller.modelChanged(this.webmythPythonFileTextModel);
 			
 			this.showUpcomingToggleModel.value = WebMyth.prefsCookieObject.showUpcoming;
 			this.controller.modelChanged(this.showUpcomingToggleModel);
@@ -676,6 +677,8 @@ PreferencesAssistant.prototype.checkSettings = function() {
 		
 	
 		WebMyth.remoteCookie.put(WebMyth.remoteCookieObject);
+		
+		Mojo.Log.error("new cookie is %j", WebMyth.prefsCookieObject);
 
 		Mojo.Controller.stageController.popScene();
 	

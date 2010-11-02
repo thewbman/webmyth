@@ -8,6 +8,10 @@ To Do - planned new features and updates:
  - build video file tree?
  - add video images ?
  - use icons for asc desc
+ - add videos shortcut
+ - change videos title when filtered ?
+ - look into menu panel (style matters)
+ - look into guide showing wrong time (esp from upcoming)
  
  
 //Long term

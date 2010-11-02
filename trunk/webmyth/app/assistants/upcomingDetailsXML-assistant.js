@@ -50,15 +50,16 @@ UpcomingDetailsXMLAssistant.prototype.setup = function() {
 
 	// Menu grouping at bottom of scene
     this.cmdMenuModel = { label: $L('Play Menu'),
-                            items: [{ label: 'Setup', command: 'go-setup', width: 90 },{ icon: 'refresh', command: 'go-refresh' },{label: $L('Web'), submenu:'web-menu', width: 90}]};
+                            items: [{ label: 'Setup', command: 'go-setup', width: 90 },{ icon: 'refresh', command: 'go-refresh' },{label: $L('More'), submenu:'web-menu', width: 90}]};
  
 	this.webMenuModel = { label: $L('WebMenu'), items: [
-			{"label": $L('Wikipedia'), "command": "go-web--Wikipedia"},
-			{"label": $L('themoviedb'), "command": "go-web--themoviedb"},
-			{"label": $L('IMDB'), "command": "go-web--IMDB"},
-			{"label": $L('TheTVDB'), "command": "go-web--TheTVDB"},
-			{"label": $L('TV.com'), "command": "go-web--TV.com"},
-			{"label": $L('Google'), "command": "go-web--Google"},
+			{"label": $L('Guide'), "command": "go-guide"},
+			{"label": $L('Web: Wikipedia'), "command": "go-web--Wikipedia"},
+			{"label": $L('Web: themoviedb'), "command": "go-web--themoviedb"},
+			{"label": $L('Web: IMDB'), "command": "go-web--IMDB"},
+			{"label": $L('Web: TheTVDB'), "command": "go-web--TheTVDB"},
+			{"label": $L('Web: TV.com'), "command": "go-web--TV.com"},
+			{"label": $L('Web: Google'), "command": "go-web--Google"},
 			]};
 
  
@@ -97,6 +98,9 @@ UpcomingDetailsXMLAssistant.prototype.handleCommand = function(event) {
 	//Mojo.Log.error("command: "+myCommand+" host: "+mySelection);
 
     switch(myCommand) {
+      case 'go-guid':
+		this.openGuide();
+       break;
       case 'go-web-':
 		this.openWeb(mySelection);
        break;
@@ -124,6 +128,14 @@ UpcomingDetailsXMLAssistant.prototype.handleCommand = function(event) {
 };
 
 
+
+UpcomingDetailsXMLAssistant.prototype.openGuide = function() {
+
+	//Mojo.Log.error("Opening in guide "+this.starttime.replace(" ","T"));
+	
+	Mojo.Controller.stageController.pushScene("guide", this.starttime.replace(" ","T").substring(0,18)+01);
+ 
+};
 
 UpcomingDetailsXMLAssistant.prototype.openMythweb = function() {
 
