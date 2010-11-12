@@ -1,5 +1,7 @@
 #!/usr/bin/python
 #
+# webmyth.py
+#
 # Original script impsired by Kyle Stoneman from http://www.legatissimo.info/node/355
 # Modified beyond recognition for use in WebMyth   http://code.google.com/p/webmyth/
 #
@@ -23,7 +25,7 @@ myDBPassword = 'mythtv'
 # end of configuration
 #
 
-version = 6
+version = 7
 
 import cgi
 import cgitb
@@ -32,9 +34,12 @@ import json
 import string
 import os
 import sys
+import base64
 #cgitb.enable()
 from telnetlib import Telnet
 from MythTV import MythDB, MythBE, Frontend, MythVideo, MythXML, MythLog, MythError, Video, ftopen
+
+import MySQLdb
 
 
 form = cgi.FieldStorage()
@@ -50,6 +55,23 @@ try :
 	mythBE = MythBE(myBackend, db=mythDB)
 except KeyError:
 	mythBE = MythBE(db=mythDB)
+
+
+#MySQL connection
+sqlDB = MySQLdb.connect(host = myDBHostName,user = myDBUserName,passwd = myDBPassword,db = myDBName)
+
+def FetchOneAssoc(cursor) :
+    data = cursor.fetchone()
+    if data == None :
+        return None
+    desc = cursor.description
+
+    dict = {}
+
+    for (name, value) in zip(desc, data) :
+        dict[name[0]] = value
+
+    return dict
 
 
 createJson = 0
@@ -82,6 +104,65 @@ if op == 'getScriptVersion':
 	#return script version
 	result = version
 	
+elif op == 'getSQL':
+	createJson = 1
+	
+	table = form['table'].value
+	
+	cursor = sqlDB.cursor(cursorclass=MySQLdb.cursors.DictCursor)
+	cursor.execute("SELECT * FROM "+table)
+	alldata = cursor.fetchall ()
+	
+	cursor.close()
+	sqlDB.close()
+	
+elif op == 'executeSQL':
+	
+	query64 = form['query64'].value
+	
+	cursor = sqlDB.cursor(cursorclass=MySQLdb.cursors.DictCursor)
+	cursor.execute(base64.b64decode(query64))
+	
+	cursor.close()
+	sqlDB.close()
+	
+	result = "Finished running SQL: "+base64.b64decode(query64)
+	
+elif op == 'executeSQLwithResponse':
+	createJson = 1
+	
+	query64 = form['query64'].value
+	
+	cursor = sqlDB.cursor(cursorclass=MySQLdb.cursors.DictCursor)
+	cursor.execute(base64.b64decode(query64))
+	alldata = cursor.fetchall ()
+	
+	cursor.close()
+	sqlDB.close()
+	
+elif op == 'getRecord':
+	createJson = 2
+	
+	recordId = form['recordId'].value
+	
+	cursor = sqlDB.cursor(cursorclass=MySQLdb.cursors.DictCursor)
+	cursor.execute("SELECT * FROM record WHERE recordid = "+recordId)
+	alldata = cursor.fetchone ()
+	
+	cursor.close()
+	sqlDB.close()
+	
+elif op == 'reschedule':
+
+	try :
+		recordId_in = form['recordId'].value
+	except KeyError:
+		recordId_in = '-1'
+	
+	mythBE.reschedule(recordid=recordId_in)
+	
+	result = "started scheduler"
+	
 elif op == 'getFile':
 	header = 'file'
 	filename = form['filename'].value
@@ -110,6 +191,13 @@ elif op == 'getUpcoming':
 	#asking for upcoming recordings - will record
 	createJson = 1
 	alldata = mythBE.getUpcomingRecordings()
+		
+elif op == 'getConflicting':
+	#asking for upcoming recordings - conflicting
+	#only added in 0.24
+	
+	createJson = 1
+	alldata = mythBE.getConflictedRecordings()
 	
 elif op == 'getPending' :
 	#asking for pending - matches recording rule
@@ -253,6 +341,17 @@ elif op == 'scanVideos':
 	
 	result = "scanned storage groups"
 	
+elif op == 'getMusic':
+	createJson = 1
+	
+	
+	cursor = sqlDB.cursor(cursorclass=MySQLdb.cursors.DictCursor)
+	cursor.execute("SELECT music_songs.song_id, music_songs.name, music_songs.filename, music_songs.year, music_songs.track, music_artists.artist_name, music_albums.album_name, music_albums.year AS album_year, music_albums.compilation FROM music_songs, music_artists, music_albums WHERE music_songs.artist_id = music_artists.artist_id AND music_songs.album_id = music_albums.album_id")
+	alldata = cursor.fetchall ()
+	
+	cursor.close()
+	sqlDB.close()
+
 elif op == 'getRecording' :
 	#asking for a singled recorded program
 	createJson = 2

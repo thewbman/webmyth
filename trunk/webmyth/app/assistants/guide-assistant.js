@@ -597,14 +597,14 @@ GuideAssistant.prototype.goGuideDetails = function(event) {
 		popupItems = [
 			{label: 'Play on '+WebMyth.prefsCookieObject.currentFrontend, command: 'do-playNow'},
 			{label: 'Details', command: 'do-pickDetails'},
-			{label: 'Setup Recording', command: 'do-pickOpenMythweb'},
+			{label: 'Setup Recording', command: 'do-pickSetupRecording'},
 			{label: 'Guide: Channel '+this.newChanNum, command: 'do-pickChannel'},
 			{label: 'Guide: '+event.item.startTime.replace("T"," ").substring(0,16), command: 'do-pickTime'}
 		]
 	} else {
 		popupItems = [
 			{label: 'Details', command: 'do-pickDetails'},
-			{label: 'Setup Recording', command: 'do-pickOpenMythweb'},
+			{label: 'Setup Recording', command: 'do-pickSetupRecording'},
 			{label: 'Guide: Channel '+this.newChanNum, command: 'do-pickChannel'},
 			{label: 'Guide: '+event.item.startTime.replace("T"," ").substring(0,16), command: 'do-pickTime'}
 		]
@@ -645,9 +645,11 @@ GuideAssistant.prototype.popupHandler = function(event) {
 			Mojo.Controller.stageController.pushScene("guideDetails", detailsObject);
 			
 		break;
-		case 'do-pickOpenMythweb':
-			//Mojo.Log.info("opening in mythweb");
+		case 'do-pickSetupRecording':
+		
+			Mojo.Log.error("opening setup");
 			
+			/*
 			var dateJS = new Date(isoToJS(this.newStartTime));
 			var dateUTC = dateJS.getTime()/1000 -59;				
 			
@@ -674,6 +676,11 @@ GuideAssistant.prototype.popupHandler = function(event) {
 					}
 				}
 			});
+			*/
+			
+			var detailsObject = trimGuideByChanidStarttime(this.resultList, this.newChannid, this.newStartTime)
+
+			Mojo.Controller.stageController.pushScene("setupRecording", detailsObject);
 
 						
 

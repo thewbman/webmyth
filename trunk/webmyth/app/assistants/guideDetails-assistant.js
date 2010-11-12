@@ -39,7 +39,7 @@ GuideDetailsAssistant.prototype.setup = function() {
 
 	// Menu grouping at bottom of scene
     this.cmdMenuModel = { label: $L('Play Menu'),
-                            items: [{ label: $L('Setup'), command: 'go-mythweb', width: 90 },{ icon: 'refresh', command: 'go-refresh' },{label: $L('Web'), submenu:'web-menu', width: 90}]};
+                            items: [{ label: $L('Setup'), command: 'go-setup--', width: 90 },{ icon: 'refresh', command: 'go-refresh' },{label: $L('Web'), submenu:'web-menu', width: 90}]};
 							
  
 	this.hostsMenuModel = { label: $L('Hosts'), items: []};
@@ -118,7 +118,7 @@ GuideDetailsAssistant.prototype.activate = function(event) {
 		this.cmdMenuModel.items[0].width =  90;
 		
 		this.cmdMenuModel.items[1].label = $L('Setup');
-		this.cmdMenuModel.items[1].command = 'go-mythweb';
+		this.cmdMenuModel.items[1].command = 'go-setup--';
 		this.cmdMenuModel.items[1].width =  90;
 		this.cmdMenuModel.items[1].icon =  '';
 		
@@ -144,7 +144,6 @@ GuideDetailsAssistant.prototype.cleanup = function(event) {
 	   a result of being popped off the scene stack */
 };
 
-
 GuideDetailsAssistant.prototype.handleCommand = function(event) {
 
   if(event.type == Mojo.Event.command) {
@@ -153,8 +152,8 @@ GuideDetailsAssistant.prototype.handleCommand = function(event) {
 	Mojo.Log.info("command: "+myCommand+" host: "+mySelection);
 
     switch(myCommand) {
-      case 'go-mythweb':
-		this.openMythweb();
+      case 'go-setup--':
+		this.openSetup();
        break;
       case 'go-play---':
 		this.checkLocation(mySelection);
@@ -172,7 +171,6 @@ GuideDetailsAssistant.prototype.handleCommand = function(event) {
   }
   
 };
-
 
 GuideDetailsAssistant.prototype.handleKey = function(event) {
 
@@ -208,9 +206,11 @@ GuideDetailsAssistant.prototype.handleKey = function(event) {
 
 
 
-GuideDetailsAssistant.prototype.openMythweb = function() {
+GuideDetailsAssistant.prototype.openSetup = function() {
 
-	Mojo.Log.error("opening in mythweb");
+	Mojo.Log.error("opening setup");
+	
+	/*
 			
 	var dateJS = new Date(isoToJS(this.guideObject.startTime));
 	var dateUTC = dateJS.getTime()/1000;				//don't need 59 second offset?
@@ -238,8 +238,10 @@ GuideDetailsAssistant.prototype.openMythweb = function() {
 			}
 		}
 	}); 
+	*/
 	
-	
+	Mojo.Controller.stageController.pushScene("setupRecording", this.guideObject);
+
 };
 
 
@@ -461,7 +463,7 @@ GuideDetailsAssistant.prototype.readDetailsXMLSuccess = function(response) {
 				//Mojo.Log.info('Starting to parse ProgramDetails');
 				programNode = topSingleNode.childNodes[0];
 				
-				this.newGuideObject = {
+				this.guideObject = {
 					"title": programNode.getAttributeNode("title").nodeValue, 
 					"subTitle": programNode.getAttributeNode("subTitle").nodeValue, 
 					"programFlags": programNode.getAttributeNode("programFlags").nodeValue, 
@@ -480,60 +482,61 @@ GuideDetailsAssistant.prototype.readDetailsXMLSuccess = function(response) {
 				};
 				
 				try {
-					this.newGuideObject.stars = programNode.getAttributeNode("stars").nodeValue;
-					this.newGuideObject.airdate = programNode.getAttributeNode("airdate").nodeValue;
+					this.guideObject.stars = programNode.getAttributeNode("stars").nodeValue;
+					this.guideObject.airdate = programNode.getAttributeNode("airdate").nodeValue;
 				} catch(e) {
 					Mojo.Log.info("Error with getting airdate and stars");
-					this.newGuideObject.stars = "";
-					this.newGuideObject.airdate = "";
+					this.guideObject.stars = "";
+					this.guideObject.airdate = "";
 				}
 				
 				for(var j = 0; j < programNode.childNodes.length; j++) {
 					programChildNode = programNode.childNodes[j];
 					//Mojo.Log.info("Node name is "+programChildNode.nodeName);
 					
-					if(j == 0) this.newGuideObject.description =programChildNode.nodeValue;
+					if(j == 0) this.guideObject.description =programChildNode.nodeValue;
 									
 					if(programChildNode.nodeName == 'Channel') {
 						//Mojo.Log.info('Inside channel if');
 
-						this.newGuideObject.inputId = programChildNode.getAttributeNode("inputId").nodeValue;
-						this.newGuideObject.chanFilters = programChildNode.getAttributeNode("chanFilters").nodeValue;
-						this.newGuideObject.commFree = programChildNode.getAttributeNode("commFree").nodeValue;
-						this.newGuideObject.channelName = programChildNode.getAttributeNode("channelName").nodeValue;
-						this.newGuideObject.sourceId = programChildNode.getAttributeNode("sourceId").nodeValue;
-						this.newGuideObject.chanId = programChildNode.getAttributeNode("chanId").nodeValue;
-						this.newGuideObject.chanNum = programChildNode.getAttributeNode("chanNum").nodeValue;
-						this.newGuideObject.callSign = programChildNode.getAttributeNode("callSign").nodeValue;
+						this.guideObject.inputId = programChildNode.getAttributeNode("inputId").nodeValue;
+						this.guideObject.chanFilters = programChildNode.getAttributeNode("chanFilters").nodeValue;
+						this.guideObject.commFree = programChildNode.getAttributeNode("commFree").nodeValue;
+						this.guideObject.channelName = programChildNode.getAttributeNode("channelName").nodeValue;
+						this.guideObject.sourceId = programChildNode.getAttributeNode("sourceId").nodeValue;
+						this.guideObject.chanId = programChildNode.getAttributeNode("chanId").nodeValue;
+						this.guideObject.chanNum = programChildNode.getAttributeNode("chanNum").nodeValue;
+						this.guideObject.callSign = programChildNode.getAttributeNode("callSign").nodeValue;
 					}
 					
 									
 					if(programChildNode.nodeName == "Recording") {
 						//Mojo.Log.info('Inside recording if');
 						
-						this.newGuideObject.recPriority = programChildNode.getAttributeNode("recPriority").nodeValue;
-						this.newGuideObject.playGroup = programChildNode.getAttributeNode("playGroup").nodeValue;
-						this.newGuideObject.recStatus = programChildNode.getAttributeNode("recStatus").nodeValue;
-						this.newGuideObject.recStartTs = programChildNode.getAttributeNode("recStartTs").nodeValue;
-						this.newGuideObject.recGroup = programChildNode.getAttributeNode("recGroup").nodeValue;
-						this.newGuideObject.dupMethod = programChildNode.getAttributeNode("dupMethod").nodeValue;
-						this.newGuideObject.recType = programChildNode.getAttributeNode("recType").nodeValue;
-						this.newGuideObject.encoderId = programChildNode.getAttributeNode("encoderId").nodeValue;
-						this.newGuideObject.recProfile = programChildNode.getAttributeNode("recProfile").nodeValue;
-						this.newGuideObject.recEndTs = programChildNode.getAttributeNode("recEndTs").nodeValue;
-						this.newGuideObject.recordId = programChildNode.getAttributeNode("recordId").nodeValue;
-						this.newGuideObject.dupInType = programChildNode.getAttributeNode("dupInType").nodeValue;
+						this.guideObject.recPriority = programChildNode.getAttributeNode("recPriority").nodeValue;
+						this.guideObject.playGroup = programChildNode.getAttributeNode("playGroup").nodeValue;
+						this.guideObject.recStatus = programChildNode.getAttributeNode("recStatus").nodeValue;
+						this.guideObject.recStartTs = programChildNode.getAttributeNode("recStartTs").nodeValue;
+						this.guideObject.recGroup = programChildNode.getAttributeNode("recGroup").nodeValue;
+						this.guideObject.dupMethod = programChildNode.getAttributeNode("dupMethod").nodeValue;
+						this.guideObject.recType = programChildNode.getAttributeNode("recType").nodeValue;
+						this.guideObject.encoderId = programChildNode.getAttributeNode("encoderId").nodeValue;
+						this.guideObject.recProfile = programChildNode.getAttributeNode("recProfile").nodeValue;
+						this.guideObject.recEndTs = programChildNode.getAttributeNode("recEndTs").nodeValue;
+						this.guideObject.recordId = programChildNode.getAttributeNode("recordId").nodeValue;
+						this.guideObject.dupInType = programChildNode.getAttributeNode("dupInType").nodeValue;
 						
-						this.newGuideObject.recStatusText = recStatusDecode(this.newGuideObject.recStatus);
+						
+						this.guideObject.recStatusText = recStatusDecode(this.guideObject.recStatus);
 								
 					} 
 						
 				}
 				
-				if(this.newGuideObject.recStatusText == null) this.newGuideObject.recStatusText = recStatusDecode(-10);
+				if(this.guideObject.recStatusText == null) this.guideObject.recStatusText = recStatusDecode(-10);
 				
 				Mojo.Log.info('Done parsing programDetails');
-				Mojo.Log.info("full upcoming details json is %j", this.newGuideObject); 
+				Mojo.Log.info("full guide details json is %j", this.guideObject); 
 				
 			break;
 				
@@ -551,23 +554,23 @@ GuideDetailsAssistant.prototype.readDetailsXMLSuccess = function(response) {
 GuideDetailsAssistant.prototype.finishedReadingDetails = function() {
 
 	//Fill in data values
-	$('scene-title').innerText = this.newGuideObject.title;
-	$('subtitle-title').innerText = this.newGuideObject.subTitle;
-	$('description-title').innerText = this.newGuideObject.description;
+	$('scene-title').innerText = this.guideObject.title;
+	$('subtitle-title').innerText = this.guideObject.subTitle;
+	$('description-title').innerText = this.guideObject.description;
 	
-	//$('hostname-title').innerText = this.newGuideObject.hostname;
-	//$('recgroup-title').innerText = this.newGuideObject.recgroup;
-	$('starttime-title').innerText = this.newGuideObject.startTime.replace("T"," ");
-	$('endtime-title').innerText = this.newGuideObject.endTime.replace("T"," ");
-	$('recstatustext-title').innerText = this.newGuideObject.recStatusText;
-	$('airdate-title').innerText = this.newGuideObject.airdate;
-	//$('storagegroup-title').innerText = this.newGuideObject.storagegroup;
-	//$('playgroup-title').innerText = this.newGuideObject.playgroup;
-	//$('programflags-title').innerText = this.newGuideObject.programflags;
-	$('programid-title').innerText = this.newGuideObject.programId;
-	//$('seriesid-title').innerText = this.newGuideObject.seriesId;
-	$('channame-title').innerText = this.newGuideObject.channelName;
-	$('channum-title').innerText = this.newGuideObject.chanNum;
-	//$('recstartts-title').innerText = this.newGuideObject.recStartTs;
+	//$('hostname-title').innerText = this.guideObject.hostname;
+	//$('recgroup-title').innerText = this.guideObject.recgroup;
+	$('starttime-title').innerText = this.guideObject.startTime.replace("T"," ");
+	$('endtime-title').innerText = this.guideObject.endTime.replace("T"," ");
+	$('recstatustext-title').innerText = this.guideObject.recStatusText;
+	$('airdate-title').innerText = this.guideObject.airdate;
+	//$('storagegroup-title').innerText = this.guideObject.storagegroup;
+	//$('playgroup-title').innerText = this.guideObject.playgroup;
+	//$('programflags-title').innerText = this.guideObject.programflags;
+	$('programid-title').innerText = this.guideObject.programId;
+	//$('seriesid-title').innerText = this.guideObject.seriesId;
+	$('channame-title').innerText = this.guideObject.channelName;
+	$('channum-title').innerText = this.guideObject.chanNum;
+	//$('recstartts-title').innerText = this.guideObject.recStartTs;
 	
 }

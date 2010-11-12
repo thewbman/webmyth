@@ -24,6 +24,10 @@
 	text-overflow: clip;
 }
 
+.palm-row .checkbox {
+	margin: 0px 4px 0px 12px;
+}
+
 /* 
  * Remote scenes
  */
@@ -99,6 +103,16 @@
 	
 	float: left;
 
+}
+
+.column1of2 {
+	float: left;
+	width: 50%;
+}
+
+.column2of2 {
+	float: left;
+	width: 50%;
 }
 
 .column1of3 {
@@ -783,6 +797,27 @@
 }
 
 .videos-scene .videos-list-item .palm-info-text.left {
+  padding: 0px;
+  margin: 0px 8px;
+  line-height: 16px;
+}
+
+/*
+ * Music
+ */
+
+.music-list-item {
+	height: 100px
+}
+
+.musicList-scene .music-list-item .music-list-title  {
+  padding: 3px 14px 0px 0px;
+  margin: 0px;
+  font-size: 20px;
+  height: 26px;
+}
+
+.musicList-scene .music-list-item .palm-info-text.left {
   padding: 0px;
   margin: 0px 8px;
   line-height: 16px;

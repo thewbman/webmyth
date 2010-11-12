@@ -149,6 +149,18 @@ PreferencesAssistant.prototype.setup = function() {
             modelProperty: "value"
          },
          this.showVideosToggleModel
+    );	
+	
+	//Show music
+	this.showMusicToggleModel = {
+             value: false
+    };
+	this.controller.setupWidget("showMusicToggleId",
+        {
+			label: $L("show music"),
+            modelProperty: "value"
+         },
+         this.showMusicToggleModel
     );
 
 
@@ -367,7 +379,7 @@ PreferencesAssistant.prototype.activate = function(event) {
 
 		if (WebMyth.prefsCookieObject) {
 			
-			Mojo.Log.error("initial cookie is %j", WebMyth.prefsCookieObject);
+			//Mojo.Log.error("initial cookie is %j", WebMyth.prefsCookieObject);
 			
 			//Update settings from cookie
 			this.webserverTextModel.value = WebMyth.prefsCookieObject.webserverName;
@@ -393,6 +405,9 @@ PreferencesAssistant.prototype.activate = function(event) {
 			
 			this.showVideosToggleModel.value = WebMyth.prefsCookieObject.showVideos;
 			this.controller.modelChanged(this.showVideosToggleModel);
+			
+			this.showMusicToggleModel.value = WebMyth.prefsCookieObject.showMusic;
+			this.controller.modelChanged(this.showMusicToggleModel);
 			
 			
 			
@@ -483,7 +498,11 @@ PreferencesAssistant.prototype.manualMasterBackendChanged = function(event) {
 	Mojo.Log.info("manual backend settings changed to "+this.manualMasterBackendToggleModel.value);
 	
 	this.masterBackendTextModel.disabled = !this.manualMasterBackendToggleModel.value;
-
+	
+	if(!this.manualMasterBackendToggleModel.value) {
+		this.masterBackendTextModel.value = "-";
+	}
+	
 	this.controller.modelChanged(this.masterBackendTextModel);
 	
 };
@@ -546,7 +565,7 @@ PreferencesAssistant.prototype.themeChanged = function(event) {
 
 PreferencesAssistant.prototype.checkSettings = function() {
 	
-	Mojo.Log.error("starting check of settings");
+	//Mojo.Log.error("starting check of settings");
 	
 	var saveOK = true, remoteError = false, currentRemoteScene = "";
 	
@@ -565,7 +584,7 @@ PreferencesAssistant.prototype.checkSettings = function() {
 		saveOK = false;
 	} else {
 
-	Mojo.Log.error("now checking remote scene");
+	//Mojo.Log.error("now checking remote scene");
 	
 	switch(WebMyth.prefsCookieObject.currentRemoteScene) {
 		case 'navigation':
@@ -619,11 +638,11 @@ PreferencesAssistant.prototype.checkSettings = function() {
 	
 	if(saveOK) {
 
-		Mojo.Log.info("New webserverName is %s", this.webserverTextModel.value);
-		Mojo.Log.info("New python file is %s", this.webmythPythonFileTextModel.value);
-		Mojo.Log.info("Metrix value is %s", this.metrixToggleModel.value);
-		Mojo.Log.info("Remote vibrate value is %s", this.vibrateToggleModel.value);
-		Mojo.Log.info("Remote fullscreen value is %s", this.remoteFullscreenToggleModel.value);
+		//Mojo.Log.info("New webserverName is %s", this.webserverTextModel.value);
+		//Mojo.Log.info("New python file is %s", this.webmythPythonFileTextModel.value);
+		//Mojo.Log.info("Metrix value is %s", this.metrixToggleModel.value);
+		//Mojo.Log.info("Remote vibrate value is %s", this.vibrateToggleModel.value);
+		//Mojo.Log.info("Remote fullscreen value is %s", this.remoteFullscreenToggleModel.value);
 		//Mojo.Log.info("Theme value is %s", this.themeModel.value);
 
 		if (WebMyth.prefsCookieObject) {
@@ -642,6 +661,7 @@ PreferencesAssistant.prototype.checkSettings = function() {
 		WebMyth.prefsCookieObject.webmythPythonFile = this.webmythPythonFileTextModel.value;
 		WebMyth.prefsCookieObject.showUpcoming = this.showUpcomingToggleModel.value;
 		WebMyth.prefsCookieObject.showVideos = this.showVideosToggleModel.value;
+		WebMyth.prefsCookieObject.showMusic = this.showMusicToggleModel.value;
 		
 		
 		WebMyth.prefsCookieObject.manualMasterBackend = this.manualMasterBackendToggleModel.value;
@@ -678,7 +698,7 @@ PreferencesAssistant.prototype.checkSettings = function() {
 	
 		WebMyth.remoteCookie.put(WebMyth.remoteCookieObject);
 		
-		Mojo.Log.error("new cookie is %j", WebMyth.prefsCookieObject);
+		//Mojo.Log.error("new cookie is %j", WebMyth.prefsCookieObject);
 
 		Mojo.Controller.stageController.popScene();
 	

@@ -1,0 +1,377 @@
+<div class="status">
+
+<div id="header-menu" class="palm-header">
+	<div id="header-title" class="truncating-text">Setup Recording</div>
+</div>
+<div class="palm-header-spacer"></div>
+
+
+<table id="ruleTypeGroup" class="palm-divider labeled collapsible right" x-mojo-touch-feedback="delayed">
+	<tr>
+		<td class="left"></td>
+		<td class="label">rule Type</td>
+		<td class="right"></td>
+		<td><div id="ruleTypeArrow" class="palm-arrow-expanded"></div></td>
+	</tr>
+</table>
+<div  x-mojo-element="Drawer" id="ruleTypeDrawer" class="ruleTypeDrawer">
+  <div class="palm-list">
+  
+	<div class="palm-row single">
+		<div class="palm-row-wrapper">                   
+			<div x-mojo-element="ListSelector" id="ruleTypeListId" class="listselectorClass"></div>
+		</div>
+	</div>
+		
+  </div>
+</div>
+
+
+<table id="programGroup" class="palm-divider labeled collapsible right" x-mojo-touch-feedback="delayed">
+	<tr>
+		<td class="left"></td>
+		<td class="label">Program</td>
+		<td class="right"></td>
+		<td><div id="programArrow" class="palm-arrow-expanded"></div></td>
+	</tr>
+</table>
+<div  x-mojo-element="Drawer" id="programDrawer" class="programDrawer">
+  <div class="palm-list">
+  
+	<div class="palm-row first">
+		<div class="palm-row-wrapper">
+            <div class="label" id="title-label">Title</div>
+			<div class="title" id="title-title"></div>
+		</div>
+    </div>
+	
+	<div class="palm-row">
+		<div class="palm-row-wrapper">
+            <div class="label" id="subtitle-label">Subtitle</div>
+			<div class="title" id="subtitle-title"></div>
+		</div>
+    </div>
+	
+	<div class="palm-row">
+		<div class="palm-row-wrapper">
+            <div class="label" id="starttime-label">Start</div>
+			<div class="title" id="starttime-title"></div>
+		</div>
+    </div>
+	
+	<div class="palm-row">
+		<div class="palm-row-wrapper">
+            <div class="label" id="recstatus-label">status</div>
+			<div class="title" id="recstatus-title"></div>
+		</div>
+    </div>
+	
+	<div class="palm-row last">
+		<div class="palm-row-wrapper">
+            <div class="label" id="station-label">Channel</div>
+			<div class="title" id="station-title"></div>
+		</div>
+    </div>
+		
+  </div>
+</div>
+
+<table id="programDetailsGroup" class="palm-divider labeled collapsible right" x-mojo-touch-feedback="delayed">
+	<tr>
+		<td class="left"></td>
+		<td class="label">Program Details</td>
+		<td class="right"></td>
+		<td><div id="programDetailsArrow" class="palm-arrow-closed"></div></td>
+	</tr>
+</table>
+<div  x-mojo-element="Drawer" id="programDetailsDrawer" class="programDetailsDrawer">
+  <div class="palm-list">
+  
+
+	<div class="palm-row first">
+		<div class="palm-row-wrapper">
+            <div class="label" id="description-label">description</div>
+			<div class="title" id="description-title"></div>
+		</div>
+    </div>
+	
+	<div class="palm-row">
+		<div class="palm-row-wrapper">
+            <div class="label" id="category-label">category</div>
+			<div class="title" id="category-title"></div>
+		</div>
+    </div>
+	
+	<div class="palm-row">
+		<div class="palm-row-wrapper">
+            <div class="label" id="seriesid-label">seriesid</div>
+			<div class="title" id="seriesid-title"></div>
+		</div>
+    </div>
+	
+	<div class="palm-row">
+		<div class="palm-row-wrapper">
+            <div class="label" id="programid-label">programid</div>
+			<div class="title" id="programid-title"></div>
+		</div>
+    </div>
+	
+	<div class="palm-row">
+		<div class="palm-row-wrapper">
+            <div class="label" id="endtime-label">endtime</div>
+			<div class="title" id="endtime-title"></div>
+		</div>
+    </div>
+	
+	<div class="palm-row last">
+		<div class="palm-row-wrapper">
+            <div class="label" id="chanid-label">chanid</div>
+			<div class="title" id="chanid-title"></div>
+		</div>
+    </div>
+		
+  </div>
+</div>
+
+
+<table id="recordingOptionsGroup" class="palm-divider labeled collapsible right" x-mojo-touch-feedback="delayed">
+	<tr>
+		<td class="left"></td>
+		<td class="label">recording Options</td>
+		<td class="right"></td>
+		<td><div id="recordingOptionsArrow" class="palm-arrow-closed"></div></td>
+	</tr>
+</table>
+<div  x-mojo-element="Drawer" id="recordingOptionsDrawer" class="recordingOptionsDrawer">
+  <div class="palm-list">
+  
+  
+	<div class="palm-row first">
+		<div class="palm-row-wrapper" x-mojo-focus-highlight="true">
+			<div class="title">                            
+				<div class="label">Recording Profile</div>
+				<!--<div x-mojo-element="ListSelector" id="profileListId" class="listselectorClass"></div>-->
+				<div x-mojo-element="TextField" id="profileId" class="textFieldClass"></div>
+			</div>
+		</div>
+	</div>
+	
+	<div class="palm-row">
+		<div class="palm-row-wrapper" x-mojo-focus-highlight="true">
+			<div class="title">                            
+				<div class="label">Transcoder</div>
+				<!--<div x-mojo-element="ListSelector" id="transcoderListId" class="listselectorClass"></div>-->
+				<div x-mojo-element="TextField" id="transcoderId" class="textFieldClass"></div>
+			</div>
+		</div>
+	</div>
+	
+	<div class="palm-row">
+		<div class="palm-row-wrapper" x-mojo-focus-highlight="true">
+			<div class="title">                            
+				<div class="label">Rec. Group</div>
+				<!--<div x-mojo-element="ListSelector" id="recgroupListId" class="listselectorClass"></div>-->
+				<div x-mojo-element="TextField" id="recgroupId" class="textFieldClass"></div>
+			</div>
+		</div>
+	</div>
+	
+	<div class="palm-row">
+		<div class="palm-row-wrapper" x-mojo-focus-highlight="true">
+			<div class="title">                            
+				<div class="label">Storage Group</div>
+				<!--<div x-mojo-element="ListSelector" id="storagegroupListId" class="listselectorClass"></div>-->
+				<div x-mojo-element="TextField" id="storagegroupId" class="textFieldClass"></div>
+			</div>
+		</div>
+	</div>
+	
+	<div class="palm-row">
+		<div class="palm-row-wrapper" x-mojo-focus-highlight="true">
+			<div class="title">                            
+				<div class="label">Playback Group</div>
+				<!--<div x-mojo-element="ListSelector" id="playgroupListId" class="listselectorClass"></div>-->
+				<div x-mojo-element="TextField" id="playgroupId" class="textFieldClass"></div>
+			</div>
+		</div>
+	</div>
+	
+	<div class="palm-row">
+		<div class="palm-row-wrapper" x-mojo-focus-highlight="true">
+			<div class="title">                            
+				<div class="label">Recording Priority</div>
+				<div x-mojo-element="IntegerPicker" id="recpriorityFieldId" class="integerpickerClass"></div>
+			</div>
+		</div>
+	</div>
+	
+	<div class="palm-row">
+		<div class="palm-row-wrapper" x-mojo-focus-highlight="true">
+			<div class="title">                            
+				<div class="label">Duplicate Check</div>
+				<div x-mojo-element="ListSelector" id="dupmethodListId" class="listselectorClass"></div>
+			</div>
+		</div>
+	</div>
+	
+	<div class="palm-row">
+		<div class="palm-row-wrapper" x-mojo-focus-highlight="true">
+			<div class="title">                            
+				<div class="label">Check In</div>
+				<div x-mojo-element="ListSelector" id="dupinListId" class="listselectorClass"></div>
+			</div>
+		</div>
+	</div>
+	
+	<div class="palm-row">
+		<div class="palm-row-wrapper" x-mojo-focus-highlight="true">
+			<div class="title">                            
+				<div class="label">Filter</div>
+				<div x-mojo-element="ListSelector" id="filterListId" class="listselectorClass"></div>
+			</div>
+		</div>
+	</div>
+	
+	<div class="palm-row">
+		<div class="palm-row-wrapperr" x-mojo-focus-highlight="true">
+			<div class="title">                            
+				<div class="label">Preferred Input</div>
+				<div x-mojo-element="ListSelector" id="prefinputListId" class="listselectorClass"></div>
+			</div>
+		</div>
+	</div>
+	
+	<div class="palm-row">
+		<div class="palm-row-wrapper" x-mojo-focus-highlight="true">
+			<div class="title">                            
+				<div class="label">Inactive</div>
+				<div x-mojo-element="CheckBox" id="inactiveFieldId" class="checkboxClass"></div>
+			</div>
+		</div>
+	</div>
+	
+	<div class="palm-row">
+		<div class="palm-row-wrapper" x-mojo-focus-highlight="true">
+			<div class="title">                            
+				<div class="label">Auto-expire</div>
+				<div x-mojo-element="CheckBox" id="autoexpireFieldId" class="checkboxClass"></div>
+			</div>
+		</div>
+	</div>
+	
+	<div class="palm-row">
+		<div class="palm-row-wrapper" x-mojo-focus-highlight="true">
+			<div class="title">                            
+				<div class="label">Record new, expire old</div>
+				<div x-mojo-element="CheckBox" id="maxnewestFieldId" class="checkboxClass"></div>
+			</div>
+		</div>
+	</div>
+	
+	<div class="palm-row">
+		<div class="palm-row-wrapper" x-mojo-focus-highlight="true">
+			<div class="title">                            
+				<div class="label">Max episodes</div>
+				<div x-mojo-element="IntegerPicker" id="maxepisodesFieldId" class="integerpickerClass"></div>
+			</div>
+		</div>
+	</div>
+	
+	<div class="palm-row">
+		<div class="palm-row-wrapper" x-mojo-focus-highlight="true">
+			<div class="title">                            
+				<div class="label">Start Early</div>
+				<div x-mojo-element="IntegerPicker" id="startoffsetFieldId" class="integerpickerClass"></div>
+			</div>
+		</div>
+	</div>
+	
+	<div class="palm-row last">
+		<div class="palm-row-wrapper" x-mojo-focus-highlight="true">
+			<div class="title">                            
+				<div class="label">End Late</div>
+				<div x-mojo-element="IntegerPicker" id="endoffsetFieldId" class="integerpickerClass"></div>
+			</div>
+		</div>
+	</div>
+		
+  </div>
+</div>
+
+
+<table id="jobOptionsGroup" class="palm-divider labeled collapsible right" x-mojo-touch-feedback="delayed">
+	<tr>
+		<td class="left"></td>
+		<td class="label">job Options</td>
+		<td class="right"></td>
+		<td><div id="jobOptionsArrow" class="palm-arrow-closed"></div></td>
+	</tr>
+</table>
+<div  x-mojo-element="Drawer" id="jobOptionsDrawer" class="jobOptionsDrawer">
+  <div class="palm-list">
+  
+	<div class="palm-row first">
+		<div class="palm-row-wrapper" x-mojo-focus-highlight="true">
+			<div class="title">                           
+				<div x-mojo-element="CheckBox" id="autocommflagFieldId" class="checkboxClass"></div> 
+				<div class="label">Commercial flag</div>
+			</div>
+		</div>
+	</div>
+  
+	<div class="palm-row">
+		<div class="palm-row-wrapper" x-mojo-focus-highlight="true">
+			<div class="title">                            
+				<div class="label">Transcode</div>
+				<div x-mojo-element="CheckBox" id="autotranscodeFieldId" class="checkboxClass"></div>
+			</div>
+		</div>
+	</div>
+  
+	<div class="palm-row">
+		<div class="palm-row-wrapper" x-mojo-focus-highlight="true">
+			<div class="title">                            
+				<div class="label">Userjob 1</div>
+				<div x-mojo-element="CheckBox" id="autouserjob1FieldId" class="checkboxClass"></div>
+			</div>
+		</div>
+	</div>
+  
+	<div class="palm-row">
+		<div class="palm-row-wrapper" x-mojo-focus-highlight="true">
+			<div class="title">                            
+				<div class="label">Userjob 2</div>
+				<div x-mojo-element="CheckBox" id="autouserjob2FieldId" class="checkboxClass"></div>
+			</div>
+		</div>
+	</div>
+  
+	<div class="palm-row">
+		<div class="palm-row-wrapper" x-mojo-focus-highlight="true">
+			<div class="title">                            
+				<div class="label">Userjob 3</div>
+				<div x-mojo-element="CheckBox" id="autouserjob3FieldId" class="checkboxClass"></div>
+			</div>
+		</div>
+	</div>
+  
+	<div class="palm-row last">
+		<div class="palm-row-wrapper" x-mojo-focus-highlight="true">
+			<div class="title">                            
+				<div class="label">Userjob 4</div>
+				<div x-mojo-element="CheckBox" id="autouserjob4FieldId" class="checkboxClass"></div>
+			</div>
+		</div>
+	</div>
+		
+  </div>
+</div>
+
+
+<div class="palm-scrim" id="myScrim">
+	<div x-mojo-element="Spinner" id="spinner" class="center"></div>
+	<div id="spinner-text"></div> 
+</div>
+
+</div>
+
