@@ -119,5 +119,17 @@
     {
         "scenes": "videosDetails",
         "source": "app/assistants/videosDetails-assistant.js"
+    },
+    {
+        "scenes": "musicList",
+        "source": "app/assistants/musicList-assistant.js"
+    },
+    {
+        "scenes": "musicDetails",
+        "source": "app/assistants/musicDetails-assistant.js"
+    },
+    {
+        "scenes": "setupRecording",
+        "source": "app/assistants/setupRecording-assistant.js"
     }
 ]

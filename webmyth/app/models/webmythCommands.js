@@ -18,11 +18,6 @@
  *   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-var telnetClass = Class.create({
-	initialize: function() {
-	}
-});
-
 
 function createHostnameDb() {
 	
@@ -103,7 +98,7 @@ function defaultCookie() {
 		remoteHeaderAction: 'Pause',
 		remoteVibrate: false,
 		remoteFullscreen: false,
-		masterBackendIp: '',
+		masterBackendIp: '-',
 		manualMasterBackend: false,
 		playJumpRemote: true,
 		guideJumpRemote: false,
@@ -113,8 +108,10 @@ function defaultCookie() {
 		useWebmythScript: true,
 		showUpcoming: true,
 		showVideos: true,
+		showMusic: true,
 		currentVideosSort: 'title-asc',
-		currentVideosGroup: 'all'
+		currentVideosGroup: 'all',
+		currentMusicSort: 'name-asc'
 		
 	};
 	
@@ -161,6 +158,37 @@ function defaultRemoteCookie() {
 	];
 	
 	return newCookieObject;
+};
+
+var intToBool = function(int_in) {
+	if(int_in == 0) {
+		return false;
+	} else {
+		return true;
+	}
+};
+
+var boolToInt = function(bool_in) {
+	if(bool_in == true) {
+		return 1;
+	} else {
+		return 0;
+	}
+};
+
+var splitDupin = function(dupin_in) {
+	if(dupin_in >= 96) {
+		return { dupin1: dupin_in - 96, dupin2: 96}
+	} else if(dupin_in >= 64) {
+		return { dupin1: dupin_in - 64, dupin2: 64}
+	} else if(dupin_in >= 32) {
+		return { dupin1: dupin_in - 32, dupin2: 32}
+	} else if(dupin_in >= 16) {
+		return { dupin1: dupin_in - 16, dupin2: 16}
+	} else {
+		return { dupin1: dupin_in, dupin2: 0 }
+	}
+
 };
 
 var sort_by = function(field, reverse, primer){
@@ -274,6 +302,44 @@ var trimByVideoType = function(fullList, myVideoType) {
 		}
 		return trimmedList;
 	}
+};
+
+var trimMusicByArtist = function(fullList, myArtist) {
+	
+		var trimmedList = [];
+		var i, s;
+	
+		for (i = 0; i < fullList.length; i++) {
+	
+			s = fullList[i];
+			if ((s.artist_name == myArtist)) {
+				//Matches artist
+				trimmedList.push(s);
+			} else {
+				//Does not match
+			}
+		}
+		return trimmedList;
+		
+};
+
+var trimMusicByAlbum = function(fullList, myAlbum) {
+	
+		var trimmedList = [];
+		var i, s;
+	
+		for (i = 0; i < fullList.length; i++) {
+	
+			s = fullList[i];
+			if ((s.album_name == myAlbum)) {
+				//Matches artist
+				trimmedList.push(s);
+			} else {
+				//Does not match
+			}
+		}
+		return trimmedList;
+		
 };
 
 var trimByChanidStarttime = function(fullList, chanid_in, starttime_in) {
@@ -581,6 +647,100 @@ var cleanVideos = function(fullList) {
 	
 }
 
+var cleanMusic = function(fullList) {
+
+	finalList = [];
+	
+	var i, j, k, s, t = [], u = [];
+	
+	for(i = 0; i < fullList.length; i++) {
+		s = fullList[i];
+		
+		//Break down name if is has '/'
+		t = s.name.split("/");
+		j = t.length;
+		s.name = t[j - 1];
+		
+		//Break down filename 
+		u = s.filename.split("/");
+		k = u.length;
+		s.filenameEnd = u[k - 1];
+			
+			
+		if(s.track < 10) {
+			s.track = '0'+s.track;
+		}
+		
+		finalList.push(s);
+		
+	}
+	
+	
+	return finalList;
+	
+}
+
+var cleanInputs = function(fullList) {
+
+	finalList = [];
+	
+	var i, j, k, s, t = {}, u = [];
+	
+	finalList.push( { label: "None", value: "0" } );
+	
+	for(i = 0; i < fullList.length; i++) {
+		s = fullList[i];
+		t = {};
+		
+		t.label = s.displayname;
+		t.value = s.cardinputid;
+
+		
+		finalList.push(t);
+		
+	}
+	
+	
+	return finalList;
+	
+}
+
+var cleanSettings = function(fullList) {
+
+	settingsObject = {};
+	
+	var i, s = {};
+	
+	
+	for(i = 0; i < fullList.length; i++) {
+		s = fullList[i];
+		
+		if(s.value == "AutoCommercialFlag") {
+			settingsObject.AutoCommercialFlag = s.data;
+		} else if(s.value == "AutoTranscode") {
+			settingsObject.AutoTranscode = s.data;
+		} else if(s.value == "AutoRunUserJob1") {
+			settingsObject.AutoRunUserJob1 = s.data;
+		} else if(s.value == "AutoRunUserJob2") {
+			settingsObject.AutoRunUserJob2 = s.data;
+		} else if(s.value == "AutoRunUserJob3") {
+			settingsObject.AutoRunUserJob3 = s.data;
+		} else if(s.value == "AutoRunUserJob4") {
+			settingsObject.AutoRunUserJob4 = s.data;
+		} else if(s.value == "DefaultStartOffset") {
+			settingsObject.DefaultStartOffset = s.data;
+		} else if(s.value == "DefaultEndOffset") {
+			settingsObject.DefaultEndOffset = s.data;
+		} 
+		
+		
+	}
+	
+	
+	return settingsObject;
+	
+}
+
 var cleanHostsCookie = function(fullList) {
 
 	finalList = [];
@@ -685,6 +845,19 @@ var isoToJS = function(isoDate) {
     time = (Number(date));
 	
 	return Number(time);
+ 
+};
+
+var dateDayAdjust = function(JSdayOfWeek) { 
+    
+    var newDay = JSdayOfWeek - 1;
+
+    if(JSdayOfWeek < 0) {
+		JSdayOfWeek = JSdayOfWeek + 7;
+	}
+
+	
+	return newDay;
  
 };
 

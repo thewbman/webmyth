@@ -19,16 +19,16 @@
  */
  
  
- function VideosAssistant() {
- 
+function MusicListAssistant() {
+
 	  this.fullResultList = [];		//Full raw data 
 	  this.resultList = [];			//Filtered down list
 	  
-	  this.storageGroups = [];		//Storage group directories
+	  this.currentMusicGroup = 'all';
 	  
 }
 
-VideosAssistant.prototype.setup = function() {
+MusicListAssistant.prototype.setup = function() {
 
 	//Show and start the animated spinner
 	this.spinnerAttr= {
@@ -37,7 +37,7 @@ VideosAssistant.prototype.setup = function() {
 		spinning: true
 	}; 
 	this.controller.setupWidget('spinner', this.spinnerAttr, this.spinnerModel);
-	$('spinner-text').innerHTML = "Loading...";
+	$('spinner-text').innerHTML = "Loading...<br />(this may take a while)";
 	
 	
 	//App menu widget
@@ -45,16 +45,13 @@ VideosAssistant.prototype.setup = function() {
 	
 	
 	// Menu grouping at bottom of scene
-    this.cmdMenuModel = { label: $L('Videos Menu'),
+    this.cmdMenuModel = { label: $L('Music Menu'),
                             items: [{label: $L('Sort'), submenu:'sort-menu', width: 90},{ icon: 'refresh', command: 'go-refresh' },{label: $L('Group'), submenu:'group-menu', width: 90}]};
  
 	this.sortMenuModel = { label: $L('Sort'), items: []};
 	
 	this.groupMenuModel = { label: $L('Group'), items: [
-		{"label": "All", "command": "go-groupall" },
-		{"label": "Regular", "command": "go-groupVideo" },
-		{"label": "TV", "command": "go-groupTV" },
-		{"label": "Specials", "command": "go-groupSpecial" }
+		{"label": "All", "command": "go-groupall" }
 	]};
 
 	this.controller.setupWidget(Mojo.Menu.commandMenu, {menuClass: 'no-fade'}, this.cmdMenuModel);
@@ -63,37 +60,32 @@ VideosAssistant.prototype.setup = function() {
 
 	
 	
-	// Videos widget filter list
-	this.videosListAttribs = {
-		itemTemplate: "videos/videosListItem",
-		dividerTemplate: "videos/videosDivider",
+	// Music filter list
+	this.musicListAttribs = {
+		itemTemplate: "musicList/musicListItem",
+		dividerTemplate: "musicList/musicDivider",
 		swipeToDelete: false,
 		filterFunction: this.filterListFunction.bind(this),
-		dividerFunction: this.videosDividerFunction.bind(this),
+		dividerFunction: this.musicDividerFunction.bind(this),
 		formatters:{myData: this.setMyData.bind(this)}
 	};
-    this.videosListModel = {            
+    this.musicListModel = {            
         //items: this.resultList,
 		disabled: false
     };
-	this.controller.setupWidget( "videosList" , this.videosListAttribs, this.videosListModel);
+	this.controller.setupWidget( "musicList" , this.musicListAttribs, this.musicListModel);
 	
 	//Event listeners
-	Mojo.Event.listen(this.controller.get( "videosList" ), Mojo.Event.listTap, this.goVideosDetails.bind(this));
+	Mojo.Event.listen(this.controller.get( "musicList" ), Mojo.Event.listTap, this.goMusicDetails.bind(this));
 	Mojo.Event.listen(this.controller.get( "header-menu" ), Mojo.Event.tap, function(){this.controller.sceneScroller.mojo.revealTop();}.bind(this));
 	
 	
-	//Storage groups for video playback
-	this.getStorageGroups();
+	//List of music
+	this.getMusic();
 	
-	//List of videos
-	this.getVideos();
-
-
 };
 
-VideosAssistant.prototype.activate = function(event) {
-
+MusicListAssistant.prototype.activate = function(event) {
 
 	//Keypress event
 	Mojo.Event.listen(this.controller.sceneElement, Mojo.Event.keyup, this.handleKey.bind(this));
@@ -103,7 +95,7 @@ VideosAssistant.prototype.activate = function(event) {
 	
 };
 
-VideosAssistant.prototype.deactivate = function(event) {
+MusicListAssistant.prototype.deactivate = function(event) {
 
 	//Keypress event
 	Mojo.Event.stopListening(this.controller.sceneElement, Mojo.Event.keyup, this.handleKey.bind(this));
@@ -115,12 +107,12 @@ VideosAssistant.prototype.deactivate = function(event) {
 	
 };
 
-VideosAssistant.prototype.cleanup = function(event) {
+MusicListAssistant.prototype.cleanup = function(event) {
 	/* this function should do any cleanup needed before the scene is destroyed as 
 	   a result of being popped off the scene stack */
 };
 
-VideosAssistant.prototype.handleCommand = function(event) {
+MusicListAssistant.prototype.handleCommand = function(event) {
 
 	 if(event.type == Mojo.Event.command) {
 		myCommand = event.command.substring(0,7);
@@ -137,7 +129,7 @@ VideosAssistant.prototype.handleCommand = function(event) {
 		  case 'go-grou':		//group
 			//Mojo.Log.error("group select ... "+mySelection);
 			this.controller.sceneScroller.mojo.revealTop();
-			this.videosGroupChanged(mySelection);
+			this.musicGroupChanged(mySelection);
 		   break;
 		  case 'go-refr':		//refresh
 		  
@@ -145,7 +137,7 @@ VideosAssistant.prototype.handleCommand = function(event) {
 			this.controller.modelChanged(this.spinnerModel, this);
 			$('myScrim').show();
 		
-			this.getVideos();
+			this.getMusic();
 			
 		   break;
 		}
@@ -156,7 +148,7 @@ VideosAssistant.prototype.handleCommand = function(event) {
   
 };
 
-VideosAssistant.prototype.handleKey = function(event) {
+MusicListAssistant.prototype.handleKey = function(event) {
 
 	Mojo.Log.info("handleKey %o, %o", event.originalEvent.metaKey, event.originalEvent.keyCode);
 	
@@ -187,7 +179,7 @@ VideosAssistant.prototype.handleKey = function(event) {
 	
 };
 
-VideosAssistant.prototype.handleShakestart = function(event) {
+MusicListAssistant.prototype.handleShakestart = function(event) {
 
 	Mojo.Log.info("Start Shaking");
 	Event.stop(event);
@@ -199,71 +191,24 @@ VideosAssistant.prototype.handleShakestart = function(event) {
 	$('myScrim').show()	
 	
 	
-	this.getVideos();
+	this.getMusic();
   
 };
 
 
 
 
-VideosAssistant.prototype.getStorageGroups = function(event) {
+
+MusicListAssistant.prototype.getMusic = function(event) {
 
 	//Update list from webmyth python script
-	Mojo.Log.info('Starting storage groups data gathering');
+	Mojo.Log.error('Starting music data gathering');
 	
 	this.controller.sceneScroller.mojo.revealTop();
 	
 	var requestUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webmythPythonFile;
-	requestUrl += "?op=getStorageGroup";				
+	requestUrl += "?op=getMusic";	
 	
-	
-	
-    try {
-        var request = new Ajax.Request(requestUrl,{
-            method: 'get',
-            evalJSON: 'true',
-			requestHeaders: {Authorization: 'Basic ' + Base64.encode(WebMyth.prefsCookieObject.webserverUsername + ":" + WebMyth.prefsCookieObject.webserverPassword)},
-            onSuccess: this.readStorageGroupsSuccess.bind(this),
-            onFailure: this.readStorageGroupsFail.bind(this)  
-        });
-    }
-    catch(e) {
-        Mojo.Log.error(e);
-    }
-	
-};
-
-VideosAssistant.prototype.readStorageGroupsFail = function(event) {
-
-	Mojo.Log.error('Failed to get storage group response');
-	
-};
-
-VideosAssistant.prototype.readStorageGroupsSuccess = function(response) {
-	//return true;  //can escape this function for testing purposes
-    
-	Mojo.Log.info('Got storage group response: %j',response.responseJSON);
-	
-	//Update the storage group list
-	this.storageGroups.clear();
-	Object.extend(this.storageGroups,response.responseJSON);
-	
-	
-}
-
-VideosAssistant.prototype.getVideos = function(event) {
-
-	//Update list from webmyth python script
-	Mojo.Log.info('Starting videos data gathering');
-	
-	this.controller.sceneScroller.mojo.revealTop();
-	
-	var requestUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webmythPythonFile;
-	requestUrl += "?op=getVideos";	
-	
-	
-	
-	//requestHeaders: {Authorization: 'Basic ' + Base64.encode(WebMyth.prefsCookieObject.webserverUsername + ":" + WebMyth.prefsCookieObject.webserverPassword)},
 	
 	
     try {
@@ -281,14 +226,14 @@ VideosAssistant.prototype.getVideos = function(event) {
 	
 };
 
-VideosAssistant.prototype.readRemoteDbTableFail = function(event) {
+MusicListAssistant.prototype.readRemoteDbTableFail = function(event) {
 
-	Mojo.Log.error('Failed to get Videos response');
+	Mojo.Log.error('Failed to get music response');
 	
 	this.resultList = [{ 'title':'Accesing remote table has failed.', 'subtitle':'Please check your server script.', 'starttime':''}];
 	
 	//Initial display
-	var listWidget = this.controller.get('videosList');
+	var listWidget = this.controller.get('musicList');
 	this.filterListFunction('', listWidget, 0, this.resultList.length);
 	
 	
@@ -300,112 +245,112 @@ VideosAssistant.prototype.readRemoteDbTableFail = function(event) {
 	
 };
 
-VideosAssistant.prototype.readRemoteDbTableSuccess = function(response) {
+MusicListAssistant.prototype.readRemoteDbTableSuccess = function(response) {
 	//return true;  //can escape this function for testing purposes
     
-	//Mojo.Log.info('Got Ajax response: %j',response.responseJSON);
+	Mojo.Log.info('Got Ajax response: %j',response.responseJSON);
 	
 		
 	//Update the list widget
 	this.fullResultList.clear();
-	Object.extend(this.fullResultList,cleanVideos(response.responseJSON));
+	Object.extend(this.fullResultList,cleanMusic(response.responseJSON));
+
 	
-	
-	//$("scene-title").innerHTML = "Videos ("+this.fullResultList.length+" items)";
-	
-	this.finishedReadingVideos();
+	this.finishedReadingMusic();
 	
 }
 
-VideosAssistant.prototype.finishedReadingVideos = function() {
+MusicListAssistant.prototype.finishedReadingMusic = function() {
 
-	this.sortChanged(WebMyth.prefsCookieObject.currentVideosSort);
+	this.sortChanged(WebMyth.prefsCookieObject.currentMusicSort);
 	
 }
 
-VideosAssistant.prototype.sortChanged = function(newSort) {
+MusicListAssistant.prototype.sortChanged = function(newSort) {
 
 	//Add sorting options here
 	Mojo.Log.info("new sort is "+newSort);
 	
-	WebMyth.prefsCookieObject.currentVideosSort = newSort;
+	WebMyth.prefsCookieObject.currentMusicSort = newSort;
+	
 	
 	//Sort list
-	switch(WebMyth.prefsCookieObject.currentVideosSort) {
-		case 'insert-asc':
-			this.fullResultList.sort(double_sort_by('insertdate', 'title', false));
+	switch(WebMyth.prefsCookieObject.currentMusicSort) {
+		case 'album-asc':
+			this.fullResultList.sort(triple_sort_by('album_name', 'track', 'name', false));
 		  break;
-		case 'insert-desc':
-			this.fullResultList.sort(double_sort_by('insertdate', 'title', true));
+		case 'album-desc':
+			this.fullResultList.sort(triple_sort_by('album_name', 'track', 'name', true));
 		  break;
-		case 'released-asc':
-			this.fullResultList.sort(triple_sort_by('releasedate', 'title', 'fullEpisode', false));
+		case 'artist-asc':
+			this.fullResultList.sort(triple_sort_by('artist_name', 'album_name', 'name', false));
 		  break;
-		case 'released-desc':
-			this.fullResultList.sort(triple_sort_by('releasedate', 'title', 'fullEpisode', true));
+		case 'artist-desc':
+			this.fullResultList.sort(triple_sort_by('artist_name', 'album_name', 'name', true));
 		  break;
-		case 'season-asc':
-			this.fullResultList.sort(triple_sort_by('season', 'title', 'fullEpisode', false));
+		case 'name-asc':
+			this.fullResultList.sort(triple_sort_by('name', 'artist_name', 'album_name', false));
 		  break;
-		case 'season-desc':
-			this.fullResultList.sort(triple_sort_by('season', 'title', 'fullEpisode', true));
+		case 'name-desc':
+			this.fullResultList.sort(triple_sort_by('name', 'artist_name', 'album_name', true));
 		  break;
-		case 'title-asc':
-			this.fullResultList.sort(double_sort_by('title', 'fullEpisode', false));
+		case 'year-asc':
+			this.fullResultList.sort(triple_sort_by('year', 'name', 'artist_name', false));
 		  break;
-		case 'title-desc':
-			this.fullResultList.sort(double_sort_by('title', 'fullEpisode', true));
+		case 'year-desc':
+			this.fullResultList.sort(triple_sort_by('year', 'name', 'artist_name', true));
 		  break;
 		default :
-			this.fullResultList.sort(double_sort_by('startTime', 'title', false));
+			this.fullResultList.sort(triple_sort_by('artist_name', 'album_name', 'name', false));
 		  break;
 	}
 	
 	
-	this.videosGroupChanged(WebMyth.prefsCookieObject.currentVideosGroup);
+	this.musicGroupChanged(this.currentMusicGroup);
 	
 	this.updateSortMenu();
 
 }
 
-VideosAssistant.prototype.updateSortMenu = function() {
+MusicListAssistant.prototype.updateSortMenu = function() {
+	
 	
 	//Reset default sorting
 	this.sortMenuModel.items = [ 
-			{"label": $L('Date Added-Asc'), "command": "go-sort-insert-asc"},
-			{"label": $L('Date Added-Desc'), "command": "go-sort-insert-desc"},
-			{"label": $L('Released-Asc'), "command": "go-sort-released-asc"},
-			{"label": $L('Released-Desc'), "command": "go-sort-released-desc"},
-			{"label": $L('Season-Asc'), "command": "go-sort-season-asc"},
-			{"label": $L('Season-Desc'), "command": "go-sort-season-desc"},
-			{"label": $L('Title-Asc'), "command": "go-sort-title-asc"},
-			{"label": $L('Title-Desc'), "command": "go-sort-title-desc"}
+			{"label": $L('Album-Asc'), "command": "go-sort-album-asc"},
+			{"label": $L('Album-Desc'), "command": "go-sort-album-desc"},
+			{"label": $L('Artist-Asc'), "command": "go-sort-artist-asc"},
+			{"label": $L('Artist-Desc'), "command": "go-sort-artist-desc"},
+			{"label": $L('Title-Asc'), "command": "go-sort-name-asc"},
+			{"label": $L('Title-Desc'), "command": "go-sort-name-desc"},
+			{"label": $L('Year-Asc'), "command": "go-sort-year-asc"},
+			{"label": $L('Year-Desc'), "command": "go-sort-year-desc"}
 	] ;
 	
-	switch(WebMyth.prefsCookieObject.currentVideosSort) {
-		case 'insert-asc':
-			this.sortMenuModel.items[0].label = '- Date Added-Asc -';
+	switch(WebMyth.prefsCookieObject.currentMusicSort) {
+		case 'album-asc':
+			this.sortMenuModel.items[0].label = '- Album-Asc -';
 		  break;
-		case 'insert-desc':
-			this.sortMenuModel.items[1].label = '- Date Added-Desc -';
+		case 'album-desc':
+			this.sortMenuModel.items[1].label = '- Album-Desc -';
 		  break;
-		case 'released-asc':
-			this.sortMenuModel.items[2].label = '- Released-Asc -';
+		case 'artist-asc':
+			this.sortMenuModel.items[2].label = '- Artist-Asc -';
 		  break;
-		case 'released-desc':
-			this.sortMenuModel.items[3].label = '- Released-Desc -';
+		case 'artist-desc':
+			this.sortMenuModel.items[3].label = '- Artist-Desc -';
 		  break;
-		case 'season-asc':
-			this.sortMenuModel.items[4].label = '- Season-Asc -';
+		case 'name-asc':
+			this.sortMenuModel.items[4].label = '- Title-Asc -';
 		  break;
-		case 'season-desc':
-			this.sortMenuModel.items[5].label = '- Season-Desc -';
+		case 'name-desc':
+			this.sortMenuModel.items[5].label = '- Title-Desc -';
 		  break;
-		case 'title-asc':
-			this.sortMenuModel.items[6].label = '- Title-Asc -';
+		case 'year-asc':
+			this.sortMenuModel.items[6].label = '- Year-Asc -';
 		  break;
-		case 'title-desc':
-			this.sortMenuModel.items[7].label = '- Title-Desc -';
+		case 'year-desc':
+			this.sortMenuModel.items[7].label = '- Year-Desc -';
 		  break;
 		default :
 			//this.sortMenuModel.items[0].label = 'Default';
@@ -414,24 +359,42 @@ VideosAssistant.prototype.updateSortMenu = function() {
 	
 	
 	this.controller.modelChanged(this.sortMenuModel);
+	
 }
 
-VideosAssistant.prototype.videosGroupChanged = function(newGroup) {
+MusicListAssistant.prototype.musicGroupChanged = function(newGroup) {
 
 	//May add filtering of results later
 	Mojo.Log.info("new grouping is "+newGroup);
 	
-	WebMyth.prefsCookieObject.currentVideosGroup = newGroup
+	this.currentMusicGroup = newGroup
 	
 	this.updateGroupMenu();
 	
 	this.resultList.clear();
-	Object.extend(this.resultList,trimByVideoType(this.fullResultList, newGroup));
 	
-	$("scene-title").innerHTML = "Videos ("+this.resultList.length+" items)";
+	switch(this.currentMusicGroup) {
+		case 'all':
+			Object.extend(this.resultList,this.fullResultList);
+		  break;
+		case 'album':
+			Object.extend(this.resultList,trimMusicByAlbum(this.fullResultList, this.newAlbum));
+		  break;
+		case 'artist':
+			Object.extend(this.resultList,trimMusicByArtist(this.fullResultList, this.newArtist));
+		  break;
+		default:
+			Object.extend(this.resultList,this.fullResultList);
+		  break;
+	}
+	
+	
+	$("scene-title").innerHTML = "Music ("+this.resultList.length+" items)";
+	
+	this.controller.sceneScroller.mojo.revealTop();
 	
 	//Initial display
-	var listWidget = this.controller.get('videosList');
+	var listWidget = this.controller.get('musicList');
 	this.filterListFunction('', listWidget, 0, this.resultList.length);
 	listWidget.mojo.close();
 	//Mojo.Controller.getAppController().showBanner("Updated with latest data", {source: 'notification'});
@@ -444,28 +407,26 @@ VideosAssistant.prototype.videosGroupChanged = function(newGroup) {
 
 };
 
-VideosAssistant.prototype.updateGroupMenu = function() {
+MusicListAssistant.prototype.updateGroupMenu = function() {
 	
 	//Reset default sorting
 	this.groupMenuModel.items = [ 
 		{"label": "All", "command": "go-groupall" },
-		{"label": "Regular", "command": "go-groupVideo" },
-		{"label": "TV", "command": "go-groupTV" },
-		{"label": "Specials", "command": "go-groupSpecial" }
+		{"label": "Artist", "command": "go-groupartist" },
+		{"label": "Album", "command": "go-groupalbum" }
 	] ;
 	
-	switch(WebMyth.prefsCookieObject.currentVideosGroup) {
+	switch(this.currentMusicGroup) {
 		case 'all':
-			this.groupMenuModel.items[0].label = '- All -';
+			this.groupMenuModel.items = [ {"label": "- All -", "command": "go-groupall" } ] ;
 		  break;
-		case 'Video':
-			this.groupMenuModel.items[1].label = '- Regular -';
+		case 'artist':
+			this.groupMenuModel.items[1].label = '- Artist: '+this.newArtist+' -';
+			this.groupMenuModel.items[2].label = 'Album: '+this.newAlbum;
 		  break;
-		case 'TV':
-			this.groupMenuModel.items[2].label = '- TV -';
-		  break;
-		case 'Special':
-			this.groupMenuModel.items[3].label = '- Specials -';
+		case 'album':
+			this.groupMenuModel.items[1].label = 'Artist: '+this.newArtist;
+			this.groupMenuModel.items[2].label = '- Album: '+this.newAlbum+' -';
 		  break;
 		default :
 			//this.sortMenuModel.items[0].label = 'Default';
@@ -474,9 +435,10 @@ VideosAssistant.prototype.updateGroupMenu = function() {
 	
 	
 	this.controller.modelChanged(this.groupMenuModel);
+	
 }
 
-VideosAssistant.prototype.filterListFunction = function(filterString, listWidget, offset, count) {
+MusicListAssistant.prototype.filterListFunction = function(filterString, listWidget, offset, count) {
 	 
 	//Filtering function
 	//Mojo.Log.info("Started filtering with '%s'",filterString);
@@ -493,18 +455,18 @@ VideosAssistant.prototype.filterListFunction = function(filterString, listWidget
 		//find the items that include the filterstring 
 		for (i = 0; i < len; i++) {
 			s = this.resultList[i];
-			if (s.title.toUpperCase().indexOf(filterString.toUpperCase()) >=0) {
+			if (s.name.toUpperCase().indexOf(filterString.toUpperCase()) >=0) {
 				//Mojo.Log.info("Found string in title", i);
 				someList.push(s);
 			}	
-			else if (s.subtitle.toUpperCase().indexOf(filterString.toUpperCase())>=0){
+			else if (s.artist_name.toUpperCase().indexOf(filterString.toUpperCase())>=0){
 				//Mojo.Log.info("Found string in subtitle", i);
 				someList.push(s);
 			}	
-			else if (s.fullEpisode.toUpperCase().indexOf(filterString.toUpperCase())>=0){
+			else if (s.album_name.toUpperCase().indexOf(filterString.toUpperCase())>=0){
 				//Mojo.Log.info("Found string in full episode name", i);
 				someList.push(s);
-			}	
+			}	/*
 			else if (s.releasedate.toUpperCase().indexOf(filterString.toUpperCase())>=0){
 				//Mojo.Log.info("Found string in release date", i);
 				someList.push(s);
@@ -512,7 +474,7 @@ VideosAssistant.prototype.filterListFunction = function(filterString, listWidget
 			else if (s.plot.toUpperCase().indexOf(filterString.toUpperCase())>=0){
 				//Mojo.Log.info("Found string in plot", i);
 				someList.push(s);
-			}
+			}	*/
 		}
 	}
 	else {
@@ -557,102 +519,129 @@ VideosAssistant.prototype.filterListFunction = function(filterString, listWidget
 	
 };	
 
-VideosAssistant.prototype.goVideosDetails = function(event) {
+MusicListAssistant.prototype.goMusicDetails = function(event) {
 	//var upcoming_chanid = event.item.chanid;
 	//var upcoming_starttime = event.item.starttime;
 	
-	//Mojo.Log.info("Selected individual recording: '%s' - '%s'", event.item.intid, event.item.title);
+	Mojo.Log.info("Selected individual music: '%s' - '%s'", event.item.song_id, event.item.name);
 	
-	var videosObject = trimByIntid(this.resultList, event.item.intid);
-
-	//Mojo.Log.error("Selected object is: '%j'", videosObject);
 	
-	var detailsStorageGroup = trimByHostnameGroupname(this.storageGroups, videosObject.host, "Videos");
+	this.musicObject = event.item;
+	this.newArtist = event.item.artist_name;
+	this.newAlbum = event.item.album_name;
 	
-	Mojo.Log.error("Hostname: "+videosObject.host+" has Videos directory: "+detailsStorageGroup.dirname);
 	
-	//Open upcomingDetails communication scene
-	Mojo.Controller.stageController.pushScene("videosDetails", videosObject, detailsStorageGroup.dirname);
+	var popupItems = [
+		{label: 'Details', command: 'do-pickDetails'},
+		{label: 'Artist: '+this.newArtist, command: 'do-pickArtist'},
+		{label: 'Album: '+this.newAlbum, command: 'do-pickAlbum'}
+	];
 	
-	Event.stop(event);
+	
+	this.popupIndex = event.index;
+    this.controller.popupSubmenu({
+      onChoose: this.popupHandler.bind(this),
+      placeNear: event.target,
+      items: popupItems
+    });
+	
 	
 };
 
-VideosAssistant.prototype.videosDividerFunction = function(itemModel) {
+MusicListAssistant.prototype.popupHandler = function(event) {
+	
+	switch(event) {
+		case 'do-pickDetails':
+			//Open upcomingDetails communication scene
+			Mojo.Controller.stageController.pushScene("musicDetails", this.musicObject);
+			
+		  break;
+		  
+		case 'do-pickAlbum':
+			
+			this.musicGroupChanged("album");
+			
+		  break;
+		  
+		case 'do-pickArtist':
+			
+			this.musicGroupChanged("artist");
+	
+		  break;
+		  
+		default:
+			//adsf
+		  break;
+	}
+			
+		
+}
+
+MusicListAssistant.prototype.musicDividerFunction = function(itemModel) {
 	 
 	//Divider function for list
     //return itemModel.title.toString()[0];	
 	//return itemModel.starttime.substring(0,10);
 	//var date = new Date(isoToJS(itemModel.starttime));
 	
-	var dividerData = '';
+	var dividerData = itemModel.artist_name;
 	
-	switch(WebMyth.prefsCookieObject.currentVideosSort) {
-		case 'insert-asc':
-			dividerData = itemModel.insertdate.substring(0,10);
+	
+	switch(WebMyth.prefsCookieObject.currentMusicSort) {
+		case 'album-asc':
+			dividerData = itemModel.album_name;
 		  break;
-		case 'insert-desc':
-			dividerData = itemModel.insertdate.substring(0,10);
+		case 'album-desc':
+			dividerData = itemModel.album_name;
 		  break;
-		case 'released-asc':
-			dividerData = itemModel.releasedate;
+		case 'artist-asc':
+			dividerData = itemModel.artist_name;
 		  break;
-		case 'released-desc':
-			dividerData = itemModel.releasedate;
+		case 'artist-desc':
+			dividerData = itemModel.artist_name;
 		  break;
-		case 'season-asc':
-			dividerData = itemModel.season;
+		case 'name-asc':
+			dividerData = itemModel.name;
 		  break;
-		case 'season-desc':
-			dividerData = itemModel.season;
+		case 'name-desc':
+			dividerData = itemModel.name;
 		  break;
-		case 'title-asc':
-			dividerData = itemModel.title;
+		case 'year-asc':
+			dividerData = itemModel.year;
 		  break;
-		case 'title-desc':
-			dividerData = itemModel.title;
+		case 'year-desc':
+			dividerData = itemModel.year;
 		  break;
 		default :
-			dividerData = itemModel.title;
+			dividerData = itemModel.artist_name;
 		  break;
 	}
+	
 	
 	return dividerData;
 	
 };
 
-VideosAssistant.prototype.setMyData = function(propertyValue, model) {
+MusicListAssistant.prototype.setMyData = function(propertyValue, model) {
 	
-	/*
-	//And img source
-	var channelIconUrl = "http://"+WebMyth.prefsCookieObject.masterBackendIp+":6544/Myth/GetChannelIcon?ChanId=";
-	channelIconUrl += model.chanid;
+	var musicDetailsText = '<div class="music-list-item">';
+	musicDetailsText += '<div class="title truncating-text left  music-list-title">&nbsp;'+model.name+'</div>';
 	
-	//Mojo.Log.error("iconURL is "+channelIconUrl);
+	musicDetailsText += '<div class="palm-row-wrapper">';
 	
-	//Mojo.Log.error('url is ' +screenshotUrl);
-	model.myImgSrc = channelIconUrl;
+	//if(WebMyth.prefsCookieObject.showUpcomingChannelIcons) musicDetailsText += '<div class="left-list-text">';
 	
-	
-	*/
-	var videosDetailsText = '<div class="videos-list-item">';
-	videosDetailsText += '<div class="title truncating-text left videos-list-title">&nbsp;'+model.title+'</div>';
-	
-	videosDetailsText += '<div class="palm-row-wrapper">';
-	
-	//if(WebMyth.prefsCookieObject.showUpcomingChannelIcons) videosDetailsText += '<div class="left-list-text">';
-	
-	videosDetailsText += '<div class="palm-info-text truncating-text left">&nbsp;'+model.subtitle+'&nbsp;</div>';
-	videosDetailsText += '<div class="palm-info-text truncating-text left">&nbsp;&nbsp;'+model.plot+'&nbsp;</div>';
-	videosDetailsText += '<div class="palm-info-text truncating-text left">&nbsp;&nbsp;&nbsp;Episode: '+model.fullEpisode+'</div>';
-	videosDetailsText += '<div class="palm-info-text truncating-text left">&nbsp;&nbsp;&nbsp;&nbsp;Released: '+model.releasedate+'</div>';
+	musicDetailsText += '<div class="palm-info-text truncating-text left">&nbsp;Artist: '+model.artist_name+'&nbsp;</div>';
+	musicDetailsText += '<div class="palm-info-text truncating-text left">&nbsp;&nbsp;Album: '+model.album_name+'&nbsp;</div>';
+	musicDetailsText += '<div class="palm-info-text truncating-text left">&nbsp;&nbsp;&nbsp;Track #: '+model.track+'</div>';
+	musicDetailsText += '<div class="palm-info-text truncating-text left">&nbsp;&nbsp;&nbsp;&nbsp;Year: '+model.year+'</div>';
 	
 	
-	videosDetailsText += '</div></div>';
+	musicDetailsText += '</div></div>';
 	
-	//videosDetailsText += '</div>';
+	//musicDetailsText += '</div>';
 	
-	model.myData = videosDetailsText;
+	model.myData = musicDetailsText;
 	
 	
 };

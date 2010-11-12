@@ -74,9 +74,7 @@ UpcomingDetailsXMLAssistant.prototype.setup = function() {
 };
 
 UpcomingDetailsXMLAssistant.prototype.activate = function(event) {
-	/* put in event handlers here that should only be in effect when this scene is active. For
-	   example, key handlers that are observing the document */
-	   
+
 	
 };
 
@@ -105,7 +103,7 @@ UpcomingDetailsXMLAssistant.prototype.handleCommand = function(event) {
 		this.openWeb(mySelection);
        break;
       case 'go-setu':
-		this.openMythweb();
+		this.openSetup();
        break;
       case 'go-refr':
 	  
@@ -137,10 +135,11 @@ UpcomingDetailsXMLAssistant.prototype.openGuide = function() {
  
 };
 
-UpcomingDetailsXMLAssistant.prototype.openMythweb = function() {
+UpcomingDetailsXMLAssistant.prototype.openSetup = function() {
 
-	Mojo.Log.error("opening in mythweb");
+	Mojo.Log.error("opening setup");
 			
+	/*		
 	var dateJS = new Date(isoSpaceToJS(this.starttime));
 	var dateUTC = dateJS.getTime()/1000;				//don't need 59 second offset?
 			
@@ -169,7 +168,9 @@ UpcomingDetailsXMLAssistant.prototype.openMythweb = function() {
 			}
 		}
 	}); 
+	*/
 	
+	Mojo.Controller.stageController.pushScene("setupRecording", this.upcomingObject);
  
 };
 
@@ -215,6 +216,8 @@ UpcomingDetailsXMLAssistant.prototype.getDetailsXML = function() {
 
 	//Update details from XML backend
 	Mojo.Log.info('Starting details data gathering from XML backend');
+	
+	this.upcomingObject = {};
 		
 	this.requestUrl = "http://"+WebMyth.prefsCookieObject.masterBackendIp+":6544/Myth/GetProgramDetails?StartTime=";
 	this.requestUrl += this.starttime.replace(" ","T");
@@ -311,7 +314,11 @@ UpcomingDetailsXMLAssistant.prototype.readDetailsXMLSuccess = function(response)
 					"endTime": programNode.getAttributeNode("endTime").nodeValue, 
 				//	"airdate": programNode.getAttributeNode("airdate").nodeValue, 
 					"startTime": programNode.getAttributeNode("startTime").nodeValue,
-					"lastModified": programNode.getAttributeNode("lastModified").nodeValue
+					"lastModified": programNode.getAttributeNode("lastModified").nodeValue,
+					
+					"recStartTs": "None",						//just so we can show data if recording has been cancelled
+					"recStatusText": "None",
+					"encoderId": "None"
 				};
 				
 				try {
@@ -366,7 +373,7 @@ UpcomingDetailsXMLAssistant.prototype.readDetailsXMLSuccess = function(response)
 				}
 				
 				Mojo.Log.info('Done parsing programDetails');
-				//Mojo.Log.info("full upcoming details json is %j", this.upcomingObject); 
+				Mojo.Log.info("full upcoming details JSON is %j", this.upcomingObject); 
 				
 			break;
 				
@@ -382,6 +389,7 @@ UpcomingDetailsXMLAssistant.prototype.readDetailsXMLSuccess = function(response)
 
 UpcomingDetailsXMLAssistant.prototype.finishedReadingDetails = function() {
 	
+	Mojo.Log.info('Now showing programDetails');
 	
 	var channelIconUrl = "http://"+WebMyth.prefsCookieObject.masterBackendIp+":6544/Myth/GetChannelIcon?ChanId=";
 	channelIconUrl += this.chanid;
