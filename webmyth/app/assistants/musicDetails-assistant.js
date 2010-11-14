@@ -48,7 +48,12 @@ MusicDetailsAssistant.prototype.setup = function() {
 	this.controller.setupWidget('web-menu', '', this.webMenuModel);
 	
 	
+	var albumArtUrl = "http://"+WebMyth.prefsCookieObject.masterBackendIp+":6544/Myth/GetAlbumArt?Id=";
+	albumArtUrl += this.musicObject.album_id;
+	
 	//Fill in data values
+	$('albumart-image').src = albumArtUrl;
+	
 	$('scene-title').innerText = this.musicObject.name;
 	
 	$('artist-title').innerText = this.musicObject.artist_name;

@@ -111,7 +111,8 @@ function defaultCookie() {
 		showMusic: true,
 		currentVideosSort: 'title-asc',
 		currentVideosGroup: 'all',
-		currentMusicSort: 'name-asc'
+		currentMusicSort: 'name-asc',
+		currentUpcomingGroup: 'Upcoming'
 		
 	};
 	
@@ -278,6 +279,54 @@ var trimByRecgroup = function(fullList, myRecgroup) {
 		}
 		return trimmedList;
 	}
+};
+
+var trimByUpcomingGroup = function(fullList, myUpcomingType) {
+	
+	//Check for keyword for no filtering
+	if ((myUpcomingType == 'All')||(myUpcomingType == 'all')) {
+		return fullList;
+	} else if (myUpcomingType == 'Conflicting') {
+	
+		var trimmedList = [];
+		var i, s;
+	
+		for (i = 0; i < fullList.length; i++) {
+	
+			s = fullList[i];
+			if ((s.recstatus == '7')) {
+				//Matches conflicting
+				trimmedList.push(s);
+			} else {
+				//Does not match
+			}
+		}
+		
+		return trimmedList;
+		
+	} else if (myUpcomingType == 'Upcoming') {
+	
+		var trimmedList = [];
+		var i, s;
+	
+		for (i = 0; i < fullList.length; i++) {
+	
+			s = fullList[i];
+			if ((s.recstatus == '7')||(s.recstatus == '-1')||(s.recstatus == '-2')) {
+				//Matches conflicting, will record, recording
+				trimmedList.push(s);
+			} else {
+				//Does not match
+			}
+		}
+		
+		return trimmedList;
+		
+	}
+	
+	//If all else fails
+	return fullList;
+	
 };
 
 var trimByVideoType = function(fullList, myVideoType) {
@@ -675,6 +724,27 @@ var cleanMusic = function(fullList) {
 		
 	}
 	
+	
+	return finalList;
+	
+}
+
+var cleanUpcoming = function(fullList) {
+
+	finalList = [];
+	
+	var i, s = {};
+	
+	for(i = 0; i < fullList.length; i++) {
+		s = fullList[i];
+		
+		s.recStatusText = recStatusDecode(s.recstatus);
+		s.startTime = s.starttime;
+		s.chanId = s.chanid;
+
+		finalList.push(s);
+		
+	}
 	
 	return finalList;
 	
@@ -1353,7 +1423,7 @@ var recStatusDecode = function(recStatusInt) {
 				newStatusText = "Unknown";
 			break;
 			case 1:		
-				newStatusText = "Don't Record";
+				newStatusText = "Force Don't Record";
 			break;
 			case 2:		
 				newStatusText = "Previously Recorded";

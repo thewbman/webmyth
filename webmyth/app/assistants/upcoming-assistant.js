@@ -27,7 +27,7 @@
 	   
 	  this.nullHandleCount = 0;
 	 
-	  //this.fullResultList = [];		//Full raw data 
+	  this.fullResultList = [];		//Full raw data 
 	  this.resultList = [];			//Filtered down list
 }
 
@@ -49,9 +49,12 @@ UpcomingAssistant.prototype.setup = function() {
 	
 	// Menu grouping at bottom of scene
     this.cmdMenuModel = { label: $L('Upcoming Menu'),
-                            items: [{},{},{ icon: 'refresh', command: 'go-refresh' }]};
-
+                            items: [{},{},{ icon: 'refresh', command: 'go-refresh' },{},{label: $L('Group'), submenu:'group-menu', width: 90}]};
+	this.groupMenuModel = { label: $L('Group'), items: [{"label": WebMyth.prefsCookieObject.currentUpcomingGroup, "command": "go-group--"+WebMyth.prefsCookieObject.currentUpcomingGroup }]};
+	
 	this.controller.setupWidget(Mojo.Menu.commandMenu, {menuClass: 'no-fade'}, this.cmdMenuModel);
+	this.controller.setupWidget('group-menu', '', this.groupMenuModel);
+	
 	
 	
 	// 'upcoming' widget filter list
@@ -86,22 +89,18 @@ UpcomingAssistant.prototype.activate = function(event) {
 	//Keypress event
 	Mojo.Event.listen(this.controller.sceneElement, Mojo.Event.keyup, this.handleKey.bind(this));
 	
-	//Vibrate event
-	Mojo.Event.listen(document, 'shakestart', this.handleShakestart.bindAsEventListener(this));
-	
 };
 
 UpcomingAssistant.prototype.deactivate = function(event) {
 	//Keypress event
 	Mojo.Event.stopListening(this.controller.sceneElement, Mojo.Event.keyup, this.handleKey.bind(this));
 	
-	//Vibrate event
-	Mojo.Event.stopListening(document, 'shakestart', this.handleShakestart.bindAsEventListener(this));
+	
+	WebMyth.prefsCookie.put(WebMyth.prefsCookieObject);
 };
 
 UpcomingAssistant.prototype.cleanup = function(event) {
-	/* this function should do any cleanup needed before the scene is destroyed as 
-	   a result of being popped off the scene stack */
+
 };
 
 UpcomingAssistant.prototype.handleCommand = function(event) {
@@ -111,17 +110,27 @@ UpcomingAssistant.prototype.handleCommand = function(event) {
 	Mojo.Controller.stageController.pushScene({name: WebMyth.prefsCookieObject.currentRemoteScene, disableSceneScroller: true});
 	
   } else if(event.type == Mojo.Event.command) {
+		myCommand = event.command.substring(0,10);
+		mySelection = event.command.substring(10);
+		Mojo.Log.error("command: "+myCommand+" selection: "+mySelection);
 
-		switch(event.command) {
-		  case 'go-refresh':		
-		  
-			this.spinnerModel.spinning = true;
-			this.controller.modelChanged(this.spinnerModel, this);
-			$('myScrim').show();
-		
-			this.getUpcoming();
+		switch(myCommand) {
+			case 'go-refresh':		
+			  
+				this.spinnerModel.spinning = true;
+				this.controller.modelChanged(this.spinnerModel, this);
+				$('myScrim').show();
 			
-		   break;
+				this.getUpcoming();
+				
+			  break;
+			case 'go-group--':	
+
+				this.controller.sceneScroller.mojo.revealTop();			
+			  
+				this.groupChanged(mySelection);
+				
+			  break;
 		}
 	}
   
@@ -158,22 +167,6 @@ UpcomingAssistant.prototype.handleKey = function(event) {
 	
 };
 
-UpcomingAssistant.prototype.handleShakestart = function(event) {
-
-	Mojo.Log.info("Start Shaking");
-	Event.stop(event);
-	
-	
-	//Stop spinner and hide
-	this.spinnerModel.spinning = true;
-	this.controller.modelChanged(this.spinnerModel, this);
-	$('myScrim').show()	
-	
-	
-	this.getUpcoming();
-  
-};
-
 
 
 
@@ -185,8 +178,8 @@ UpcomingAssistant.prototype.getUpcoming = function(event) {
 	this.controller.sceneScroller.mojo.revealTop();
 	
 	var requestUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webmythPythonFile;
-	requestUrl += "?op=getUpcoming";				//will record
-	//requestUrl += "?op=getPending";				//matches any reocrding rule
+	//requestUrl += "?op=getUpcoming";				//will record
+	requestUrl += "?op=getPending";				//matches any reocrding rule
 	//requestUrl += "?op=getScheduled";				//includes recording rules that don't match anything
 	
 	//requestHeaders: {Authorization: 'Basic ' + Base64.encode(WebMyth.prefsCookieObject.webserverUsername + ":" + WebMyth.prefsCookieObject.webserverPassword)},
@@ -232,15 +225,39 @@ UpcomingAssistant.prototype.readRemoteDbTableSuccess = function(response) {
 	
 		
 	//Update the list widget
+	this.fullResultList.clear();
+	Object.extend(this.fullResultList,cleanUpcoming(response.responseJSON));
+	
+	/*
+	for(var i = 0; i < this.fullResultList; i++) {
+	
+		this.fullResultList[i].recStatusText = recStatusDecode(this.fullResultList[i].recstatus*1);
+		this.fullResultList[i].startTime = this.fullResultList[i].starttime;
+		this.fullResultList[i].chanId = this.fullResultList[i].chanid;
+		
+	}
+	*/
+	
+	this.groupChanged(WebMyth.prefsCookieObject.currentUpcomingGroup);
+	
+}
+
+UpcomingAssistant.prototype.groupChanged = function(newGroup) {
+
+	WebMyth.prefsCookieObject.currentUpcomingGroup = newGroup;
+	
+	Mojo.Log.info("The current upcoming group has changed to "+WebMyth.prefsCookieObject.currentUpcomingGroup);
+	
+	//Update results list from filter
 	this.resultList.clear();
-	Object.extend(this.resultList,response.responseJSON);
+	Object.extend(this.resultList, trimByUpcomingGroup(this.fullResultList, WebMyth.prefsCookieObject.currentUpcomingGroup));
+	//Object.extend(this.resultList, this.fullResultList);
+	
+	//Mojo.Log.info("grouped upcoming list is %j",this.resultList);
+	
 	
 	$("scene-title").innerHTML = "Upcoming Recordings ("+this.resultList.length+" items)";
 	
-	for(var i = 0; i < this.resultList.length; i++) {
-		this.resultList[i].startTime = this.resultList[i].starttime;
-		this.resultList[i].chanId = this.resultList[i].chanid;
-	}
 	//this.fullResultList.sort(double_sort_by('starttime', 'title', false));
 	
 	
@@ -257,6 +274,7 @@ UpcomingAssistant.prototype.readRemoteDbTableSuccess = function(response) {
 	listWidget.mojo.close();
 	//Mojo.Controller.getAppController().showBanner("Updated with latest data", {source: 'notification'});
 	
+	this.updateGroupMenu();
 	
 	//Stop spinner and hide
 	this.spinnerModel.spinning = false;
@@ -265,10 +283,39 @@ UpcomingAssistant.prototype.readRemoteDbTableSuccess = function(response) {
 
 };
 
+UpcomingAssistant.prototype.updateGroupMenu = function() {
+	
+	//Reset default sorting
+	this.groupMenuModel.items = [ 
+			{"label": $L('All'), "command": "go-group--All"},
+			{"label": $L('Conflicting'), "command": "go-group--Conflicting"},
+			{"label": $L('Upcoming'), "command": "go-group--Upcoming"}
+	] ;
+	
+	switch(WebMyth.prefsCookieObject.currentUpcomingGroup) {
+		case 'All':
+			this.groupMenuModel.items[0].label = '- All -';
+		  break;
+		case 'Conflicting':
+			this.groupMenuModel.items[1].label = '- Conflicting -';
+		  break;
+		case 'Upcoming':
+			this.groupMenuModel.items[2].label = '- Upcoming -';
+		  break;
+		default :
+			//this.groupMenuModel.items[0].label = 'Default';
+		  break;
+	}
+	
+	
+	this.controller.modelChanged(this.groupMenuModel);
+	
+}
+
 UpcomingAssistant.prototype.filterListFunction = function(filterString, listWidget, offset, count) {
 	 
 	//Filtering function
-	Mojo.Log.info("Started filtering with '%s'",filterString);
+	//Mojo.Log.info("Started filtering with '%s'",filterString);
 	
 	var totalSubsetSize = 0;
  
@@ -298,11 +345,15 @@ UpcomingAssistant.prototype.filterListFunction = function(filterString, listWidg
 				//Mojo.Log.info("Found string in category", i);
 				someList.push(s);
 			}
+			else if (s.recStatusText.toUpperCase().indexOf(filterString.toUpperCase())>=0){
+				//Mojo.Log.info("Found string in recStatusText", i);
+				someList.push(s);
+			}
 		}
 	}
 	else {
 
-		Mojo.Log.info("No filter string");
+		//Mojo.Log.info("No filter string");
 
 		var len = this.resultList.length;
  
@@ -391,8 +442,12 @@ UpcomingAssistant.prototype.setMyData = function(propertyValue, model) {
 	upcomingDetailsText += '<div class="palm-info-text truncating-text left">&nbsp;'+model.subtitle+'&nbsp;</div>';
 	upcomingDetailsText += '<div class="palm-info-text truncating-text left">&nbsp;&nbsp;'+model.starttime+'&nbsp;</div>';
 	upcomingDetailsText += '<div class="palm-info-text truncating-text left">&nbsp;&nbsp;&nbsp;'+model.category+'</div>';
-	upcomingDetailsText += '<div class="palm-info-text truncating-text left">&nbsp;&nbsp;&nbsp;&nbsp;'+model.channum+" - "+model.channame+'</div>';
 	
+	if(model.recstatus == '-1') {
+		upcomingDetailsText += '<div class="palm-info-text truncating-text left">&nbsp;&nbsp;&nbsp;&nbsp;'+model.channum+" - "+model.channame+'</div>';
+	} else {
+		upcomingDetailsText += '<div class="palm-info-text truncating-text left">&nbsp;&nbsp;&nbsp;&nbsp;'+model.recStatusText+'</div>';
+	}
 	
 	
 	if(WebMyth.prefsCookieObject.showUpcomingChannelIcons) {

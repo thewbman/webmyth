@@ -12,14 +12,8 @@ To Do - planned new features and updates:
  - look into guide showing wrong time (esp from upcoming)
  - open remote in new card option
  - handle music playlists
- - fix upcomingdetailsXML if no rule
- - getConflictedRecrodigns in python
  - fix download with :
- - use script for screenshots on WAN
- - group pixi first buttons
- - disable shake refresh when button
- - album art from 6544 backend
- - handle quotes in scheudle job SQL
+ - get userjob names for setup
  
  
 //Long term

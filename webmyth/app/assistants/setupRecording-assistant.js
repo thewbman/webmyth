@@ -415,10 +415,10 @@ SetupRecordingAssistant.prototype.handleCommand = function(event) {
 		this.buildRecordingRule('forget-old');
 		
        break;
-      case 'do-change-override':			//never record
-		Mojo.Log.error("changing override type");
+      case 'do-override-toggle':			//toggle override type
+		Mojo.Log.error("toggling override type");
 		
-		this.buildRecordingRule('change-override');
+		this.buildRecordingRule('toggle-override');
 		
        break;
       case 'do-cancel-rule':			//cancel rule
@@ -1115,6 +1115,11 @@ SetupRecordingAssistant.prototype.buildRecordingRule = function(saveType) {
 			this.forgetOld();
 		  break;
 		  
+		case 'toggle-override':
+			this.toggleOverride();
+		  break;
+		  
+		  
 		case 'cancel-record':
 			this.cancelRecord();
 		  break;
@@ -1124,21 +1129,21 @@ SetupRecordingAssistant.prototype.buildRecordingRule = function(saveType) {
 
 SetupRecordingAssistant.prototype.updateRule = function() {
 	
-	var query = "UPDATE `record` SET `type` = '"+this.newRule.type+"', `title` = '"+this.newRule.title+"', `subtitle` = '"+this.newRule.subtitle;
-	query += "', startdate = '"+this.newRule.startdate+"', starttime = '"+this.newRule.starttime+"', station = '"+this.newRule.station;
-	query += "', description = '"+this.newRule.description+"', category = '"+this.newRule.category+"', seriesid = '"+this.newRule.seriesid;
-	query += "', programid = '"+this.newRule.programid+"', chanid = '"+this.newRule.chanid+"', endtime = '"+this.newRule.endtime;
-	query += "', enddate = '"+this.newRule.enddate+"', profile = '"+this.newRule.profile+"', transcoder = '"+this.newRule.transcoder;
-	query += "', recgroup = '"+this.newRule.recgroup+"', storagegroup = '"+this.newRule.storagegroup+"', playgroup = '"+this.newRule.playgroup;
-	query += "', recpriority = '"+this.newRule.recpriority+"', dupmethod = '"+this.newRule.dupmethod;
-	query += "', dupin = '"+this.newRule.dupin+"', prefinput = '"+this.newRule.prefinput+"', inactive = '"+this.newRule.inactive;
-	query += "', autoexpire = '"+this.newRule.autoexpire+"', maxnewest = '"+this.newRule.maxnewest+"', maxepisodes = '"+this.newRule.maxepisodes;
-	query += "', startoffset = '"+this.newRule.startoffset+"', endoffset = '"+this.newRule.endoffset+"', autocommflag = '"+this.newRule.autocommflag;
-	query += "', autotranscode = '"+this.newRule.autotranscode+"', autouserjob1 = '"+this.newRule.autouserjob1+"', autouserjob2 = '"+this.newRule.autouserjob2;
-	query += "', autouserjob3 = '"+this.newRule.autouserjob3+"', autouserjob4 = '"+this.newRule.autouserjob4;
-	query += "' WHERE `recordid` = "+this.newRule.recordid+" LIMIT 1;";
+	var query = 'UPDATE `record` SET `type` = "'+this.newRule.type+'", `title` = "'+this.newRule.title+'", `subtitle` = "'+this.newRule.subtitle;
+	query += '", startdate = "'+this.newRule.startdate+'", starttime = "'+this.newRule.starttime+'", station = "'+this.newRule.station;
+	query += '", description = "'+this.newRule.description+'", category = "'+this.newRule.category+'", seriesid = "'+this.newRule.seriesid;
+	query += '", programid = "'+this.newRule.programid+'", chanid = "'+this.newRule.chanid+'", endtime = "'+this.newRule.endtime;
+	query += '", enddate = "'+this.newRule.enddate+'", profile = "'+this.newRule.profile+'", transcoder = "'+this.newRule.transcoder;
+	query += '", recgroup = "'+this.newRule.recgroup+'", storagegroup = "'+this.newRule.storagegroup+"', playgroup = '"+this.newRule.playgroup;
+	query += '", recpriority = "'+this.newRule.recpriority+'", dupmethod = "'+this.newRule.dupmethod;
+	query += '", dupin = "'+this.newRule.dupin+'", prefinput = "'+this.newRule.prefinput+'", inactive = "'+this.newRule.inactive;
+	query += '", autoexpire = "'+this.newRule.autoexpire+'", maxnewest = "'+this.newRule.maxnewest+'", maxepisodes = "'+this.newRule.maxepisodes;
+	query += '", startoffset = "'+this.newRule.startoffset+'", endoffset = "'+this.newRule.endoffset+'", autocommflag = "'+this.newRule.autocommflag;
+	query += '", autotranscode = "'+this.newRule.autotranscode+'", autouserjob1 = "'+this.newRule.autouserjob1+'", autouserjob2 = "'+this.newRule.autouserjob2;
+	query += '", autouserjob3 = "'+this.newRule.autouserjob3+'", autouserjob4 = "'+this.newRule.autouserjob4;
+	query += '" WHERE `recordid` = '+this.newRule.recordid+' LIMIT 1;';
 	
-	
+	Mojo.Log.error("query is "+query);
 	
 	var requestUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webmythPythonFile;
 	requestUrl += "?op=executeSQL";				
@@ -1183,25 +1188,27 @@ SetupRecordingAssistant.prototype.createRule = function() {
 		$('myScrim').hide();
 		
 	} else {
-		var query = "INSERT INTO `record` SET `type` = '"+this.newRule.type+"', `title` = '"+this.newRule.title+"', `subtitle` = '"+this.newRule.subtitle;
-		query += "', startdate = '"+this.newRule.startdate+"', starttime = '"+this.newRule.starttime+"', station = '"+this.newRule.station;
-		query += "', description = '"+this.newRule.description+"', category = '"+this.newRule.category+"', seriesid = '"+this.newRule.seriesid;
-		query += "', programid = '"+this.newRule.programid+"', chanid = '"+this.newRule.chanid+"', endtime = '"+this.newRule.endtime;
-		query += "', enddate = '"+this.newRule.enddate+"', profile = '"+this.newRule.profile+"', transcoder = '"+this.newRule.transcoder;
-		query += "', recgroup = '"+this.newRule.recgroup+"', storagegroup = '"+this.newRule.storagegroup+"', playgroup = '"+this.newRule.playgroup;
-		query += "', recpriority = '"+this.newRule.recpriority+"', dupmethod = '"+this.newRule.dupmethod;
-		query += "', dupin = '"+this.newRule.dupin+"', prefinput = '"+this.newRule.prefinput+"', inactive = '"+this.newRule.inactive;
-		query += "', autoexpire = '"+this.newRule.autoexpire+"', maxnewest = '"+this.newRule.maxnewest+"', maxepisodes = '"+this.newRule.maxepisodes;
-		query += "', startoffset = '"+this.newRule.startoffset+"', endoffset = '"+this.newRule.endoffset+"', autocommflag = '"+this.newRule.autocommflag;
-		query += "', autotranscode = '"+this.newRule.autotranscode+"', autouserjob1 = '"+this.newRule.autouserjob1+"', autouserjob2 = '"+this.newRule.autouserjob2;
-		query += "', autouserjob3 = '"+this.newRule.autouserjob3+"', autouserjob4 = '"+this.newRule.autouserjob4;
-		query += "', last_record = '"+this.newRule.last_record+"', last_delete = '"+this.newRule.last_delete;
-		query += "' ;";
+		var query = 'INSERT INTO `record` SET `type` = "'+this.newRule.type+'", `title` = "'+this.newRule.title+'", `subtitle` = "'+this.newRule.subtitle;
+		query += '", startdate = "'+this.newRule.startdate+'", starttime = "'+this.newRule.starttime+'", station = "'+this.newRule.station;
+		query += '", description = "'+this.newRule.description+'", category = "'+this.newRule.category+'", seriesid = "'+this.newRule.seriesid;
+		query += '", programid = "'+this.newRule.programid+'", chanid = "'+this.newRule.chanid+'", endtime = "'+this.newRule.endtime;
+		query += '", enddate = "'+this.newRule.enddate+'", profile = "'+this.newRule.profile+'", transcoder = "'+this.newRule.transcoder;
+		query += '", recgroup = "'+this.newRule.recgroup+'", storagegroup = "'+this.newRule.storagegroup+'", playgroup = "'+this.newRule.playgroup;
+		query += '", recpriority = "'+this.newRule.recpriority+'", dupmethod = "'+this.newRule.dupmethod;
+		query += '", dupin = "'+this.newRule.dupin+'", prefinput = "'+this.newRule.prefinput+'", inactive = "'+this.newRule.inactive;
+		query += '", autoexpire = "'+this.newRule.autoexpire+'", maxnewest = "'+this.newRule.maxnewest+'", maxepisodes = "'+this.newRule.maxepisodes;
+		query += '", startoffset = "'+this.newRule.startoffset+'", endoffset = "'+this.newRule.endoffset+'", autocommflag = "'+this.newRule.autocommflag;
+		query += '", autotranscode = "'+this.newRule.autotranscode+'", autouserjob1 = "'+this.newRule.autouserjob1+'", autouserjob2 = "'+this.newRule.autouserjob2;
+		query += '", autouserjob3 = "'+this.newRule.autouserjob3+'", autouserjob4 = "'+this.newRule.autouserjob4;
+		query += '", last_record = "'+this.newRule.last_record+'", last_delete = "'+this.newRule.last_delete;
+		query += '" ;';
 		
 		
 		this.newRule.recordid = -1;				//so that we reschedule all
 		
 		
+		
+	Mojo.Log.error("query is "+query);
 		
 		var requestUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webmythPythonFile;
 		requestUrl += "?op=executeSQL";				
@@ -1229,22 +1236,24 @@ SetupRecordingAssistant.prototype.createRule = function() {
 
 SetupRecordingAssistant.prototype.overrideRecord = function() {
 	
-	var query = "INSERT INTO `record` SET `type` = '7', `title` = '"+this.newRule.title+"', `subtitle` = '"+this.newRule.subtitle;
-	query += "', startdate = '"+this.newRule.startdate+"', starttime = '"+this.newRule.starttime+"', station = '"+this.newRule.station;
-	query += "', description = '"+this.newRule.description+"', category = '"+this.newRule.category+"', seriesid = '"+this.newRule.seriesid;
-	query += "', programid = '"+this.newRule.programid+"', chanid = '"+this.newRule.chanid+"', endtime = '"+this.newRule.endtime;
-	query += "', enddate = '"+this.newRule.enddate+"', profile = '"+this.newRule.profile+"', transcoder = '"+this.newRule.transcoder;
-	query += "', recgroup = '"+this.newRule.recgroup+"', storagegroup = '"+this.newRule.storagegroup+"', playgroup = '"+this.newRule.playgroup;
-	query += "', recpriority = '"+this.newRule.recpriority+"', dupmethod = '"+this.newRule.dupmethod;
-	query += "', dupin = '"+this.newRule.dupin+"', prefinput = '"+this.newRule.prefinput+"', inactive = '"+this.newRule.inactive;
-	query += "', autoexpire = '"+this.newRule.autoexpire+"', maxnewest = '"+this.newRule.maxnewest+"', maxepisodes = '"+this.newRule.maxepisodes;
-	query += "', startoffset = '"+this.newRule.startoffset+"', endoffset = '"+this.newRule.endoffset+"', autocommflag = '"+this.newRule.autocommflag;
-	query += "', autotranscode = '"+this.newRule.autotranscode+"', autouserjob1 = '"+this.newRule.autouserjob1+"', autouserjob2 = '"+this.newRule.autouserjob2;
-	query += "', autouserjob3 = '"+this.newRule.autouserjob3+"', autouserjob4 = '"+this.newRule.autouserjob4;  //+"', parentid = '"+this.newRule.recordid;
-	query += "', findtime = '"+this.newRule.starttime+"', findday = '"+this.newRule.findday+"', findid = '"+this.newRule.findid;
-	query += "', last_record = '"+this.newRule.last_record+"', last_delete = '"+this.newRule.last_delete;
-	query += "' ;";
+	var query = 'INSERT INTO `record` SET `type` = "7", `title` = "'+this.newRule.title+'", `subtitle` = "'+this.newRule.subtitle;
+	query += '", startdate = "'+this.newRule.startdate+'", starttime = "'+this.newRule.starttime+'", station = "'+this.newRule.station;
+	query += '", description = "'+this.newRule.description+'", category = "'+this.newRule.category+'", seriesid = "'+this.newRule.seriesid;
+	query += '", programid = "'+this.newRule.programid+'", chanid = "'+this.newRule.chanid+'", endtime = "'+this.newRule.endtime;
+	query += '", enddate = "'+this.newRule.enddate+'", profile = "'+this.newRule.profile+'", transcoder = "'+this.newRule.transcoder;
+	query += '", recgroup = "'+this.newRule.recgroup+'", storagegroup = "'+this.newRule.storagegroup+'", playgroup = "'+this.newRule.playgroup;
+	query += '", recpriority = "'+this.newRule.recpriority+'", dupmethod = "'+this.newRule.dupmethod;
+	query += '", dupin = "'+this.newRule.dupin+'", prefinput = "'+this.newRule.prefinput+'", inactive = "'+this.newRule.inactive;
+	query += '", autoexpire = "'+this.newRule.autoexpire+'", maxnewest = "'+this.newRule.maxnewest+'", maxepisodes = "'+this.newRule.maxepisodes;
+	query += '", startoffset = "'+this.newRule.startoffset+'", endoffset = "'+this.newRule.endoffset+'", autocommflag = "'+this.newRule.autocommflag;
+	query += '", autotranscode = "'+this.newRule.autotranscode+'", autouserjob1 = "'+this.newRule.autouserjob1+"', autouserjob2 = '"+this.newRule.autouserjob2;
+	query += '", autouserjob3 = "'+this.newRule.autouserjob3+'", autouserjob4 = "'+this.newRule.autouserjob4;  //+"', parentid = '"+this.newRule.recordid;
+	query += '", findtime = "'+this.newRule.starttime+'", findday = "'+this.newRule.findday+'", findid = "'+this.newRule.findid;
+	query += '", last_record = "'+this.newRule.last_record+'", last_delete = "'+this.newRule.last_delete;
+	query += '" ;';
 	
+	
+	Mojo.Log.error("query is "+query);
 	
 	this.newRule.recordid = -1;				//so that we reschedule all
 	
@@ -1272,26 +1281,27 @@ SetupRecordingAssistant.prototype.overrideRecord = function() {
 
 SetupRecordingAssistant.prototype.overrideDontRecord = function() {
 	
-	var query = "INSERT INTO `record` SET `type` = '8', `title` = '"+this.newRule.title+"', `subtitle` = '"+this.newRule.subtitle;
-	query += "', startdate = '"+this.newRule.startdate+"', starttime = '"+this.newRule.starttime+"', station = '"+this.newRule.station;
-	query += "', description = '"+this.newRule.description+"', category = '"+this.newRule.category+"', seriesid = '"+this.newRule.seriesid;
-	query += "', programid = '"+this.newRule.programid+"', chanid = '"+this.newRule.chanid+"', endtime = '"+this.newRule.endtime;
-	query += "', enddate = '"+this.newRule.enddate+"', profile = '"+this.newRule.profile+"', transcoder = '"+this.newRule.transcoder;
-	query += "', recgroup = '"+this.newRule.recgroup+"', storagegroup = '"+this.newRule.storagegroup+"', playgroup = '"+this.newRule.playgroup;
-	query += "', recpriority = '"+this.newRule.recpriority+"', dupmethod = '"+this.newRule.dupmethod;
-	query += "', dupin = '"+this.newRule.dupin+"', prefinput = '"+this.newRule.prefinput+"', inactive = '"+this.newRule.inactive;
-	query += "', autoexpire = '"+this.newRule.autoexpire+"', maxnewest = '"+this.newRule.maxnewest+"', maxepisodes = '"+this.newRule.maxepisodes;
-	query += "', startoffset = '"+this.newRule.startoffset+"', endoffset = '"+this.newRule.endoffset+"', autocommflag = '"+this.newRule.autocommflag;
-	query += "', autotranscode = '"+this.newRule.autotranscode+"', autouserjob1 = '"+this.newRule.autouserjob1+"', autouserjob2 = '"+this.newRule.autouserjob2;
-	query += "', autouserjob3 = '"+this.newRule.autouserjob3+"', autouserjob4 = '"+this.newRule.autouserjob4;  //+"', parentid = '"+this.newRule.recordid;
-	query += "', findtime = '"+this.newRule.starttime+"', findday = '"+this.newRule.findday+"', findid = '"+this.newRule.findid;
-	query += "', last_record = '"+this.newRule.last_record+"', last_delete = '"+this.newRule.last_delete;
-	query += "' ;";
+	var query = 'INSERT INTO `record` SET `type` = "8", `title` = "'+this.newRule.title+'", `subtitle` = "'+this.newRule.subtitle;
+	query += '", startdate = "'+this.newRule.startdate+'", starttime = "'+this.newRule.starttime+'", station = "'+this.newRule.station;
+	query += '", description = "'+this.newRule.description+'", category = "'+this.newRule.category+'", seriesid = "'+this.newRule.seriesid;
+	query += '", programid = "'+this.newRule.programid+'", chanid = "'+this.newRule.chanid+'", endtime = "'+this.newRule.endtime;
+	query += '", enddate = "'+this.newRule.enddate+'", profile = "'+this.newRule.profile+'", transcoder = "'+this.newRule.transcoder;
+	query += '", recgroup = "'+this.newRule.recgroup+'", storagegroup = "'+this.newRule.storagegroup+'", playgroup = "'+this.newRule.playgroup;
+	query += '", recpriority = "'+this.newRule.recpriority+'", dupmethod = "'+this.newRule.dupmethod;
+	query += '", dupin = "'+this.newRule.dupin+'", prefinput = "'+this.newRule.prefinput+'", inactive = "'+this.newRule.inactive;
+	query += '", autoexpire = "'+this.newRule.autoexpire+'", maxnewest = "'+this.newRule.maxnewest+'", maxepisodes = "'+this.newRule.maxepisodes;
+	query += '", startoffset = "'+this.newRule.startoffset+'", endoffset = "'+this.newRule.endoffset+'", autocommflag = "'+this.newRule.autocommflag;
+	query += '", autotranscode = "'+this.newRule.autotranscode+'", autouserjob1 = "'+this.newRule.autouserjob1+'", autouserjob2 = "'+this.newRule.autouserjob2;
+	query += '", autouserjob3 = "'+this.newRule.autouserjob3+'", autouserjob4 = "'+this.newRule.autouserjob4;  //+"', parentid = '"+this.newRule.recordid;
+	query += '", findtime = "'+this.newRule.starttime+'", findday = "'+this.newRule.findday+'", findid = "'+this.newRule.findid;
+	query += '", last_record = "'+this.newRule.last_record+'", last_delete = "'+this.newRule.last_delete;
+	query += '" ;';
 	
 	
 	this.newRule.recordid = -1;				//so that we reschedule all
 	
 	
+	Mojo.Log.error("query is "+query);
 	
 	var requestUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webmythPythonFile;
 	requestUrl += "?op=executeSQL";				
@@ -1317,17 +1327,18 @@ SetupRecordingAssistant.prototype.overrideDontRecord = function() {
 
 SetupRecordingAssistant.prototype.neverRecord = function() {
 	
-	var query = "REPLACE INTO oldrecorded (chanid,starttime,endtime,title,";
-	query += "subtitle,description,category,seriesid,programid,";
-	query += "recordid,station,rectype,recstatus,duplicate) VALUES ('";
-	query += this.newRule.chanid+"','"+this.newRule.starttime+"','"+this.newRule.endtime+"','"+this.newRule.title+"','";
-	query += this.newRule.subtitle+"','"+this.newRule.description+"','"+this.newRule.category+"','"+this.newRule.seriesid+"','"+this.newRule.programid+"','";
-	query += this.newRule.recordid+"','"+this.newRule.station+"','"+this.newRule.type+"',11,1);";
+	var query = 'REPLACE INTO oldrecorded (chanid,starttime,endtime,title,';
+	query += 'subtitle,description,category,seriesid,programid,';
+	query += 'recordid,station,rectype,recstatus,duplicate) VALUES ("';
+	query += this.newRule.chanid+'","'+this.newRule.starttime+'","'+this.newRule.endtime+'","'+this.newRule.title+'","';
+	query += this.newRule.subtitle+'","'+this.newRule.description+'","'+this.newRule.category+'","'+this.newRule.seriesid+'","'+this.newRule.programid+'","';
+	query += this.newRule.recordid+'","'+this.newRule.station+'","'+this.newRule.type+'",11,1);';
 	
 	
 	//this.newRule.recordid = -1;				//so that we reschedule all
 	
 	
+	Mojo.Log.error("query is "+query);
 	
 	var requestUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webmythPythonFile;
 	requestUrl += "?op=executeSQL";				
@@ -1354,16 +1365,17 @@ SetupRecordingAssistant.prototype.neverRecord = function() {
 
 SetupRecordingAssistant.prototype.forgetOld = function() {
 	
-	var query = "DELETE FROM `oldrecorded` WHERE ";
-	query += "`title` = '"+this.newRule.title;
-	query += "' AND `subtitle` = '"+this.newRule.subtitle;
-	query += "' AND `description` = '"+this.newRule.description;
-	query += "'";
+	var query = 'DELETE FROM `oldrecorded` WHERE ';
+	query += '`title` = "'+this.newRule.title;
+	query += '" AND `subtitle` = "'+this.newRule.subtitle;
+	query += '" AND `description` = "'+this.newRule.description;
+	query += '"';
 	
 	
 	//this.newRule.recordid = -1;				//so that we reschedule all
 	
 	
+	Mojo.Log.error("query is "+query);
 	
 	var requestUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webmythPythonFile;
 	requestUrl += "?op=executeSQL";				
@@ -1388,12 +1400,50 @@ SetupRecordingAssistant.prototype.forgetOld = function() {
 	
 };
 
+SetupRecordingAssistant.prototype.toggleOverride = function() {
+
+	if(this.newRule.type == 7) {
+		Mojo.Log.error("changing from force record to force dont");
+		var query = 'UPDATE `record` SET `type` = "8" WHERE `recordid` = '+this.newRule.recordid+' LIMIT 1';
+	} else if(this.newRule.type == 8) { 
+		Mojo.Log.error("changing from force dont record to force record");
+		var query = 'UPDATE `record` SET `type` = "7" WHERE `recordid` = '+this.newRule.recordid+' LIMIT 1';
+	} else {
+		Mojo.Log.error("unknown toggle type");
+		var query = "";
+	}
+	
+	Mojo.Log.error("query is "+query);
+	
+	var requestUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webmythPythonFile;
+	requestUrl += "?op=executeSQL";				
+	requestUrl += "&query64=";		
+	requestUrl += Base64.encode(query);	
+	
+	
+	
+    try {
+        var request = new Ajax.Request(requestUrl,{
+            method: 'get',
+            evalJSON: 'false',
+			requestHeaders: {Authorization: 'Basic ' + Base64.encode(WebMyth.prefsCookieObject.webserverUsername + ":" + WebMyth.prefsCookieObject.webserverPassword)},
+            onSuccess: this.executeSqlSuccess.bind(this),
+            onFailure: this.executeSqlFail.bind(this)  
+        });
+    }
+    catch(e) {
+        Mojo.Log.error(e);
+    }
+	
+};
+
 SetupRecordingAssistant.prototype.cancelRecord = function() {
 
 	var query = "DELETE FROM `record` ";
 	query += " WHERE `recordid` = "+this.newRule.recordid+" LIMIT 1;";
 	
 	
+	Mojo.Log.error("query is "+query);
 	
 	var requestUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webmythPythonFile;
 	requestUrl += "?op=executeSQL";				
