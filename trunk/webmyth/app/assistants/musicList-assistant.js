@@ -206,10 +206,24 @@ MusicListAssistant.prototype.getMusic = function(event) {
 	
 	this.controller.sceneScroller.mojo.revealTop();
 	
+	//var requestUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webmythPythonFile;
+	//requestUrl += "?op=getMusic";	
+	
+	//SELECT music_songs.song_id, music_songs.name, music_songs.filename, music_songs.year, music_songs.track, music_artists.artist_name, music_albums.album_name, music_albums.year AS album_year, music_albums.compilation FROM music_songs, music_artists, music_albums WHERE music_songs.artist_id = music_artists.artist_id AND music_songs.album_id = music_albums.album_id
+	
+	var query = "SELECT music_songs.song_id, music_songs.name, music_songs.filename, music_songs.year, music_songs.track, "; 
+	query += " music_songs.artist_id, music_artists.artist_name, music_songs.album_id, music_albums.album_name, music_albums.compilation ";
+	query += " FROM music_songs ";
+	query += " LEFT JOIN music_artists ON music_songs.artist_id = music_artists.artist_id "
+	query += " LEFT JOIN music_albums ON music_songs.album_id = music_albums.album_id ";
+	
+	
 	var requestUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webmythPythonFile;
-	requestUrl += "?op=getMusic";	
+	requestUrl += "?op=executeSQLwithResponse";				
+	requestUrl += "&query64=";		
+	requestUrl += Base64.encode(query);	
 	
-	
+
 	
     try {
         var request = new Ajax.Request(requestUrl,{
@@ -248,7 +262,7 @@ MusicListAssistant.prototype.readRemoteDbTableFail = function(event) {
 MusicListAssistant.prototype.readRemoteDbTableSuccess = function(response) {
 	//return true;  //can escape this function for testing purposes
     
-	Mojo.Log.info('Got Ajax response: %j',response.responseJSON);
+	//Mojo.Log.info('Got Ajax response: %j',response.responseJSON);
 	
 		
 	//Update the list widget
@@ -623,23 +637,34 @@ MusicListAssistant.prototype.musicDividerFunction = function(itemModel) {
 };
 
 MusicListAssistant.prototype.setMyData = function(propertyValue, model) {
+
+	var albumArtUrl = "http://"+WebMyth.prefsCookieObject.masterBackendIp+":6544/Myth/GetAlbumArt?Id=";
+	albumArtUrl += model.album_id;
 	
 	var musicDetailsText = '<div class="music-list-item">';
 	musicDetailsText += '<div class="title truncating-text left  music-list-title">&nbsp;'+model.name+'</div>';
 	
 	musicDetailsText += '<div class="palm-row-wrapper">';
 	
-	//if(WebMyth.prefsCookieObject.showUpcomingChannelIcons) musicDetailsText += '<div class="left-list-text">';
+	musicDetailsText += '<div class="left-music-image"> <div class="left-list-music-image-wrapper">';
+	musicDetailsText += '<img class="music-albumart-small" src="'+albumArtUrl+'" />';
+	musicDetailsText += '</div> </div>';
 	
+	
+	musicDetailsText += '<div class="right-music-text">';
 	musicDetailsText += '<div class="palm-info-text truncating-text left">&nbsp;Artist: '+model.artist_name+'&nbsp;</div>';
 	musicDetailsText += '<div class="palm-info-text truncating-text left">&nbsp;&nbsp;Album: '+model.album_name+'&nbsp;</div>';
 	musicDetailsText += '<div class="palm-info-text truncating-text left">&nbsp;&nbsp;&nbsp;Track #: '+model.track+'</div>';
 	musicDetailsText += '<div class="palm-info-text truncating-text left">&nbsp;&nbsp;&nbsp;&nbsp;Year: '+model.year+'</div>';
+	musicDetailsText += '</div>';
 	
 	
 	musicDetailsText += '</div></div>';
 	
-	//musicDetailsText += '</div>';
+	
+	
+	
+
 	
 	model.myData = musicDetailsText;
 	

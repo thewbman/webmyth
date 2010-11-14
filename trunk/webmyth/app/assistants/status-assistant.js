@@ -48,6 +48,13 @@ StatusAssistant.prototype.setup = function() {
 	this.controller.setupWidget(Mojo.Menu.appMenu, WebMyth.appMenuAttr, WebMyth.appMenuModel);
 	
 	
+	// Menu grouping at bottom of scene
+    this.cmdMenuModel = { label: $L('Status'),
+                            items: [{},{},{ icon: 'refresh', command: 'go-refresh' }]};
+	
+	this.controller.setupWidget(Mojo.Menu.commandMenu, {menuClass: 'no-fade'}, this.cmdMenuModel);
+	
+	
 	//Encoders drawer and list
 	this.controller.setupWidget("encodersDrawer",
 		this.encodersAttributes = {
@@ -181,17 +188,11 @@ StatusAssistant.prototype.setup = function() {
 StatusAssistant.prototype.activate = function(event) {
 	//Keypress event
 	Mojo.Event.listen(this.controller.sceneElement, Mojo.Event.keyup, this.handleKey.bind(this));
-	
-	//Vibrate event
-	Mojo.Event.listen(document, 'shakestart', this.handleShakestart.bindAsEventListener(this));
 };
 
 StatusAssistant.prototype.deactivate = function(event) {
 	//Keypress event
 	Mojo.Event.stopListening(this.controller.sceneElement, Mojo.Event.keyup, this.handleKey.bind(this));
-	
-	//Vibrate event
-	Mojo.Event.stopListening(document, 'shakestart', this.handleShakestart.bindAsEventListener(this));
 };
 
 StatusAssistant.prototype.cleanup = function(event) {
@@ -204,7 +205,22 @@ StatusAssistant.prototype.handleCommand = function(event) {
   if(event.type == Mojo.Event.forward) {
 		//Mojo.Controller.stageController.pushScene("hostSelector", true);
 		Mojo.Controller.stageController.pushScene({name: WebMyth.prefsCookieObject.currentRemoteScene, disableSceneScroller: true});
-  }
+		
+  } else if(event.type == Mojo.Event.command) {
+  
+
+		switch(event.command) {
+			case 'go-refresh':		
+			  
+				this.spinnerModel.spinning = true;
+				this.controller.modelChanged(this.spinnerModel, this);
+				$('myScrim').show();
+			
+				this.getStatus();
+				
+			  break;
+		}
+	}
   
 };
 
@@ -236,21 +252,6 @@ StatusAssistant.prototype.handleKey = function(event) {
 		}
 	}
 	Event.stop(event); 
-};
-
-StatusAssistant.prototype.handleShakestart = function(event) {
-	Mojo.Log.info("Start Shaking");
-	Event.stop(event);
-	
-	
-	//Stop spinner and hide
-	this.spinnerModel.spinning = true;
-	this.controller.modelChanged(this.spinnerModel, this);
-	$('myScrim').show()	
-	
-	
-	this.getStatus();
-  
 };
 
 

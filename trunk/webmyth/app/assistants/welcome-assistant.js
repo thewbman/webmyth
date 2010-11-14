@@ -50,7 +50,7 @@ WelcomeAssistant.prototype.setup = function() {
 	//View recorded button
 	this.controller.setupWidget("goRecordedButtonId",
          {},
-         {
+         this.recordedButtonModel = {
              label : "Recorded Shows",
              disabled: false
          }
@@ -61,7 +61,7 @@ WelcomeAssistant.prototype.setup = function() {
 	//View upcoming button
 	this.controller.setupWidget("goUpcomingButtonId",
 		 {},
-		 {
+		 this.upcomingButtonModel = {
 			 label : "Upcoming Recordings",
 			 disabled: false
 		 }
@@ -154,6 +154,7 @@ WelcomeAssistant.prototype.setup = function() {
 		if (WebMyth.prefsCookieObject.currentVideosGroup == null) WebMyth.prefsCookieObject.currentVideosGroup = defaultCookie().currentVideosGroup;
 		if (WebMyth.prefsCookieObject.currentFrontendAddress == null) WebMyth.prefsCookieObject.currentFrontendAddress = defaultCookie().currentFrontend;
 		if (WebMyth.prefsCookieObject.currentMusicSort == null) WebMyth.prefsCookieObject.currentMusicSort = defaultCookie().currentMusicSort;
+		if (WebMyth.prefsCookieObject.currentUpcomingGroup == null) WebMyth.prefsCookieObject.currentUpcomingGroup = defaultCookie().currentUpcomingGroup;
 		
 		
 		//Check if scripts need an upgrade message
@@ -293,9 +294,6 @@ WelcomeAssistant.prototype.activate = function(event) {
 	//Keypress event
 	Mojo.Event.listen(this.controller.sceneElement, Mojo.Event.keyup, this.handleKey.bind(this));
 	
-	//Vibrate event
-	Mojo.Event.listen(document, 'shakestart', this.handleShakestart.bindAsEventListener(this));
-	
 	//Help button
 	Mojo.Event.listen(this.controller.get("helpButton"),Mojo.Event.tap, this.doHelpButton.bind(this));
 	
@@ -305,9 +303,6 @@ WelcomeAssistant.prototype.deactivate = function(event) {
 
 	//Keypress event
 	Mojo.Event.stopListening(this.controller.sceneElement, Mojo.Event.keyup, this.handleKey.bind(this));
-	
-	//Vibrate event
-	Mojo.Event.stopListening(document, 'shakestart', this.handleShakestart.bindAsEventListener(this));
 	
 	WebMyth.prefsCookie.put(WebMyth.prefsCookieObject);
 	
@@ -357,11 +352,6 @@ WelcomeAssistant.prototype.handleKey = function(event) {
 	Event.stop(event); 
 };
 
-WelcomeAssistant.prototype.handleShakestart = function(event) {
-	Mojo.Log.info("Start Shaking");
-	Event.stop(event);
-	
-};
 
 
 
@@ -385,12 +375,34 @@ WelcomeAssistant.prototype.showButtons = function() {
 		$('goMusicButtonId').hide();
 	}
 	
-	if((WebMyth.prefsCookieObject.showMusic)&&(WebMyth.prefsCookieObject.showVideos)) {
+	if((WebMyth.prefsCookieObject.showMusic)&&(WebMyth.prefsCookieObject.showVideos)&&(WebMyth.prefsCookieObject.showUpcoming)) {
 		$('videoButtonWrapper').className = 'column1of2';
 		$('musicButtonWrapper').className = 'column2of2';
 	} else {
 		$('videoButtonWrapper').className = "";
 		$('musicButtonWrapper').className = "";
+	}
+	
+	
+	
+	
+	if((Mojo.Environment.DeviceInfo.screenHeight == "400")&&(WebMyth.prefsCookieObject.showUpcoming)) {
+		$('recordedButtonWrapper').className = 'column1of2';
+		$('upcomingButtonWrapper').className = 'column2of2';
+		
+		this.recordedButtonModel.label = "Recorded";
+			this.controller.modelChanged(this.recordedButtonModel, this);
+		this.upcomingButtonModel.label = "Upcoming";
+			this.controller.modelChanged(this.upcomingButtonModel, this);
+			
+	} else {
+		$('recordedButtonWrapper').className = "";
+		$('upcomingButtonWrapper').className = "";
+		
+		this.recordedButtonModel.label = "Recorded shows";
+			this.controller.modelChanged(this.recordedButtonModel, this);
+		this.upcomingButtonModel.label = "Upcoming recordings";
+			this.controller.modelChanged(this.upcomingButtonModel, this);
 	}
 	
 };
@@ -557,11 +569,6 @@ WelcomeAssistant.prototype.doHelpButton = function(event) {
 
 WelcomeAssistant.prototype.alertScriptUpdate = function(oldversion) {
 	
-	/* Script history:
-		remote.py version 2 from 0.1.8
-		webmyth-mysql.php version 2 from 0.1.8
-	*/
-	
 	//Mojo.Log.error("Current version is " + WebMyth.currentScriptVersion + " but last version was " + oldversion);
 	
 	
@@ -569,9 +576,8 @@ WelcomeAssistant.prototype.alertScriptUpdate = function(oldversion) {
 	
 		//Mojo.Log.info("Inside remote alert if");
 	
-		var script_message = "This update to WebMyth includes a brand new script (webmyth.py) that replaces the previous scripts.  ";
-		script_message += "Unfortunately this app breaks compatibility with the old scripts and will not work until you install the new script.  ";
-		script_message += "If you recently installed webmyth.py version 3 and were having problems, this update to the script should fix all that.<hr/>";
+		var script_message = "This update to WebMyth includes a new script version that replaces the previous scripts.  ";
+		script_message += "While all of the existig functionality of the prvious version should still be intact, you will not be able to access music or setup recordings from the app.  <hr/>";
 		script_message += "The current script version is " + WebMyth.currentScriptVersion + ".";
        
 		this.controller.showAlertDialog({
@@ -605,8 +611,6 @@ WelcomeAssistant.prototype.alertScriptUpdate = function(oldversion) {
 	
 	
 };
-
-
 
 WelcomeAssistant.prototype.readMasterBackendFail = function(response) {
 	Mojo.Log.error("Failed to get backend setting information");
@@ -678,7 +682,7 @@ WelcomeAssistant.prototype.checkConnectionStatus = function() {
 			method: 'getstatus',
 			parameters: {subscribe: false},
 			onSuccess: function(response) {
-				Mojo.Log.info("Got connection status of %j", response);
+				//Mojo.Log.info("Got connection status of %j", response);
 				
 				if(response.wifi.state == "connected") {
 					this.getHostsList();
@@ -931,63 +935,6 @@ WelcomeAssistant.prototype.readMasterBackendIPSuccess = function(response) {
 
 
 
-
-/*
-	Small controller class for help button
-*/
-
-var HelpButtonAssistant = Class.create({
-	
-	initialize: function(sceneAssistant, timeObject2, callbackFunc) {
-		this.sceneAssistant = sceneAssistant;
-		this.controller = sceneAssistant.controller;
-		
-		this.timeObject2 = timeObject2;
-		this.callbackFunc = callbackFunc;
-	},
-	
-	setup : function(widget) {
-	
-		this.widget = widget;
-		
-		Mojo.Log.error("time object 2 is %j", this.timeObject2);
-		
-		this.newTime = new Date(this.timeObject2.year, (this.timeObject2.month-1), this.timeObject2.day, this.timeObject2.hour, this.timeObject2.minute, this.timeObject2.second);
-		Mojo.Log.error("time is %j", this.newTime);
-		
-		this.controller.setupWidget("datepickerid",
-        this.dateAttributes = {
-             modelProperty: 'time' 
-        },
-        this.dateModel = {
-            time: this.newTime
-        }
-		); 
-		this.controller.setupWidget("timepickerid",
-        this.timeAttributes = {
-             modelProperty: 'time' 
-        },
-        this.timeModel = {
-            time: this.newTime
-        }
-		); 
-		
-		Mojo.Event.listen(this.controller.get('goDate_button'),Mojo.Event.tap,this.okButton.bind(this));
-
-		
-	},
-	
-	okButton: function() {
-	
-		this.callbackFunc(this.newTime);
-
-		this.widget.mojo.close();
-	}
-	
-	
-});
-
-
 WelcomeAssistant.prototype.puchkDoUpdateCheck = function(interval) {
 
 	this.puchkInterval = interval;
@@ -1115,3 +1062,59 @@ WelcomeAssistant.prototype.puchkSplitVer = function(v) {
     };
     	
 }
+
+
+/*
+	Small controller class for help button
+*/
+
+var HelpButtonAssistant = Class.create({
+	
+	initialize: function(sceneAssistant, timeObject2, callbackFunc) {
+		this.sceneAssistant = sceneAssistant;
+		this.controller = sceneAssistant.controller;
+		
+		this.timeObject2 = timeObject2;
+		this.callbackFunc = callbackFunc;
+	},
+	
+	setup : function(widget) {
+	
+		this.widget = widget;
+		
+		Mojo.Log.error("time object 2 is %j", this.timeObject2);
+		
+		this.newTime = new Date(this.timeObject2.year, (this.timeObject2.month-1), this.timeObject2.day, this.timeObject2.hour, this.timeObject2.minute, this.timeObject2.second);
+		Mojo.Log.error("time is %j", this.newTime);
+		
+		this.controller.setupWidget("datepickerid",
+        this.dateAttributes = {
+             modelProperty: 'time' 
+        },
+        this.dateModel = {
+            time: this.newTime
+        }
+		); 
+		this.controller.setupWidget("timepickerid",
+        this.timeAttributes = {
+             modelProperty: 'time' 
+        },
+        this.timeModel = {
+            time: this.newTime
+        }
+		); 
+		
+		Mojo.Event.listen(this.controller.get('goDate_button'),Mojo.Event.tap,this.okButton.bind(this));
+
+		
+	},
+	
+	okButton: function() {
+	
+		this.callbackFunc(this.newTime);
+
+		this.widget.mojo.close();
+	}
+	
+	
+});

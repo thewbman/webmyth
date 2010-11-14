@@ -30,6 +30,8 @@
 	  this.fullResultList = [];		//Full raw data 
 	  this.resultList = [];			//Filtered down based on 'recgroupXML'
 	  
+	  this.onWan = true;			//Assume on WAN and not wifi
+	  
 	  this.subset = [];				//Actually displayed list
 	  
 }
@@ -109,6 +111,24 @@ RecordedAssistant.prototype.setup = function() {
 	this.controller.listen(this.controller.get( "header-menu" ), Mojo.Event.tap, function(){this.controller.sceneScroller.mojo.revealTop();}.bind(this));
 	//this.controller.listen(this.controller.get( "recordedList" ), Mojo.Event.filter, this.searchFilter.bind(this));
 		
+		
+	//Check we are on WiFi 
+	this.controller.serviceRequest('palm://com.palm.connectionmanager', {
+			method: 'getstatus',
+			parameters: {subscribe: false},
+			onSuccess: function(response) {
+				//Mojo.Log.info("Got connection status of %j", response);
+				
+				if(response.wifi.state == "connected") {
+					this.onWan = false;
+				}
+	
+			}.bind(this),
+			onFailure: function() {}
+		}
+	);
+	
+	
 	
 	this.getRecorded();
 	
@@ -118,16 +138,11 @@ RecordedAssistant.prototype.activate = function(event) {
 	//Keypress event
 	Mojo.Event.listen(this.controller.sceneElement, Mojo.Event.keyup, this.handleKey.bind(this));
 	
-	//Vibrate event
-	Mojo.Event.listen(document, 'shakestart', this.handleShakestart.bindAsEventListener(this));
 };
 
 RecordedAssistant.prototype.deactivate = function(event) {
 	//Keypress event
 	Mojo.Event.stopListening(this.controller.sceneElement, Mojo.Event.keyup, this.handleKey.bind(this));
-	
-	//Vibrate event
-	Mojo.Event.stopListening(document, 'shakestart', this.handleShakestart.bindAsEventListener(this));
 	   
 	   
 	WebMyth.prefsCookie.put(WebMyth.prefsCookieObject);
@@ -205,22 +220,6 @@ RecordedAssistant.prototype.handleKey = function(event) {
 	}
 	Event.stop(event); 
 	
-};
-
-RecordedAssistant.prototype.handleShakestart = function(event) {
-
-	Mojo.Log.info("Start Shaking");
-	Event.stop(event);
-	
-	
-	//Stop spinner and hide
-	this.spinnerModel.spinning = true;
-	this.controller.modelChanged(this.spinnerModel, this);
-	$('myScrim').show()	
-	
-	
-	this.getRecorded();
-  
 };
 
 
@@ -611,7 +610,7 @@ RecordedAssistant.prototype.readRecordedXMLSuccess = function(response) {
 									singleProgramJson.stars = singleProgramNode.getAttributeNode("stars").nodeValue;
 									singleProgramJson.airdate = singleProgramNode.getAttributeNode("airdate").nodeValue;
 								} catch(e) {
-									Mojo.Log.info("Error with getting airdate and stars");
+									//Mojo.Log.info("Error with getting airdate and stars");
 									singleProgramJson.stars = "";
 									singleProgramJson.airdate = "";
 								}
@@ -668,7 +667,7 @@ RecordedAssistant.prototype.readRecordedXMLSuccess = function(response) {
 		}
 	}
 	
-	Mojo.Log.info("Exited XML parsing");
+	//Mojo.Log.info("Exited XML parsing");
 	
 	
 	this.finishedReadingRecorded();
@@ -908,16 +907,16 @@ RecordedAssistant.prototype.updateRecgroupList = function(transaction, results) 
 
 RecordedAssistant.prototype.setMyData = function(propertyValue, model)  { 
 
-	if(Mojo.appInfo.useXML == "true") {
-		var screenshotUrl = "http://"+getBackendIP(WebMyth.backendsCookieObject,model.hostname,WebMyth.prefsCookieObject.masterBackendIp)+":6544/Myth/GetPreviewImage?ChanId=";
-		//var screenshotUrl = "http://"+WebMyth.prefsCookieObject.masterBackendIp+":6544/Myth/GetPreviewImage?ChanId=";
-		screenshotUrl += model.chanId + "&StartTime=" + model.recStartTsSpace;
-	} else {
+	if((this.onWan == true)&&(WebMyth.prefsCookieObject.useWebmythScript)) {
 		var screenshotUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webmythPythonFile+"?op=getPremadeImage&chanid=";
-		screenshotUrl += model.chanid + "&startTime=" + model.recstartts;
+		screenshotUrl += model.chanId + "&starttime=" + model.recStartTsSpace;
+		
+	} else {
+		var screenshotUrl = "http://"+getBackendIP(WebMyth.backendsCookieObject,model.hostname,WebMyth.prefsCookieObject.masterBackendIp)+":6544/Myth/GetPreviewImage?ChanId=";
+		screenshotUrl += model.chanId + "&StartTime=" + model.recStartTsSpace;
 	}
 	
-	//Mojo.Log.error("Screenshot URL is "+screenshotUrl);
+	//Mojo.Log.error("Wan is "+this.onWan+" - Screenshot URL is "+screenshotUrl);
 	
 	var recordedDetailsText = '<div class="recorded-list-item '+model.recGroup+'">';
 	recordedDetailsText += '<div class="title truncating-text left recorded-list-title">&nbsp;'+model.title+'</div>';

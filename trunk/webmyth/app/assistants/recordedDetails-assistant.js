@@ -30,6 +30,8 @@ function RecordedDetailsAssistant(detailsObject) {
 	   this.downloadOrStream = '';
 	   
 	   this.timeOffsetSeconds = 0;
+	   
+	   this.screenshotUrl = "";
   
 	   
 }
@@ -61,23 +63,34 @@ RecordedDetailsAssistant.prototype.setup = function() {
 	this.controller.setupWidget('web-menu', '', this.webMenuModel);
 
 	
-	if(Mojo.appInfo.useXML == "true") {
-		this.screenshotUrl = "http://"+getBackendIP(WebMyth.backendsCookieObject,this.recordedObject.hostname,WebMyth.prefsCookieObject.masterBackendIp)+":6544/Myth/GetPreviewImage?ChanId=";
-		this.screenshotUrl += this.recordedObject.chanId + "&StartTime=" + this.recordedObject.recStartTs.replace("T"," ");
-	} else {
-		this.screenshotUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webmythPythonFile+"?op=getPremadeImage&ChanId=";
-		this.screenshotUrl += this.recordedObject.chanId + "&startTime=" + this.recordedObject.recStartTs.replace("T"," ");
-	}
+		
+	//Check we are on WiFi 
+	this.controller.serviceRequest('palm://com.palm.connectionmanager', {
+			method: 'getstatus',
+			parameters: {subscribe: false},
+			onSuccess: function(response) {
+				//Mojo.Log.error("Got connection status of %j", response);
+				
+				if((response.wifi.state != "connected")&&(WebMyth.prefsCookieObject.useWebmythScript)) {
+					this.screenshotUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webmythPythonFile+"?op=getPremadeImage&chanid=";
+					this.screenshotUrl += this.recordedObject.chanId + "&starttime=" + this.recordedObject.recStartTs.replace("T"," ");
+				} else {
+					this.screenshotUrl = "http://"+getBackendIP(WebMyth.backendsCookieObject,this.recordedObject.hostname,WebMyth.prefsCookieObject.masterBackendIp)+":6544/Myth/GetPreviewImage?ChanId=";
+					this.screenshotUrl += this.recordedObject.chanId + "&StartTime=" + this.recordedObject.recStartTs.replace("T"," ");
+				}
+				
 	
+				Mojo.Log.error("Screenshot URL is "+ this.screenshotUrl);
+
+				$('recorded-screenshot').src = this.screenshotUrl;
+				
+			}.bind(this),
+			onFailure: function() {}
+		}
+	);
 	
 
-	
-	
-	Mojo.Log.info("Screenshot URL is "+ this.screenshotUrl);
-
-	
 	//Fill in data values
-	$('recorded-screenshot').src = this.screenshotUrl;
 	
 	$('scene-title').innerText = this.recordedObject.title;
 	$('subtitle-title').innerText = this.recordedObject.subTitle;

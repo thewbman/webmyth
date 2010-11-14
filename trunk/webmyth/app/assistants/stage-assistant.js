@@ -111,8 +111,8 @@ WebMyth.guideChannelsCookieObject = WebMyth.guideChannelsCookie.get();
 
 
 //Current script verion
-//2 = 0.1.8, 3 = 0.1.9, 4 = 0.2.0
-WebMyth.currentScriptVersion = 4;
+//2 = 0.1.8, 3 = 0.1.9, 4 = 0.2.0, 7 = 0.4.1 (recording rules, music)
+WebMyth.currentScriptVersion = 7;
 
 
 //Current frontend location
@@ -134,7 +134,7 @@ WebMyth.helpEmailText += "You can get the file <a href='http://code.google.com/p
 WebMyth.helpEmailText += "The script (<a href='http://code.google.com/p/webmyth/source/browse/trunk/webmyth.py'>webmyth.py</a>) ";
 WebMyth.helpEmailText += "needs to be in executable as cgi-bin on your local webserver.  ";
 WebMyth.helpEmailText += "The script has some database settings that you need to manually set.  You can find the correct values for your system by looking at /etc/mythtv/mysql.txt on your frontend or backend machine.<hr/>";
-WebMyth.helpEmailText += "The file needs to be accesible to this device without any authentication.<hr/>";
+WebMyth.helpEmailText += "The file needs to be accesible to this device either without any authentication or with only Basic http authentication (Digest security is not supported).<hr/>";
 WebMyth.helpEmailText += "Please report any issues you find with the system on the 'issues' tab of the homepage.  ";
 WebMyth.helpEmailText += "Or you can email the developer directly at <a href=mailto:webmyth.help@gmail.com>webmyth.help@gmail.com</a>.";
 

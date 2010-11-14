@@ -817,11 +817,58 @@
   height: 26px;
 }
 
+.left-music-image {
+	height: 60px;
+	width: 25%;
+	float: left;
+	margin-left: auto;
+	margin-right: auto;
+}
+
+.left-list-music-image-wrapper {
+	height: 60px;
+	position:relative;
+	
+	float: right;
+	
+	margin-left: auto;
+	margin-right: auto;
+}
+
+.music-albumart-small {
+	padding: 3px 3px;
+	height: 100%;
+	
+	position:relative;
+	
+	text-align: center;
+	border: 0px; 
+	
+	margin-left: auto;
+	margin-right: auto;
+}
+
+.right-music-text {
+	height: 60px;
+	width: 75%;
+	float: left;
+}
+
 .musicList-scene .music-list-item .palm-info-text.left {
   padding: 0px;
-  margin: 0px 8px;
+  margin: 0px 3px;
   line-height: 16px;
 }
+
+.music-albumart {
+	padding: 3px 80px;
+	width: 160px;
+	text-align: center;
+	border: 0px; 
+	-webkit-border-radius: 5px;
+}
+
+
 
 /*
  * Status scene
