@@ -28,6 +28,7 @@ function SetupRecordingAssistant(programObject) {
 	this.finishedGettingRule = false;
 	this.finishedGettingInputs = false;
 	this.finishedGettingDefaults = false;
+	this.finishedGettingSettings = false;
 
 }
 
@@ -55,7 +56,7 @@ SetupRecordingAssistant.prototype.setup = function() {
 			{"label": $L('Force record'), "command": "do-override-record"},
 			{"label": $L("Force don't record"), "command": "do-override-dontrecord"},
 			{"label": $L("Never record"), "command": "do-override-neverrecord"},
-			{"label": $L("Cancel schedule"), "command": "do-cancel-rule"}
+			{"label": $L("Delete schedule"), "command": "do-cancel-rule"}
 			]};
 	
 	this.controller.setupWidget(Mojo.Menu.commandMenu, {menuClass: 'no-fade'}, this.cmdMenuModel);
@@ -333,13 +334,9 @@ SetupRecordingAssistant.prototype.setup = function() {
 	
 	
 	
-	
-	
-	
-	
-	
-	
 	this.getEncoderInputs();
+	
+	this.getGeneralSettings();
 	
 	
 	
@@ -350,8 +347,6 @@ SetupRecordingAssistant.prototype.setup = function() {
 		this.getExistingRecord();
 	} else {
 		//load up defaults
-		this.getGeneralSettings();
-		
 		this.getDefaultRule();
 	}
 	
@@ -536,6 +531,7 @@ SetupRecordingAssistant.prototype.setupCreateMenu = function() {
 	this.controller.modelChanged(this.cmdMenuModel, this);
 	
 };
+
 
 SetupRecordingAssistant.prototype.getEncoderInputs = function() {
 
@@ -750,12 +746,16 @@ SetupRecordingAssistant.prototype.readRecordingRuleSuccess = function(response) 
 	$('myScrim').hide()
 	
 	
+	this.finishedGettingRule = true;
+	
 	if(this.finishedGettingInputs == true) {
 		this.updateInputs();
-		this.finishedGettingRule = true;
-	} else {
-		this.finishedGettingRule = true;
-	}
+	} 
+	
+	if(this.finishedGettingDefaults == true) {
+		this.updateDefaults();
+	} 
+	
 
 };
 
@@ -930,6 +930,7 @@ SetupRecordingAssistant.prototype.readSettingsSuccess = function(response) {
 	Mojo.Log.info("Cleaned settings is %j",this.settings);
 	
 	
+	
 	this.finishedGettingDefaults = true;
 		
 	if(this.finishedGettingRule == true) {
@@ -960,7 +961,20 @@ SetupRecordingAssistant.prototype.updateDefaults = function() {
 
     Mojo.Log.info("Updating default settings");
 	
-			//recording options
+		
+	$('UserJobDesc1Id').innerHTML = this.settings.UserJobDesc1;
+	$('UserJobDesc2Id').innerHTML = this.settings.UserJobDesc2;
+	$('UserJobDesc3Id').innerHTML = this.settings.UserJobDesc3;
+	$('UserJobDesc4Id').innerHTML = this.settings.UserJobDesc4;
+	
+
+	if(this.programObject.recordId){
+		//if we were given a object, don't update settings to defaults
+	} else {
+		//load up defaults
+
+
+		//recording options
 /*	this.profileModel.value = this.recordRule.profile;
 		this.controller.modelChanged(this.profileModel, this);
 	this.transcoderModel.value = this.recordRule.transcoder;
@@ -1009,6 +1023,7 @@ SetupRecordingAssistant.prototype.updateDefaults = function() {
 	this.autouserjob4Model.value = intToBool(this.settings.AutoRunUserJob4);
 		this.controller.modelChanged(this.autouserjob4Model, this);
 	
+	}
 	
 	this.controller.sceneScroller.mojo.revealTop();
 
@@ -1472,7 +1487,69 @@ SetupRecordingAssistant.prototype.executeSqlFail = function(event) {
 	Mojo.Log.error('Failed to get exexcute SQL');
 	
 	$('spinner-text').innerHTML = "---ERROR---";
+	
+	this.controller.showAlertDialog({
+			onChoose: function(value) {
+				switch(value) {
+					case 'mythweb':
+					
+						//Open recording in mythweb
+						this.openMythweb();
+						
+						this.closeScene();
+						 
+					break;
+					case 'cancel':
+									
+						//Cancel and close
+						this.closeScene();
+									
+					break;
+					}
+				},
+			title: "WebMyth - v" + Mojo.Controller.appInfo.version,
+			message:  "Error with saving recording rule", 
+			choices: [
+					{label: "Try MythWeb", value: 'mythweb'},
+                    {label: "Cancel", value: 'cancel'}
+					],
+			allowHTMLMessage: true
+		});
 
+
+};
+
+SetupRecordingAssistant.prototype.openMythweb = function() {
+		
+	var dateJS = new Date(isoSpaceToJS($('starttime-title').innerHTML));
+	var dateUTC = dateJS.getTime()/1000;				//don't need 59 second offset?
+			
+	Mojo.Log.info("Selected time is: '%j'", dateUTC);
+			
+	
+	var mythwebUrl = "http://";
+	mythwebUrl += WebMyth.prefsCookieObject.webserverName;
+	mythwebUrl += "/mythweb/tv/detail/";
+	mythwebUrl += this.newRule.chanid + "/";
+	mythwebUrl += dateUTC;
+	//mythwebUrl += "?RESET_TMPL=true";
+			
+	Mojo.Log.info("mythweb url is "+mythwebUrl);
+	
+	//Mojo.Controller.stageController.pushScene("webview", mythwebUrl, "Edit Upcoming Recording");
+	
+	
+			
+	this.controller.serviceRequest("palm://com.palm.applicationManager", {
+		method: "open",
+		parameters:  {
+			id: 'com.palm.app.browser',
+			params: {
+				target: mythwebUrl
+			}
+		}
+	}); 
+	
 };
 
 SetupRecordingAssistant.prototype.executeSqlSuccess = function(response) {

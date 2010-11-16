@@ -71,7 +71,7 @@ RecordedDetailsAssistant.prototype.setup = function() {
 			onSuccess: function(response) {
 				//Mojo.Log.error("Got connection status of %j", response);
 				
-				if((response.wifi.state != "connected")&&(WebMyth.prefsCookieObject.useWebmythScript)) {
+				if(((response.wifi.state != "connected")&&(WebMyth.prefsCookieObject.useWebmythScript))||(WebMyth.prefsCookieObject.forceScriptScreenshots)) {
 					this.screenshotUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webmythPythonFile+"?op=getPremadeImage&chanid=";
 					this.screenshotUrl += this.recordedObject.chanId + "&starttime=" + this.recordedObject.recStartTs.replace("T"," ");
 				} else {

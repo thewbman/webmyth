@@ -155,6 +155,7 @@ WelcomeAssistant.prototype.setup = function() {
 		if (WebMyth.prefsCookieObject.currentFrontendAddress == null) WebMyth.prefsCookieObject.currentFrontendAddress = defaultCookie().currentFrontend;
 		if (WebMyth.prefsCookieObject.currentMusicSort == null) WebMyth.prefsCookieObject.currentMusicSort = defaultCookie().currentMusicSort;
 		if (WebMyth.prefsCookieObject.currentUpcomingGroup == null) WebMyth.prefsCookieObject.currentUpcomingGroup = defaultCookie().currentUpcomingGroup;
+		if (WebMyth.prefsCookieObject.forceScriptScreenshots == null) WebMyth.prefsCookieObject.forceScriptScreenshots = defaultCookie().forceScriptScreenshots;
 		
 		
 		//Check if scripts need an upgrade message
@@ -666,6 +667,55 @@ WelcomeAssistant.prototype.getHostsList = function() {
 	
 }
 
+WelcomeAssistant.prototype.getSettings = function() {
+	
+	//Mojo.Log.error("Starting to get settingss");
+		
+	var query = "SELECT * FROM `settings`  WHERE `value` != 'MythWelcomeDateFormat' ;";
+	
+	
+	var requestUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webmythPythonFile;
+	requestUrl += "?op=executeSQLwithResponse";				
+	requestUrl += "&query64=";		
+	requestUrl += Base64.encode(query);	
+	
+	
+    try {
+        var request = new Ajax.Request(requestUrl,{
+            method: 'get',
+            evalJSON: 'true',
+			requestHeaders: {Authorization: 'Basic ' + Base64.encode(WebMyth.prefsCookieObject.webserverUsername + ":" + WebMyth.prefsCookieObject.webserverPassword)},
+			onSuccess: this.readSettingsSuccess.bind(this),
+            onFailure: function() {
+						Mojo.Log.info("failed to get settings table from backend")	
+					}   
+        });
+    }
+    catch(e) {
+        Mojo.Log.error(e);
+    }
+	
+}
+
+WelcomeAssistant.prototype.readSettingsSuccess = function(response) {
+
+	//Mojo.Log.info('Got settings table rule responseJSON: %j', response.responseJSON);
+	
+	this.settings = cleanSettings(response.responseJSON);
+	
+	Mojo.Log.info("Cleaned settings is %j",this.settings);
+	
+	this.backendsList = this.settings.hosts;
+	
+	//Mojo.Log.info("Cleaned backends list is %j",this.backendsList);
+	
+	WebMyth.backendsCookieObject.clear();
+	Object.extend(WebMyth.backendsCookieObject,this.backendsList);
+	WebMyth.backendsCookie.put(WebMyth.backendsCookieObject);
+	
+	
+};
+
 WelcomeAssistant.prototype.gotConnectionFailed = function(response) {
 	Mojo.Log.error("failed to get connection status");
 	
@@ -685,7 +735,8 @@ WelcomeAssistant.prototype.checkConnectionStatus = function() {
 				//Mojo.Log.info("Got connection status of %j", response);
 				
 				if(response.wifi.state == "connected") {
-					this.getHostsList();
+					//this.getHostsList();
+					this.getSettings();
 				}
 	
 			}.bind(this),
