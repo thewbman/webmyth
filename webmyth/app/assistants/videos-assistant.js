@@ -181,6 +181,22 @@ VideosAssistant.prototype.handleKey = function(event) {
 	
 };
 
+VideosAssistant.prototype.handleShakestart = function(event) {
+
+	Mojo.Log.info("Start Shaking");
+	Event.stop(event);
+	
+	
+	//Stop spinner and hide
+	this.spinnerModel.spinning = true;
+	this.controller.modelChanged(this.spinnerModel, this);
+	$('myScrim').show()	
+	
+	
+	this.getVideos();
+  
+};
+
 
 
 

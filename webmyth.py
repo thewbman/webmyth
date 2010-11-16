@@ -25,7 +25,7 @@ myDBPassword = 'mythtv'
 # end of configuration
 #
 
-version = 8
+version = 7
 
 import cgi
 import cgitb
@@ -60,7 +60,6 @@ except KeyError:
 #MySQL connection
 sqlDB = MySQLdb.connect(host = myDBHostName,user = myDBUserName,passwd = myDBPassword,db = myDBName)
 
-#So we can create JSON values from SQL
 def FetchOneAssoc(cursor) :
     data = cursor.fetchone()
     if data == None :
@@ -163,12 +162,6 @@ elif op == 'reschedule':
 	mythBE.reschedule(recordid=recordId_in)
 	
 	result = "started scheduler"
-	
-elif op == 'backendCommand':
-
-	command64 = form['command64'].value
-	
-	result = mythBE.backendCommand(base64.b64decode(command64))
 	
 elif op == 'getFile':
 	header = 'file'

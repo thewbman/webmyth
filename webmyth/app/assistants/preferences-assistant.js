@@ -226,17 +226,6 @@ PreferencesAssistant.prototype.setup = function() {
          },
          this.upcomingChannelIconsToggleModel
     ); 
-	//Use script for screenshots
-	this.forceScriptScreenshotsToggleModel = {
-             value: false
-    };
-	this.controller.setupWidget("forceScriptScreenshotsToggleId",
-        {
-			label: $L("Use script to display screenshots"),
-            modelProperty: "value"
-         },
-         this.forceScriptScreenshotsToggleModel
-    ); 
 	//Remote header action
 	this.remoteHeaderActionModel = {
 			value: WebMyth.prefsCookieObject.remoteHeaderAction,
@@ -433,9 +422,6 @@ PreferencesAssistant.prototype.activate = function(event) {
 			
 			this.upcomingChannelIconsToggleModel.value = WebMyth.prefsCookieObject.showUpcomingChannelIcons;
 			this.controller.modelChanged(this.upcomingChannelIconsToggleModel);
-			
-			this.forceScriptScreenshotsToggleModel.value = WebMyth.prefsCookieObject.forceScriptScreenshots;
-			this.controller.modelChanged(this.forceScriptScreenshotsToggleModel);
 			
 			this.vibrateToggleModel.value = WebMyth.prefsCookieObject.remoteVibrate;
 			this.controller.modelChanged(this.vibrateToggleModel);
@@ -684,7 +670,6 @@ PreferencesAssistant.prototype.checkSettings = function() {
 		
 		//WebMyth.prefsCookieObject.theme = this.themeModel.value;
 		WebMyth.prefsCookieObject.showUpcomingChannelIcons = this.upcomingChannelIconsToggleModel.value;
-		WebMyth.prefsCookieObject.forceScriptScreenshots = this.forceScriptScreenshotsToggleModel.value;
 		WebMyth.prefsCookieObject.remoteHeaderAction = this.remoteHeaderActionModel.value;
 		WebMyth.prefsCookieObject.remoteVibrate = this.vibrateToggleModel.value;
 		WebMyth.prefsCookieObject.remoteFullscreen = this.remoteFullscreenToggleModel.value;

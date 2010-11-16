@@ -111,8 +111,8 @@ WebMyth.guideChannelsCookieObject = WebMyth.guideChannelsCookie.get();
 
 
 //Current script verion
-//2 = 0.1.8, 3 = 0.1.9, 4 = 0.2.0, 7 = 0.4.1 (recording rules, music, SQL), 8 = 0.4.3 generic protocol access
-WebMyth.currentScriptVersion = 8;
+//2 = 0.1.8, 3 = 0.1.9, 4 = 0.2.0, 7 = 0.4.1 (recording rules, music)
+WebMyth.currentScriptVersion = 7;
 
 
 //Current frontend location

@@ -46,8 +46,7 @@ AddHostAssistant.prototype.setup = function() {
             hintText: $L(""),
             multiline: false,
             enterSubmits: false,
-            focus: false,
-			textCase: Mojo.Widget.steModeLowerCase
+            focus: false
          },
          this.hostTextModel
     ); 
@@ -62,8 +61,7 @@ AddHostAssistant.prototype.setup = function() {
             hintText: $L(""),
             multiline: false,
             enterSubmits: false,
-            focus: false,
-			textCase: Mojo.Widget.steModeLowerCase
+            focus: false
          },
          this.addressTextModel
     ); 
@@ -78,8 +76,7 @@ AddHostAssistant.prototype.setup = function() {
             hintText: $L("default 6546"),
             multiline: false,
             enterSubmits: false,
-            focus: false,
-			textCase: Mojo.Widget.steModeLowerCase
+            focus: false
          },
          this.portTextModel
     );
