@@ -112,7 +112,8 @@ function defaultCookie() {
 		currentVideosSort: 'title-asc',
 		currentVideosGroup: 'all',
 		currentMusicSort: 'name-asc',
-		currentUpcomingGroup: 'Upcoming'
+		currentUpcomingGroup: 'Upcoming',
+		forceScriptScreenshots: false
 		
 	};
 	
@@ -777,9 +778,11 @@ var cleanInputs = function(fullList) {
 
 var cleanSettings = function(fullList) {
 
-	settingsObject = {};
+	settingsObject = { hosts: [] };
+	hosts = [];
+	hostObject = {};
 	
-	var i, s = {};
+	var i, j, s = {}, t = {};
 	
 	
 	for(i = 0; i < fullList.length; i++) {
@@ -801,9 +804,31 @@ var cleanSettings = function(fullList) {
 			settingsObject.DefaultStartOffset = s.data;
 		} else if(s.value == "DefaultEndOffset") {
 			settingsObject.DefaultEndOffset = s.data;
-		} 
+		} else if(s.value == "UserJobDesc1") {
+			settingsObject.UserJobDesc1 = s.data;
+		} else if(s.value == "UserJobDesc2") {
+			settingsObject.UserJobDesc2 = s.data;
+		} else if(s.value == "UserJobDesc3") {
+			settingsObject.UserJobDesc3 = s.data;
+		} else if(s.value == "UserJobDesc4") {
+			settingsObject.UserJobDesc4 = s.data;
+		} else if(s.value == "MasterServerIP") {
+			settingsObject.MasterServerIP = s.data;
+		} else if(s.value == "BackendServerIP") {
+			//Mojo.Log.error("backend ip of "+s.data);
+			hostObject = { "hostname": s.hostname, "ip": s.data, "master": false };
+			settingsObject.hosts.push(hostObject);
+		}
 		
+	}
+	
+	
+	for(j = 0; j < settingsObject.hosts.length; j++) {
+		t = settingsObject.hosts[j];
 		
+		if(t.ip == settingsObject.MasterServerIP) {
+			t.master = true;
+		}
 	}
 	
 	
@@ -1367,7 +1392,7 @@ var getNextRemote = function(fullRemoteList, currentRemote) {
 
 var getBackendIP = function(fullBackendList, backendName, masterBackend) {   
 	
-	var returnIP = "unknown";
+	var returnIP = masterBackend;
 	var i = 0;
 	
 	for(i = 0; i < fullBackendList.length; i++) {

@@ -907,7 +907,7 @@ RecordedAssistant.prototype.updateRecgroupList = function(transaction, results) 
 
 RecordedAssistant.prototype.setMyData = function(propertyValue, model)  { 
 
-	if((this.onWan == true)&&(WebMyth.prefsCookieObject.useWebmythScript)) {
+	if(((this.onWan == true)&&(WebMyth.prefsCookieObject.useWebmythScript))||(WebMyth.prefsCookieObject.forceScriptScreenshots)) {
 		var screenshotUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webmythPythonFile+"?op=getPremadeImage&chanid=";
 		screenshotUrl += model.chanId + "&starttime=" + model.recStartTsSpace;
 		
@@ -916,7 +916,7 @@ RecordedAssistant.prototype.setMyData = function(propertyValue, model)  {
 		screenshotUrl += model.chanId + "&StartTime=" + model.recStartTsSpace;
 	}
 	
-	//Mojo.Log.error("Wan is "+this.onWan+" - Screenshot URL is "+screenshotUrl);
+	Mojo.Log.info("Screenshot URL is "+screenshotUrl);
 	
 	var recordedDetailsText = '<div class="recorded-list-item '+model.recGroup+'">';
 	recordedDetailsText += '<div class="title truncating-text left recorded-list-title">&nbsp;'+model.title+'</div>';
