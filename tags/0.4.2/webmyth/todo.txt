@@ -1,0 +1,26 @@
+To Do - planned new features and updates:
+ 
+//Future
+ - new app icons/theme
+ - fix pixelated icon
+ - non-email feedback?
+ - build video file tree?
+ - add video images ?
+ - use icons for asc desc
+ - add videos shortcut
+ - look into menu panel (style matters)
+ - look into guide showing wrong time (esp from upcoming)
+ - open remote in new card option
+ - handle music playlists
+ - fix download with :
+ - get userjob names for setup
+ 
+ 
+//Long term
+ - plugin for remote
+ - details under status scheduled
+ - progress scrobble on remote ?
+ - demo video(s)
+ - fade command menus (looks bad with palm-dark)
+ - add support for pin on backend ?
+
