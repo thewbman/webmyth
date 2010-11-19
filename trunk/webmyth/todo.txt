@@ -13,7 +13,9 @@ To Do - planned new features and updates:
  - open remote in new card option
  - handle music playlists
  - fix download with :
- - get userjob names for setup
+ - jobqueue on recorded
+ - lookup live current script version
+ - search recording rules
  
  
 //Long term

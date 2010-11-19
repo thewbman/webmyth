@@ -220,7 +220,7 @@ VideosAssistant.prototype.readStorageGroupsFail = function(event) {
 VideosAssistant.prototype.readStorageGroupsSuccess = function(response) {
 	//return true;  //can escape this function for testing purposes
     
-	Mojo.Log.info('Got storage group response: %j',response.responseJSON);
+	//Mojo.Log.info('Got storage group response: %j',response.responseJSON);
 	
 	//Update the storage group list
 	this.storageGroups.clear();
@@ -236,13 +236,12 @@ VideosAssistant.prototype.getVideos = function(event) {
 	
 	this.controller.sceneScroller.mojo.revealTop();
 	
+	
+	
+	
 	var requestUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webmythPythonFile;
-	requestUrl += "?op=getVideos";	
-	
-	
-	
-	//requestHeaders: {Authorization: 'Basic ' + Base64.encode(WebMyth.prefsCookieObject.webserverUsername + ":" + WebMyth.prefsCookieObject.webserverPassword)},
-	
+	//requestUrl += "?op=getVideos";	
+	requestUrl += "?op=getSQL&table=videometadata";
 	
     try {
         var request = new Ajax.Request(requestUrl,{
@@ -281,12 +280,15 @@ VideosAssistant.prototype.readRemoteDbTableFail = function(event) {
 VideosAssistant.prototype.readRemoteDbTableSuccess = function(response) {
 	//return true;  //can escape this function for testing purposes
     
-	//Mojo.Log.info('Got Ajax response: %j',response.responseJSON);
+	//Mojo.Log.info('Got Videos response: %j',response.responseJSON);
 	
 		
 	//Update the list widget
 	this.fullResultList.clear();
 	Object.extend(this.fullResultList,cleanVideos(response.responseJSON));
+	
+	
+	//Mojo.Log.info('Cleaned Videos is: %j',this.fullResultList);
 	
 	
 	//$("scene-title").innerHTML = "Videos ("+this.fullResultList.length+" items)";

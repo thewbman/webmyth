@@ -290,16 +290,16 @@ RecordedAssistant.prototype.sortChanged = function(newSort) {
 	//Sort list by selection
 	switch(WebMyth.prefsCookieObject.currentRecSort) {
 		case 'title-asc':
-			this.fullResultList.sort(double_sort_by('title', 'startTime', false));
+			this.fullResultList.sort(double_sort_by('title', 'recStartTs', false));
 		  break;
 		case 'title-desc':
-			this.fullResultList.sort(double_sort_by('title', 'startTime', true));
+			this.fullResultList.sort(double_sort_by('title', 'recStartTs', true));
 		  break;
 		case 'date-asc':
-			this.fullResultList.sort(double_sort_by('startTime', 'title', false));
+			this.fullResultList.sort(double_sort_by('recStartTs', 'title', false));
 		  break;
 		case 'date-desc':
-			this.fullResultList.sort(double_sort_by('startTime', 'title', true));
+			this.fullResultList.sort(double_sort_by('recStartTs', 'title', true));
 		  break;
 		case 'category-asc':
 			this.fullResultList.sort(double_sort_by('category', 'title', false));
@@ -308,7 +308,7 @@ RecordedAssistant.prototype.sortChanged = function(newSort) {
 			this.fullResultList.sort(double_sort_by('category', 'title', true));
 		  break;
 		default :
-			this.fullResultList.sort(double_sort_by('startTime', 'title', false));
+			this.fullResultList.sort(double_sort_by('recStartTs', 'title', false));
 		  break;
 	}
 

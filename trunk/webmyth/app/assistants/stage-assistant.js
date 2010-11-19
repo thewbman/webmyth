@@ -403,10 +403,14 @@ StageAssistant.prototype.onFocusHandler = function() {
 	//App card is now active
 	//Mojo.Log.info("Card is active");
 	
-	dashboardStage = Mojo.Controller.getAppController().getStageController("dashboard");
+	if(WebMyth.prefsCookieObject.dashboardRemote) {
 	
-	dashboardStage.delegateToSceneAssistant("closeDashboard", {});
-
+		dashboardStage = Mojo.Controller.getAppController().getStageController("dashboard");
+		
+		dashboardStage.delegateToSceneAssistant("closeDashboard", {});
+		
+	}
+	
 };
 
 StageAssistant.prototype.startDashboard = function() {

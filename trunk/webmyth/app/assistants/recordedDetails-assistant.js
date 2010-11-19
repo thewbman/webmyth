@@ -46,21 +46,31 @@ RecordedDetailsAssistant.prototype.setup = function() {
 	
 	// Menu grouping at bottom of scene
     this.cmdMenuModel = { label: $L('Play Menu'),
-                            items: [{label: $L('Play'), submenu:'hosts-menu', width: 90},{},{label: $L('Web'), submenu:'web-menu', width: 90}]};
+                            items: [{label: $L('Play'), submenu:'hosts-menu', width: 90},{},{label: $L('More'), submenu:'more-menu', width: 90}]};
  
 	this.hostsMenuModel = { label: $L('Hosts'), items: []};
-	this.webMenuModel = { label: $L('WebMenu'), items: [
-			{"label": $L('Wikipedia'), "command": "go-web--Wikipedia"},
-			{"label": $L('themoviedb'), "command": "go-web--themoviedb"},
-			{"label": $L('IMDB'), "command": "go-web--IMDB"},
-			{"label": $L('TheTVDB'), "command": "go-web--TheTVDB"},
-			{"label": $L('TV.com'), "command": "go-web--TV.com"},
-			{"label": $L('Google'), "command": "go-web--Google"}
-			]};
+	this.moreMenuModel = { label: $L('MoreMenu'), items: [
+			{"label": $L('Delete'), items:[
+				{"label": $L('Delete'), "command": "go-dele-delete"}
+				//{"label": $L('and re-record'), "command": "go-dele-rerecord"},
+			]},
+			{"label": $L('Web'), items:[
+				{"label": $L('Wikipedia'), "command": "go-web--Wikipedia"},
+				{"label": $L('themoviedb'), "command": "go-web--themoviedb"},
+				{"label": $L('IMDB'), "command": "go-web--IMDB"},
+				{"label": $L('TheTVDB'), "command": "go-web--TheTVDB"},
+				{"label": $L('TV.com'), "command": "go-web--TV.com"},
+				{"label": $L('Google'), "command": "go-web--Google"}	
+			]},	
+			{"label": $L('MythWeb'), "command": "go-mythweb"},	
+			{"label": $L('Guide'), "command": "go-guide"}
+		]};
+			
+			
 
 	this.controller.setupWidget(Mojo.Menu.commandMenu, {menuClass: 'no-fade'}, this.cmdMenuModel);
 	this.controller.setupWidget('hosts-menu', '', this.hostsMenuModel);
-	this.controller.setupWidget('web-menu', '', this.webMenuModel);
+	this.controller.setupWidget('more-menu', '', this.moreMenuModel);
 
 	
 		
@@ -150,6 +160,21 @@ RecordedDetailsAssistant.prototype.activate = function(event) {
 	this.controller.modelChanged(this.hostsMenuModel);
 	
 	
+	
+	
+	if(this.recordedObject.recGroup == "Deleted"){
+	
+		this.moreMenuModel.items[0].label = "Undelete";
+		this.moreMenuModel.items[0].items = [
+				{"label": $L('Undelete'), "command": "go-undelete"}
+			];
+			
+		this.controller.modelChanged(this.moreMenuModel);
+	};	
+	
+	
+	
+	
 	//Keypress event
 	Mojo.Event.listen(this.controller.sceneElement, Mojo.Event.keyup, this.handleKey.bind(this));
 	
@@ -161,8 +186,7 @@ RecordedDetailsAssistant.prototype.deactivate = function(event) {
 };
 
 RecordedDetailsAssistant.prototype.cleanup = function(event) {
-	/* this function should do any cleanup needed before the scene is destroyed as 
-	   a result of being popped off the scene stack */
+
 };
 
 RecordedDetailsAssistant.prototype.handleCommand = function(event) {
@@ -181,6 +205,18 @@ RecordedDetailsAssistant.prototype.handleCommand = function(event) {
        break;
       case 'go-down':
 		this.handleDownload(mySelection);
+       break;
+      case 'go-dele':
+		this.handleDelete(mySelection);
+       break;
+      case 'go-unde':
+		this.handleUndelete(mySelection);
+       break;
+      case 'go-myth':
+		this.openMythweb();
+       break;
+      case 'go-guid':
+		this.openGuide();
        break;
     }
   } else if(event.type == Mojo.Event.forward) {
@@ -222,6 +258,48 @@ RecordedDetailsAssistant.prototype.handleKey = function(event) {
 
 
 
+
+RecordedDetailsAssistant.prototype.openGuide = function() {
+
+	//Mojo.Log.error("Opening in guide "+this.starttime.replace(" ","T"));
+	
+	Mojo.Controller.stageController.pushScene("guide", this.recordedObject.startTime.replace(" ","T").substring(0,18)+01);
+ 
+};
+
+RecordedDetailsAssistant.prototype.openMythweb = function() {
+
+	Mojo.Log.error("opening mythweb");
+			
+			
+	var dateJS = new Date(isoToJS(this.recordedObject.recStartTs));
+	var dateUTC = dateJS.getTime()/1000;				//don't need 59 second offset?
+			
+	Mojo.Log.info("Selected time is: '%j'", dateUTC);
+			
+	
+	var mythwebUrl = "http://";
+	mythwebUrl += WebMyth.prefsCookieObject.webserverName;
+	mythwebUrl += "/mythweb/tv/detail/";
+	mythwebUrl += this.recordedObject.chanId + "/";
+	mythwebUrl += dateUTC;
+	//mythwebUrl += "?RESET_TMPL=true";
+			
+	Mojo.Log.info("mythweb url is "+mythwebUrl);
+	
+	
+			
+	this.controller.serviceRequest("palm://com.palm.applicationManager", {
+		method: "open",
+		parameters:  {
+			id: 'com.palm.app.browser',
+			params: {
+				target: mythwebUrl
+			}
+		}
+	}); 
+	
+};
 
 RecordedDetailsAssistant.prototype.openWeb = function(website) {
 
@@ -378,8 +456,91 @@ RecordedDetailsAssistant.prototype.playOnHost = function(host) {
 	
 };
 
-RecordedDetailsAssistant.prototype.goScreenshot = function() {
+RecordedDetailsAssistant.prototype.handleDelete = function(selection_in) {
 	
-	Mojo.Controller.stageController.pushScene('imageview', this.screenshotUrl);
+	Mojo.Log.info("Deleting with "+selection_in+" option");
+	
+	var intdate = this.recordedObject.recStartTs.replace("T","").replace(":","").replace(":","").replace("-","").replace("-","");
+	
+	if(selection_in == "rerecord"){
+		intdate += " FORGET";
+	}
+	
+	
+	var command = 'DELETE_RECORDING '+this.recordedObject.chanId+" "+intdate;
+	
+	
+	Mojo.Log.error("command is "+command);
+	
+	
+	var requestUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webmythPythonFile;
+	requestUrl += "?op=backendCommand";				
+	requestUrl += "&command64=";		
+	requestUrl += Base64.encode(command);	
+	
+	
+	
+    try {
+        var request = new Ajax.Request(requestUrl,{
+            method: 'get',
+            evalJSON: 'false',
+			requestHeaders: {Authorization: 'Basic ' + Base64.encode(WebMyth.prefsCookieObject.webserverUsername + ":" + WebMyth.prefsCookieObject.webserverPassword)},
+            onSuccess: function() {
+				Mojo.Log.info("Success in sending command");
+				Mojo.Controller.getAppController().showBanner("Successfully deleted", {source: 'notification'});
+			},
+            onFailure: function() {
+				Mojo.Log.error("Error in sending command");
+				Mojo.Controller.getAppController().showBanner("Error deleting recording", {source: 'notification'});
+			}  
+        });
+    }
+    catch(e) {
+        Mojo.Log.error(e);
+    }
+	
+};
+
+RecordedDetailsAssistant.prototype.handleUndelete = function() {
+	
+	Mojo.Log.info("Undeleting recorded");
+	
+	
+	
+	var query = 'UPDATE `recorded` SET `recgroup` = "Default" WHERE `chanid` = '
+	query += this.recordedObject.chanId;
+	query += ' AND `starttime` = "';
+	query += this.recordedObject.recStartTs.replace("T"," ");
+	query += '" LIMIT 1; ';
+	
+	
+	Mojo.Log.error("query is "+query);
+	
+	
+	var requestUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webmythPythonFile;
+	requestUrl += "?op=executeSQL";				
+	requestUrl += "&query64=";		
+	requestUrl += Base64.encode(query);	
+	
+	
+	
+    try {
+        var request = new Ajax.Request(requestUrl,{
+            method: 'get',
+            evalJSON: 'false',
+			requestHeaders: {Authorization: 'Basic ' + Base64.encode(WebMyth.prefsCookieObject.webserverUsername + ":" + WebMyth.prefsCookieObject.webserverPassword)},
+            onSuccess: function() {
+				Mojo.Log.info("Success in sending command");
+				Mojo.Controller.getAppController().showBanner("Successfully undeleted", {source: 'notification'});
+			},
+            onFailure: function() {
+				Mojo.Log.error("Error in sending command");
+				Mojo.Controller.getAppController().showBanner("Error undeleting recording", {source: 'notification'});
+			}  
+        });
+    }
+    catch(e) {
+        Mojo.Log.error(e);
+    }
 	
 };
