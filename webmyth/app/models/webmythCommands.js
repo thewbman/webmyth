@@ -682,6 +682,8 @@ var cleanVideos = function(fullList) {
 		s.level4 = t[0]+"/"+t[1]+"/"+t[2]+"/"+t[3];
 		s.level5 = t[0]+"/"+t[1]+"/"+t[2]+"/"+t[3]+"/"+t[4];
 		s.level6 = t[0]+"/"+t[1]+"/"+t[2]+"/"+t[3]+"/"+t[4]+"/"+t[5];
+		
+		s.onlyFilename = t[s.fileLevels-1];
 			
 			
 		//Fix some blank values

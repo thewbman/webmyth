@@ -32,7 +32,7 @@ function VideosDetailsAssistant(detailsObject, videoBase) {
 
 VideosDetailsAssistant.prototype.setup = function() {
 
-	//Mojo.Log.info("Starting videos details scene '%j'", this.videosObject);
+	Mojo.Log.info("Starting videos details scene '%j'", this.videosObject);
 	
 	//App menu widget
 	this.controller.setupWidget(Mojo.Menu.appMenu, WebMyth.appMenuAttr, WebMyth.appMenuModel);
@@ -70,6 +70,7 @@ VideosDetailsAssistant.prototype.setup = function() {
 	$('insertdate-title').innerText = this.videosObject.insertdate.substring(0,10);
 	$('host-title').innerText = this.videosObject.host;
 	$('filename-title').innerText = this.videosObject.filename;
+	//$('onlyFilename-title').innerText = this.videosObject.onlyFilename;
 	$('coverfile-title').innerText = this.videosObject.coverfile;
 	$('screenshot-title').innerText = this.videosObject.screenshot;
 	$('banner-title').innerText = this.videosObject.banner;
@@ -80,43 +81,18 @@ VideosDetailsAssistant.prototype.setup = function() {
 	//$('filesize-title').innerText = Mojo.Format.formatNumber(parseInt(this.videosObject.fileSize.substring(0,this.videosObject.fileSize.length - 6)))+" MB";
 	
 	
+	//Update play list for hosts (check for download/stream later and update as needed)
+	this.updateHostsList();
+	
+	//Look for video in upnp table on backend
+	this.getUpnpmedia();
+	
 	
 };
 
 VideosDetailsAssistant.prototype.activate = function(event) {
 
-	
-	//Update list of current hosts
-	var hostsList = [];
-	var i, s;
-
-	/*
-	if(WebMyth.prefsCookieObject.allowRecordedDownloads) {
-		var downloadCmd = { "label": "Download to Phone", "command": "go-down-download" }
-		var streamCmd = { "label": "Stream to Phone", "command": "go-down-stream" }
-		
-		hostsList.push(downloadCmd);
-		hostsList.push(streamCmd);
-	}	
-	*/
-	
-	
-	for (i = 0; i < WebMyth.hostsCookieObject.length; i++) {
-
-		s = { 
-			"label": $L(WebMyth.hostsCookieObject[i].hostname),
-			"command": "go-play-"+WebMyth.hostsCookieObject[i].hostname,
-			"hostname": WebMyth.hostsCookieObject[i].hostname,
-			"port": WebMyth.hostsCookieObject[i].port 
-		};
-		hostsList.push(s);
-		
-	};
-		
-	this.hostsMenuModel.items = hostsList;
-	this.controller.modelChanged(this.hostsMenuModel);
-	
-	
+	//Update web list if we have homepage value
 	
 	var webList = [];
 	
@@ -257,26 +233,19 @@ VideosDetailsAssistant.prototype.openWeb = function(website) {
 
 VideosDetailsAssistant.prototype.handleDownload = function(downloadOrStream_in) {
 
-	Mojo.Log.info("Asked to "+downloadOrStream_in+" recorded program");
-	/*
+	Mojo.Log.info("Asked to "+downloadOrStream_in+" video");
+	
 	
 	this.downloadOrStream = downloadOrStream_in;
 	
-	var dateJS = new Date(isoToJS(this.videosObject.recStartTs));
 	
-	Mojo.Log.info("Rec date JS is %j, %s", dateJS, this.videosObject.recStartTs);
+	var filenameRequestUrl = "http://"+WebMyth.prefsCookieObject.masterBackendIp+":6544/Myth/GetVideo/Id"
+	filenameRequestUrl += this.upnpId;
 	
-	//requestHeaders: {Authorization: 'Basic ' + Base64.encode(WebMyth.prefsCookieObject.webserverUsername + ":" + WebMyth.prefsCookieObject.webserverPassword)},
-	
-	var filenameRequestUrl = "http://"+WebMyth.prefsCookieObject.webserverUsername + ":" + WebMyth.prefsCookieObject.webserverPassword+"@";
-	filenameRequestUrl += WebMyth.prefsCookieObject.webserverName+"/mythweb/pl/stream/";
-	filenameRequestUrl += this.videosObject.chanId+"/";
-	filenameRequestUrl += ((dateJS.getTime()/1000));
-	filenameRequestUrl += ".mp4";
 	
 	Mojo.Log.info("Download/stream URL is "+filenameRequestUrl);
 	
-	var myFilename = this.videosObject.title + "-" + this.videosObject.subTitle + ".mp4";
+	var myFilename = this.videosObject.title + "-" + this.videosObject.subtitle + ".mp4";
 	
 	Mojo.Log.info("Filename is "+myFilename);
  
@@ -347,7 +316,7 @@ VideosDetailsAssistant.prototype.handleDownload = function(downloadOrStream_in) 
 			}
 		});	
 	}
-	*/
+	
  
 };
 
@@ -379,3 +348,88 @@ VideosDetailsAssistant.prototype.playOnHost = function(host) {
 	if(WebMyth.prefsCookieObject.playJumpRemote)  Mojo.Controller.stageController.pushScene({name: WebMyth.prefsCookieObject.currentRemoteScene, disableSceneScroller: true});
 	
 };
+
+VideosDetailsAssistant.prototype.getUpnpmedia = function() {
+
+	var query = 'SELECT * FROM `upnpmedia` WHERE `filename` = "'+this.videosObject.onlyFilename+'" LIMIT 1;' ;
+	
+	
+	Mojo.Log.error("query is "+query);
+	
+	var requestUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webmythPythonFile;
+	requestUrl += "?op=executeSQLwithResponse";				
+	requestUrl += "&query64=";		
+	requestUrl += Base64.encode(query);	
+	
+	
+	
+    try {
+        var request = new Ajax.Request(requestUrl,{
+            method: 'get',
+            evalJSON: 'true',
+			requestHeaders: {Authorization: 'Basic ' + Base64.encode(WebMyth.prefsCookieObject.webserverUsername + ":" + WebMyth.prefsCookieObject.webserverPassword)},
+            onSuccess: this.getUpnpSuccess.bind(this),
+            onFailure: this.getUpnpFail.bind(this)  
+        });
+    }
+    catch(e) {
+        Mojo.Log.error(e);
+    }
+
+}
+
+VideosDetailsAssistant.prototype.getUpnpFail = function() {
+
+	Mojo.Log.error("Failed to get UPNP value from SQL");
+	
+
+}
+
+VideosDetailsAssistant.prototype.getUpnpSuccess = function(response) {
+
+	//Mojo.Log.info('Got UPNP response: %j', response.responseJSON);
+	
+	var myResponse = response.responseJSON[0];
+	
+	
+	//If nothing is returned this will crash, leaving default hosts for playback.
+	this.upnpId = myResponse.intid;
+	
+	
+	//Reset play menu so we can add download/stream
+	this.hostsMenuModel.items = [];
+	
+	if(WebMyth.prefsCookieObject.allowRecordedDownloads) {
+		var downloadCmd = { "label": "Download to Phone", "command": "go-down-download" }
+		var streamCmd = { "label": "Stream to Phone", "command": "go-down-stream" }
+		
+		this.hostsMenuModel.items.push(downloadCmd);
+		this.hostsMenuModel.items.push(streamCmd);
+	}	
+	
+	
+	this.updateHostsList();
+	
+}
+	
+
+VideosDetailsAssistant.prototype.updateHostsList = function() {
+	
+	var i, s;
+	
+	
+	for (i = 0; i < WebMyth.hostsCookieObject.length; i++) {
+
+		s = { 
+			"label": $L(WebMyth.hostsCookieObject[i].hostname),
+			"command": "go-play-"+WebMyth.hostsCookieObject[i].hostname,
+			"hostname": WebMyth.hostsCookieObject[i].hostname,
+			"port": WebMyth.hostsCookieObject[i].port 
+		};
+		this.hostsMenuModel.items.push(s);
+		
+	};
+		
+	this.controller.modelChanged(this.hostsMenuModel);
+
+}
