@@ -705,6 +705,9 @@ WelcomeAssistant.prototype.readSettingsSuccess = function(response) {
 	
 	Mojo.Log.info("Cleaned settings is %j",this.settings);
 	
+	WebMyth.settings.clear();
+	Object.extend(WebMyth.settings,this.settings);
+	
 	this.backendsList = this.settings.hosts;
 	
 	//Mojo.Log.info("Cleaned backends list is %j",this.backendsList);

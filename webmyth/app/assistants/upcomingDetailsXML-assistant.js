@@ -53,14 +53,17 @@ UpcomingDetailsXMLAssistant.prototype.setup = function() {
                             items: [{ label: 'Setup', command: 'go-setup', width: 90 },{ icon: 'refresh', command: 'go-refresh' },{label: $L('More'), submenu:'web-menu', width: 90}]};
  
 	this.webMenuModel = { label: $L('WebMenu'), items: [
-			{"label": $L('Guide'), "command": "go-guide"},
-			{"label": $L('Web: Wikipedia'), "command": "go-web--Wikipedia"},
-			{"label": $L('Web: themoviedb'), "command": "go-web--themoviedb"},
-			{"label": $L('Web: IMDB'), "command": "go-web--IMDB"},
-			{"label": $L('Web: TheTVDB'), "command": "go-web--TheTVDB"},
-			{"label": $L('Web: TV.com'), "command": "go-web--TV.com"},
-			{"label": $L('Web: Google'), "command": "go-web--Google"},
-			]};
+		{"label": $L('Web'), items:[
+			{"label": $L('Wikipedia'), "command": "go-web--Wikipedia"},
+			{"label": $L('themoviedb'), "command": "go-web--themoviedb"},
+			{"label": $L('IMDB'), "command": "go-web--IMDB"},
+			{"label": $L('TheTVDB'), "command": "go-web--TheTVDB"},
+			{"label": $L('TV.com'), "command": "go-web--TV.com"},
+			{"label": $L('Google'), "command": "go-web--Google"},
+			]},	
+		{"label": $L('MythWeb'), "command": "go-mythweb"},	
+		{"label": $L('Guide'), "command": "go-guide"}
+	]};
 
  
 	this.controller.setupWidget(Mojo.Menu.commandMenu, {menuClass: 'no-fade'}, this.cmdMenuModel);
@@ -99,6 +102,9 @@ UpcomingDetailsXMLAssistant.prototype.handleCommand = function(event) {
       case 'go-guid':
 		this.openGuide();
        break;
+      case 'go-myth':
+		this.openMythweb();
+       break;
       case 'go-web-':
 		this.openWeb(mySelection);
        break;
@@ -135,11 +141,8 @@ UpcomingDetailsXMLAssistant.prototype.openGuide = function() {
  
 };
 
-UpcomingDetailsXMLAssistant.prototype.openSetup = function() {
+UpcomingDetailsXMLAssistant.prototype.openMythweb = function() {
 
-	Mojo.Log.error("opening setup");
-			
-	/*		
 	var dateJS = new Date(isoSpaceToJS(this.starttime));
 	var dateUTC = dateJS.getTime()/1000;				//don't need 59 second offset?
 			
@@ -168,7 +171,12 @@ UpcomingDetailsXMLAssistant.prototype.openSetup = function() {
 			}
 		}
 	}); 
-	*/
+ 
+};
+
+UpcomingDetailsXMLAssistant.prototype.openSetup = function() {
+
+	Mojo.Log.error("opening setup");
 	
 	Mojo.Controller.stageController.pushScene("setupRecording", this.upcomingObject);
  

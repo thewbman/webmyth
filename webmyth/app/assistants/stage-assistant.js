@@ -119,6 +119,11 @@ WebMyth.currentScriptVersion = 8;
 WebMyth.currentLocation = "";
 WebMyth.usePlugin = false;
 
+//Selected channel in guide
+WebMyth.channelObject = {};
+
+//Live settings object
+WebMyth.settings = [];
 
 //Help and first-run message
 WebMyth.helpMessage = "This app requires the installation of 1 script on a local webserver on your network.  ";
