@@ -228,15 +228,7 @@ UpcomingAssistant.prototype.readRemoteDbTableSuccess = function(response) {
 	this.fullResultList.clear();
 	Object.extend(this.fullResultList,cleanUpcoming(response.responseJSON));
 	
-	/*
-	for(var i = 0; i < this.fullResultList; i++) {
-	
-		this.fullResultList[i].recStatusText = recStatusDecode(this.fullResultList[i].recstatus*1);
-		this.fullResultList[i].startTime = this.fullResultList[i].starttime;
-		this.fullResultList[i].chanId = this.fullResultList[i].chanid;
-		
-	}
-	*/
+	Mojo.Log.info('Cleaned upcoming: %j', this.fullResultList);
 	
 	this.groupChanged(WebMyth.prefsCookieObject.currentUpcomingGroup);
 	
@@ -289,6 +281,7 @@ UpcomingAssistant.prototype.updateGroupMenu = function() {
 	this.groupMenuModel.items = [ 
 			{"label": $L('All'), "command": "go-group--All"},
 			{"label": $L('Conflicting'), "command": "go-group--Conflicting"},
+			{"label": $L('Overrides'), "command": "go-group--Overrides"},
 			{"label": $L('Upcoming'), "command": "go-group--Upcoming"}
 	] ;
 	
@@ -299,8 +292,11 @@ UpcomingAssistant.prototype.updateGroupMenu = function() {
 		case 'Conflicting':
 			this.groupMenuModel.items[1].label = '- Conflicting -';
 		  break;
+		case 'Overrides':
+			this.groupMenuModel.items[2].label = '- Overrides -';
+		  break;
 		case 'Upcoming':
-			this.groupMenuModel.items[2].label = '- Upcoming -';
+			this.groupMenuModel.items[3].label = '- Upcoming -';
 		  break;
 		default :
 			//this.groupMenuModel.items[0].label = 'Default';
@@ -444,7 +440,11 @@ UpcomingAssistant.prototype.setMyData = function(propertyValue, model) {
 	upcomingDetailsText += '<div class="palm-info-text truncating-text left">&nbsp;&nbsp;&nbsp;'+model.category+'</div>';
 	
 	if(model.recstatus == '-1') {
-		upcomingDetailsText += '<div class="palm-info-text truncating-text left">&nbsp;&nbsp;&nbsp;&nbsp;'+model.channum+" - "+model.channame+'</div>';
+		if((model.rectype == '8')||(model.rectype == '7')) {
+			upcomingDetailsText += '<div class="palm-info-text truncating-text left">&nbsp;&nbsp;&nbsp;&nbsp;(Forced) '+model.channum+" - "+model.channame+'</div>';
+		} else {
+			upcomingDetailsText += '<div class="palm-info-text truncating-text left">&nbsp;&nbsp;&nbsp;&nbsp;'+model.channum+" - "+model.channame+'</div>';
+		}
 	} else {
 		upcomingDetailsText += '<div class="palm-info-text truncating-text left">&nbsp;&nbsp;&nbsp;&nbsp;'+model.recStatusText+'</div>';
 	}

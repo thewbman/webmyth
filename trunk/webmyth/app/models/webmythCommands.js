@@ -323,6 +323,24 @@ var trimByUpcomingGroup = function(fullList, myUpcomingType) {
 		
 		return trimmedList;
 		
+	} else if (myUpcomingType == 'Overrides') {
+	
+		var trimmedList = [];
+		var i, s;
+	
+		for (i = 0; i < fullList.length; i++) {
+	
+			s = fullList[i];
+			if ((s.rectype == '7')||(s.rectype == '8')) {
+				//Matches forced do and don't record
+				trimmedList.push(s);
+			} else {
+				//Does not match
+			}
+		}
+		
+		return trimmedList;
+		
 	}
 	
 	//If all else fails
@@ -616,6 +634,123 @@ var cleanGuideChannels = function(fullList) {
 	for(j = 0; j < listLength; j++) {
 		finalList.push(updatedList[j]);
 	}
+	
+	return finalList;
+	
+}
+
+var cleanJobqueue = function(fullList) {
+
+	finalList = [];
+	
+	var i, j, s, t = [];
+	
+	for(i = 0; i < fullList.length; i++) {
+		s = fullList[i];
+		
+		switch(parseInt(s.type)) {
+			case 0:
+				s.jobType = "System Job";
+				break;
+			case 1:
+				s.jobType = "Transcode";
+				break;
+			case 2:
+				s.jobType = "Commercial Flagging";
+				break;
+			case 256:
+				if(WebMyth.settings.UserJobDesc1) {
+					s.jobType = WebMyth.settings.UserJobDesc1;
+				} else {
+					s.jobType = "User Job 1";
+				}
+				//s.jobType = "User Job 1";
+				break;
+			case 512:
+				if(WebMyth.settings.UserJobDesc1) {
+					s.jobType = WebMyth.settings.UserJobDesc2;
+				} else {
+					s.jobType = "User Job 2";
+				}
+				//s.jobType = "User Job 2";
+				break;
+			case 1024:
+				if(WebMyth.settings.UserJobDesc1) {
+					s.jobType = WebMyth.settings.UserJobDesc3;
+				} else {
+					s.jobType = "User Job 3";
+				}
+				//s.jobType = "User Job 3";
+				break;
+			case 2048:
+				if(WebMyth.settings.UserJobDesc4) {
+					s.jobType = WebMyth.settings.UserJobDesc4;
+				} else {
+					s.jobType = "User Job 4";
+				}
+				//s.jobType = "User Job 4";
+				break;
+			default:
+				s.jobType = "Unknown";
+				break;
+		};
+	
+		switch(parseInt(s.status)) {
+			case 0:
+				s.statusText = "Unknown";
+				break;
+			case 1:
+				s.statusText = "Queued";
+				break;
+			case 2:
+				s.statusText = "Pending";
+				break;
+			case 3:
+				s.statusText = "Starting";
+				break;
+			case 4:
+				s.statusText = "Running";
+				break;
+			case 5:
+				s.statusText = "Stopped";
+				break;
+			case 6:
+				s.statusText = "Paused";
+				break;
+			case 7:
+				s.statusText = "Retry";
+				break;
+			case 8:
+				s.statusText = "Erroring";
+				break;
+			case 9:
+				s.statusText = "Aborting";
+				break;
+			case 256:
+				s.statusText = "Done";
+				break;
+			case 272:
+				s.statusText = "Finished";
+				break;
+			case 288:
+				s.statusText = "Aborted";
+				break;
+			case 304:
+				s.statusText = "Errored";
+				break;
+			case 320:
+				s.statusText = "Cancelled";
+				break;
+			default:
+				s.statusText = "Unknown";
+				break;
+		};
+				
+		
+		finalList.push(s);
+		
+	}
+	
 	
 	return finalList;
 	

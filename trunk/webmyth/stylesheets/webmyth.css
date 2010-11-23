@@ -723,6 +723,10 @@
   background: #555555;
 }
 
+.channelPicker-scene .channel-picker-row {
+	height: 20px;
+}
+
 /*
  * Upcoming
  */

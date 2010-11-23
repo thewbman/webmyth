@@ -20,10 +20,6 @@
 
 
 function RecordedDetailsAssistant(detailsObject) {
-	/* this is the creator function for your scene assistant object. It will be passed all the 
-	   additional parameters (after the scene name) that were passed to pushScene. The reference
-	   to the scene controller (this.controller) has not be established yet, so any initialization
-	   that needs the scene controller should be done in the setup function below. */
 	   
 	   this.recordedObject = detailsObject;
 	   this.standardFilename = '';
@@ -33,6 +29,7 @@ function RecordedDetailsAssistant(detailsObject) {
 	   
 	   this.screenshotUrl = "";
   
+		this.jobqueueList = [{"hostname": "N/A", "comment": "", "jobType": "N/A", "statusText": "Attempting to get queue data ..." }];
 	   
 }
 
@@ -52,8 +49,15 @@ RecordedDetailsAssistant.prototype.setup = function() {
 	this.moreMenuModel = { label: $L('MoreMenu'), items: [
 			{"label": $L('Delete'), items:[
 				{"label": $L('Delete'), "command": "go-dele-delete"}
-				//{"label": $L('and re-record'), "command": "go-dele-rerecord"},
 			]},
+			{"label": $L('Queue a job'), items:[
+				{"label": $L('Transcode'), "command": "go-queue1"},
+				{"label": $L('Flag commercials'), "command": "go-queue2"},
+				{"label": $L('User Job 1'), "command": "go-queue256"},
+				{"label": $L('User Job 2'), "command": "go-queue512"},
+				{"label": $L('User Job 3'), "command": "go-queue1024"},
+				{"label": $L('User Job 4'), "command": "go-queue2048"}	
+			]},	
 			{"label": $L('Web'), items:[
 				{"label": $L('Wikipedia'), "command": "go-web--Wikipedia"},
 				{"label": $L('themoviedb'), "command": "go-web--themoviedb"},
@@ -66,11 +70,21 @@ RecordedDetailsAssistant.prototype.setup = function() {
 			{"label": $L('Guide'), "command": "go-guide"}
 		]};
 			
-			
-
 	this.controller.setupWidget(Mojo.Menu.commandMenu, {menuClass: 'no-fade'}, this.cmdMenuModel);
 	this.controller.setupWidget('hosts-menu', '', this.hostsMenuModel);
 	this.controller.setupWidget('more-menu', '', this.moreMenuModel);
+	
+	
+	//List of jobqueue
+	this.jobqueueListAttribs = {
+		itemTemplate: "recordedDetails/jobqueueListItem",
+		swipeToDelete: false
+	};
+	
+    this.jobqueueListModel = {            
+        items: this.jobqueueList
+    };
+	this.controller.setupWidget( "jobqueueList" , this.jobqueueListAttribs, this.jobqueueListModel);
 
 	
 		
@@ -124,11 +138,11 @@ RecordedDetailsAssistant.prototype.setup = function() {
 	
 	//Mojo.Event.listen(this.controller.get("recorded-screenshot"),Mojo.Event.tap, this.goScreenshot.bind(this));
 	
+	this.getJobqueue();
+	
 };
 
 RecordedDetailsAssistant.prototype.activate = function(event) {
-	
-
 	
 	//Update list of current hosts
 	var hostsList = [];
@@ -169,10 +183,17 @@ RecordedDetailsAssistant.prototype.activate = function(event) {
 				{"label": $L('Undelete'), "command": "go-undelete"}
 			];
 			
-		this.controller.modelChanged(this.moreMenuModel);
 	};	
 	
 	
+	//Update jobs names
+	this.moreMenuModel.items[1].items[2].label = WebMyth.settings.UserJobDesc1;
+	this.moreMenuModel.items[1].items[3].label = WebMyth.settings.UserJobDesc2;
+	this.moreMenuModel.items[1].items[4].label = WebMyth.settings.UserJobDesc3;
+	this.moreMenuModel.items[1].items[5].label = WebMyth.settings.UserJobDesc4;
+	
+	
+	this.controller.modelChanged(this.moreMenuModel);
 	
 	
 	//Keypress event
@@ -208,6 +229,9 @@ RecordedDetailsAssistant.prototype.handleCommand = function(event) {
        break;
       case 'go-dele':
 		this.handleDelete(mySelection);
+       break;
+      case 'go-queu':
+		this.queueJob(mySelection);
        break;
       case 'go-unde':
 		this.handleUndelete(mySelection);
@@ -543,4 +567,121 @@ RecordedDetailsAssistant.prototype.handleUndelete = function() {
         Mojo.Log.error(e);
     }
 	
+};
+
+RecordedDetailsAssistant.prototype.getJobqueue = function() {
+	
+	Mojo.Log.info("Getting jobqueue");
+	
+	
+	var query = 'SELECT * FROM `jobqueue` WHERE `chanid` = "'+this.recordedObject.chanId+'" AND `starttime` = "'+this.recordedObject.recStartTs+'" ;';
+	
+	var requestUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webmythPythonFile;
+	requestUrl += "?op=executeSQLwithResponse";				
+	requestUrl += "&query64=";		
+	requestUrl += Base64.encode(query);	
+	
+	
+	
+    try {
+        var request = new Ajax.Request(requestUrl,{
+            method: 'get',
+            evalJSON: 'true',
+			requestHeaders: {Authorization: 'Basic ' + Base64.encode(WebMyth.prefsCookieObject.webserverUsername + ":" + WebMyth.prefsCookieObject.webserverPassword)},
+            onSuccess: this.successJobqueue.bind(this),
+            onFailure: this.failJobqueue.bind(this)
+        });
+    }
+    catch(e) {
+        Mojo.Log.error(e);
+    }
+	
+};
+
+RecordedDetailsAssistant.prototype.failJobqueue = function() {
+
+	Mojo.Log.info("Failed to get jobqueue data ");
+	
+	this.jobqueueList.clear();
+	
+	this.jobqueueList.push({"hostname": "N/A", "comment": "", "jobType": "ERROR", "statusText": "Failed to get jobqueue data" });	
+	
+	this.controller.modelChanged(this.jobqueueListModel);
+
+}
+
+RecordedDetailsAssistant.prototype.successJobqueue = function(response) {
+
+	Mojo.Log.info("Got matching jobqueue data %j",response.responseJSON);
+	
+	if(response.responseJSON) {
+		//Got some recent jobqueues
+		this.jobqueueList.clear();
+		
+		Object.extend(this.jobqueueList, cleanJobqueue(response.responseJSON));
+		
+		this.controller.modelChanged(this.jobqueueListModel);
+	
+		
+	} else {
+		//Got empty response
+		this.jobqueueList.clear();
+		
+		this.jobqueueList.push({"hostname": "N/A", "comment": "", "jobType": "N/A", "statusText": "No recent jobs" });
+		
+		this.controller.modelChanged(this.jobqueueListModel);
+	
+	}
+
+}
+
+RecordedDetailsAssistant.prototype.queueJob = function(jobTypeNum) {
+	
+	Mojo.Log.info("Queueing job "+jobTypeNum);
+	
+	var nowDate = new Date();
+	var nowDateISO = dateJSToISO(nowDate);
+	
+	
+	
+	var query = 'INSERT INTO `jobqueue` SET `chanid` = "'+this.recordedObject.chanId;
+	query += '", starttime = "'+this.recordedObject.recStartTs.replace("T"," ");
+	query += '", inserttime = "'+nowDateISO.replace("T"," ");
+	query += '", type = "'+jobTypeNum;
+	query += '", hostname = "';
+	query += '", args = "';
+	query += '", status = "1';
+	query += '", statustime = "'+nowDateISO.replace("T"," ");
+	query += '", schedruntime = "'+nowDateISO.replace("T"," ");
+	query += '", comment = "Queued by WebMyth app';
+	query += '", flags = "0"';
+		
+	
+	Mojo.Log.error("query is "+query);
+	
+	
+	var requestUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webmythPythonFile;
+	requestUrl += "?op=executeSQL";				
+	requestUrl += "&query64=";		
+	requestUrl += Base64.encode(query);	
+	
+	try {
+        var request = new Ajax.Request(requestUrl,{
+            method: 'get',
+            evalJSON: 'false',
+			requestHeaders: {Authorization: 'Basic ' + Base64.encode(WebMyth.prefsCookieObject.webserverUsername + ":" + WebMyth.prefsCookieObject.webserverPassword)},
+            onSuccess: function() {
+				Mojo.Log.info("Success in queueing job");
+				Mojo.Controller.getAppController().showBanner("Successfully queued", {source: 'notification'});
+			},
+            onFailure: function() {
+				Mojo.Log.error("Error in queueing job");
+				Mojo.Controller.getAppController().showBanner("Error queueing", {source: 'notification'});
+			}  
+        });
+    }
+    catch(e) {
+        Mojo.Log.error(e);
+    }
+
 };

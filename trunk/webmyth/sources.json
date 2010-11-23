@@ -131,5 +131,9 @@
     {
         "scenes": "setupRecording",
         "source": "app/assistants/setupRecording-assistant.js"
+    },
+    {
+        "scenes": "channelPicker",
+        "source": "app/assistants/channelPicker-assistant.js"
     }
 ]

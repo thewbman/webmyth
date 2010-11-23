@@ -110,8 +110,7 @@ VideosAssistant.prototype.deactivate = function(event) {
 };
 
 VideosAssistant.prototype.cleanup = function(event) {
-	/* this function should do any cleanup needed before the scene is destroyed as 
-	   a result of being popped off the scene stack */
+
 };
 
 VideosAssistant.prototype.handleCommand = function(event) {
@@ -187,12 +186,13 @@ VideosAssistant.prototype.handleKey = function(event) {
 VideosAssistant.prototype.getStorageGroups = function(event) {
 
 	//Update list from webmyth python script
-	Mojo.Log.info('Starting storage groups data gathering');
+	//Mojo.Log.info('Starting storage groups data gathering');
 	
 	this.controller.sceneScroller.mojo.revealTop();
 	
 	var requestUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webmythPythonFile;
-	requestUrl += "?op=getStorageGroup";				
+	//requestUrl += "?op=getStorageGroup";	
+	requestUrl += "?op=getSQL&table=storagegroup";
 	
 	
 	
@@ -220,7 +220,7 @@ VideosAssistant.prototype.readStorageGroupsFail = function(event) {
 VideosAssistant.prototype.readStorageGroupsSuccess = function(response) {
 	//return true;  //can escape this function for testing purposes
     
-	//Mojo.Log.info('Got storage group response: %j',response.responseJSON);
+	Mojo.Log.info('Got storage group response: %j',response.responseJSON);
 	
 	//Update the storage group list
 	this.storageGroups.clear();
