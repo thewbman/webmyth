@@ -1,0 +1,11 @@
+﻿30      MYTH_PROTO_VERSION 63 3875641D
+
+28      ANN Monitor wes-windows7 0
+
+26      RESCHEDULE_RECORDINGS -1
+
+6       DONE
+
+
+
+(have to add +1 character for return key ?)
