@@ -119,8 +119,13 @@ WelcomeAssistant.prototype.setup = function() {
 		//Do Metrix submission if allowed
 		if (WebMyth.prefsCookieObject.allowMetrix == true) {
 			Mojo.Log.info("Submitting data to Metrix");
+			
 			//Metrix command
 			WebMyth.Metrix.postDeviceData();
+			
+			//Metrix bulletin
+			//0.4.6 - bulletin 10
+			WebMyth.Metrix.checkBulletinBoard(this.controller, 10);
 		};
 		
 		
@@ -156,6 +161,7 @@ WelcomeAssistant.prototype.setup = function() {
 		if (WebMyth.prefsCookieObject.currentMusicSort == null) WebMyth.prefsCookieObject.currentMusicSort = defaultCookie().currentMusicSort;
 		if (WebMyth.prefsCookieObject.currentUpcomingGroup == null) WebMyth.prefsCookieObject.currentUpcomingGroup = defaultCookie().currentUpcomingGroup;
 		if (WebMyth.prefsCookieObject.forceScriptScreenshots == null) WebMyth.prefsCookieObject.forceScriptScreenshots = defaultCookie().forceScriptScreenshots;
+		if (WebMyth.prefsCookieObject.showVideoImages == null) WebMyth.prefsCookieObject.showVideoImages = defaultCookie().showVideoImages;
 		
 		
 		//Check if scripts need an upgrade message
@@ -245,6 +251,9 @@ WelcomeAssistant.prototype.setup = function() {
 	
 	//Get backend IPs
 	this.checkConnectionStatus();
+	
+	//Get script veriosn
+	this.getScriptVersion();
 	
 };
 
@@ -525,7 +534,7 @@ WelcomeAssistant.prototype.doHelpButton = function(event) {
 								parameters: {
 									id: "com.palm.app.email",
 									params: {
-										summary: "Help with WebMyth v"+ Mojo.Controller.appInfo.version,
+										summary: "Help with WebMyth v"+ Mojo.Controller.appInfo.version+", script version "+WebMyth.prefsCookieObject.liveScriptVersion,
 										recipients: [{
 											type:"email",
 											value:"webmyth.help@gmail.com",
@@ -716,6 +725,41 @@ WelcomeAssistant.prototype.readSettingsSuccess = function(response) {
 	Object.extend(WebMyth.backendsCookieObject,this.backendsList);
 	WebMyth.backendsCookie.put(WebMyth.backendsCookieObject);
 	
+	
+};
+
+WelcomeAssistant.prototype.getScriptVersion = function() {
+	
+	//Mojo.Log.error("Starting to get script version");
+		
+	
+	var requestUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webmythPythonFile;
+	requestUrl += "?op=getScriptVersion";	
+	
+	
+    try {
+        var request = new Ajax.Request(requestUrl,{
+            method: 'get',
+            evalJSON: 'false',
+			requestHeaders: {Authorization: 'Basic ' + Base64.encode(WebMyth.prefsCookieObject.webserverUsername + ":" + WebMyth.prefsCookieObject.webserverPassword)},
+			onSuccess: this.readScriptVersionSuccess.bind(this),
+            onFailure: function() {
+						Mojo.Log.info("failed to get script version")	
+					}   
+        });
+    }
+    catch(e) {
+        Mojo.Log.error(e);
+    }
+	
+}
+
+WelcomeAssistant.prototype.readScriptVersionSuccess = function(response) {
+
+	Mojo.Log.info('Got script version', response.responseText.trim());
+	
+	WebMyth.prefsCookieObject.liveScriptVersion = response.responseText.trim();
+	WebMyth.prefsCookie.put(WebMyth.prefsCookieObject);
 	
 };
 
@@ -1117,58 +1161,3 @@ WelcomeAssistant.prototype.puchkSplitVer = function(v) {
     	
 }
 
-
-/*
-	Small controller class for help button
-*/
-
-var HelpButtonAssistant = Class.create({
-	
-	initialize: function(sceneAssistant, timeObject2, callbackFunc) {
-		this.sceneAssistant = sceneAssistant;
-		this.controller = sceneAssistant.controller;
-		
-		this.timeObject2 = timeObject2;
-		this.callbackFunc = callbackFunc;
-	},
-	
-	setup : function(widget) {
-	
-		this.widget = widget;
-		
-		Mojo.Log.error("time object 2 is %j", this.timeObject2);
-		
-		this.newTime = new Date(this.timeObject2.year, (this.timeObject2.month-1), this.timeObject2.day, this.timeObject2.hour, this.timeObject2.minute, this.timeObject2.second);
-		Mojo.Log.error("time is %j", this.newTime);
-		
-		this.controller.setupWidget("datepickerid",
-        this.dateAttributes = {
-             modelProperty: 'time' 
-        },
-        this.dateModel = {
-            time: this.newTime
-        }
-		); 
-		this.controller.setupWidget("timepickerid",
-        this.timeAttributes = {
-             modelProperty: 'time' 
-        },
-        this.timeModel = {
-            time: this.newTime
-        }
-		); 
-		
-		Mojo.Event.listen(this.controller.get('goDate_button'),Mojo.Event.tap,this.okButton.bind(this));
-
-		
-	},
-	
-	okButton: function() {
-	
-		this.callbackFunc(this.newTime);
-
-		this.widget.mojo.close();
-	}
-	
-	
-});

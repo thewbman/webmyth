@@ -27,8 +27,10 @@ function SetupRecordingAssistant(programObject) {
 	
 	this.finishedGettingRule = false;
 	this.finishedGettingInputs = false;
-	this.finishedGettingDefaults = false;
-	this.finishedGettingSettings = false;
+	this.finishedGettingSettings = false;	
+	
+	this.finishedGettingDefaults = true;	//preloaded on welcome scene
+	
 
 }
 
@@ -336,7 +338,7 @@ SetupRecordingAssistant.prototype.setup = function() {
 	
 	this.getEncoderInputs();
 	
-	this.getGeneralSettings();
+	//this.getGeneralSettings();  //preloaded from welcome
 	
 	
 	
@@ -925,9 +927,9 @@ SetupRecordingAssistant.prototype.readSettingsSuccess = function(response) {
 
 	//Mojo.Log.info('Got settings table rule responseJSON: %j', response.responseJSON);
 	
-	this.settings = cleanSettings(response.responseJSON);
+	WebMyth.settings = cleanSettings(response.responseJSON);
 	
-	Mojo.Log.info("Cleaned settings is %j",this.settings);
+	Mojo.Log.info("Cleaned settings is %j",WebMyth.settings);
 	
 	
 	
@@ -962,10 +964,10 @@ SetupRecordingAssistant.prototype.updateDefaults = function() {
     Mojo.Log.info("Updating default settings");
 	
 		
-	$('UserJobDesc1Id').innerHTML = this.settings.UserJobDesc1;
-	$('UserJobDesc2Id').innerHTML = this.settings.UserJobDesc2;
-	$('UserJobDesc3Id').innerHTML = this.settings.UserJobDesc3;
-	$('UserJobDesc4Id').innerHTML = this.settings.UserJobDesc4;
+	$('UserJobDesc1Id').innerHTML = WebMyth.settings.UserJobDesc1;
+	$('UserJobDesc2Id').innerHTML = WebMyth.settings.UserJobDesc2;
+	$('UserJobDesc3Id').innerHTML = WebMyth.settings.UserJobDesc3;
+	$('UserJobDesc4Id').innerHTML = WebMyth.settings.UserJobDesc4;
 	
 
 	if(this.programObject.recordId){
@@ -1002,25 +1004,25 @@ SetupRecordingAssistant.prototype.updateDefaults = function() {
 	this.maxepisodesModel.value = this.recordRule.maxepisodes;
 		this.controller.modelChanged(this.maxepisodesModel, this);		*/
 		
-	this.startoffsetModel.value = this.settings.DefaultStartOffset;
+	this.startoffsetModel.value = WebMyth.settings.DefaultStartOffset;
 		this.controller.modelChanged(this.startoffsetModel, this);
-	this.endoffsetModel.value = this.settings.DefaultEndOffset;
+	this.endoffsetModel.value = WebMyth.settings.DefaultEndOffset;
 		this.controller.modelChanged(this.endoffsetModel, this);
 	
 	
 	
 		//job options
-	this.autocommflagModel.value = intToBool(this.settings.AutoCommercialFlag);
+	this.autocommflagModel.value = intToBool(WebMyth.settings.AutoCommercialFlag);
 		this.controller.modelChanged(this.autocommflagModel, this);
-	this.autotranscodeModel.value = intToBool(this.settings.AutoTranscode);
+	this.autotranscodeModel.value = intToBool(WebMyth.settings.AutoTranscode);
 		this.controller.modelChanged(this.autotranscodeModel, this);
-	this.autouserjob1Model.value = intToBool(this.settings.AutoRunUserJob1);
+	this.autouserjob1Model.value = intToBool(WebMyth.settings.AutoRunUserJob1);
 		this.controller.modelChanged(this.autouserjob1Model, this);
-	this.autouserjob2Model.value = intToBool(this.settings.AutoRunUserJob2);
+	this.autouserjob2Model.value = intToBool(WebMyth.settings.AutoRunUserJob2);
 		this.controller.modelChanged(this.autouserjob2Model, this);
-	this.autouserjob3Model.value = intToBool(this.settings.AutoRunUserJob3);
+	this.autouserjob3Model.value = intToBool(WebMyth.settings.AutoRunUserJob3);
 		this.controller.modelChanged(this.autouserjob3Model, this);
-	this.autouserjob4Model.value = intToBool(this.settings.AutoRunUserJob4);
+	this.autouserjob4Model.value = intToBool(WebMyth.settings.AutoRunUserJob4);
 		this.controller.modelChanged(this.autouserjob4Model, this);
 	
 	}
@@ -1149,7 +1151,7 @@ SetupRecordingAssistant.prototype.updateRule = function() {
 	query += '", description = "'+this.newRule.description+'", category = "'+this.newRule.category+'", seriesid = "'+this.newRule.seriesid;
 	query += '", programid = "'+this.newRule.programid+'", chanid = "'+this.newRule.chanid+'", endtime = "'+this.newRule.endtime;
 	query += '", enddate = "'+this.newRule.enddate+'", profile = "'+this.newRule.profile+'", transcoder = "'+this.newRule.transcoder;
-	query += '", recgroup = "'+this.newRule.recgroup+'", storagegroup = "'+this.newRule.storagegroup+"', playgroup = '"+this.newRule.playgroup;
+	query += '", recgroup = "'+this.newRule.recgroup+'", storagegroup = "'+this.newRule.storagegroup+'", playgroup = "'+this.newRule.playgroup;
 	query += '", recpriority = "'+this.newRule.recpriority+'", dupmethod = "'+this.newRule.dupmethod;
 	query += '", dupin = "'+this.newRule.dupin+'", prefinput = "'+this.newRule.prefinput+'", inactive = "'+this.newRule.inactive;
 	query += '", autoexpire = "'+this.newRule.autoexpire+'", maxnewest = "'+this.newRule.maxnewest+'", maxepisodes = "'+this.newRule.maxepisodes;

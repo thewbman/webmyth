@@ -77,18 +77,15 @@ UpcomingDetailsXMLAssistant.prototype.setup = function() {
 };
 
 UpcomingDetailsXMLAssistant.prototype.activate = function(event) {
-
 	
 };
 
 UpcomingDetailsXMLAssistant.prototype.deactivate = function(event) {
-	/* remove any event handlers you added in activate and do any other cleanup that should happen before
-	   this scene is popped or another scene is pushed on top */
+
 };
 
 UpcomingDetailsXMLAssistant.prototype.cleanup = function(event) {
-	/* this function should do any cleanup needed before the scene is destroyed as 
-	   a result of being popped off the scene stack */
+
 };
 
 UpcomingDetailsXMLAssistant.prototype.handleCommand = function(event) {
@@ -111,6 +108,9 @@ UpcomingDetailsXMLAssistant.prototype.handleCommand = function(event) {
       case 'go-setu':
 		this.openSetup();
        break;
+      case 'go-play':
+		this.openPlay(mySelection);
+       break;
       case 'go-refr':
 	  
 		//Restart spinner and show
@@ -130,6 +130,7 @@ UpcomingDetailsXMLAssistant.prototype.handleCommand = function(event) {
   }
   
 };
+
 
 
 
@@ -179,6 +180,28 @@ UpcomingDetailsXMLAssistant.prototype.openSetup = function() {
 	Mojo.Log.error("opening setup");
 	
 	Mojo.Controller.stageController.pushScene("setupRecording", this.upcomingObject);
+ 
+};
+
+UpcomingDetailsXMLAssistant.prototype.openPlay = function(host) {
+
+	//Attempting to play
+	var thisHostname = host;
+	WebMyth.prefsCookieObject.currentFrontend = host;
+	
+	//var clean_starttime = this.recordedObject.starttime.replace(' ','T');
+	var clean_starttime = this.upcomingObject.recStartTs;
+	
+	var cmd = "program "+this.upcomingObject.chanId+" "+clean_starttime+" resume";
+	
+	Mojo.Log.info("Command to send is " + cmd);
+
+		
+	WebMyth.sendPlay(cmd);
+	
+	
+	if(WebMyth.prefsCookieObject.playJumpRemote)  Mojo.Controller.stageController.pushScene({name: WebMyth.prefsCookieObject.currentRemoteScene, disableSceneScroller: true});
+
  
 };
 
@@ -397,7 +420,7 @@ UpcomingDetailsXMLAssistant.prototype.readDetailsXMLSuccess = function(response)
 
 UpcomingDetailsXMLAssistant.prototype.finishedReadingDetails = function() {
 	
-	Mojo.Log.info('Now showing programDetails');
+	Mojo.Log.info('Now showing programDetails %j', this.upcomingObject);
 	
 	var channelIconUrl = "http://"+WebMyth.prefsCookieObject.masterBackendIp+":6544/Myth/GetChannelIcon?ChanId=";
 	channelIconUrl += this.chanid;
@@ -426,6 +449,40 @@ UpcomingDetailsXMLAssistant.prototype.finishedReadingDetails = function() {
 	$('seriesid-title').innerText = this.upcomingObject.seriesId;
 	$('channame-title').innerText = this.upcomingObject.channelName;
 	$('channum-title').innerText = this.upcomingObject.chanNum;
+	
+	
+	if(this.upcomingObject.recStatus == '-2') {
+	
+		var hostsList = [];
+		var i, s;
+		
+		
+		for (i = 0; i < WebMyth.hostsCookieObject.length; i++) {
+
+			s = { 
+				"label": $L(WebMyth.hostsCookieObject[i].hostname),
+				"command": "go-play-"+WebMyth.hostsCookieObject[i].hostname,
+				"hostname": WebMyth.hostsCookieObject[i].hostname,
+				"port": WebMyth.hostsCookieObject[i].port 
+			};
+			hostsList.push(s);
+			
+		};
+		
+		
+			
+	
+		this.cmdMenuModel.items[0].label = "Play";
+		this.cmdMenuModel.items[0].submenu = 'hosts-menu';
+		
+		
+		this.hostsMenuModel = { label: $L('Hosts'), items: hostsList};
+		
+		this.controller.modelChanged(this.cmdMenuModel);
+		
+		this.controller.setupWidget('hosts-menu', '', this.hostsMenuModel);
+		
+	};
 	
 
 	//Stop spinner and hide

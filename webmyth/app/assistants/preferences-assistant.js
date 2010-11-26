@@ -215,6 +215,8 @@ PreferencesAssistant.prototype.setup = function() {
 	);
 	this.controller.listen('theme', Mojo.Event.propertyChange, this.themeChanged.bindAsEventListener(this));
 */
+
+
 	//Channel Icons in upcoming
 	this.upcomingChannelIconsToggleModel = {
              value: false
@@ -225,6 +227,17 @@ PreferencesAssistant.prototype.setup = function() {
             modelProperty: "value"
          },
          this.upcomingChannelIconsToggleModel
+    ); 
+	//Video images
+	this.videoImagesToggleModel = {
+             value: false
+    };
+	this.controller.setupWidget("videoImagesToggleId",
+        {
+			label: $L("Show Video Images"),
+            modelProperty: "value"
+         },
+         this.videoImagesToggleModel
     ); 
 	//Use script for screenshots
 	this.forceScriptScreenshotsToggleModel = {
@@ -237,6 +250,9 @@ PreferencesAssistant.prototype.setup = function() {
          },
          this.forceScriptScreenshotsToggleModel
     ); 
+	
+	
+	
 	//Remote header action
 	this.remoteHeaderActionModel = {
 			value: WebMyth.prefsCookieObject.remoteHeaderAction,
@@ -434,8 +450,13 @@ PreferencesAssistant.prototype.activate = function(event) {
 			this.upcomingChannelIconsToggleModel.value = WebMyth.prefsCookieObject.showUpcomingChannelIcons;
 			this.controller.modelChanged(this.upcomingChannelIconsToggleModel);
 			
+			this.videoImagesToggleModel.value = WebMyth.prefsCookieObject.showVideoImages;
+			this.controller.modelChanged(this.videoImagesToggleModel);
+			
 			this.forceScriptScreenshotsToggleModel.value = WebMyth.prefsCookieObject.forceScriptScreenshots;
 			this.controller.modelChanged(this.forceScriptScreenshotsToggleModel);
+			
+			
 			
 			this.vibrateToggleModel.value = WebMyth.prefsCookieObject.remoteVibrate;
 			this.controller.modelChanged(this.vibrateToggleModel);
@@ -684,7 +705,10 @@ PreferencesAssistant.prototype.checkSettings = function() {
 		
 		//WebMyth.prefsCookieObject.theme = this.themeModel.value;
 		WebMyth.prefsCookieObject.showUpcomingChannelIcons = this.upcomingChannelIconsToggleModel.value;
+		WebMyth.prefsCookieObject.showVideoImages = this.videoImagesToggleModel.value;
 		WebMyth.prefsCookieObject.forceScriptScreenshots = this.forceScriptScreenshotsToggleModel.value;
+		
+		
 		WebMyth.prefsCookieObject.remoteHeaderAction = this.remoteHeaderActionModel.value;
 		WebMyth.prefsCookieObject.remoteVibrate = this.vibrateToggleModel.value;
 		WebMyth.prefsCookieObject.remoteFullscreen = this.remoteFullscreenToggleModel.value;

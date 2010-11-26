@@ -67,6 +67,7 @@ RecordedDetailsAssistant.prototype.setup = function() {
 				{"label": $L('Google'), "command": "go-web--Google"}	
 			]},	
 			{"label": $L('MythWeb'), "command": "go-mythweb"},	
+			{"label": $L('Setup schedule'), "command": "go-setup"},	
 			{"label": $L('Guide'), "command": "go-guide"}
 		]};
 			
@@ -242,6 +243,9 @@ RecordedDetailsAssistant.prototype.handleCommand = function(event) {
       case 'go-guid':
 		this.openGuide();
        break;
+      case 'go-setu':
+		this.openSetup();
+       break;
     }
   } else if(event.type == Mojo.Event.forward) {
 	
@@ -282,6 +286,15 @@ RecordedDetailsAssistant.prototype.handleKey = function(event) {
 
 
 
+
+
+RecordedDetailsAssistant.prototype.openSetup = function() {
+
+	//Mojo.Log.error("Opening in guide "+this.starttime.replace(" ","T"));
+	
+	Mojo.Controller.stageController.pushScene("setupRecording", this.recordedObject);
+ 
+};
 
 RecordedDetailsAssistant.prototype.openGuide = function() {
 
@@ -673,7 +686,11 @@ RecordedDetailsAssistant.prototype.queueJob = function(jobTypeNum) {
             onSuccess: function() {
 				Mojo.Log.info("Success in queueing job");
 				Mojo.Controller.getAppController().showBanner("Successfully queued", {source: 'notification'});
-			},
+				
+				//Update job queue list
+				this.getJobqueue();
+				
+			}.bind(this),
             onFailure: function() {
 				Mojo.Log.error("Error in queueing job");
 				Mojo.Controller.getAppController().showBanner("Error queueing", {source: 'notification'});
