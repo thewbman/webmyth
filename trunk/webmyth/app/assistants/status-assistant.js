@@ -259,9 +259,11 @@ StatusAssistant.prototype.handleKey = function(event) {
 StatusAssistant.prototype.getStatus = function() {
 	
 	//Getting settings information
-	Mojo.Log.info("Got master backend IP from settings: "+WebMyth.prefsCookieObject.masterBackendIp);
+	//Mojo.Log.info("Got master backend IP from settings: "+WebMyth.prefsCookieObject.masterBackendIp);
 	
 	var requestUrl = "http://"+WebMyth.prefsCookieObject.masterBackendIp+":6544/xml";
+	
+	Mojo.Log.info("Status request URL is "+requestUrl);
 	
     try {
         var request = new Ajax.Request(requestUrl,{
@@ -441,7 +443,7 @@ StatusAssistant.prototype.readStatusSuccess = function(response) {
 	var jobqueueNode=xmlobject.getElementsByTagName("JobQueue")[0];
 	var jobqueueCount = jobqueueNode.getAttributeNode("count").nodeValue;
 	//Mojo.Log.info("Count of jobqueue is "+jobqueueCount);
-	//Mojo.Log.info("Count of child jobqueue nodes is "+jobqueueNode.childNodes.length);
+	Mojo.Log.info("Count of child jobqueue nodes is "+jobqueueNode.childNodes.length);
 	for(var i = 0; i < jobqueueNode.childNodes.length; i++) {
 		//Mojo.Log.info("jobqueue nodeName is "+jobqueueNode.childNodes[i].nodeName);
 		singleJobqueueNode = jobqueueNode.childNodes[i];
@@ -465,11 +467,13 @@ StatusAssistant.prototype.readStatusSuccess = function(response) {
 	} 
 	if(hasJobs) {
 		//Only update jobs list if we had jobs
+	
 		this.jobqueueList.clear();
 		Object.extend(this.jobqueueList, tempJobsList);
 		this.controller.modelChanged(this.jobqueueListModel);
+		
 	}
-	//Mojo.Log.info("Full jobqueue is %j", this.jobqueueList);
+	Mojo.Log.info("Full jobqueue is %j", this.jobqueueList);
 	
 	
 	//Storage
@@ -491,7 +495,7 @@ StatusAssistant.prototype.readStatusSuccess = function(response) {
 			this.storageList.push(singleStorageJson);
 		}
 	} 
-	//Mojo.Log.info("Full storagelist is %j", this.storageList);
+	Mojo.Log.info("Full storagelist is %j", this.storageList);
 	this.controller.modelChanged(this.storageListModel);
 	
 	
@@ -588,7 +592,7 @@ StatusAssistant.prototype.readStatusSuccess = function(response) {
 
 StatusAssistant.prototype.setJobqueueData = function(propertyValue, model)  { 
 	
-	var jobType, status;
+	var jobType, statusText;
 	
 	switch(parseInt(model.type)) {
 		case 0:
@@ -601,16 +605,32 @@ StatusAssistant.prototype.setJobqueueData = function(propertyValue, model)  {
 			jobType = "Commercial Flagging";
 			break;
 		case 256:
-			jobType = "User Job 1";
+				if(WebMyth.settings.UserJobDesc1) {
+					jobType = WebMyth.settings.UserJobDesc1;
+				} else {
+					jobType = "User Job 1";
+				}
 			break;
 		case 512:
-			jobType = "User Job 2";
+				if(WebMyth.settings.UserJobDesc1) {
+					jobType = WebMyth.settings.UserJobDesc2;
+				} else {
+					jobType = "User Job 2";
+				}
 			break;
 		case 1024:
-			jobType = "User Job 3";
+				if(WebMyth.settings.UserJobDesc1) {
+					jobType = WebMyth.settings.UserJobDesc3;
+				} else {
+					jobType = "User Job 3";
+				}
 			break;
 		case 2048:
-			jobType = "User Job 4";
+				if(WebMyth.settings.UserJobDesc4) {
+					jobType = WebMyth.settings.UserJobDesc4;
+				} else {
+					jobType = "User Job 4";
+				}
 			break;
 		default:
 			jobType = "Unknown";
@@ -619,49 +639,49 @@ StatusAssistant.prototype.setJobqueueData = function(propertyValue, model)  {
 	
 	switch(parseInt(model.status)) {
 		case 0:
-			status = "Unknown";
+			statusText = "Unknown";
 			break;
 		case 1:
-			status = "Queued";
+			statusText = "Queued";
 			break;
 		case 2:
-			status = "Pending";
+			statusText = "Pending";
 			break;
 		case 3:
-			status = "Starting";
+			statusText = "Starting";
 			break;
 		case 4:
-			status = "Running";
+			statusText = "Running";
 			break;
 		case 5:
-			status = "Stopped";
+			statusText = "Stopped";
 			break;
 		case 6:
-			status = "Paused";
+			statusText = "Paused";
 			break;
 		case 7:
-			status = "Retry";
+			statusText = "Retry";
 			break;
 		case 8:
-			status = "Erroring";
+			statusText = "Erroring";
 			break;
 		case 9:
-			status = "Aborting";
+			statusText = "Aborting";
 			break;
 		case 256:
-			status = "Done";
+			statusText = "Done";
 			break;
 		case 272:
-			status = "Finished";
+			statusText = "Finished";
 			break;
 		case 288:
-			status = "Aborted";
+			statusText = "Aborted";
 			break;
 		case 304:
-			status = "Errored";
+			statusText = "Errored";
 			break;
 		case 320:
-			status = "Cancelled";
+			statusText = "Cancelled";
 			break;
 		default:
 			jobType = "Unknown";
@@ -672,7 +692,7 @@ StatusAssistant.prototype.setJobqueueData = function(propertyValue, model)  {
 	var myDataModel = '<div class="title truncating-text left">'+model.fullTitle+'</div>';
     myDataModel += '<div class="palm-info-text left">'+model.startTime+'</div>';
     myDataModel += '<div class="palm-info-text right italics">'+jobType+' on '+model.hostname;
-    myDataModel += '<br />'+status+'</div>';
+    myDataModel += '<br />'+statusText+'</div>';
 	
 	if(model.comments) myDataModel += '<div class="title truncating-text right italics">'+model.comments+'</div>';
 	

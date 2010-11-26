@@ -68,6 +68,7 @@ VideosAssistant.prototype.setup = function() {
 		itemTemplate: "videos/videosListItem",
 		dividerTemplate: "videos/videosDivider",
 		swipeToDelete: false,
+		renderLimit: 12,
 		filterFunction: this.filterListFunction.bind(this),
 		dividerFunction: this.videosDividerFunction.bind(this),
 		formatters:{myData: this.setMyData.bind(this)}
@@ -237,11 +238,21 @@ VideosAssistant.prototype.getVideos = function(event) {
 	this.controller.sceneScroller.mojo.revealTop();
 	
 	
+	var query = "SELECT videometadata.intid, videometadata.title, videometadata.subtitle, videometadata.plot, videometadata.inetref,  "; 
+	query += " videometadata.homepage, videometadata.releasedate, videometadata.season, videometadata.episode, videometadata.filename, ";
+	query += " videometadata.director, videometadata.year, videometadata.rating, videometadata.length, videocategory.category, ";
+	query += " videometadata.hash, videometadata.coverfile, videometadata.host, videometadata.insertdate ";
+	query += " FROM videometadata ";
+	query += " LEFT OUTER JOIN videocategory ON videocategory.intid = videometadata.category ";
+	
 	
 	
 	var requestUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webmythPythonFile;
 	//requestUrl += "?op=getVideos";	
-	requestUrl += "?op=getSQL&table=videometadata";
+	//requestUrl += "?op=getSQL&table=videometadata";
+	requestUrl += "?op=executeSQLwithResponse";			
+	requestUrl += "&query64=";		
+	requestUrl += Base64.encode(query);	
 	
     try {
         var request = new Ajax.Request(requestUrl,{
@@ -615,12 +626,22 @@ VideosAssistant.prototype.setMyData = function(propertyValue, model) {
 	
 	
 	*/
-	var videosDetailsText = '<div class="videos-list-item">';
+	var videosDetailsText = "";
+	
+	if(WebMyth.prefsCookieObject.showVideoImages) {
+		var imageBase = "http://"+WebMyth.prefsCookieObject.webserverUsername + ":" + WebMyth.prefsCookieObject.webserverPassword+"@";
+		imageBase += WebMyth.prefsCookieObject.webserverName+"/mythweb/pl/";
+	
+		videosDetailsText += '<div class="videos-left-list-image">';
+		videosDetailsText += '<img id="coverfile-img" class="videos-coverfile-small" src="'+imageBase+'/coverart/'+model.coverfile+'" />';
+		videosDetailsText += '</div><div class="videos-right-list-text">';
+		
+	}
+	
+	videosDetailsText += '<div class="videos-list-item">';
 	videosDetailsText += '<div class="title truncating-text left videos-list-title">&nbsp;'+model.title+'</div>';
 	
 	videosDetailsText += '<div class="palm-row-wrapper">';
-	
-	//if(WebMyth.prefsCookieObject.showUpcomingChannelIcons) videosDetailsText += '<div class="left-list-text">';
 	
 	videosDetailsText += '<div class="palm-info-text truncating-text left">&nbsp;'+model.subtitle+'&nbsp;</div>';
 	videosDetailsText += '<div class="palm-info-text truncating-text left">&nbsp;&nbsp;'+model.plot+'&nbsp;</div>';
@@ -630,7 +651,9 @@ VideosAssistant.prototype.setMyData = function(propertyValue, model) {
 	
 	videosDetailsText += '</div></div>';
 	
-	//videosDetailsText += '</div>';
+	if(WebMyth.prefsCookieObject.showVideoImages) {
+		videosDetailsText += '</div>';
+	}
 	
 	model.myData = videosDetailsText;
 	

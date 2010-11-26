@@ -190,6 +190,8 @@ GuideAssistant.prototype.setup = function() {
 					
 				this.timeObjectPlus30 = dateObjectAdd30Min(this.timeObject);
 				this.timeISOPlus30 = dateObjectToISO(this.timeObjectPlus30);
+				
+				this.timeObject = dateObjectSubtract30Min(this.timeObject);
 					
 				this.selectedTime();
 			}
@@ -588,7 +590,16 @@ GuideAssistant.prototype.goGuideDetails = function(event) {
 	this.newStartTime = event.item.startTime.substring(0,16)+":59";
 	
 	var nowDate = new Date();
+	var nowDatePlus15 = new Date();
+	var nowDateMinus15 = new Date();
+	
+	nowDatePlus15.setTime(nowDatePlus15.getTime() + 900000);
+	nowDateMinus15.setTime(nowDateMinus15.getTime() - 900000);
+	
 	var nowDateISO = dateJSToISO(nowDate);
+	var nowDatePlus15ISO = dateJSToISO(nowDatePlus15);
+	var nowDateMinus15ISO = dateJSToISO(nowDateMinus15);
+	
 	
 	this.channelList = updateChannelLastUpdate(this.channelList, this.newChannid, nowDateISO);
 	
@@ -603,6 +614,22 @@ GuideAssistant.prototype.goGuideDetails = function(event) {
 	if((event.item.startTime <  nowDateISO) && (event.item.endTime >  nowDateISO)) {
 		popupItems = [
 			{label: 'Play on '+WebMyth.prefsCookieObject.currentFrontend, command: 'do-playNow'},
+			{label: 'Details', command: 'do-pickDetails'},
+			{label: 'Setup Recording', command: 'do-pickSetupRecording'},
+			{label: 'Guide: Channel '+this.newChanNum, command: 'do-pickChannel'},
+			{label: 'Guide: '+event.item.startTime.replace("T"," ").substring(0,16), command: 'do-pickTime'}
+		]
+	} else if((event.item.startTime <  nowDatePlus15ISO) && (event.item.endTime >  nowDateISO)) {
+		popupItems = [
+			{label: 'Play (soon) on '+WebMyth.prefsCookieObject.currentFrontend, command: 'do-playNow'},
+			{label: 'Details', command: 'do-pickDetails'},
+			{label: 'Setup Recording', command: 'do-pickSetupRecording'},
+			{label: 'Guide: Channel '+this.newChanNum, command: 'do-pickChannel'},
+			{label: 'Guide: '+event.item.startTime.replace("T"," ").substring(0,16), command: 'do-pickTime'}
+		]
+	} else if((event.item.startTime <  nowDateISO) && (event.item.endTime >  nowDateMinus15ISO)) {
+		popupItems = [
+			{label: 'Play (recent) on '+WebMyth.prefsCookieObject.currentFrontend, command: 'do-playNow'},
 			{label: 'Details', command: 'do-pickDetails'},
 			{label: 'Setup Recording', command: 'do-pickSetupRecording'},
 			{label: 'Guide: Channel '+this.newChanNum, command: 'do-pickChannel'},
@@ -705,6 +732,8 @@ GuideAssistant.prototype.popupHandler = function(event) {
 			
 			this.timeObjectPlus30 = dateObjectAdd30Min(this.timeObject);
 			this.timeISOPlus30 = dateObjectToISO(this.timeObjectPlus30);
+			
+			this.timeObjectPlus30 = dateObjectSubtract30Min(this.timeObject);
 			
 			this.selectedTime();
 					
@@ -1039,7 +1068,7 @@ GuideAssistant.prototype.setMyData = function(propertyValue, model) {
 	guideDetailsText += '<div class="guide-left-program-earlier">';
 	
 	//If program started earlier
-	if((model.startTime < this.timeISO.substring(0,16)) && (this.layoutStyle == 'time')) {
+	if((model.startTime < this.timeISO.substring(0,16)) && ((this.layoutStyle == 'time')||(this.layoutStyle == 'now'))) {
 		guideDetailsText += '<div class="arrow"><</div>';
 	} 
 	
@@ -1067,7 +1096,7 @@ GuideAssistant.prototype.setMyData = function(propertyValue, model) {
 	guideDetailsText += '</div>';
 	
 	//If program goes later
-	if((model.endTime > this.timeISOPlus30) && (this.layoutStyle == 'time')) {
+	if((model.endTime > this.timeISOPlus30) && ((this.layoutStyle == 'time')||(this.layoutStyle == 'now'))) {
 		guideDetailsText += '<div class="guide-right-list-later"><div class="arrow">></div></div>';
 	} 
 	

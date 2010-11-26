@@ -111,9 +111,10 @@ function defaultCookie() {
 		showMusic: true,
 		currentVideosSort: 'title-asc',
 		currentVideosGroup: 'all',
-		currentMusicSort: 'name-asc',
+		currentMusicSort: 'artist-asc',
 		currentUpcomingGroup: 'Upcoming',
-		forceScriptScreenshots: false
+		forceScriptScreenshots: false,
+		showVideoImages: true
 		
 	};
 	

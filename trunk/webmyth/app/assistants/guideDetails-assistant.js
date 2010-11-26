@@ -91,8 +91,18 @@ GuideDetailsAssistant.prototype.setup = function() {
 GuideDetailsAssistant.prototype.activate = function(event) {
 	
 	var nowDate = new Date();
+	var nowDatePlus15 = new Date();
+	var nowDateMinus15 = new Date();
 	
-	if(((this.guideObject.startTime) <  dateJSToISO(nowDate)) && ((this.guideObject.endTime) >  dateJSToISO(nowDate))) {
+	nowDatePlus15.setTime(nowDatePlus15.getTime() + 900000);
+	nowDateMinus15.setTime(nowDateMinus15.getTime() - 900000);
+	
+	var nowDateISO = dateJSToISO(nowDate);
+	var nowDatePlus15ISO = dateJSToISO(nowDatePlus15);
+	var nowDateMinus15ISO = dateJSToISO(nowDateMinus15);
+	
+	
+	if(((this.guideObject.startTime) <  nowDatePlus15ISO) && ((this.guideObject.endTime) >  nowDateMinus15ISO)) {
 		
 		//Update list of current hosts
 		var hostsList = [];

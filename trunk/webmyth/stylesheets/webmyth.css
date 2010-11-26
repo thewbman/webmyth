@@ -28,6 +28,10 @@
 	margin: 0px 4px 0px 12px;
 }
 
+body.palm-dark {
+   background: url('../images/gradient4.png') center center;
+}
+
 /* 
  * Remote scenes
  */
@@ -793,6 +797,18 @@
 	height: 100px
 }
 
+.videos-scene .videos-left-list-image {
+	height: 100px;
+	width: 21%;
+	float: left;
+}
+
+.videos-scene .videos-right-list-text {
+	height: 100px;
+	width: 79%;
+	float: left;
+}
+
 .videos-scene .videos-list-item .videos-list-title  {
   padding: 3px 14px 0px 0px;
   margin: 0px;
@@ -804,6 +820,20 @@
   padding: 0px;
   margin: 0px 8px;
   line-height: 16px;
+}
+
+.videos-scene .videos-coverfile-small {
+	padding: 3px 6px 5px 6px;
+	height: 90px;
+	text-align: center;
+	border: 0px;
+}
+
+.videosDetails-scene .videos-coverfile {
+	width: 200px; 
+	text-align: center;
+	padding: 2px 60px;
+	border: 0px; 
 }
 
 /*
@@ -954,7 +984,7 @@
 }
 
 .faqs-scene .help-bold a{
-	color: orange;
+	color: red;
 	font-weight: bold;
 }
 

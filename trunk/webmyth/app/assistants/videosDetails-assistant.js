@@ -72,9 +72,25 @@ VideosDetailsAssistant.prototype.setup = function() {
 	$('filename-title').innerText = this.videosObject.filename;
 	//$('onlyFilename-title').innerText = this.videosObject.onlyFilename;
 	$('coverfile-title').innerText = this.videosObject.coverfile;
-	$('screenshot-title').innerText = this.videosObject.screenshot;
-	$('banner-title').innerText = this.videosObject.banner;
-	$('fanart-title').innerText = this.videosObject.fanart;
+	//$('screenshot-title').innerText = this.videosObject.screenshot;
+	//$('banner-title').innerText = this.videosObject.banner;
+	//$('fanart-title').innerText = this.videosObject.fanart;
+	
+	
+
+	
+	//if(WebMyth.prefsCookieObject.showVideoImages) {};
+	
+		var imageBase = "http://"+WebMyth.prefsCookieObject.webserverUsername + ":" + WebMyth.prefsCookieObject.webserverPassword+"@";
+		imageBase += WebMyth.prefsCookieObject.webserverName+"/mythweb/pl/";
+	
+		$('videos-coverfile').innerHTML = '<img id="coverfile-img" class="videos-coverfile" src="'+imageBase+'/coverart/'+this.videosObject.coverfile+'" />';
+		//$('screenshot-img').src = imageBase+"/screenshot/"+this.videosObject.screenshot;
+		//$('banner-img').src = imageBase+"/banner/"+this.videosObject.banner;
+		//$('fanart-img').src = imageBase+"/fanart/"+this.videosObject.fanart;
+
+	
+	
 	
 	//$('channum-title').innerText = this.videosObject.chanNum;
 	//$('recstartts-title').innerText = this.videosObject.recStartTs.replace("T"," ");
@@ -331,8 +347,8 @@ VideosDetailsAssistant.prototype.playOnHost = function(host) {
 	
 	var cmd = "file ";
 	
-	if(this.videosObject.filename == this.videosObject.level1) {
-		//Try using a myth:// URL when not using subdirectories
+	if((this.videosObject.filename == this.videosObject.level1) && false) {
+		//Try using a myth:// URL when not using subdirectories - FAILING IN 0.24 - using full filename for all
 		cmd += "myth://"+this.videosObject.host+"/"+this.videosObject.filename+"'";
 	} else {
 		//Use a direct file reference as a backup
