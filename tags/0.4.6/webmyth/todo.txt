@@ -1,0 +1,24 @@
+To Do - planned new features and updates:
+ 
+//Future
+ - open remote in new card option
+ - handle music playlists
+ - fix download with :
+ - cleanup schedule recording scene
+ - BUG: open guide to no matching (past), 'now' doesn't work, persistant
+ - add guide search
+ 
+ 
+//Long term
+ - plugin for remote
+ - progress/volume scrobble on remote ?
+ - demo video(s)
+ - fade command menus (looks bad with palm-dark)
+ - add support for pin on backend ?
+ - search recording rules
+ - new app icons/theme
+ - fix pixelated icon
+ - non-email feedback?
+ - build video file tree?
+ - look into menu panel (style matters)
+
