@@ -1,0 +1,29 @@
+To Do - planned new features and updates:
+ 
+//Future
+ - open remote in new card option
+ - handle music playlists
+ - fix download with :
+ - cleanup schedule recording scene
+ - BUG: open guide to no matching (past), 'now' doesn't work, persistant
+ - add backend log
+ - sort asc/desc submenus
+ - make dialogs palm-dark
+ - enter submits search
+ 
+ 
+//Long term
+ - plugin for remote
+ - progress/volume scrobble on remote ?
+ - demo video(s)
+ - add support for pin on backend ?
+ - search recording rules
+ - new app icons/theme
+ - fix pixelated icon
+ - non-email feedback?
+ - build video file tree?
+ - look into menu panel (style matters)
+ - language translation support
+ - screenshots with gradient
+ 
+
