@@ -19,13 +19,11 @@
  */
 
 
-function GuideDetailsAssistant(detailsObject) {
-	/* this is the creator function for your scene assistant object. It will be passed all the 
-	   additional parameters (after the scene name) that were passed to pushScene. The reference
-	   to the scene controller (this.controller) has not be established yet, so any initialization
-	   that needs the scene controller should be done in the setup function below. */
+function GuideDetailsAssistant(detailsObject, forceRefresh) {
 	   
 	   this.guideObject = detailsObject;
+	   
+	   this.forceRefresh = forceRefresh;
 	   
 	   this.host = WebMyth.prefsCookieObject.currentFrontend;
 }
@@ -39,23 +37,33 @@ GuideDetailsAssistant.prototype.setup = function() {
 
 	// Menu grouping at bottom of scene
     this.cmdMenuModel = { label: $L('Play Menu'),
-                            items: [{ label: $L('Setup'), command: 'go-setup--', width: 90 },{ icon: 'refresh', command: 'go-refresh' },{label: $L('Web'), submenu:'web-menu', width: 90}]};
+                            items: [{ label: $L('Setup'), command: 'go-setup--', width: 90 },
+									{ icon: 'refresh', command: 'go-refresh' },
+									{label: $L('More'), submenu:'more-menu', width: 90}
+								]};
 							
  
 	this.hostsMenuModel = { label: $L('Hosts'), items: []};
  
-	this.webMenuModel = { label: $L('WebMenu'), items: [
+	this.moreMenuModel = { label: $L('moreMenu'), items: [
+		{"label": $L('Web'), items:[
 			{"label": $L('Wikipedia'), "command": "go-web-----Wikipedia"},
 			{"label": $L('themoviedb'), "command": "go-web-----themoviedb"},
 			{"label": $L('IMDB'), "command": "go-web-----IMDB"},
 			{"label": $L('TheTVDB'), "command": "go-web-----TheTVDB"},
 			{"label": $L('TV.com'), "command": "go-web-----TV.com"},
 			{"label": $L('Google'), "command": "go-web-----Google"},
-			]};
+			]},	
+		{"label": $L('MythWeb'), "command": "go-mythweb"},	
+		{"label": $L('Guide'), items:[
+			{"label": $L('Time'), "command": "go-guide---time"},
+			{"label": $L('Title Search'), "command": "go-guide---search"}
+		]}
+	]};
 
  
 	this.controller.setupWidget(Mojo.Menu.commandMenu, {menuClass: 'no-fade'}, this.cmdMenuModel);
-	this.controller.setupWidget('web-menu', '', this.webMenuModel);
+	this.controller.setupWidget('more-menu', '', this.moreMenuModel);
 	
 	
 	var channelIconUrl = "http://"+WebMyth.prefsCookieObject.masterBackendIp+":6544/Myth/GetChannelIcon?ChanId=";
@@ -139,6 +147,14 @@ GuideDetailsAssistant.prototype.activate = function(event) {
 	}
 	
 	
+
+	if(this.forceRefresh){
+		this.forceRefresh = false;
+		
+		this.refreshData();
+	}
+	
+	
 	//Keypress event
 	Mojo.Event.listen(this.controller.sceneElement, Mojo.Event.keyup, this.handleKey.bind(this));
 	
@@ -170,6 +186,12 @@ GuideDetailsAssistant.prototype.handleCommand = function(event) {
        break;
       case 'go-web----':
 		this.openWeb(mySelection);
+       break;
+      case 'go-mythweb':
+		this.openMythweb();
+       break;
+      case 'go-guide--':
+		this.openGuide(mySelection);
        break;
       case 'go-refresh':
 		this.refreshData();
@@ -220,12 +242,27 @@ GuideDetailsAssistant.prototype.openSetup = function() {
 
 	Mojo.Log.error("opening setup");
 	
-	/*
+	Mojo.Controller.stageController.pushScene("setupRecording", this.guideObject);
+
+};
+
+GuideDetailsAssistant.prototype.openGuide = function(guideType) {
+
+	Mojo.Log.error("Opening in guide "+guideType);
+	
+	if(guideType == "time"){
+		Mojo.Controller.stageController.pushScene("guide", this.guideObject.startTime.replace(" ","T").substring(0,18)+01);
+	} else if(guideType == "search"){
+		Mojo.Controller.stageController.pushScene("search", this.guideObject.title);
+	}
+ 
+};
+
+GuideDetailsAssistant.prototype.openMythweb = function() {
+
 			
 	var dateJS = new Date(isoToJS(this.guideObject.startTime));
 	var dateUTC = dateJS.getTime()/1000;				//don't need 59 second offset?
-			
-	Mojo.Log.info("Selected time is: '%j'", dateUTC);
 			
 	var mythwebUrl = "http://";
 	mythwebUrl += WebMyth.prefsCookieObject.webserverName;
@@ -235,9 +272,7 @@ GuideDetailsAssistant.prototype.openSetup = function() {
 	//mythwebUrl += "?RESET_TMPL=true";
 			
 	Mojo.Log.info("mythweb url is "+mythwebUrl);
-			
-	//Mojo.Controller.stageController.pushScene("webview", mythwebUrl, "Setup Recording");
-			
+					
 	
 	this.controller.serviceRequest("palm://com.palm.applicationManager", {
 		method: "open",
@@ -248,10 +283,7 @@ GuideDetailsAssistant.prototype.openSetup = function() {
 			}
 		}
 	}); 
-	*/
 	
-	Mojo.Controller.stageController.pushScene("setupRecording", this.guideObject);
-
 };
 
 

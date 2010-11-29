@@ -373,13 +373,17 @@ GuideAssistant.prototype.handleCommand = function(event) {
 			  break;
 			case 'do-selectTime':
 			
-			
 				Mojo.Log.info("selected time");
 				this.timePicker();
 					
 			  break;
-			case 'do-selectChannel':
+			case 'do-selectSearch':
 			
+				Mojo.Log.info("selected search");
+				Mojo.Controller.stageController.pushScene("search");
+					
+			  break;
+			case 'do-selectChannel':
 			
 				Mojo.Log.info("selected channel");
 				this.channelPicker();
@@ -562,6 +566,7 @@ GuideAssistant.prototype.updateViewMenu = function() {
 	this.viewMenuModel.items = [ 
 		{label: '- Now -', command: 'do-now'},
 		{label: 'Channel', command: 'do-selectChannel'} ,
+		{label: 'Search', command: 'do-selectSearch'} ,
 		{label: 'Time', command: 'do-selectTime'} 
 	] ;
 	
@@ -575,7 +580,7 @@ GuideAssistant.prototype.updateViewMenu = function() {
 			break;
 			case 'time':
 				this.viewMenuModel.items[0].label = 'Now';
-				this.viewMenuModel.items[2].label = '- Time -';
+				this.viewMenuModel.items[3].label = '- Time -';
 			break;
 		}
 	
@@ -588,6 +593,7 @@ GuideAssistant.prototype.goGuideDetails = function(event) {
 	this.newChannid = event.item.chanId;
 	this.newChanNum = event.item.chanNum;
 	this.newStartTime = event.item.startTime.substring(0,16)+":59";
+	this.newTitle = event.item.title;
 	
 	var nowDate = new Date();
 	var nowDatePlus15 = new Date();
@@ -617,7 +623,8 @@ GuideAssistant.prototype.goGuideDetails = function(event) {
 			{label: 'Details', command: 'do-pickDetails'},
 			{label: 'Setup Recording', command: 'do-pickSetupRecording'},
 			{label: 'Guide: Channel '+this.newChanNum, command: 'do-pickChannel'},
-			{label: 'Guide: '+event.item.startTime.replace("T"," ").substring(0,16), command: 'do-pickTime'}
+			{label: 'Guide: '+event.item.startTime.replace("T"," ").substring(0,16), command: 'do-pickTime'},
+			{label: 'Search: '+event.item.title, command: 'do-pickSearch'}
 		]
 	} else if((event.item.startTime <  nowDatePlus15ISO) && (event.item.endTime >  nowDateISO)) {
 		popupItems = [
@@ -625,7 +632,8 @@ GuideAssistant.prototype.goGuideDetails = function(event) {
 			{label: 'Details', command: 'do-pickDetails'},
 			{label: 'Setup Recording', command: 'do-pickSetupRecording'},
 			{label: 'Guide: Channel '+this.newChanNum, command: 'do-pickChannel'},
-			{label: 'Guide: '+event.item.startTime.replace("T"," ").substring(0,16), command: 'do-pickTime'}
+			{label: 'Guide: '+event.item.startTime.replace("T"," ").substring(0,16), command: 'do-pickTime'},
+			{label: 'Search: '+event.item.title, command: 'do-pickSearch'}
 		]
 	} else if((event.item.startTime <  nowDateISO) && (event.item.endTime >  nowDateMinus15ISO)) {
 		popupItems = [
@@ -633,14 +641,16 @@ GuideAssistant.prototype.goGuideDetails = function(event) {
 			{label: 'Details', command: 'do-pickDetails'},
 			{label: 'Setup Recording', command: 'do-pickSetupRecording'},
 			{label: 'Guide: Channel '+this.newChanNum, command: 'do-pickChannel'},
-			{label: 'Guide: '+event.item.startTime.replace("T"," ").substring(0,16), command: 'do-pickTime'}
+			{label: 'Guide: '+event.item.startTime.replace("T"," ").substring(0,16), command: 'do-pickTime'},
+			{label: 'Search: '+event.item.title, command: 'do-pickSearch'}
 		]
 	} else {
 		popupItems = [
 			{label: 'Details', command: 'do-pickDetails'},
 			{label: 'Setup Recording', command: 'do-pickSetupRecording'},
 			{label: 'Guide: Channel '+this.newChanNum, command: 'do-pickChannel'},
-			{label: 'Guide: '+event.item.startTime.replace("T"," ").substring(0,16), command: 'do-pickTime'}
+			{label: 'Guide: '+event.item.startTime.replace("T"," ").substring(0,16), command: 'do-pickTime'},
+			{label: 'Search: '+event.item.title, command: 'do-pickSearch'}
 		]
 	}
 	
@@ -676,7 +686,13 @@ GuideAssistant.prototype.popupHandler = function(event) {
 			//Mojo.Log.info("Selected object is: '%j'", detailsObject);
 			
 			//Open guideDetails communication scene
-			Mojo.Controller.stageController.pushScene("guideDetails", detailsObject);
+			Mojo.Controller.stageController.pushScene("guideDetails", detailsObject, false);
+			
+		break;
+		case 'do-pickSearch':
+			//Mojo.Log.info("searching by title");
+			
+			Mojo.Controller.stageController.pushScene("search", this.newTitle);
 			
 		break;
 		case 'do-pickSetupRecording':

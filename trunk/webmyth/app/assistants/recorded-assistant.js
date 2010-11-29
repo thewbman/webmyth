@@ -282,7 +282,6 @@ RecordedAssistant.prototype.getRecorded = function() {
 RecordedAssistant.prototype.sortChanged = function(newSort) {
 	//Save selection back to cookie
 	WebMyth.prefsCookieObject.currentRecSort = newSort;
-	//WebMyth.prefsCookie.put(WebMyth.prefsCookieObject);   //done immediately after in recgroupChanged
 	
 	//Mojo.Log.info("The current sorting has changed to "+WebMyth.prefsCookieObject.currentRecSort);
 	
@@ -317,7 +316,6 @@ RecordedAssistant.prototype.sortChanged = function(newSort) {
 	
 	this.updateSortMenu();
 	
-   
 };
 
 RecordedAssistant.prototype.recgroupChanged = function(newRecgroup) {
@@ -548,7 +546,6 @@ RecordedAssistant.prototype.readRecordedXMLSuccess = function(response) {
 	var topNode, topNodesCount, topSingleNode, programsNode, programsNode;
 	var singleProgramNode, singleProgramJson;
 	var singleProgramChildNode;
-	var Count, AsOf, Version, ProtoVer;
 	
 	var s = {};		//individual JSON for each program parsing
 	
@@ -562,17 +559,8 @@ RecordedAssistant.prototype.readRecordedXMLSuccess = function(response) {
 	for(var i = 0; i < topNodesCount; i++) {
 		topSingleNode = topNode.childNodes[i];
 		switch(topSingleNode.nodeName) {
-			case 'Count':
-				Count = topSingleNode.childNodes[0].nodeValue;
-				break;
-			case 'AsOf':
-				AsOf = topSingleNode.childNodes[0].nodeValue;
-				break;
-			case 'Version':
-				Version = topSingleNode.childNodes[0].nodeValue;
-				break;
 			case 'ProtoVer':
-				ProtoVer = topSingleNode.childNodes[0].nodeValue;
+				WebMyth.prefsCookieObject.protoVer = topSingleNode.childNodes[0].nodeValue;
 				break;
 			case 'Recorded':
 				//Mojo.Log.info('Starting to parse Recorded');

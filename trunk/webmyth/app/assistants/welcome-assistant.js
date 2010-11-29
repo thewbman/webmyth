@@ -442,6 +442,11 @@ WelcomeAssistant.prototype.goGuide = function(event) {
 	Mojo.Controller.stageController.pushScene("guide");
 };
 
+WelcomeAssistant.prototype.goSearch = function(event) {
+	//Start upcoming scene
+	Mojo.Controller.stageController.pushScene("search");
+};
+
 WelcomeAssistant.prototype.goVideos = function(event) {
 	//Start upcoming scene
 	Mojo.Controller.stageController.pushScene("videos");

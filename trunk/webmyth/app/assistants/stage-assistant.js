@@ -47,6 +47,7 @@ WebMyth.appMenuModel = {
 			{label: "Tips", command: 'do-helpTips'},
 			{label: "FAQs", command: 'do-helpFAQs'},
 			{label: "Changelog", command: 'do-helpChangelog'},
+			{label: "Bulletin", command: 'do-helpBulletin'},
 			{label: "Email Developer", command: 'do-helpEmail'}
 			]
 		}
@@ -306,6 +307,15 @@ StageAssistant.prototype.handleCommand = function(event) {
 			
        break;
 	   
+	  case 'do-helpBulletin':
+			//Metrix bulletin
+			
+			Mojo.Log.info("opening metrix bulletin");
+			
+			WebMyth.Metrix.checkBulletinBoard(currentScene, 10, true);
+			
+       break;
+	   
 	  case 'do-helpEmail':
 			//Email
 			
@@ -364,25 +374,23 @@ StageAssistant.prototype.handleCommand = function(event) {
 			}
 	   break;
 	   
-	  case 'go-remotePrevious':
+	  case 'go-remotePrevious2':
 			var previousRemoteScene = getPreviousRemote(WebMyth.remoteCookieObject, WebMyth.prefsCookieObject.currentRemoteScene);
 			Mojo.Controller.stageController.swapScene({name: previousRemoteScene, disableSceneScroller: true});
 	   break;
 	   
-	  case 'go-remoteNext':
-			//Mojo.Log.error("current scene is " + WebMyth.prefsCookieObject.currentRemoteScene);
+	  case 'go-remoteNext2':
 			var nextRemoteScene = getNextRemote(WebMyth.remoteCookieObject, WebMyth.prefsCookieObject.currentRemoteScene);
-			//Mojo.Log.error("next scene is " + nextRemoteScene);
 			Mojo.Controller.stageController.swapScene({name: nextRemoteScene, disableSceneScroller: true});
 	   break;
 	   
-	  case 'do-remoteHeaderAction':
+	  case 'do-remoteHeaderAction2':
 			switch(WebMyth.prefsCookieObject.remoteHeaderAction) {
 				case 'Pause':
-					currentScene.assistant.sendTelnetKey('p');
+					WebMyth.sendKey('p');
 				break;
 				case 'Mute':
-					currentScene.assistant.sendTelnetKey('f9');
+					WebMyth.sendKey('f9');
 				break;
 			}
 	   break;

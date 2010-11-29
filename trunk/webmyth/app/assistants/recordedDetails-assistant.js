@@ -68,7 +68,10 @@ RecordedDetailsAssistant.prototype.setup = function() {
 			]},	
 			{"label": $L('MythWeb'), "command": "go-mythweb"},	
 			{"label": $L('Setup schedule'), "command": "go-setup"},	
-			{"label": $L('Guide'), "command": "go-guide"}
+			{"label": $L('Guide'), items:[
+				{"label": $L('Time'), "command": "go-guid-time"},
+				{"label": $L('Title Search'), "command": "go-guid-search"}
+			]}
 		]};
 			
 	this.controller.setupWidget(Mojo.Menu.commandMenu, {menuClass: 'no-fade'}, this.cmdMenuModel);
@@ -241,7 +244,7 @@ RecordedDetailsAssistant.prototype.handleCommand = function(event) {
 		this.openMythweb();
        break;
       case 'go-guid':
-		this.openGuide();
+		this.openGuide(mySelection);
        break;
       case 'go-setu':
 		this.openSetup();
@@ -296,12 +299,16 @@ RecordedDetailsAssistant.prototype.openSetup = function() {
  
 };
 
-RecordedDetailsAssistant.prototype.openGuide = function() {
+RecordedDetailsAssistant.prototype.openGuide = function(guideType) {
 
-	//Mojo.Log.error("Opening in guide "+this.starttime.replace(" ","T"));
+	Mojo.Log.error("Opening in guide "+guideType);
 	
-	Mojo.Controller.stageController.pushScene("guide", this.recordedObject.startTime.replace(" ","T").substring(0,18)+01);
- 
+	if(guideType == "time"){
+		Mojo.Controller.stageController.pushScene("guide", this.recordedObject.startTime.replace(" ","T").substring(0,18)+01);
+	} else if(guideType == "search"){
+		Mojo.Controller.stageController.pushScene("search", this.recordedObject.title);
+	}
+	
 };
 
 RecordedDetailsAssistant.prototype.openMythweb = function() {

@@ -62,7 +62,10 @@ UpcomingDetailsXMLAssistant.prototype.setup = function() {
 			{"label": $L('Google'), "command": "go-web--Google"},
 			]},	
 		{"label": $L('MythWeb'), "command": "go-mythweb"},	
-		{"label": $L('Guide'), "command": "go-guide"}
+		{"label": $L('Guide'), items:[
+			{"label": $L('Time'), "command": "go-guid-time"},
+			{"label": $L('Title Search'), "command": "go-guid-search"}
+		]}
 	]};
 
  
@@ -97,7 +100,7 @@ UpcomingDetailsXMLAssistant.prototype.handleCommand = function(event) {
 
     switch(myCommand) {
       case 'go-guid':
-		this.openGuide();
+		this.openGuide(mySelection);
        break;
       case 'go-myth':
 		this.openMythweb();
@@ -134,11 +137,17 @@ UpcomingDetailsXMLAssistant.prototype.handleCommand = function(event) {
 
 
 
-UpcomingDetailsXMLAssistant.prototype.openGuide = function() {
+UpcomingDetailsXMLAssistant.prototype.openGuide = function(guideType) {
 
 	//Mojo.Log.error("Opening in guide "+this.starttime.replace(" ","T"));
 	
-	Mojo.Controller.stageController.pushScene("guide", this.starttime.replace(" ","T").substring(0,18)+01);
+	Mojo.Log.error("Opening in guide "+guideType);
+	
+	if(guideType == "time"){
+		Mojo.Controller.stageController.pushScene("guide", this.upcomingObject.startTime.replace(" ","T").substring(0,18)+01);
+	} else if(guideType == "search"){
+		Mojo.Controller.stageController.pushScene("search", this.upcomingObject.title);
+	}
  
 };
 
