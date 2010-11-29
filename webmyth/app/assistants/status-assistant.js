@@ -226,7 +226,7 @@ StatusAssistant.prototype.handleCommand = function(event) {
 
 StatusAssistant.prototype.handleKey = function(event) {
 
-	Mojo.Log.info("handleKey %o, %o", event.originalEvent.metaKey, event.originalEvent.keyCode);
+	//Mojo.Log.info("handleKey %o, %o", event.originalEvent.metaKey, event.originalEvent.keyCode);
 	
 	if(event.originalEvent.metaKey) {
 		switch(event.originalEvent.keyCode) {
@@ -263,7 +263,7 @@ StatusAssistant.prototype.getStatus = function() {
 	
 	var requestUrl = "http://"+WebMyth.prefsCookieObject.masterBackendIp+":6544/xml";
 	
-	Mojo.Log.info("Status request URL is "+requestUrl);
+	//Mojo.Log.info("Status request URL is "+requestUrl);
 	
     try {
         var request = new Ajax.Request(requestUrl,{
@@ -443,7 +443,7 @@ StatusAssistant.prototype.readStatusSuccess = function(response) {
 	var jobqueueNode=xmlobject.getElementsByTagName("JobQueue")[0];
 	var jobqueueCount = jobqueueNode.getAttributeNode("count").nodeValue;
 	//Mojo.Log.info("Count of jobqueue is "+jobqueueCount);
-	Mojo.Log.info("Count of child jobqueue nodes is "+jobqueueNode.childNodes.length);
+	//Mojo.Log.info("Count of child jobqueue nodes is "+jobqueueNode.childNodes.length);
 	for(var i = 0; i < jobqueueNode.childNodes.length; i++) {
 		//Mojo.Log.info("jobqueue nodeName is "+jobqueueNode.childNodes[i].nodeName);
 		singleJobqueueNode = jobqueueNode.childNodes[i];
@@ -473,7 +473,7 @@ StatusAssistant.prototype.readStatusSuccess = function(response) {
 		this.controller.modelChanged(this.jobqueueListModel);
 		
 	}
-	Mojo.Log.info("Full jobqueue is %j", this.jobqueueList);
+	//Mojo.Log.info("Full jobqueue is %j", this.jobqueueList);
 	
 	
 	//Storage
@@ -495,7 +495,7 @@ StatusAssistant.prototype.readStatusSuccess = function(response) {
 			this.storageList.push(singleStorageJson);
 		}
 	} 
-	Mojo.Log.info("Full storagelist is %j", this.storageList);
+	//Mojo.Log.info("Full storagelist is %j", this.storageList);
 	this.controller.modelChanged(this.storageListModel);
 	
 	
@@ -697,7 +697,7 @@ StatusAssistant.prototype.setJobqueueData = function(propertyValue, model)  {
 	if(model.comments) myDataModel += '<div class="title truncating-text right italics">'+model.comments+'</div>';
 	
 	if(model.noJobs) {
-		model.myJobqueueData = '<div class="title truncating-text left">No recent or upcoming jobs</div>';
+		model.myJobqueueData = '<div class="title truncating-text left">No recent or queued jobs</div>';
 	} else {
 		model.myJobqueueData = myDataModel;
 	}
@@ -749,7 +749,7 @@ StatusAssistant.prototype.setEncodersData = function(propertyValue, model)  {
 	
 	if(model.title) {
 		myDataModel += '<div class="palm-info-text">'+model.title+': '+model.subTitle+'<br />';
-		myDataModel += 'Will finish recording at '+model.endTime+'</div>';
+		myDataModel += 'Program finishes at '+model.endTime+'</div>';
 	}
 	
 	myDataModel += '</div>';

@@ -114,7 +114,8 @@ function defaultCookie() {
 		currentMusicSort: 'artist-asc',
 		currentUpcomingGroup: 'Upcoming',
 		forceScriptScreenshots: false,
-		showVideoImages: true
+		showVideoImages: true,
+		currentSearchSort: 'date-asc'
 		
 	};
 	
@@ -750,6 +751,27 @@ var cleanJobqueue = function(fullList) {
 		
 		finalList.push(s);
 		
+	}
+	
+	
+	return finalList;
+	
+}
+
+var cleanSearchResults = function(fullList, nowDateISO) {
+
+	finalList = [];
+	
+	var i, s = {};
+	
+	for(i = 0; i < fullList.length; i++) {
+		s = fullList[i];
+		
+		if(s.endTime < nowDateISO) {
+			//Program in past - ignore
+		} else {
+			finalList.push(s);
+		}
 	}
 	
 	
@@ -1595,7 +1617,7 @@ var recStatusDecode = function(recStatusInt) {
 				newStatusText = "Current Recording";
 			break;
 			case 4:		
-				newStatusText = "Don't Record";
+				newStatusText = "Won't Record";
 			break;
 			case 5:		
 				newStatusText = "Earlier Showing";

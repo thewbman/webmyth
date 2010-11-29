@@ -254,9 +254,11 @@ Metrix.prototype.checkBulletinBoard = function(controller,minBulletinVersion, fo
 
 Metrix.prototype.bulletinTimeCheck = function(controller, forceReview, url, response)
 {
+  Mojo.Log.info("inside Metrix check time "+forceReview+url+response);
+  
   var timeUTC = response.utc;
 
-  if(response.utc > (this.lastBulletinTime + 86400) || forceReview === true)
+  if((response.utc > (this.lastBulletinTime + 86400)) || (forceReview == true))
   {
     var requestBulletin = this.AjaxRequest.request(url, {
                                                     method: "get",
@@ -270,6 +272,8 @@ Metrix.prototype.bulletinTimeCheck = function(controller, forceReview, url, resp
   
 Metrix.prototype.checkBulletinSuccess = function(timeUTC,controller, forceReview, transport)
 {
+  Mojo.Log.info("inside Metrix bulletin success");
+  
   var version = transport.responseXML.getElementsByTagName("version").item(0).textContent;
   var msgArray = [];
   
@@ -291,6 +295,9 @@ Metrix.prototype.checkBulletinSuccess = function(timeUTC,controller, forceReview
 
 Metrix.prototype.checkBulletinFailure = function(transport)
 {
+
+	Mojo.Log.error("failed to get bulletin");
+
 };
 
 Metrix.prototype.customCounts = function(valueGroup,valueName,valueData)

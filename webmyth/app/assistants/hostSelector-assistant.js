@@ -161,10 +161,6 @@ HostSelectorAssistant.prototype.chooseList = function(event) {
 	WebMyth.prefsCookieObject.currentRemotePort = event.item.port;
 	WebMyth.prefsCookie.put(WebMyth.prefsCookieObject);
 	 
-	//if(Mojo.Controller.appInfo.usePlugin){
-	//	$('telnet_plugin_id').closeSocket();
-	//	$('telnet_plugin_id').openSocket(WebMyth.prefsCookieObject.currentFrontendAddress, WebMyth.prefsCookieObject.currentRemotePort);
-	//}
 	
 	this.startCommunication();
 	
@@ -180,98 +176,30 @@ HostSelectorAssistant.prototype.startCommunication = function(event) {
 	
 };
 
-
-
-
-
-HostSelectorAssistant.prototype.sendTelnet = function(value){
-	var reply;
+HostSelectorAssistant.prototype.startCommunication2 = function(event) {
 	
-	if (Mojo.appInfo.skipPDK == "true") {
-		//Mojo.Controller.getAppController().showBanner("Sending command to telnet", {source: 'notification'});
-		
-		
-		//Using cgi-bin on server
-		var cmdvalue = encodeURIComponent(value);
-		var requestURL="http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webserverRemoteFile+"?host="+WebMyth.prefsCookieObject.currentFrontend+"&cmd="+cmdvalue;
+	Mojo.Log.info("Starting communication ...");
 	
-		var request = new Ajax.Request(requestURL, {
-			method: 'get',
-			onSuccess: function(transport){
-				reply = transport.responseText;
-				if (reply.substring(0,5) == "ERROR") {
-					Mojo.Log.error("Error in response: '%s'", reply.substring(6));
-					Mojo.Controller.getAppController().showBanner(reply, {source: 'notification'});
-				} else {
-					Mojo.Log.info("Success AJAX: '%s'", reply);
-				}
-			},
-			onFailure: function() {
-				Mojo.Log.error("Failed AJAX: '%s'", requestURL);
-				Mojo.Controller.getAppController().showBanner("ERROR - check remote.py scipt", {source: 'notification'});
-			}
-		});
+	remoteStage = Mojo.Controller.getAppController().getStageController(WebMyth.prefsCookieObject.currentRemoteScene);
+	
+	
+		if (remoteStage) {
+			// Dashboard stage is already open
+			Mojo.Log.info("DELEGATING TO SCENE ASST");
+			remoteStage.popScenesTo();
+			remoteStage.pushScene(WebMyth.prefsCookieObject.currentRemoteScene);
+			remoteStage.activate();
+		} else {
+			//Mojo.Log.info("No dashboard Stage found.");
+			pushCard = function (stageController) {
+				stageController.pushScene(WebMyth.prefsCookieObject.currentRemoteScene);
+			};
+			Mojo.Controller.getAppController().createStageWithCallback({name: WebMyth.prefsCookieObject.currentRemoteScene, lightweight: true },
+				pushCard, "card");
+		}	
 		
-		
-		
-	}
-	else {
-		$('telnetPlug').SendTelnet(value);
-	}
 };
 
-HostSelectorAssistant.prototype.sendKey = function(value){
-		
-		var cmdvalue = encodeURIComponent(value);
-		
-		var requestUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webmythPythonFile;
-		requestUrl += "?op=remote&type=key";
-		requestUrl += "&host="+WebMyth.prefsCookieObject.currentFrontend;
-		requestUrl += "&cmd="+cmdvalue;
-		//var requestURL="http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webserverRemoteFile+"?host="+this.frontendTextModel.value+"&cmd="+cmd;  
-	
-		var request = new Ajax.Request(requestUrl, {
-			method: 'get',
-			onSuccess: function(transport){
-				reply = transport.responseText;
-				if (reply.substring(0,5) == "ERROR") {
-					Mojo.Log.error("ERROR in response: '%s'", reply.substring(6));
-					Mojo.Controller.getAppController().showBanner(reply, {source: 'notification'});
-				} else {
-					Mojo.Log.info("Success AJAX: '%s'", reply);
-				}
-			},
-			onFailure: function() {
-				Mojo.Log.error("Failed AJAX: '%s'", requestURL);
-				Mojo.Controller.getAppController().showBanner("ERROR - check remote.py scipt", {source: 'notification'});
-			}
-		});
-};
 
-HostSelectorAssistant.prototype.sendJump = function(value){
-		
-		var cmdvalue = encodeURIComponent(value);
-		
-		var requestUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webmythPythonFile;
-		requestUrl += "?op=remote&type=jump";
-		requestUrl += "&host="+WebMyth.prefsCookieObject.currentFrontend;
-		requestUrl += "&cmd="+cmdvalue;
-		//var requestURL="http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webserverRemoteFile+"?host="+this.frontendTextModel.value+"&cmd="+cmd;  
-	
-		var request = new Ajax.Request(requestUrl, {
-			method: 'get',
-			onSuccess: function(transport){
-				reply = transport.responseText;
-				if (reply.substring(0,5) == "ERROR") {
-					Mojo.Log.error("ERROR in response: '%s'", reply.substring(6));
-					Mojo.Controller.getAppController().showBanner(reply, {source: 'notification'});
-				} else {
-					Mojo.Log.info("Success AJAX: '%s'", reply);
-				}
-			},
-			onFailure: function() {
-				Mojo.Log.error("Failed AJAX: '%s'", requestURL);
-				Mojo.Controller.getAppController().showBanner("ERROR - check remote.py scipt", {source: 'notification'});
-			}
-		});
-};
+
+

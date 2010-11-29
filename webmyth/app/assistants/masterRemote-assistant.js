@@ -33,15 +33,20 @@ MasterRemoteAssistant.prototype.setup = function() {
 	//App menu widget
 	this.controller.setupWidget(Mojo.Menu.appMenu, WebMyth.appMenuAttr, WebMyth.appMenuModel);
 	
-	//Bottom of remote page command menu widget
-	//this.controller.setupWidget( Mojo.Menu.commandMenu, WebMyth.remoteCommandMenuAttr, WebMyth.remoteCommandMenuModel );
-	//WebMyth.remoteCommandMenuModel.items[1].toggleCmd = 'go-music'; 
-	//this.controller.modelChanged(WebMyth.remoteCommandMenuModel);
 	
-	//View menu widget
-	WebMyth.remoteViewMenuModel.items[0].items[1].label = "Master: " + WebMyth.prefsCookieObject.currentFrontend;  
-	this.controller.setupWidget( Mojo.Menu.viewMenu, WebMyth.remoteViewMenuAttr, WebMyth.remoteViewMenuModel );
-	//this.controller.modelChanged(WebMyth.remoteViewMenuModel);
+	//Setup remote view menu
+	this.remoteViewMenuAttr = { spacerHeight: 0, menuClass: 'no-fade' };	
+	this.remoteViewMenuModel = {
+		visible: true,
+		items: [{
+			items: [
+				{ icon: 'back', command: 'go-remotePrevious'},
+				{ label: "Master: " + WebMyth.prefsCookieObject.currentFrontend, command: 'do-remoteHeaderAction', width: 200 },
+				{ icon: 'forward', command: 'go-remoteNext'}
+			]
+		}]
+	};
+	this.controller.setupWidget( Mojo.Menu.viewMenu, this.remoteViewMenuAttr, this.remoteViewMenuModel ); 
 
 	
 	
@@ -80,34 +85,34 @@ MasterRemoteAssistant.prototype.setup = function() {
 	Mojo.Event.listen(this.controller.sceneElement, Mojo.Event.keyup, this.handleKey.bind(this));
 	
 	//Navigation button events
-	Mojo.Event.listen(this.controller.get("backButton"),Mojo.Event.tap, this.sendCommand.bind(this, this.controller.get("backButton")));
-	Mojo.Event.listen(this.controller.get("upButton"),Mojo.Event.tap, this.sendCommand.bind(this, this.controller.get("upButton")));
-	Mojo.Event.listen(this.controller.get("downButton"),Mojo.Event.tap, this.sendCommand.bind(this, this.controller.get("downButton")));
-	Mojo.Event.listen(this.controller.get("leftButton"),Mojo.Event.tap, this.sendCommand.bind(this, this.controller.get("leftButton")));
-	Mojo.Event.listen(this.controller.get("rightButton"),Mojo.Event.tap, this.sendCommand.bind(this, this.controller.get("rightButton")));
-	Mojo.Event.listen(this.controller.get("selectButton"),Mojo.Event.tap, this.sendCommand.bind(this, this.controller.get("selectButton")));
-	Mojo.Event.listen(this.controller.get("infoButton"),Mojo.Event.tap, this.sendCommand.bind(this, this.controller.get("infoButton")));
-	Mojo.Event.listen(this.controller.get("menuButton"),Mojo.Event.tap, this.sendCommand.bind(this, this.controller.get("menuButton")));
+	Mojo.Event.listen(this.controller.get("backButton"),Mojo.Event.tap, this.sendTelnetKey.bind(this, "escape"));
+	Mojo.Event.listen(this.controller.get("upButton"),Mojo.Event.tap, this.sendTelnetKey.bind(this, "up"));
+	Mojo.Event.listen(this.controller.get("downButton"),Mojo.Event.tap, this.sendTelnetKey.bind(this, "down"));
+	Mojo.Event.listen(this.controller.get("leftButton"),Mojo.Event.tap, this.sendTelnetKey.bind(this, "left"));
+	Mojo.Event.listen(this.controller.get("rightButton"),Mojo.Event.tap, this.sendTelnetKey.bind(this, "right"));
+	Mojo.Event.listen(this.controller.get("selectButton"),Mojo.Event.tap, this.sendTelnetKey.bind(this, "space"));
+	Mojo.Event.listen(this.controller.get("infoButton"),Mojo.Event.tap, this.sendTelnetKey.bind(this, "i"));
+	Mojo.Event.listen(this.controller.get("menuButton"),Mojo.Event.tap, this.sendTelnetKey.bind(this, "m"));
 	
 	//Volume button events
-	Mojo.Event.listen(this.controller.get("volumeUpButton"),Mojo.Event.tap, this.sendCommand.bind(this, this.controller.get("volumeUpButton")));
-	Mojo.Event.listen(this.controller.get("volumeDownButton"),Mojo.Event.tap, this.sendCommand.bind(this, this.controller.get("volumeDownButton")));
-	Mojo.Event.listen(this.controller.get("muteButton"),Mojo.Event.tap, this.sendCommand.bind(this, this.controller.get("muteButton")));
+	Mojo.Event.listen(this.controller.get("volumeUpButton"),Mojo.Event.tap, this.sendTelnetKey.bind(this, "f11"));
+	Mojo.Event.listen(this.controller.get("volumeDownButton"),Mojo.Event.tap, this.sendTelnetKey.bind(this, "f10"));
+	Mojo.Event.listen(this.controller.get("muteButton"),Mojo.Event.tap, this.sendTelnetKey.bind(this, "f9"));
 	
 	//Playback button events
-	//Mojo.Event.listen(this.controller.get("playButton"),Mojo.Event.tap, this.sendCommand.bind(this, this.controller.get("playButton")));
-	Mojo.Event.listen(this.controller.get("pauseButton"),Mojo.Event.tap, this.sendCommand.bind(this, this.controller.get("pauseButton")));
-	//Mojo.Event.listen(this.controller.get("fastforwardButton"),Mojo.Event.tap, this.sendCommand.bind(this, this.controller.get("fastforwardButton")));
-	//Mojo.Event.listen(this.controller.get("rewindButton"),Mojo.Event.tap, this.sendCommand.bind(this, this.controller.get("rewindButton")));
-	Mojo.Event.listen(this.controller.get("skipForwardButton"),Mojo.Event.tap, this.sendCommand.bind(this, this.controller.get("skipForwardButton")));
-	Mojo.Event.listen(this.controller.get("skipBackButton"),Mojo.Event.tap, this.sendCommand.bind(this, this.controller.get("skipBackButton")));
-	Mojo.Event.listen(this.controller.get("deleteButton"),Mojo.Event.tap, this.sendCommand.bind(this, this.controller.get("deleteButton")));
+	//Mojo.Event.listen(this.controller.get("playButton"),Mojo.Event.tap, this.sendTelnetKey.bind(this, "p"));
+	Mojo.Event.listen(this.controller.get("pauseButton"),Mojo.Event.tap, this.sendTelnetKey.bind(this, "p"));
+	//Mojo.Event.listen(this.controller.get("fastforwardButton"),Mojo.Event.tap, this.sendTelnetKey.bind(this, "."));
+	//Mojo.Event.listen(this.controller.get("rewindButton"),Mojo.Event.tap, this.sendTelnetKey.bind(this, ","));
+	Mojo.Event.listen(this.controller.get("skipForwardButton"),Mojo.Event.tap, this.sendTelnetKey.bind(this, "z"));
+	Mojo.Event.listen(this.controller.get("skipBackButton"),Mojo.Event.tap, this.sendTelnetKey.bind(this, "q"));
+	Mojo.Event.listen(this.controller.get("deleteButton"),Mojo.Event.tap, this.sendTelnetKey.bind(this, "d"));
 
 	//Jump button events
-	Mojo.Event.listen(this.controller.get("livetvButton"),Mojo.Event.tap, this.sendCommand.bind(this, this.controller.get("livetvButton")));
-	Mojo.Event.listen(this.controller.get("musicButton"),Mojo.Event.tap, this.sendCommand.bind(this, this.controller.get("musicButton")));
-	Mojo.Event.listen(this.controller.get("videosButton"),Mojo.Event.tap, this.sendCommand.bind(this, this.controller.get("videosButton")));
-	Mojo.Event.listen(this.controller.get("recordedButton"),Mojo.Event.tap, this.sendCommand.bind(this, this.controller.get("recordedButton")));
+	Mojo.Event.listen(this.controller.get("livetvButton"),Mojo.Event.tap, this.sendJumpPoint.bind(this, "livetv"));
+	Mojo.Event.listen(this.controller.get("musicButton"),Mojo.Event.tap, this.sendJumpPoint.bind(this, "playmusic"));
+	Mojo.Event.listen(this.controller.get("videosButton"),Mojo.Event.tap, this.sendJumpPoint.bind(this, "mythvideo"));
+	Mojo.Event.listen(this.controller.get("recordedButton"),Mojo.Event.tap, this.sendJumpPoint.bind(this, "playbackrecordings"));
 	
 };
 
@@ -119,6 +124,10 @@ MasterRemoteAssistant.prototype.activate = function(event) {
 	   
 	WebMyth.prefsCookieObject.currentRemoteScene = 'masterRemote';
 	WebMyth.prefsCookie.put(WebMyth.prefsCookieObject); 
+	
+	//View menu widget
+	this.remoteViewMenuModel.items[0].items[1].label = "Master: " + WebMyth.prefsCookieObject.currentFrontend;  
+	this.controller.modelChanged(this.remoteViewMenuModel);
 	
 	
 	this.controller.enableFullScreenMode(WebMyth.prefsCookieObject.remoteFullscreen);
@@ -134,99 +143,38 @@ MasterRemoteAssistant.prototype.cleanup = function(event) {
 	   a result of being popped off the scene stack */
 };
 
+MasterRemoteAssistant.prototype.handleCommand = function(event) {
 
-MasterRemoteAssistant.prototype.sendCommand = function(element, event) {
-
-	var name = element;
-	
-	switch(name)
-	{
+	if(event.type == Mojo.Event.command) {
+		Mojo.Log.error("command is %s",event.command);
 		
-	//Navigation commands
-	case backButton:
-	  this.sendTelnetKey("escape");
-	  break;
-	case upButton:
-	  this.sendTelnetKey("up");
-	  break;
-	case downButton:
-	  this.sendTelnetKey("down");
-	  break;
-	case leftButton:
-	  this.sendTelnetKey("left");
-	  break;
-	case rightButton:
-	  this.sendTelnetKey("right");
-	  break;
-	case selectButton:
-	  this.sendTelnetKey("enter");
-	  break;
-	case menuButton:
-	  this.sendTelnetKey("m");
-	  break;
-	case infoButton:
-	  this.sendTelnetKey("i");
-	  break;
-	  
-	//Volume
-	case volumeUpButton:
-	  this.sendTelnetKey("]");
-	  break;
-	case volumeDownButton:
-	  this.sendTelnetKey("[");
-	  break;
-	case muteButton:
-	  this.sendTelnetKey("f9");
-	  break;
-	  
-	//Playback Commands
-	case pauseButton:
-	  this.sendTelnetKey("p");
-	  break;
-	/*
-	case fastforwardButton:
-	  this.sendTelnetKey(".");
-	  break;
-	case rewindButton:
-	  this.sendTelnetKey(",");
-	  break;
-	case playButton:
-	  this.sendTelnetKey("p");
-	  break;
-	  */
-	case skipForwardButton:
-	  this.sendTelnetKey("z");
-	  break;
-	case skipBackButton:
-	  this.sendTelnetKey("q");
-	  break;
-	case deleteButton:
-	  this.sendTelnetKey("d");
-	  break;
-	  
-	//Jump commands
-	case livetvButton:
-	  this.sendJumpPoint("livetv");
-	  break;
-	case musicButton:
-	  this.sendJumpPoint("playmusic");
-	  break;
-	case videosButton:
-	  this.sendJumpPoint("mythvideo");
-	  break;
-	case recordedButton:
-	  this.sendJumpPoint("playbackrecordings");
-	  break;
-	  
-	default:
-	  Mojo.Controller.errorDialog("no matching command for %$s", name);
+		switch(event.command) {
+
+			  case 'go-remotePrevious':
+					var previousRemoteScene = getPreviousRemote(WebMyth.remoteCookieObject, WebMyth.prefsCookieObject.currentRemoteScene);
+					this.controller.stageController.swapScene({name: previousRemoteScene, disableSceneScroller: true});
+			   break;
+
+			  case 'go-remoteNext':
+					var nextRemoteScene = getNextRemote(WebMyth.remoteCookieObject, WebMyth.prefsCookieObject.currentRemoteScene);
+					this.controller.stageController.swapScene({name: nextRemoteScene, disableSceneScroller: true});
+			   break;
+	   
+			  case 'do-remoteHeaderAction':
+					switch(WebMyth.prefsCookieObject.remoteHeaderAction) {
+						case 'Pause':
+							WebMyth.sendKey('p');
+						break;
+						case 'Mute':
+							WebMyth.sendKey('f9');
+						break;
+					}
+			   break;
+		}
 	}
   
 };
 
-
-
-// Send commands to telnet connection
 MasterRemoteAssistant.prototype.handleKey = function(event) {
 
 	Mojo.Log.info("MasterRemoteAssistant.prototype.handleKey %o", event.originalEvent.keyCode);
@@ -241,6 +189,9 @@ MasterRemoteAssistant.prototype.handleKey = function(event) {
 			break;
 		case 10:
 			this.sendTelnetKey("enter");
+			break;
+		case 32:
+			this.sendTelnetKey("space");
 			break;
 		case 48:
 			this.sendTelnetKey("0");

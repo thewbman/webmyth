@@ -90,8 +90,6 @@ MusicListAssistant.prototype.activate = function(event) {
 	//Keypress event
 	Mojo.Event.listen(this.controller.sceneElement, Mojo.Event.keyup, this.handleKey.bind(this));
 	
-	//Vibrate event
-	Mojo.Event.listen(document, 'shakestart', this.handleShakestart.bindAsEventListener(this));
 	
 };
 
@@ -100,8 +98,6 @@ MusicListAssistant.prototype.deactivate = function(event) {
 	//Keypress event
 	Mojo.Event.stopListening(this.controller.sceneElement, Mojo.Event.keyup, this.handleKey.bind(this));
 	
-	//Vibrate event
-	Mojo.Event.stopListening(document, 'shakestart', this.handleShakestart.bindAsEventListener(this));
 	
 	WebMyth.prefsCookie.put(WebMyth.prefsCookieObject);
 	
@@ -177,22 +173,6 @@ MusicListAssistant.prototype.handleKey = function(event) {
 	}
 	Event.stop(event); 
 	
-};
-
-MusicListAssistant.prototype.handleShakestart = function(event) {
-
-	Mojo.Log.info("Start Shaking");
-	Event.stop(event);
-	
-	
-	//Stop spinner and hide
-	this.spinnerModel.spinning = true;
-	this.controller.modelChanged(this.spinnerModel, this);
-	$('myScrim').show()	
-	
-	
-	this.getMusic();
-  
 };
 
 
@@ -272,13 +252,13 @@ MusicListAssistant.prototype.readRemoteDbTableSuccess = function(response) {
 	
 	this.finishedReadingMusic();
 	
-}
+};
 
 MusicListAssistant.prototype.finishedReadingMusic = function() {
 
 	this.sortChanged(WebMyth.prefsCookieObject.currentMusicSort);
 	
-}
+};
 
 MusicListAssistant.prototype.sortChanged = function(newSort) {
 
@@ -546,6 +526,8 @@ MusicListAssistant.prototype.goMusicDetails = function(event) {
 	
 	
 	var popupItems = [
+		{label: 'Download to phone', command: 'do-pickDownload'},
+		{label: 'Stream to phone', command: 'do-pickStream'},
 		{label: 'Details', command: 'do-pickDetails'},
 		{label: 'Artist: '+this.newArtist, command: 'do-pickArtist'},
 		{label: 'Album: '+this.newAlbum, command: 'do-pickAlbum'}
@@ -565,6 +547,16 @@ MusicListAssistant.prototype.goMusicDetails = function(event) {
 MusicListAssistant.prototype.popupHandler = function(event) {
 	
 	switch(event) {
+		case 'do-pickDownload':
+			this.handleDownload("download");
+			
+		  break;
+		  
+		case 'do-pickStream':
+			this.handleDownload("stream");
+			
+		  break;
+		  
 		case 'do-pickDetails':
 			//Open upcomingDetails communication scene
 			Mojo.Controller.stageController.pushScene("musicDetails", this.musicObject);
@@ -589,7 +581,85 @@ MusicListAssistant.prototype.popupHandler = function(event) {
 	}
 			
 		
-}
+};
+
+MusicListAssistant.prototype.handleDownload = function(downloadOrStream_in) {
+
+	Mojo.Log.info("Asked to "+downloadOrStream_in+" music");
+	this.downloadOrStream = downloadOrStream_in;
+	
+	
+	var filenameRequestUrl = "http://"+WebMyth.prefsCookieObject.masterBackendIp+":6544/Myth/GetMusic?Id="
+	filenameRequestUrl += this.musicObject.song_id;
+	
+	Mojo.Log.info("Download/stream URL is "+filenameRequestUrl);
+	
+	var myDirectory = "/media/internal/music/"+this.musicObject.artist_name+"/"+this.musicObject.album_name+"/";
+	
+	var myFilename = this.musicObject.filenameEnd;
+	
+	Mojo.Log.info("Filename is "+myDirectory+myFilename);
+ 
+ 
+	if( this.downloadOrStream == 'download' ) {
+		Mojo.Log.info("starting download");
+
+		
+		
+		this.controller.serviceRequest('palm://com.palm.downloadmanager/', {
+			method: 'download',
+			parameters: {
+				target: filenameRequestUrl,		
+				targetFilename: myFilename,
+				subscribe: true,	
+				targetDir: myDirectory
+			},
+			onSuccess: function(response) {
+				if(response.completed) {
+					this.controller.showBanner("Download finished! "+myFilename, "");
+					
+					this.controller.serviceRequest('palm://com.palm.applicationManager', {
+						method:'launch',							
+						parameters: {
+							id:"com.palm.app.musicplayer"
+						}
+					});
+					
+						
+				} else {
+					if(response.amountReceived && response.amountTotal) {
+						var percent = (response.amountReceived / response.amountTotal)*100;
+						percent = Math.round(percent);
+						if(percent!=NaN) {
+							if(this.currProgress != percent) {
+								this.currProgress = percent;
+								this.controller.showBanner("Downloading: " + percent + "%", "");
+							}
+						}
+					}
+					
+				}
+			}.bind(this)
+		});	
+		
+		
+		
+	} else if( this.downloadOrStream == 'stream' ) {
+		
+		Mojo.Log.info("Starting to stream");
+	
+		this.controller.serviceRequest("palm://com.palm.applicationManager", {
+			method: "launch",
+			parameters:  {
+				id: 'com.palm.app.streamingmusicplayer',
+				params: {
+					target: filenameRequestUrl	
+				}
+			}
+		});	
+	}
+ 
+};
 
 MusicListAssistant.prototype.musicDividerFunction = function(itemModel) {
 	 

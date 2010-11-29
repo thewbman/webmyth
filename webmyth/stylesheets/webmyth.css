@@ -35,17 +35,27 @@ body.palm-dark {
 /* 
  * Remote scenes
  */
+ 
+.flick-scene,
+.music-scene,
+.masterRemote-scene,
+.playback-scene,
+.navigation-scene,
+.numberpad-scene {
+   height: 100%;
+   background: url('../images/gradient4.png') center center;
+}
 
 .buttonRow3 {
 	width: 100%;
-	margin: 0 0px 0 0px;
+	margin: 0px;
 	height: 50px;
 	min-height: 50px;
 }
 
 .buttonRow4 {
 	width: 100%;
-	margin: 0 0px 0 0px;
+	margin: 0px;
 	height: 30px;
 	min-height: 30px;
 }
@@ -94,7 +104,7 @@ body.palm-dark {
 	float: left;
 }
 
-.palm-dark .masterRemote .small-button .palm-button-wrapper {
+.masterRemote-scene .small-button .palm-button-wrapper {
 	color: white;
 }
 
@@ -730,6 +740,67 @@ body.palm-dark {
 .channelPicker-scene .channel-picker-row {
 	height: 20px;
 }
+
+/*
+ * Search
+ */
+
+.search-scene #scene-title {
+	margin: 0px -20px;
+}
+ 
+.search-scene .search-right-list-text .search-list-title  {
+  padding: 8px 14px 0px 0px;
+  margin: 0px;
+}
+
+.search-scene .search-right-list-text .palm-info-text.left {
+  padding: 0px;
+  margin: 0px 8px;
+  line-height: 16px;
+}
+
+.search-scene .search-list-item {
+	height: 100px
+}
+
+.search-scene .chanNum.chanNum-no-icon {
+	padding: 40px 0px 0px 0px;
+	height: 45px;
+	text-align: center;
+}
+
+.guide-left-program-earlier {
+	height: 100px;
+	width: 2%;
+	float: left;
+	text-align: center;
+}
+
+.search-scene .search-left-list-image {
+	height: 100px;
+	width: 23%;
+	float: left;
+	text-align: center;
+}
+
+.search-scene .search-right-list-text {
+	height: 100px;
+	width: 77%;
+	float: left;
+}
+
+.search-scene .search-channelicon-small {
+	padding: 10px 5px 0px 10px;
+	width: 48px;
+	height: 36px;
+	border: 0px; 
+}
+
+.search-scene .search-list-item .chanNum {
+	font-size: 16px;
+}
+
 
 /*
  * Upcoming

@@ -31,17 +31,20 @@ FlickAssistant.prototype.setup = function() {
 	//App menu widget
 	this.controller.setupWidget(Mojo.Menu.appMenu, WebMyth.appMenuAttr, WebMyth.appMenuModel);
 	
-	//Bottom of remote page command menu widget
-	//this.controller.setupWidget( Mojo.Menu.commandMenu, WebMyth.remoteCommandMenuAttr, WebMyth.remoteCommandMenuModel );
-	//WebMyth.remoteCommandMenuModel.items[1].toggleCmd = 'go-flick';  
-	//this.controller.modelChanged(WebMyth.remoteCommandMenuModel);
 	
-	//View menu widget
-	WebMyth.remoteViewMenuModel.items[0].items[1].label = "Flick: " + WebMyth.prefsCookieObject.currentFrontend; 
-	this.controller.setupWidget( Mojo.Menu.viewMenu, WebMyth.remoteViewMenuAttr, WebMyth.remoteViewMenuModel ); 
-	//this.controller.modelChanged(WebMyth.remoteViewMenuModel);
-	
-	
+	//Setup remote view menu
+	this.remoteViewMenuAttr = { spacerHeight: 0, menuClass: 'no-fade' };	
+	this.remoteViewMenuModel = {
+		visible: true,
+		items: [{
+			items: [
+				{ icon: 'back', command: 'go-remotePrevious'},
+				{ label: "Flick: " + WebMyth.prefsCookieObject.currentFrontend, command: 'do-remoteHeaderAction', width: 200 },
+				{ icon: 'forward', command: 'go-remoteNext'}
+			]
+		}]
+	};
+	this.controller.setupWidget( Mojo.Menu.viewMenu, this.remoteViewMenuAttr, this.remoteViewMenuModel ); 
 	
 		
 	
@@ -71,6 +74,10 @@ FlickAssistant.prototype.activate = function(event) {
 	WebMyth.prefsCookieObject.currentRemoteScene = 'flick';
 	WebMyth.prefsCookie.put(WebMyth.prefsCookieObject); 
 	
+	//View menu widget
+	this.remoteViewMenuModel.items[0].items[1].label = "Flick: " + WebMyth.prefsCookieObject.currentFrontend;  
+	this.controller.modelChanged(this.remoteViewMenuModel);
+	
 	
 	this.controller.enableFullScreenMode(WebMyth.prefsCookieObject.remoteFullscreen);
 };
@@ -83,6 +90,38 @@ FlickAssistant.prototype.deactivate = function(event) {
 FlickAssistant.prototype.cleanup = function(event) {
 	/* this function should do any cleanup needed before the scene is destroyed as 
 	   a result of being popped off the scene stack */
+};
+
+FlickAssistant.prototype.handleCommand = function(event) {
+
+	if(event.type == Mojo.Event.command) {
+		Mojo.Log.error("command is %s",event.command);
+		
+		switch(event.command) {
+
+			  case 'go-remotePrevious':
+					var previousRemoteScene = getPreviousRemote(WebMyth.remoteCookieObject, WebMyth.prefsCookieObject.currentRemoteScene);
+					this.controller.stageController.swapScene({name: previousRemoteScene, disableSceneScroller: true});
+			   break;
+
+			  case 'go-remoteNext':
+					var nextRemoteScene = getNextRemote(WebMyth.remoteCookieObject, WebMyth.prefsCookieObject.currentRemoteScene);
+					this.controller.stageController.swapScene({name: nextRemoteScene, disableSceneScroller: true});
+			   break;
+	   
+			  case 'do-remoteHeaderAction':
+					switch(WebMyth.prefsCookieObject.remoteHeaderAction) {
+						case 'Pause':
+							WebMyth.sendKey('p');
+						break;
+						case 'Mute':
+							WebMyth.sendKey('f9');
+						break;
+					}
+			   break;
+		}
+	}
+  
 };
 
 
@@ -186,6 +225,9 @@ FlickAssistant.prototype.handleKey = function(event) {
 			break;
 		case 10:
 			this.sendTelnetKey("enter");
+			break;
+		case 32:
+			this.sendTelnetKey("space");
 			break;
 		case 48:
 			this.sendTelnetKey("0");
