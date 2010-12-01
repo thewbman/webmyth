@@ -81,6 +81,8 @@ SearchHostsAssistant.prototype.cleanup = function(event) {
 };
 
 
+
+
 SearchHostsAssistant.prototype.getFrontendsSuccess = function(response) {
 	Mojo.Log.info("got response text: '%s'", response.responseText);
 	Mojo.Log.info("got frontends json: '%j'", response.responseJSON);
@@ -98,17 +100,16 @@ SearchHostsAssistant.prototype.getFrontendsSuccess = function(response) {
 	//Mojo.Log.info("Done with data query function");
 };
 
-
 SearchHostsAssistant.prototype.getFrontendsFailure = function(event) {
 	Mojo.Log.error("failed to get frontends");
 };
-
 
 SearchHostsAssistant.prototype.selectedHost = function(event) {
 	Mojo.Log.info("chosen a host "+event.item.hostname+" with port "+event.item.port);
 	var newHost = {
 		'hostname': event.item.hostname,
-		'port': event.item.port
+		'port': event.item.port,
+		'address': ""
 	};
 	
 	//Mojo.Log.info("New hostname is %s", this.hostTextModel.value);
@@ -117,23 +118,15 @@ SearchHostsAssistant.prototype.selectedHost = function(event) {
 	WebMyth.hostsCookieObject.push(newHost);
 	WebMyth.hostsCookie.put(WebMyth.hostsCookieObject);
 	
-	 /*
-	var sql = "INSERT INTO 'hosts' (hostname, port) VALUES (?, ?)";
-	
-	WebMyth.db.transaction( function (transaction) {
-		transaction.executeSql(sql,  [event.item.hostname, event.item.port], 
-			function(transaction, results) {    // success handler
-				Mojo.Log.info("Successfully inserted record"); 
-            },
-            function(transaction, error) {      // error handler
-                Mojo.Log.error("Could not insert record: " + error.message);
-            }
-		);
-	});
-	*/
+
+	//Update prefs cookie
+	WebMyth.prefsCookieObject.currentFrontend = newHost.hostname;
+	WebMyth.prefsCookieObject.currentFrontendPort = newHost.port;
+	WebMyth.prefsCookieObject.currentFrontendAddress = newHost.address;
+	WebMyth.prefsCookie.put(WebMyth.prefsCookieObject);
 	
 	
 	//Return to host selector
-	Mojo.Controller.stageController.popScene();
+	Mojo.Controller.stageController.swapScene("editHost");
 	
 };

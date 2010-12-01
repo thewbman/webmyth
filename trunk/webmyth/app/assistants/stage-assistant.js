@@ -451,7 +451,7 @@ StageAssistant.prototype.startDashboard = function() {
 
 StageAssistant.prototype.handleConnect = function(event) {
 
-	$('telnet_plugin_id').openSocket(WebMyth.prefsCookieObject.currentFrontendAddress, WebMyth.prefsCookieObject.currentRemotePort);
+	$('telnet_plugin_id').openSocket(WebMyth.prefsCookieObject.currentFrontendAddress, WebMyth.prefsCookieObject.currentFrontendPort);
 	
 	Mojo.Log.info("opening telnet socket");
 	

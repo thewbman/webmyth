@@ -27,9 +27,12 @@ function HostSelectorAssistant(jumpRemote) {
 	  
 	  this.jumpToRemote = jumpRemote;
 	  
+	  this.pickType = "start";
+	  
 	  this.nullHandleCount = 0;
 	 
 	  this.resultList = [];
+	  
 };
 
 
@@ -41,9 +44,9 @@ HostSelectorAssistant.prototype.setup = function() {
 	this.hostsCommandMenuModel = {
 		visible: true,
 		items: [
-			{ items: [ { label: "Add", command: 'go-addHost', width: 90 } ] },
-			{},
-			{ items: [ { label: "Search", command: 'go-searchHost', width: 90 } ] }
+			{ label: "Add", command: 'go-addHost', width: 90 } ,
+			{ label: "Edit", command: 'go-editHost', width: 90 },
+			{ label: "Search", command: 'go-searchHost', width: 90 }
 		]
 	};
 	
@@ -81,6 +84,12 @@ HostSelectorAssistant.prototype.activate = function(event) {
 	Object.extend(this.resultList,WebMyth.hostsCookieObject);
 	this.controller.modelChanged(this.hostListModel);
 	
+	
+	//Reset from edit
+	$('scene-title').innerText = "Select Host";
+	this.pickType = "start";
+	
+	
 	if(this.jumpToRemote) {
 		this.jumpToRemote = false;
 		this.startCommunication();
@@ -89,25 +98,13 @@ HostSelectorAssistant.prototype.activate = function(event) {
 };
 
 HostSelectorAssistant.prototype.deactivate = function(event) {
-	/* remove any event handlers you added in activate and do any other cleanup that should happen before
-	   this scene is popped or another scene is pushed on top */
 	   
 	WebMyth.hostsCookie.put(WebMyth.hostsCookieObject);
-	  
 	  	  
 };
 
 HostSelectorAssistant.prototype.cleanup = function(event) {
-	/* this function should do any cleanup needed before the scene is destroyed as 
-	   a result of being popped off the scene stack */
-	  
-	//Close out any open telnet connection
-	if (Mojo.appInfo.skipPDK == "true") {
-		//Mojo.Controller.getAppController().showBanner("Closing out telnet", {source: 'notification'});
-	}
-	else {
-		//$('telnetPlug').CloseTelnetConnection();
-	}
+
 };
 
 HostSelectorAssistant.prototype.handleCommand = function(event) {
@@ -115,6 +112,10 @@ HostSelectorAssistant.prototype.handleCommand = function(event) {
     switch(event.command) {
       case 'go-addHost':
         Mojo.Controller.stageController.pushScene("addHost");
+       break;
+      case 'go-editHost':
+        this.pickType = "edit";
+		$('scene-title').innerText = "Edit Host";
        break;
       case 'go-searchHost':
 		Mojo.Controller.stageController.pushScene("searchHosts");
@@ -146,8 +147,6 @@ HostSelectorAssistant.prototype.deleteHost = function(event) {
 	Object.extend(WebMyth.hostsCookieObject,newList);
 	
 	
-	//WebMyth.hostsCookie.put(WebMyth.hostsCookieObject);
-	//WebMyth.hostsCookie.put(this.resultList);
 	WebMyth.hostsCookie.put(newList);
 
 	
@@ -158,11 +157,14 @@ HostSelectorAssistant.prototype.chooseList = function(event) {
 	
 	WebMyth.prefsCookieObject.currentFrontend = event.item.hostname;
 	WebMyth.prefsCookieObject.currentFrontendAddress = event.item.address;
-	WebMyth.prefsCookieObject.currentRemotePort = event.item.port;
+	WebMyth.prefsCookieObject.currentFrontendPort = event.item.port;
 	WebMyth.prefsCookie.put(WebMyth.prefsCookieObject);
 	 
-	
-	this.startCommunication();
+	if(this.pickType == "start") {
+		this.startCommunication();
+	} else if (this.pickType == "edit") {
+        Mojo.Controller.stageController.pushScene("editHost");
+	}
 	
 };
 
