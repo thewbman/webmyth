@@ -198,7 +198,7 @@ NumberpadAssistant.prototype.handleKey = function(event) {
 	switch(event.originalEvent.keyCode)
 	{
 		case 8:
-			this.sendTelnetKey("backspace");
+			this.sendTelnetKey("escape");
 			break;
 		case 9:
 			this.sendTelnetKey("tab");

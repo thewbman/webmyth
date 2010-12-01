@@ -136,7 +136,7 @@ WelcomeAssistant.prototype.setup = function() {
 		if (WebMyth.prefsCookieObject.currentRecgroup == null) WebMyth.prefsCookieObject.currentRecgroup = defaultCookie().currentRecgroup;
 		if (WebMyth.prefsCookieObject.currentRecSort == null) WebMyth.prefsCookieObject.currentRecSort = defaultCookie().currentRecSort;
 		if (WebMyth.prefsCookieObject.currentFrontend == null) WebMyth.prefsCookieObject.currentFrontend = defaultCookie().currentFrontend;
-		if (WebMyth.prefsCookieObject.currentRemotePort == null) WebMyth.prefsCookieObject.currentRemotePort = defaultCookie().currentRemotePort;
+		if (WebMyth.prefsCookieObject.currentFrontendPort == null) WebMyth.prefsCookieObject.currentFrontendPort = defaultCookie().currentFrontendPort;
 		if (WebMyth.prefsCookieObject.currentRemoteScene == null) WebMyth.prefsCookieObject.currentRemoteScene = defaultCookie().currentRemoteScene;
 		if (WebMyth.prefsCookieObject.allowRecordedDownloads == null) WebMyth.prefsCookieObject.allowRecordedDownloads = defaultCookie().allowRecordedDownloads;
 		if (WebMyth.prefsCookieObject.recordedDownloadsUrl == null) WebMyth.prefsCookieObject.recordedDownloadsUrl = defaultCookie().recordedDownloadsUrl;
@@ -209,8 +209,8 @@ WelcomeAssistant.prototype.setup = function() {
 	//Hosts cookie
 	if (WebMyth.hostsCookieObject) {		//cookie exist
 		//Mojo.Log.info("Hosts cookie is %j",WebMyth.hostsCookieObject);
-		cleanHostsCookie(WebMyth.hostsCookieObject);
-		WebMyth.hostsCookie.put(WebMyth.hostsCookieObject);
+		//cleanHostsCookie(WebMyth.hostsCookieObject);
+		//WebMyth.hostsCookie.put(WebMyth.hostsCookieObject);
 	} else {
 		//Mojo.Log.info("Missing hosts cookie.  Using default.");
 		WebMyth.hostsCookieObject = defaultHostsCookieCurrent(WebMyth.prefsCookieObject.currentFrontend);
@@ -659,6 +659,8 @@ WelcomeAssistant.prototype.readMasterBackendSuccess = function(response) {
 
 WelcomeAssistant.prototype.getHostsList = function() {
 	
+	//This function has been depreciated and replaced with getSettings();
+	
 	//Mojo.Log.error("Starting to get hosts");
 		
 	var requestUrl = "http://"+WebMyth.prefsCookieObject.masterBackendIp+":6544/Myth/GetHosts";
@@ -730,8 +732,114 @@ WelcomeAssistant.prototype.readSettingsSuccess = function(response) {
 	Object.extend(WebMyth.backendsCookieObject,this.backendsList);
 	WebMyth.backendsCookie.put(WebMyth.backendsCookieObject);
 	
+	this.getConnectionInfo();
+	
 	
 };
+
+WelcomeAssistant.prototype.getConnectionInfo = function() {
+	
+	//Mojo.Log.error("Starting to get connection info");
+		
+	
+	var requestUrl = "http://"+WebMyth.prefsCookieObject.masterBackendIp+":6544/Myth/GetConnectionInfo";
+	
+	
+    try {
+        var request = new Ajax.Request(requestUrl,{
+            method: 'get',
+            evalJSON: 'false',
+			onSuccess: this.readConnectionInfoSuccess.bind(this),
+            onFailure: function() {
+						Mojo.Log.info("failed to get connection info")	
+					}   
+        });
+    }
+    catch(e) {
+        Mojo.Log.error(e);
+    }
+	
+}
+
+WelcomeAssistant.prototype.readConnectionInfoSuccess = function(response) {
+
+	//Mojo.Log.info('Got connection info', response.responseText.trim());
+	
+	var xmlstring = response.responseText.trim();
+	var xmlobject = (new DOMParser()).parseFromString(xmlstring, "text/xml");
+	
+	
+	//Local variables
+	var topNode, topNodesCount, topSingleNode, infoNode, databaseNode, databaseChildNode;
+	var singleHostJson = {};
+	var Count;
+	
+	
+	//Start parsing
+	topNode = xmlobject.getElementsByTagName("GetConnectionInfoResponse")[0];
+	var topNodesCount = topNode.childNodes.length;
+	for(var i = 0; i < topNodesCount; i++) {
+		topSingleNode = topNode.childNodes[i];
+		switch(topSingleNode.nodeName) {
+			case 'Info':
+				//Mojo.Log.info('Starting to parse Info');
+				infoNode = topSingleNode;
+				
+				for(var j = 0; j < infoNode.childNodes.length; j++) {
+					switch(infoNode.childNodes[j].nodeName) {
+						case 'Database':
+							//Mojo.Log.info('Starting to parse Database');
+							databaseChildNode = infoNode.childNodes[j];
+							
+							for(var k = 0; k < databaseChildNode.childNodes.length; k++) {
+								//Mojo.Log.info("database child node name is "+databaseChildNode.childNodes[k].nodeName);
+								switch(databaseChildNode.childNodes[k].nodeName) {
+									case 'Host':
+										//Mojo.Log.info("DB host is "+databaseChildNode.childNodes[k].childNodes[0].nodeValue);
+										WebMyth.prefsCookieObject.databaseHost = databaseChildNode.childNodes[k].childNodes[0].nodeValue;
+									  break;
+									  
+									case 'Port':
+										//Mojo.Log.info("DB port is "+databaseChildNode.childNodes[k].childNodes[0].nodeValue);
+										WebMyth.prefsCookieObject.databasePort = databaseChildNode.childNodes[k].childNodes[0].nodeValue;
+									  break;
+									  
+									case 'UserName':
+										//Mojo.Log.info("DB username is "+databaseChildNode.childNodes[k].childNodes[0].nodeValue);
+										WebMyth.prefsCookieObject.databaseUsername = databaseChildNode.childNodes[k].childNodes[0].nodeValue;
+									  break;
+									  
+									case 'Password':
+										//Mojo.Log.info("DB password is "+databaseChildNode.childNodes[k].childNodes[0].nodeValue);
+										WebMyth.prefsCookieObject.databasePassword = databaseChildNode.childNodes[k].childNodes[0].nodeValue;
+									  break;
+									  
+									case 'Name':
+										//Mojo.Log.info("DB name is "+databaseChildNode.childNodes[k].childNodes[0].nodeValue);
+										WebMyth.prefsCookieObject.databaseName = databaseChildNode.childNodes[k].childNodes[0].nodeValue;
+									  break;
+									  
+								}
+							}
+						
+						  break;
+						  
+					}
+				}
+			
+			  break;
+		}
+		
+	}
+	
+	Mojo.Log.info("Finished gettig SQL connection info");
+	
+	
+	WebMyth.prefsCookie.put(WebMyth.prefsCookieObject);						
+			
+	
+};
+
 
 WelcomeAssistant.prototype.getScriptVersion = function() {
 	
@@ -788,6 +896,7 @@ WelcomeAssistant.prototype.checkConnectionStatus = function() {
 				
 				if(response.wifi.state == "connected") {
 					//this.getHostsList();
+					
 					this.getSettings();
 				}
 	

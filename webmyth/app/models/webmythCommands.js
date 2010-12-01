@@ -89,7 +89,7 @@ function defaultCookie() {
 		currentRecSort: 'date-desc',
 		currentFrontend: 'frontend',
 		currentFrontendAddress: 'frontend-address',
-		currentRemotePort: '6546',
+		currentFrontendPort: '6546',
 		currentRemoteScene: 'masterRemote',
 		previousScriptVersion: 0,
 		allowRecordedDownloads: false,
@@ -1617,7 +1617,7 @@ var recStatusDecode = function(recStatusInt) {
 				newStatusText = "Current Recording";
 			break;
 			case 4:		
-				newStatusText = "Won't Record";
+				newStatusText = "Don't Record";
 			break;
 			case 5:		
 				newStatusText = "Earlier Showing";

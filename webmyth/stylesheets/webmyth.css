@@ -226,10 +226,11 @@ body.palm-dark {
 	
 	border-style: solid;
 	border-color: #000000;
-	background-color: #333333;
+	
+	background-color: rgba(50, 50, 50, 0.1);
 	
 	background: url('../images/mine/arrows-140x140-clear.png') center center no-repeat;
-	background-color: #333333;
+	background-color: rgba(50, 50, 50, 0.1);
 	
 	text-align: center;
 	vertical-align: middle;
@@ -246,12 +247,17 @@ body.palm-dark {
 	margin: 10px 50px;
 	-webkit-border-radius: 110px;
 	
+	
 	border-style: solid;
 	border-color: #000000;
-	background-color: #333333;
+	
+	background-color: rgba(50, 50, 50, 0.1);
 	
 	background: url('../images/mine/arrows-200x200-clear.png') center center no-repeat;
-	background-color: #333333;
+	background-color: rgba(50, 50, 50, 0.1);
+	
+	text-align: center;
+	vertical-align: middle;
 }
 
 .height-480 .flickNavButton:active {
@@ -273,7 +279,8 @@ body.palm-dark {
 	
 	border-style: solid;
 	border-color: #000000;
-	background-color: #333333;
+	
+	background-color: rgba(50, 50, 50, 0.1);
 	
 	text-align: center;
 	vertical-align: middle;
@@ -294,7 +301,8 @@ body.palm-dark {
 	
 	border-style: solid;
 	border-color: #000000;
-	background-color: #333333;
+	
+	background-color: rgba(50, 50, 50, 0.1);
 	
 	text-align: center;
 	vertical-align: middle;

@@ -1035,9 +1035,10 @@ GuideAssistant.prototype.updateChannelListCookie = function() {
 	//Guide channels cookie
 	if (WebMyth.guideChannelsCookieObject) {		//cookie exists
 	
-		//Mojo.Log.info("Cookie exists, updating last update");
+		Mojo.Log.info("Cookie exists, updating last update");
 		
 		//Mojo.Log.info("channels cookie is %j",WebMyth.guideChannelsCookieObject);
+		//Mojo.Log.info("channels list is %j",this.channelList);
 		
 		//Mojo.Log.info("lengths are "+this.channelList.length+" and "+WebMyth.guideChannelsCookieObject.length);
 		
@@ -1341,7 +1342,7 @@ GuideAssistant.prototype.readGuideSuccess = function(response) {
 				//Mojo.Log.error("channels json is %j", this.channelList);
 				
 				
-				if(this.channelList.length == 0) {
+				if((this.channelList.length == 0)&&(newChannelList.length>0)) {
 					Mojo.Log.info("Didn't find any channels - adding now");
 					this.channelList = newChannelList;
 					
@@ -1349,12 +1350,9 @@ GuideAssistant.prototype.readGuideSuccess = function(response) {
 					
 					this.updateChannelListCookie();
 					
-					//Object.extend(this.channelMenuModel.items,this.channelList);
-					
-					//this.controller.modelChanged(this.channelMenuModel);
-					
 				} 
 				
+				Mojo.Log.info("Finished updating channels (if needed)");
 				
 				this.sortChanged();
 				

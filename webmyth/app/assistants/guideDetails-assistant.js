@@ -29,6 +29,17 @@ function GuideDetailsAssistant(detailsObject, forceRefresh) {
 }
 
 GuideDetailsAssistant.prototype.setup = function() {
+
+	//Show and start the animated spinner
+	this.spinnerAttr= {
+		spinnerSize: "large"
+	}; this.spinnerModel= {
+		spinning: true
+	}; 
+	this.controller.setupWidget('spinner', this.spinnerAttr, this.spinnerModel);
+	$('spinner-text').innerHTML = "Loading...";
+	
+	
 	Mojo.Log.info("Starting upcoming details scene '%j'", this.guideObject);
 	
 	//App menu widget
@@ -152,6 +163,14 @@ GuideDetailsAssistant.prototype.activate = function(event) {
 		this.forceRefresh = false;
 		
 		this.refreshData();
+		
+	} else {
+	
+		//Stop spinner and hide
+		this.spinnerModel.spinning = false;
+		this.controller.modelChanged(this.spinnerModel, this);
+		$('myScrim').hide();
+		
 	}
 	
 	
@@ -420,6 +439,11 @@ GuideDetailsAssistant.prototype.startChannelPlay = function(host) {
 
 GuideDetailsAssistant.prototype.refreshData = function() {
 
+		//Stop spinner and hide
+		this.spinnerModel.spinning = true;
+		this.controller.modelChanged(this.spinnerModel, this);
+		$('myScrim').show();
+		
 	//Update details from XML backend
 	Mojo.Log.info('Starting details data gathering from XML backend');
 		
@@ -594,6 +618,12 @@ GuideDetailsAssistant.prototype.readDetailsXMLSuccess = function(response) {
 
 
 GuideDetailsAssistant.prototype.finishedReadingDetails = function() {
+	
+		//Stop spinner and hide
+		this.spinnerModel.spinning = false;
+		this.controller.modelChanged(this.spinnerModel, this);
+		$('myScrim').hide();
+		
 
 	//Fill in data values
 	$('scene-title').innerText = this.guideObject.title;

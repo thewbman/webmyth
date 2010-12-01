@@ -19,17 +19,12 @@
  */
 
 
-function AddHostAssistant() {
-	/* this is the creator function for your scene assistant object. It will be passed all the 
-	   additional parameters (after the scene name) that were passed to pushScene. The reference
-	   to the scene controller (this.controller) has not be established yet, so any initialization
-	   that needs the scene controller should be done in the setup function below. */
-	  
+function EditHostAssistant() {
+
 }
 
-AddHostAssistant.prototype.setup = function() {
+EditHostAssistant.prototype.setup = function() {
 
-		
 	
 	//App menu widget
 	this.controller.setupWidget(Mojo.Menu.appMenu, WebMyth.appMenuAttr, WebMyth.appMenuModel);
@@ -37,7 +32,7 @@ AddHostAssistant.prototype.setup = function() {
 	
 	//Widgets
 	this.hostTextModel = {
-             value: "",
+             value: WebMyth.prefsCookieObject.currentFrontend,
              disabled: false
     };
 	this.controller.setupWidget("hostTextFieldId",
@@ -53,7 +48,7 @@ AddHostAssistant.prototype.setup = function() {
 	
 	
 	this.addressTextModel = {
-             value: "",
+             value: WebMyth.prefsCookieObject.currentFrontendAddress,
              disabled: false
     };
 	this.controller.setupWidget("addressTextFieldId",
@@ -69,7 +64,7 @@ AddHostAssistant.prototype.setup = function() {
 	
 	
 	this.portTextModel = {
-             value: "6546",
+             value: WebMyth.prefsCookieObject.currentFrontendPort,
              disabled: false
     };
 	this.controller.setupWidget("portTextFieldId",
@@ -84,70 +79,72 @@ AddHostAssistant.prototype.setup = function() {
     );
 	
 	
-	this.controller.setupWidget("submitHostButtonId",
+	this.controller.setupWidget("saveHostButtonId",
          {},
          {
-             label : "SUBMIT",
+             label : "SAVE",
              disabled: false
          }
      );
 	
-	/* add event handlers to listen to events from widgets */
-	Mojo.Event.listen(this.controller.get("submitHostButtonId"),Mojo.Event.tap, this.submitNewHost.bind(this));
+	Mojo.Event.listen(this.controller.get("saveHostButtonId"),Mojo.Event.tap, this.saveHost.bind(this));
 	
 };
 
-AddHostAssistant.prototype.activate = function(event) {
-	/* put in event handlers here that should only be in effect when this scene is active. For
-	   example, key handlers that are observing the document */
+EditHostAssistant.prototype.activate = function(event) {
+
+	if(WebMyth.prefsCookieObject.currentFrontendAddress == "") {
+		//empty frontend address, see if a backend
+		Mojo.Log.info("empty address, trying to get backend IP address");
+		
+		this.addressTextModel.value = getBackendIP(WebMyth.backendsCookieObject,WebMyth.prefsCookieObject.currentFrontend,WebMyth.prefsCookieObject.masterBackendIp);
+		this.controller.modelChanged(this.addressTextModel, this);
+	}
+
 };
 
-AddHostAssistant.prototype.deactivate = function(event) {
+EditHostAssistant.prototype.deactivate = function(event) {
 	/* remove any event handlers you added in activate and do any other cleanup that should happen before
 	   this scene is popped or another scene is pushed on top */
 };
 
-AddHostAssistant.prototype.cleanup = function(event) {
+EditHostAssistant.prototype.cleanup = function(event) {
 	/* this function should do any cleanup needed before the scene is destroyed as 
 	   a result of being popped off the scene stack */
 };
 
-AddHostAssistant.prototype.submitNewHost = function(event) {
-	//Returns data to host selector scene
+
+
+
+EditHostAssistant.prototype.saveHost = function(event) {
+
 	var newHost = {
 		'hostname': this.hostTextModel.value,
 		'address': this.addressTextModel.value,
 		'port': this.portTextModel.value
 	};
 	
+	Mojo.Log.info("Updated hostname is %j", newHost);
 	
-	//TODO: verify port is integer
 	
-	//TODO: resolve IP address to add into WebMyth.db
+	//Delete old host
+	Mojo.Log.info("Deleting host: %s",newHost.hostname);
+	var newList = cutoutHostname(WebMyth.hostsCookieObject, newHost.hostname);
+	WebMyth.hostsCookieObject.clear();
+	Object.extend(WebMyth.hostsCookieObject,newList);
 	
-	//Mojo.Log.info("New hostname is %s", this.hostTextModel.value);
-	Mojo.Log.info("New hostname is %s", newHost.hostname);
-	
+	//Add in updated version
 	WebMyth.hostsCookieObject.push(newHost);
 	WebMyth.hostsCookie.put(WebMyth.hostsCookieObject);
 	 
-	 /*
-	var sql = "INSERT INTO 'hosts' (hostname, port) VALUES (?, ?)";
- 
-	WebMyth.db.transaction( function (transaction) {
-		transaction.executeSql(sql,  [newHost.hostname, newHost.port], 
-			function(transaction, results) {    // success handler
-				Mojo.Log.info("Successfully inserted record"); 
-            },
-            function(transaction, error) {      // error handler
-                Mojo.Log.error("Could not insert record: " + error.message);
-            }
-		);
-	});
-	*/
+	//Update prefs cookie
+	WebMyth.prefsCookieObject.currentFrontend = newHost.hostname;
+	WebMyth.prefsCookieObject.currentFrontendAddress = newHost.address;
+	WebMyth.prefsCookieObject.currentFrontendPort = newHost.port;
+	WebMyth.prefsCookie.put(WebMyth.prefsCookieObject);
 	
 	
-	//Return to host selector
+	
 	Mojo.Controller.stageController.popScene();
 
 };
