@@ -142,6 +142,10 @@ RecordedDetailsAssistant.prototype.setup = function() {
 	
 	//Mojo.Event.listen(this.controller.get("recorded-screenshot"),Mojo.Event.tap, this.goScreenshot.bind(this));
 	
+	if((this.recordedObject.recStatus == -2)) {
+		$('currently-recording-title').innerText = "Currently Recording";
+	}
+	
 	this.getJobqueue();
 	
 };

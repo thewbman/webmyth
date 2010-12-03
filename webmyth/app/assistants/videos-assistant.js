@@ -24,6 +24,11 @@
 	  this.fullResultList = [];		//Full raw data 
 	  this.resultList = [];			//Filtered down list
 	  
+	  this.fullDirectoryList = [];
+	  this.directoryList = [];
+	  
+	  this.currentDirectoryObject = { directory: "", directoryLevels: 1, localDirectory: "", upperDirectory: "" };
+	  
 	  this.storageGroups = [];		//Storage group directories
 	  
 }
@@ -63,6 +68,22 @@ VideosAssistant.prototype.setup = function() {
 
 	
 	
+	// Videos directory filter list
+	this.videosDirectoryListAttribs = {
+		itemTemplate: "videos/videosDirectoryItem",
+		dividerTemplate: "videos/videosDivider",
+		swipeToDelete: false,
+		dividerFunction: this.videosDirectoryDividerFunction.bind(this),
+		reorderable: false
+	};
+    this.videosDirectoryListModel = {            
+        items: this.directoryList,
+		disabled: false
+    };
+	this.controller.setupWidget( "videosDirectoryList" , this.videosDirectoryListAttribs, this.videosDirectoryListModel);
+
+	
+	
 	// Videos widget filter list
 	this.videosListAttribs = {
 		itemTemplate: "videos/videosListItem",
@@ -71,7 +92,8 @@ VideosAssistant.prototype.setup = function() {
 		renderLimit: 12,
 		filterFunction: this.filterListFunction.bind(this),
 		dividerFunction: this.videosDividerFunction.bind(this),
-		formatters:{myData: this.setMyData.bind(this)}
+		formatters:{myData: this.setMyData.bind(this)},
+		reorderable: false
 	};
     this.videosListModel = {            
         //items: this.resultList,
@@ -79,8 +101,11 @@ VideosAssistant.prototype.setup = function() {
     };
 	this.controller.setupWidget( "videosList" , this.videosListAttribs, this.videosListModel);
 	
+	
+	
 	//Event listeners
 	Mojo.Event.listen(this.controller.get( "videosList" ), Mojo.Event.listTap, this.goVideosDetails.bind(this));
+	Mojo.Event.listen(this.controller.get( "videosDirectoryList" ), Mojo.Event.listTap, this.goVideosDirectory.bind(this));
 	Mojo.Event.listen(this.controller.get( "header-menu" ), Mojo.Event.tap, function(){this.controller.sceneScroller.mojo.revealTop();}.bind(this));
 	
 	
@@ -130,6 +155,7 @@ VideosAssistant.prototype.handleCommand = function(event) {
 		   break;
 		  case 'go-grou':		//group
 			//Mojo.Log.error("group select ... "+mySelection);
+			this.currentDirectoryObject = { directory: "", directoryLevels: 1, localDirectory: "", upperDirectory: "" };
 			this.controller.sceneScroller.mojo.revealTop();
 			this.videosGroupChanged(mySelection);
 		   break;
@@ -221,12 +247,11 @@ VideosAssistant.prototype.readStorageGroupsFail = function(event) {
 VideosAssistant.prototype.readStorageGroupsSuccess = function(response) {
 	//return true;  //can escape this function for testing purposes
     
-	Mojo.Log.info('Got storage group response: %j',response.responseJSON);
+	//Mojo.Log.info('Got storage group response: %j',response.responseJSON);
 	
 	//Update the storage group list
 	this.storageGroups.clear();
-	Object.extend(this.storageGroups,response.responseJSON);
-	
+	Object.extend(this.storageGroups,response.responseJSON);	
 	
 }
 
@@ -297,9 +322,14 @@ VideosAssistant.prototype.readRemoteDbTableSuccess = function(response) {
 	//Update the list widget
 	this.fullResultList.clear();
 	Object.extend(this.fullResultList,cleanVideos(response.responseJSON));
-	
-	
 	//Mojo.Log.info('Cleaned Videos is: %j',this.fullResultList);
+	
+	
+	this.directoryList.clear();
+	Object.extend(this.fullDirectoryList,cleanVideosDirectory(this.fullResultList.sort(sort_by('filename', false))));
+	Mojo.Log.info("Video directory list is %s long and is %j",this.fullDirectoryList.length,this.fullDirectoryList);
+	
+	
 	
 	
 	//$("scene-title").innerHTML = "Videos ("+this.fullResultList.length+" items)";
@@ -412,14 +442,34 @@ VideosAssistant.prototype.videosGroupChanged = function(newGroup) {
 	//May add filtering of results later
 	Mojo.Log.info("new grouping is "+newGroup);
 	
+	this.controller.sceneScroller.mojo.revealTop();
+	
 	WebMyth.prefsCookieObject.currentVideosGroup = newGroup
 	
 	this.updateGroupMenu();
 	
 	this.resultList.clear();
-	Object.extend(this.resultList,trimByVideoType(this.fullResultList, newGroup));
+	this.directoryList.clear();
 	
-	$("scene-title").innerHTML = "Videos ("+this.resultList.length+" items)";
+	if(newGroup == "Directory"){
+		Object.extend(this.resultList,trimByVideoDirectory(this.fullResultList, this.currentDirectoryObject.directory));
+		$("scene-title").innerHTML = "Videos ("+this.resultList.length+" items)";
+		
+		if(this.currentDirectoryObject.directory != ""){
+			this.directoryList.push( {localDirectory: "Return to top level", directory: "", upperDirectory: "" } );
+		}
+		
+		Object.extend(this.directoryList,trimByVideoUpperDirectory(this.fullDirectoryList, this.currentDirectoryObject.directory));
+		
+		this.controller.modelChanged(this.videosDirectoryListModel);
+		
+	} else {
+		Object.extend(this.resultList,trimByVideoType(this.fullResultList, newGroup));
+		$("scene-title").innerHTML = "Videos ("+this.resultList.length+" items)";
+		
+		this.controller.modelChanged(this.videosDirectoryListModel);
+	}
+	
 	
 	//Initial display
 	var listWidget = this.controller.get('videosList');
@@ -440,6 +490,7 @@ VideosAssistant.prototype.updateGroupMenu = function() {
 	//Reset default sorting
 	this.groupMenuModel.items = [ 
 		{"label": "All", "command": "go-groupall" },
+		{"label": "Directory", "command": "go-groupDirectory" },
 		{"label": "Regular", "command": "go-groupVideo" },
 		{"label": "TV", "command": "go-groupTV" },
 		{"label": "Specials", "command": "go-groupSpecial" }
@@ -449,14 +500,17 @@ VideosAssistant.prototype.updateGroupMenu = function() {
 		case 'all':
 			this.groupMenuModel.items[0].label = '- All -';
 		  break;
+		case 'Directory':
+			this.groupMenuModel.items[1].label = '- Directory -';
+		  break;
 		case 'Video':
-			this.groupMenuModel.items[1].label = '- Regular -';
+			this.groupMenuModel.items[2].label = '- Regular -';
 		  break;
 		case 'TV':
-			this.groupMenuModel.items[2].label = '- TV -';
+			this.groupMenuModel.items[3].label = '- TV -';
 		  break;
 		case 'Special':
-			this.groupMenuModel.items[3].label = '- Specials -';
+			this.groupMenuModel.items[4].label = '- Specials -';
 		  break;
 		default :
 			//this.sortMenuModel.items[0].label = 'Default';
@@ -567,6 +621,31 @@ VideosAssistant.prototype.goVideosDetails = function(event) {
 	
 	Event.stop(event);
 	
+};
+
+VideosAssistant.prototype.goVideosDirectory = function(event) {
+	
+	Mojo.Log.info("Selected individual directory: '%j'", event.item);
+	
+	this.currentDirectoryObject = event.item;
+
+	this.videosGroupChanged("Directory");
+	
+	Event.stop(event);
+	
+};
+
+VideosAssistant.prototype.videosDirectoryDividerFunction = function(itemModel) {
+	
+	var divider = "";
+	
+	if(this.currentDirectoryObject.directory == ""){
+		divider = "Top Directory";
+	} else {
+		divider = this.currentDirectoryObject.directory;
+	}
+	
+	return divider;
 };
 
 VideosAssistant.prototype.videosDividerFunction = function(itemModel) {
