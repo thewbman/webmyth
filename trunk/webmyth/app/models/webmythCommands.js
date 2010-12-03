@@ -110,7 +110,7 @@ function defaultCookie() {
 		showVideos: true,
 		showMusic: true,
 		currentVideosSort: 'title-asc',
-		currentVideosGroup: 'all',
+		currentVideosGroup: 'Directory',
 		currentMusicSort: 'artist-asc',
 		currentUpcomingGroup: 'Upcoming',
 		forceScriptScreenshots: false,
@@ -222,8 +222,8 @@ var double_sort_by = function(field1, field2, reverse, primer){
 
    return function(a,b){
 
-       a = a[field1]+a[field2];
-       b = b[field1]+b[field2];
+       a = a[field1]+"_"+a[field2];
+       b = b[field1]+"_"+b[field2];
 
        if (typeof(primer) != 'undefined'){
            a = primer(a);
@@ -354,7 +354,22 @@ var trimByVideoType = function(fullList, myVideoType) {
 	
 	//Check for keyword for no filtering
 	if (myVideoType == 'all') {
-		return fullList;
+	
+		var trimmedList = [];
+		var i, s;
+	
+		for (i = 0; i < fullList.length; i++) {
+	
+			s = fullList[i];
+			if ((s.videoType == "Video")||(s.videoType == "Special")||(s.videoType == "TV")) {
+				//Matches video type
+				trimmedList.push(s);
+			} else {
+				//Does not match
+			}
+		}
+		return trimmedList;
+		
 	} else {
 	
 		var trimmedList = [];
@@ -372,6 +387,50 @@ var trimByVideoType = function(fullList, myVideoType) {
 		}
 		return trimmedList;
 	}
+};
+
+var trimByVideoDirectory = function(fullList, directory_in) {
+	
+	
+		var trimmedList = [];
+		var i, s;
+	
+		for (i = 0; i < fullList.length; i++) {
+	
+			s = fullList[i];
+			if ((s.directory == directory_in)) {
+				//Matches video directory
+				trimmedList.push(s);
+			} else {
+				//Does not match
+			}
+		}
+		
+		return trimmedList;
+		
+
+};
+
+var trimByVideoUpperDirectory = function(fullList, directory_in) {
+	
+	
+		var trimmedList = [];
+		var i, s;
+	
+		for (i = 0; i < fullList.length; i++) {
+	
+			s = fullList[i];
+			if ((s.upperDirectory == directory_in)&&(s.upperDirectory != s.directory)) {
+				//Matches video directory
+				trimmedList.push(s);
+			} else {
+				//Does not match
+			}
+		}
+		
+		return trimmedList;
+		
+
 };
 
 var trimMusicByArtist = function(fullList, myArtist) {
@@ -842,6 +901,8 @@ var cleanVideos = function(fullList) {
 		s.level6 = t[0]+"/"+t[1]+"/"+t[2]+"/"+t[3]+"/"+t[4]+"/"+t[5];
 		
 		s.onlyFilename = t[s.fileLevels-1];
+		
+		s.directory = s.filename.replace(s.onlyFilename,"");
 			
 			
 		//Fix some blank values
@@ -849,6 +910,107 @@ var cleanVideos = function(fullList) {
 		if(s.plot == 'None') s.plot = '';
 		
 		finalList.push(s);
+		
+	}
+	
+	
+	return finalList;
+	
+}
+
+var cleanVideosDirectory = function(fullList) {
+
+	finalList = [];
+	
+	var i, s = {}, t = {}, u = [];
+	
+	var lastDirectory1 = "asdf-fake-directory";
+	var lastDirectory2 = "asdf-fake-directory";
+	var lastDirectory3 = "asdf-fake-directory";
+	var lastDirectory4 = "asdf-fake-directory";
+	var lastDirectory5 = "asdf-fake-directory";
+	var lastDirectory6 = "asdf-fake-directory";
+	
+	for(i = 0; i < fullList.length; i++) {
+		s = fullList[i];
+		t = {};
+		u.clear();
+		u = s.directory.split("/");
+		
+		
+		if((s.fileLevels > 1)&&(lastDirectory1 != s.level1)){
+			t = {};
+			
+			t.directory = s.level1+'/';
+			t.directoryLevels = 2;
+			t.localDirectory = u[t.directoryLevels-2];
+			t.upperDirectory = t.directory.replace(t.localDirectory+'/',"");
+			
+			finalList.push(t);
+			lastDirectory1 = s.level1;
+		}
+		
+		
+		if((s.fileLevels > 2)&&(lastDirectory2 != s.level2)){
+			t = {};
+			
+			t.directory = s.level2+'/';
+			t.directoryLevels = 3;
+			t.localDirectory = u[t.directoryLevels-2];
+			t.upperDirectory = t.directory.replace(t.localDirectory+'/',"");
+			
+			finalList.push(t);
+			lastDirectory2 = s.level2;
+		}
+		
+		if((s.fileLevels > 3)&&(lastDirectory3 != s.level3)){
+			t = {};
+			
+			t.directory = s.level3+'/';
+			t.directoryLevels = 4;
+			t.localDirectory = u[t.directoryLevels-2];
+			t.upperDirectory = t.directory.replace(t.localDirectory+'/',"");
+			
+			finalList.push(t);
+			lastDirectory3 = s.level3;
+		}
+		
+		if((s.fileLevels > 4)&&(lastDirectory4 != s.level4)){
+			t = {};
+			
+			t.directory = s.level4+'/';
+			t.directoryLevels = 5;
+			t.localDirectory = u[t.directoryLevels-2];
+			t.upperDirectory = t.directory.replace(t.localDirectory+'/',"");
+			
+			finalList.push(t);
+			lastDirectory4 = s.level4;
+		}
+		
+		if((s.fileLevels > 5)&&(lastDirectory5 != s.level5)){
+			t = {};
+			
+			t.directory = s.level5+'/';
+			t.directoryLevels = 6;
+			t.localDirectory = u[t.directoryLevels-2];
+			t.upperDirectory = t.directory.replace(t.localDirectory+'/',"");
+			
+			finalList.push(t);
+			lastDirectory5 = s.level5;
+		}
+		
+		if((s.fileLevels > 6)&&(lastDirectory4 != s.level6)){
+			t = {};
+			
+			t.directory = s.level6+'/';
+			t.directoryLevels = 7;
+			t.localDirectory = u[t.directoryLevels-2];
+			t.upperDirectory = t.directory.replace(t.localDirectory+'/',"");
+			
+			finalList.push(t);
+			lastDirectory6 = s.level6;
+		}
+		
 		
 	}
 	

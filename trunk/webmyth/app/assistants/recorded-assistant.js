@@ -919,7 +919,13 @@ RecordedAssistant.prototype.setMyData = function(propertyValue, model)  {
 	recordedDetailsText += '<div class="palm-info-text truncating-text left">&nbsp;'+model.subTitle+'&nbsp;</div>';
 	recordedDetailsText += '<div class="palm-info-text truncating-text left">&nbsp;&nbsp;'+model.startTimeSpace+'&nbsp;</div>';
 	recordedDetailsText += '<div class="palm-info-text truncating-text left">&nbsp;&nbsp;&nbsp;'+model.category+'</div>';
-	recordedDetailsText += '<div class="palm-info-text truncating-text left">&nbsp;&nbsp;&nbsp;&nbsp;'+model.chanNum+" - "+model.channelName+'</div>';
+	
+	if(model.recStatus == -2){
+		recordedDetailsText += '<div class="palm-info-text truncating-text left">&nbsp;&nbsp;&nbsp;&nbsp;Currently Recording</div>';
+	} else {
+		recordedDetailsText += '<div class="palm-info-text truncating-text left">&nbsp;&nbsp;&nbsp;&nbsp;'+model.chanNum+" - "+model.channelName+'</div>';
+	}
+	
 	recordedDetailsText += '</div>';
 	
 	recordedDetailsText += '</div></div>';

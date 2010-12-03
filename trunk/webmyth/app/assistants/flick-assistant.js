@@ -53,16 +53,16 @@ FlickAssistant.prototype.setup = function() {
 	
 	
 	//Escape button
-	Mojo.Event.listen(this.controller.get("flickEscButtonId"),Mojo.Event.tap, this.handleTap.bind(this, this.controller.get("flickEscButtonId")));
+	Mojo.Event.listen(this.controller.get("flickEscButtonId"),Mojo.Event.tap, this.sendTelnetKey.bind(this, "escape"));
 	//Nav flick button
-	Mojo.Event.listen(this.controller.get("flickNavButtonId"),Mojo.Event.tap, this.handleTap.bind(this, this.controller.get("flickNavButtonId")));
-	Mojo.Event.listen(this.controller.get("flickNavButtonId"),Mojo.Event.flick, this.handleFlick.bind(this, this.controller.get("flickNavButtonId")));
+	Mojo.Event.listen(this.controller.get("flickNavButtonId"),Mojo.Event.tap, this.sendTelnetKey.bind(this, "space"));
+	Mojo.Event.listen(this.controller.get("flickNavButtonId"),Mojo.Event.flick, this.handleNavFlick.bind(this));
 	//Play flick button
-	Mojo.Event.listen(this.controller.get("flickPlayButtonId"),Mojo.Event.tap, this.handleTap.bind(this, this.controller.get("flickPlayButtonId")));
-	Mojo.Event.listen(this.controller.get("flickPlayButtonId"),Mojo.Event.flick, this.handleFlick.bind(this, this.controller.get("flickPlayButtonId")));
+	Mojo.Event.listen(this.controller.get("flickPlayButtonId"),Mojo.Event.tap, this.sendTelnetKey.bind(this, "p"));
+	Mojo.Event.listen(this.controller.get("flickPlayButtonId"),Mojo.Event.flick, this.handlePlayFlick.bind(this));
 	//Volume flick button
-	Mojo.Event.listen(this.controller.get("flickVolumeButtonId"),Mojo.Event.tap, this.handleTap.bind(this, this.controller.get("flickVolumeButtonId")));
-	Mojo.Event.listen(this.controller.get("flickVolumeButtonId"),Mojo.Event.flick, this.handleFlick.bind(this, this.controller.get("flickVolumeButtonId")));
+	Mojo.Event.listen(this.controller.get("flickVolumeButtonId"),Mojo.Event.tap, this.sendTelnetKey.bind(this, "f9"));
+	Mojo.Event.listen(this.controller.get("flickVolumeButtonId"),Mojo.Event.flick, this.handleVolumeFlick.bind(this));
 
 	
 };
@@ -78,18 +78,17 @@ FlickAssistant.prototype.activate = function(event) {
 	this.remoteViewMenuModel.items[0].items[1].label = "Flick: " + WebMyth.prefsCookieObject.currentFrontend;  
 	this.controller.modelChanged(this.remoteViewMenuModel);
 	
-	
 	this.controller.enableFullScreenMode(WebMyth.prefsCookieObject.remoteFullscreen);
+	
+
 };
 
 FlickAssistant.prototype.deactivate = function(event) {
-	/* remove any event handlers you added in activate and do any other cleanup that should happen before
-	   this scene is popped or another scene is pushed on top */
+
 };
 
 FlickAssistant.prototype.cleanup = function(event) {
-	/* this function should do any cleanup needed before the scene is destroyed as 
-	   a result of being popped off the scene stack */
+
 };
 
 FlickAssistant.prototype.handleCommand = function(event) {
@@ -124,93 +123,6 @@ FlickAssistant.prototype.handleCommand = function(event) {
   
 };
 
-
-// Send tap commands to telnet connection
-FlickAssistant.prototype.handleTap = function(element, event) {
-
-	var name = element;
-	
-	switch(name)
-	{
-		case flickEscButtonId:
-			this.sendTelnetKey("escape");
-			break;
-		case flickNavButtonId:
-			this.sendTelnetKey("enter");
-			break;
-		case flickPlayButtonId:
-			this.sendTelnetKey("p");
-			break;
-		case flickVolumeButtonId:
-			this.sendTelnetKey("f9");
-			break;
-
-		  
-		default:
-			Mojo.Controller.errorDialog("no matching command for %$s", name);
-			break;
-		
-	}
-  
-};
-
-
-// Send tap commands to telnet connection
-FlickAssistant.prototype.handleFlick = function(element, event) {
-
-	var name = element;
-	var threshold = 500;
-	
-	//$("flickDebug").innerHTML = " velocity x: "+event.velocity.x+" and y: "+event.velocity.y;
-	
-	switch(name)
-	{
-	//Navigation commands
-	case flickNavButtonId:
-	  if(event.velocity.x > threshold) {
-		this.sendTelnetKey("right");
-	  } else if(Math.abs(event.velocity.x) > threshold){
-		this.sendTelnetKey("left");
-	  } else if(event.velocity.y > threshold){
-		this.sendTelnetKey("down");
-	  } else if(Math.abs(event.velocity.y) > threshold){
-		this.sendTelnetKey("up");
-	  } else {
-		Mojo.Log.info("Nav flick not strong enough x:"+event.velocity.x+" and y: "+event.velocity.y);
-	  }
-	  break;
-	//Play commands
-	case flickPlayButtonId:
-	  if(event.velocity.x > threshold) {
-		this.sendTelnetKey("z");
-	  } else if(Math.abs(event.velocity.x) > threshold){
-		this.sendTelnetKey("q");
-	  } else {
-		Mojo.Log.info("Play flick not strong enough x:"+event.velocity.x+" and y: "+event.velocity.y);
-	  }
-	  break;
-	//Volume commands
-	case flickVolumeButtonId:
-	  if(event.velocity.x > threshold) {
-		this.sendTelnetKey("]");
-	  } else if(Math.abs(event.velocity.x) > threshold){
-		this.sendTelnetKey("[");
-	  } else {
-		Mojo.Log.info("Volume flick not strong enough x:"+event.velocity.x+" and y: "+event.velocity.y);
-	  }
-	  break;
-
-	  
-	default:
-	  Mojo.Controller.errorDialog("no matching command for %$s", name);
-	}
-	
-	Event.stop(event);
-  
-};
-
-
-// Send commands to telnet connection
 FlickAssistant.prototype.handleKey = function(event) {
 
 	Mojo.Log.info("NavigationAssistant.prototype.handleKey %o", event.originalEvent.keyCode);
@@ -340,6 +252,63 @@ FlickAssistant.prototype.handleKey = function(event) {
 		default:
 			Mojo.Log.info("No known key");
 	}
+  
+};
+
+
+
+
+
+FlickAssistant.prototype.handleNavFlick = function(event) {
+
+	var threshold = 500;
+	
+	  if(event.velocity.x > threshold) {
+		this.sendTelnetKey("right");
+	  } else if(Math.abs(event.velocity.x) > threshold){
+		this.sendTelnetKey("left");
+	  } else if(event.velocity.y > threshold){
+		this.sendTelnetKey("down");
+	  } else if(Math.abs(event.velocity.y) > threshold){
+		this.sendTelnetKey("up");
+	  } else {
+		Mojo.Log.info("Nav flick not strong enough x:"+event.velocity.x+" and y: "+event.velocity.y);
+	  }
+	  
+	  
+	Event.stop(event);
+}
+
+FlickAssistant.prototype.handlePlayFlick = function(event) {
+
+	var threshold = 500;
+	
+	  if(event.velocity.x > threshold) {
+		this.sendTelnetKey("z");
+	  } else if(Math.abs(event.velocity.x) > threshold){
+		this.sendTelnetKey("q");
+	  } else {
+		Mojo.Log.info("Play flick not strong enough x:"+event.velocity.x+" and y: "+event.velocity.y);
+	  }
+	  
+	  
+	Event.stop(event);
+}
+
+FlickAssistant.prototype.handleVolumeFlick = function(event) {
+
+	var threshold = 500;
+
+	  if(event.velocity.x > threshold) {
+		this.sendTelnetKey("f11");
+	  } else if(Math.abs(event.velocity.x) > threshold){
+		this.sendTelnetKey("f10");
+	  } else {
+		Mojo.Log.info("Volume flick not strong enough x:"+event.velocity.x+" and y: "+event.velocity.y);
+	  }
+
+	
+	Event.stop(event);
   
 };
 

@@ -43,7 +43,7 @@ body.palm-dark {
 .navigation-scene,
 .numberpad-scene {
    height: 100%;
-   background: url('../images/gradient4.png') center center;
+   /*background: url('../images/gradient4.png') center center;*/
 }
 
 .buttonRow3 {
@@ -559,6 +559,9 @@ body.palm-dark {
   line-height: 16px;
 }
 
+.recordedDetails-scene .currently-recording-text {
+	text-align: center;
+}
 
 /*
  * Imageview
@@ -980,8 +983,6 @@ body.palm-dark {
 	border: 0px; 
 	-webkit-border-radius: 5px;
 }
-
-
 
 /*
  * Status scene
