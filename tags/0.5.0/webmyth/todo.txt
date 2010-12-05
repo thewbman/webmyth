@@ -1,0 +1,23 @@
+Todo - planned new features and updates:
+ 
+//Future
+ 
+ 
+//Long term
+ - plugin for remote
+ - progress/volume scrobble on remote ?
+ - demo video(s)
+ - add support for pin on backend ?
+ - search recording rules
+ - new app icons/theme
+ - fix pixelated icon
+ - non-email feedback?
+ - look into menu panel (style matters)
+ - language translation support
+ - make dialogs palm-dark
+ - handle music playlists
+ - cleanup schedule recording scene
+ 
+
+//May never do
+ - open remote in seperate card (had trouble with coding up and working correctly) 
