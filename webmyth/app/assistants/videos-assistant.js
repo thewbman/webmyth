@@ -456,10 +456,17 @@ VideosAssistant.prototype.videosGroupChanged = function(newGroup) {
 		$("scene-title").innerHTML = "Videos ("+this.resultList.length+" items)";
 		
 		if(this.currentDirectoryObject.directory != ""){
-			this.directoryList.push( {localDirectory: "Return to top level", directory: "", upperDirectory: "" } );
+			this.directoryList.push( {localDirectory: "&nbsp;&nbsp;-&nbsp;&nbsp;Return to top level&nbsp;&nbsp;-&nbsp;&nbsp;", directory: "", upperDirectory: "" } );
 		}
 		
-		Object.extend(this.directoryList,trimByVideoUpperDirectory(this.fullDirectoryList, this.currentDirectoryObject.directory));
+		var currentDirectories = trimByVideoUpperDirectory(this.fullDirectoryList, this.currentDirectoryObject.directory);
+		
+		for(var i = 0; i < currentDirectories.length; i++) {
+			this.directoryList.push(currentDirectories[i]);
+		}
+		
+		//Object.extend(this.directoryList,trimByVideoUpperDirectory(this.fullDirectoryList, this.currentDirectoryObject.directory));
+		
 		
 		this.controller.modelChanged(this.videosDirectoryListModel);
 		

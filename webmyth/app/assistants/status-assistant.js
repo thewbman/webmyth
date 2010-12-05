@@ -684,7 +684,7 @@ StatusAssistant.prototype.setJobqueueData = function(propertyValue, model)  {
 			statusText = "Cancelled";
 			break;
 		default:
-			jobType = "Unknown";
+			statusText = "Unknown";
 			break;
 	};
 			
@@ -721,19 +721,28 @@ StatusAssistant.prototype.setEncodersData = function(propertyValue, model)  {
 			state = "Watching Live TV";
 			break;
 		case 2:
-			state = "Unknown Status 2";
+			state = "Watching Pre-Recorded";
 			break;
 		case 3:
-			state = "Unknown Status 3";
+			state = "Watching Video";
 			break;
 		case 4:
-			state = "Unknown Status 4";
+			state = "Watching DVD";
 			break;
 		case 5:
-			state = "Unknown Status 5";
+			state = "Watching BD";
 			break;
 		case 6:
 			state = "Recording";
+			break;
+		case 7:
+			state = "Recording";
+			break;
+		case 8:
+			state = "Unknown Status 8";
+			break;
+		case 9:
+			state = "Unknown Status 9";
 			break;
 		default:
 			state = "Unknown";

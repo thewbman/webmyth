@@ -104,6 +104,11 @@ GuideDetailsAssistant.prototype.setup = function() {
 	$('channum-title').innerText = this.guideObject.chanNum;
 	//$('recstartts-title').innerText = this.guideObject.recStartTs;
 	
+	
+	
+	this.controller.listen(this.controller.get( "header-menu" ), Mojo.Event.tap, function(){this.controller.sceneScroller.mojo.revealTop();}.bind(this));
+	
+	
 
 };
 

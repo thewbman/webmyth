@@ -1,11 +1,9 @@
 [
     {"source": "app/assistants/stage-assistant.js"},
-	
     {"source": "app/models/webmythCommands.js"},
     {"source": "app/models/metrix.js"},
     {"source": "app/models/Base64.js"},
     {"source": "app/models/asyncWrappers.js"},
-	
     {
         "scenes": "hostSelector",
         "source": "app/assistants/hostSelector-assistant.js"
@@ -145,5 +143,9 @@
     {
         "scenes": "editHost",
         "source": "app/assistants/editHost-assistant.js"
+    },
+    {
+        "scenes": "log",
+        "source": "app/assistants/log-assistant.js"
     }
 ]

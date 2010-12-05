@@ -113,6 +113,17 @@ WelcomeAssistant.prototype.setup = function() {
 	Mojo.Event.listen(this.controller.get("goStatusButtonId"),Mojo.Event.tap, this.goStatus.bind(this));
 	
 	
+	//View log button
+	this.controller.setupWidget("goLogButtonId",
+         {},
+         {
+             label : "Log",
+             disabled: false
+         }
+     );
+	Mojo.Event.listen(this.controller.get("goLogButtonId"),Mojo.Event.tap, this.goLog.bind(this));
+	
+	
 
 	if (WebMyth.prefsCookieObject) {		//cookie exists
 			
@@ -128,40 +139,44 @@ WelcomeAssistant.prototype.setup = function() {
 			WebMyth.Metrix.checkBulletinBoard(this.controller, 10);
 		};
 		
+		myDefaultCookie = defaultCookie();
 		
 		//Setup default settings if missing due to old cookie versions
-		//if (WebMyth.prefsCookieObject.webserverRemoteFile == null) WebMyth.prefsCookieObject.webserverRemoteFile = defaultCookie().webserverRemoteFile;
-		//if (WebMyth.prefsCookieObject.webMysqlFile == null) WebMyth.prefsCookieObject.webMysqlFile = defaultCookie().webMysqlFile;
-		if (WebMyth.prefsCookieObject.webmythPythonFile == null) WebMyth.prefsCookieObject.webmythPythonFile = defaultCookie().webmythPythonFile;
-		if (WebMyth.prefsCookieObject.currentRecgroup == null) WebMyth.prefsCookieObject.currentRecgroup = defaultCookie().currentRecgroup;
-		if (WebMyth.prefsCookieObject.currentRecSort == null) WebMyth.prefsCookieObject.currentRecSort = defaultCookie().currentRecSort;
-		if (WebMyth.prefsCookieObject.currentFrontend == null) WebMyth.prefsCookieObject.currentFrontend = defaultCookie().currentFrontend;
-		if (WebMyth.prefsCookieObject.currentFrontendPort == null) WebMyth.prefsCookieObject.currentFrontendPort = defaultCookie().currentFrontendPort;
-		if (WebMyth.prefsCookieObject.currentRemoteScene == null) WebMyth.prefsCookieObject.currentRemoteScene = defaultCookie().currentRemoteScene;
-		if (WebMyth.prefsCookieObject.allowRecordedDownloads == null) WebMyth.prefsCookieObject.allowRecordedDownloads = defaultCookie().allowRecordedDownloads;
-		if (WebMyth.prefsCookieObject.recordedDownloadsUrl == null) WebMyth.prefsCookieObject.recordedDownloadsUrl = defaultCookie().recordedDownloadsUrl;
-		//if (WebMyth.prefsCookieObject.theme == null) WebMyth.prefsCookieObject.theme = defaultCookie().theme;
-		if (WebMyth.prefsCookieObject.remoteVibrate == null) WebMyth.prefsCookieObject.remoteVibrate = defaultCookie().remoteVibrate;
-		if (WebMyth.prefsCookieObject.remoteFullscreen == null) WebMyth.prefsCookieObject.remoteFullscreen = defaultCookie().remoteFullscreen;
-		if (WebMyth.prefsCookieObject.masterBackendIp == null) WebMyth.prefsCookieObject.masterBackendIp = defaultCookie().masterBackendIp;
-		if (WebMyth.prefsCookieObject.manualMasterBackend == null) WebMyth.prefsCookieObject.manualMasterBackend = defaultCookie().manualMasterBackend;
-		if (WebMyth.prefsCookieObject.remoteHeaderAction == null) WebMyth.prefsCookieObject.remoteHeaderAction = defaultCookie().remoteHeaderAction;
-		if (WebMyth.prefsCookieObject.playJumpRemote == null) WebMyth.prefsCookieObject.playJumpRemote = defaultCookie().playJumpRemote;
-		if (WebMyth.prefsCookieObject.guideJumpRemote == null) WebMyth.prefsCookieObject.guideJumpRemote = defaultCookie().guideJumpRemote;
-		if (WebMyth.prefsCookieObject.showUpcomingChannelIcons == null) WebMyth.prefsCookieObject.showUpcomingChannelIcons = defaultCookie().showUpcomingChannelIcons;
-		if (WebMyth.prefsCookieObject.dashboardRemote == null) WebMyth.prefsCookieObject.dashboardRemote = defaultCookie().dashboardRemote;
-		if (WebMyth.prefsCookieObject.dashboardRemoteIndex == null) WebMyth.prefsCookieObject.dashboardRemoteIndex = defaultCookie().dashboardRemoteIndex;
-		if (WebMyth.prefsCookieObject.useWebmythScript == null) WebMyth.prefsCookieObject.useWebmythScript = defaultCookie().useWebmythScript;
-		if (WebMyth.prefsCookieObject.showUpcoming == null) WebMyth.prefsCookieObject.showUpcoming = defaultCookie().showUpcoming;
-		if (WebMyth.prefsCookieObject.showVideos == null) WebMyth.prefsCookieObject.showVideos = defaultCookie().showVideos;
-		if (WebMyth.prefsCookieObject.showMusic == null) WebMyth.prefsCookieObject.showMusic = defaultCookie().showMusic;
-		if (WebMyth.prefsCookieObject.currentVideosSort == null) WebMyth.prefsCookieObject.currentVideosSort = defaultCookie().currentVideosSort;
-		if (WebMyth.prefsCookieObject.currentVideosGroup == null) WebMyth.prefsCookieObject.currentVideosGroup = defaultCookie().currentVideosGroup;
-		if (WebMyth.prefsCookieObject.currentFrontendAddress == null) WebMyth.prefsCookieObject.currentFrontendAddress = defaultCookie().currentFrontend;
-		if (WebMyth.prefsCookieObject.currentMusicSort == null) WebMyth.prefsCookieObject.currentMusicSort = defaultCookie().currentMusicSort;
-		if (WebMyth.prefsCookieObject.currentUpcomingGroup == null) WebMyth.prefsCookieObject.currentUpcomingGroup = defaultCookie().currentUpcomingGroup;
-		if (WebMyth.prefsCookieObject.forceScriptScreenshots == null) WebMyth.prefsCookieObject.forceScriptScreenshots = defaultCookie().forceScriptScreenshots;
-		if (WebMyth.prefsCookieObject.showVideoImages == null) WebMyth.prefsCookieObject.showVideoImages = defaultCookie().showVideoImages;
+		//if (WebMyth.prefsCookieObject.webserverRemoteFile == null) WebMyth.prefsCookieObject.webserverRemoteFile = myDefaultCookie.webserverRemoteFile;
+		//if (WebMyth.prefsCookieObject.webMysqlFile == null) WebMyth.prefsCookieObject.webMysqlFile = myDefaultCookie.webMysqlFile;
+		if (WebMyth.prefsCookieObject.webmythPythonFile == null) WebMyth.prefsCookieObject.webmythPythonFile = myDefaultCookie.webmythPythonFile;
+		if (WebMyth.prefsCookieObject.currentRecgroup == null) WebMyth.prefsCookieObject.currentRecgroup = myDefaultCookie.currentRecgroup;
+		if (WebMyth.prefsCookieObject.currentRecSort == null) WebMyth.prefsCookieObject.currentRecSort = myDefaultCookie.currentRecSort;
+		if (WebMyth.prefsCookieObject.currentFrontend == null) WebMyth.prefsCookieObject.currentFrontend = myDefaultCookie.currentFrontend;
+		if (WebMyth.prefsCookieObject.currentFrontendPort == null) WebMyth.prefsCookieObject.currentFrontendPort = myDefaultCookie.currentFrontendPort;
+		if (WebMyth.prefsCookieObject.currentRemoteScene == null) WebMyth.prefsCookieObject.currentRemoteScene = myDefaultCookie.currentRemoteScene;
+		if (WebMyth.prefsCookieObject.allowRecordedDownloads == null) WebMyth.prefsCookieObject.allowRecordedDownloads = myDefaultCookie.allowRecordedDownloads;
+		if (WebMyth.prefsCookieObject.recordedDownloadsUrl == null) WebMyth.prefsCookieObject.recordedDownloadsUrl = myDefaultCookie.recordedDownloadsUrl;
+		//if (WebMyth.prefsCookieObject.theme == null) WebMyth.prefsCookieObject.theme = myDefaultCookie.theme;
+		if (WebMyth.prefsCookieObject.remoteVibrate == null) WebMyth.prefsCookieObject.remoteVibrate = myDefaultCookie.remoteVibrate;
+		if (WebMyth.prefsCookieObject.remoteFullscreen == null) WebMyth.prefsCookieObject.remoteFullscreen = myDefaultCookie.remoteFullscreen;
+		if (WebMyth.prefsCookieObject.masterBackendIp == null) WebMyth.prefsCookieObject.masterBackendIp = myDefaultCookie.masterBackendIp;
+		if (WebMyth.prefsCookieObject.manualMasterBackend == null) WebMyth.prefsCookieObject.manualMasterBackend = myDefaultCookie.manualMasterBackend;
+		if (WebMyth.prefsCookieObject.remoteHeaderAction == null) WebMyth.prefsCookieObject.remoteHeaderAction = myDefaultCookie.remoteHeaderAction;
+		if (WebMyth.prefsCookieObject.playJumpRemote == null) WebMyth.prefsCookieObject.playJumpRemote = myDefaultCookie.playJumpRemote;
+		if (WebMyth.prefsCookieObject.guideJumpRemote == null) WebMyth.prefsCookieObject.guideJumpRemote = myDefaultCookie.guideJumpRemote;
+		if (WebMyth.prefsCookieObject.showUpcomingChannelIcons == null) WebMyth.prefsCookieObject.showUpcomingChannelIcons = myDefaultCookie.showUpcomingChannelIcons;
+		if (WebMyth.prefsCookieObject.dashboardRemote == null) WebMyth.prefsCookieObject.dashboardRemote = myDefaultCookie.dashboardRemote;
+		if (WebMyth.prefsCookieObject.dashboardRemoteIndex == null) WebMyth.prefsCookieObject.dashboardRemoteIndex = myDefaultCookie.dashboardRemoteIndex;
+		if (WebMyth.prefsCookieObject.useWebmythScript == null) WebMyth.prefsCookieObject.useWebmythScript = myDefaultCookie.useWebmythScript;
+		if (WebMyth.prefsCookieObject.showUpcoming == null) WebMyth.prefsCookieObject.showUpcoming = myDefaultCookie.showUpcoming;
+		if (WebMyth.prefsCookieObject.showVideos == null) WebMyth.prefsCookieObject.showVideos = myDefaultCookie.showVideos;
+		if (WebMyth.prefsCookieObject.showMusic == null) WebMyth.prefsCookieObject.showMusic = myDefaultCookie.showMusic;
+		if (WebMyth.prefsCookieObject.currentVideosSort == null) WebMyth.prefsCookieObject.currentVideosSort = myDefaultCookie.currentVideosSort;
+		if (WebMyth.prefsCookieObject.currentVideosGroup == null) WebMyth.prefsCookieObject.currentVideosGroup = myDefaultCookie.currentVideosGroup;
+		if (WebMyth.prefsCookieObject.currentFrontendAddress == null) WebMyth.prefsCookieObject.currentFrontendAddress = myDefaultCookie.currentFrontend;
+		if (WebMyth.prefsCookieObject.currentMusicSort == null) WebMyth.prefsCookieObject.currentMusicSort = myDefaultCookie.currentMusicSort;
+		if (WebMyth.prefsCookieObject.currentUpcomingGroup == null) WebMyth.prefsCookieObject.currentUpcomingGroup = myDefaultCookie.currentUpcomingGroup;
+		if (WebMyth.prefsCookieObject.forceScriptScreenshots == null) WebMyth.prefsCookieObject.forceScriptScreenshots = myDefaultCookie.forceScriptScreenshots;
+		if (WebMyth.prefsCookieObject.showVideoImages == null) WebMyth.prefsCookieObject.showVideoImages = myDefaultCookie.showVideoImages;
+		if (WebMyth.prefsCookieObject.showVideoDetailsImage == null) WebMyth.prefsCookieObject.showVideoDetailsImage = myDefaultCookie.showVideoDetailsImage;
+		if (WebMyth.prefsCookieObject.showLog == null) WebMyth.prefsCookieObject.showLog = myDefaultCookie.showLog;
+		if (WebMyth.prefsCookieObject.currentLogGroup == null) WebMyth.prefsCookieObject.currentLogGroup = myDefaultCookie.currentLogGroup;
 		
 		
 		//Check if scripts need an upgrade message
@@ -393,6 +408,16 @@ WelcomeAssistant.prototype.showButtons = function() {
 		$('musicButtonWrapper').className = "";
 	}
 	
+	if((WebMyth.prefsCookieObject.showLog)) {
+		$('statusButtonWrapper').className = 'column1of2';
+		$('logButtonWrapper').className = 'column2of2';
+		$('goLogButtonId').show();
+	} else {
+		$('statusButtonWrapper').className = "";
+		$('logButtonWrapper').className = "";
+		$('goLogButtonId').hide();
+	}
+	
 	
 	
 	
@@ -460,6 +485,11 @@ WelcomeAssistant.prototype.goMusic = function(event) {
 WelcomeAssistant.prototype.goStatus = function(event) {
 	//Start upcoming scene
 	Mojo.Controller.stageController.pushScene("status");
+};
+
+WelcomeAssistant.prototype.goLog = function(event) {
+	//Start upcoming scene
+	Mojo.Controller.stageController.pushScene("log");
 };
 
 WelcomeAssistant.prototype.goWebview = function(event) {

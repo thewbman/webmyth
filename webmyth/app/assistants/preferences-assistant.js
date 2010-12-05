@@ -162,6 +162,18 @@ PreferencesAssistant.prototype.setup = function() {
          },
          this.showMusicToggleModel
     );
+	
+	//Show backend log
+	this.showLogToggleModel = {
+             value: false
+    };
+	this.controller.setupWidget("showLogToggleId",
+        {
+			label: $L("show log"),
+            modelProperty: "value"
+         },
+         this.showLogToggleModel
+    );
 
 
 	
@@ -228,17 +240,29 @@ PreferencesAssistant.prototype.setup = function() {
          },
          this.upcomingChannelIconsToggleModel
     ); 
-	//Video images
+	//Video images list
 	this.videoImagesToggleModel = {
              value: false
     };
 	this.controller.setupWidget("videoImagesToggleId",
         {
-			label: $L("Show Video Images"),
+			label: $L("Show Video Images (List)"),
             modelProperty: "value"
          },
          this.videoImagesToggleModel
     ); 
+	//Video images details
+	this.showVideoDetailsImageToggleModel = {
+             value: false
+    };
+	this.controller.setupWidget("showVideoDetailsImageToggleId",
+        {
+			label: $L("Show Video Images (Details)"),
+            modelProperty: "value"
+         },
+         this.showVideoDetailsImageToggleModel
+    ); 
+	//showVideoDetailsImage
 	//Use script for screenshots
 	this.forceScriptScreenshotsToggleModel = {
              value: false
@@ -436,6 +460,9 @@ PreferencesAssistant.prototype.activate = function(event) {
 			this.showMusicToggleModel.value = WebMyth.prefsCookieObject.showMusic;
 			this.controller.modelChanged(this.showMusicToggleModel);
 			
+			this.showLogToggleModel.value = WebMyth.prefsCookieObject.showLog;
+			this.controller.modelChanged(this.showLogToggleModel);
+			
 			
 			
 			this.manualMasterBackendToggleModel.value = WebMyth.prefsCookieObject.manualMasterBackend;
@@ -452,6 +479,9 @@ PreferencesAssistant.prototype.activate = function(event) {
 			
 			this.videoImagesToggleModel.value = WebMyth.prefsCookieObject.showVideoImages;
 			this.controller.modelChanged(this.videoImagesToggleModel);
+			
+			this.showVideoDetailsImageToggleModel.value = WebMyth.prefsCookieObject.showVideoDetailsImage;
+			this.controller.modelChanged(this.showVideoDetailsImageToggleModel);
 			
 			this.forceScriptScreenshotsToggleModel.value = WebMyth.prefsCookieObject.forceScriptScreenshots;
 			this.controller.modelChanged(this.forceScriptScreenshotsToggleModel);
@@ -697,6 +727,7 @@ PreferencesAssistant.prototype.checkSettings = function() {
 		WebMyth.prefsCookieObject.showUpcoming = this.showUpcomingToggleModel.value;
 		WebMyth.prefsCookieObject.showVideos = this.showVideosToggleModel.value;
 		WebMyth.prefsCookieObject.showMusic = this.showMusicToggleModel.value;
+		WebMyth.prefsCookieObject.showLog = this.showLogToggleModel.value;
 		
 		
 		WebMyth.prefsCookieObject.manualMasterBackend = this.manualMasterBackendToggleModel.value;
@@ -706,6 +737,7 @@ PreferencesAssistant.prototype.checkSettings = function() {
 		//WebMyth.prefsCookieObject.theme = this.themeModel.value;
 		WebMyth.prefsCookieObject.showUpcomingChannelIcons = this.upcomingChannelIconsToggleModel.value;
 		WebMyth.prefsCookieObject.showVideoImages = this.videoImagesToggleModel.value;
+		WebMyth.prefsCookieObject.showVideoDetailsImage = this.showVideoDetailsImageToggleModel.value;
 		WebMyth.prefsCookieObject.forceScriptScreenshots = this.forceScriptScreenshotsToggleModel.value;
 		
 		
