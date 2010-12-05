@@ -74,6 +74,9 @@ UpcomingDetailsXMLAssistant.prototype.setup = function() {
 	
 	
 	
+	this.controller.listen(this.controller.get( "header-menu" ), Mojo.Event.tap, function(){this.controller.sceneScroller.mojo.revealTop();}.bind(this));
+	
+	
 	this.getDetailsXML();
 	
 	

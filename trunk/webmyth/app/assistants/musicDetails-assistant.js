@@ -61,6 +61,11 @@ MusicDetailsAssistant.prototype.setup = function() {
 	$('album-title').innerText = this.musicObject.album_name;
 	$('track-title').innerText = this.musicObject.track;
 	$('year-title').innerText = this.musicObject.year;
+	
+	
+	this.controller.listen(this.controller.get( "header-menu" ), Mojo.Event.tap, function(){this.controller.sceneScroller.mojo.revealTop();}.bind(this));
+	
+	
 };
 
 MusicDetailsAssistant.prototype.activate = function(event) {

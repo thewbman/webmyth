@@ -79,22 +79,19 @@ VideosDetailsAssistant.prototype.setup = function() {
 	
 
 	
-	//if(WebMyth.prefsCookieObject.showVideoImages) {};
+	if(WebMyth.prefsCookieObject.showVideoDetailsImage) {
 	
 		var imageBase = "http://"+WebMyth.prefsCookieObject.webserverUsername + ":" + WebMyth.prefsCookieObject.webserverPassword+"@";
 		imageBase += WebMyth.prefsCookieObject.webserverName+"/mythweb/pl/";
 	
 		$('videos-coverfile').innerHTML = '<img id="coverfile-img" class="videos-coverfile" src="'+imageBase+'/coverart/'+this.videosObject.coverfile+'" />';
-		//$('screenshot-img').src = imageBase+"/screenshot/"+this.videosObject.screenshot;
-		//$('banner-img').src = imageBase+"/banner/"+this.videosObject.banner;
-		//$('fanart-img').src = imageBase+"/fanart/"+this.videosObject.fanart;
-
+	
+	}
 	
 	
 	
-	//$('channum-title').innerText = this.videosObject.chanNum;
-	//$('recstartts-title').innerText = this.videosObject.recStartTs.replace("T"," ");
-	//$('filesize-title').innerText = Mojo.Format.formatNumber(parseInt(this.videosObject.fileSize.substring(0,this.videosObject.fileSize.length - 6)))+" MB";
+	this.controller.listen(this.controller.get( "header-menu" ), Mojo.Event.tap, function(){this.controller.sceneScroller.mojo.revealTop();}.bind(this));
+	
 	
 	
 	//Update play list for hosts (check for download/stream later and update as needed)
@@ -102,8 +99,7 @@ VideosDetailsAssistant.prototype.setup = function() {
 	
 	//Look for video in upnp table on backend
 	this.getUpnpmedia();
-	
-	
+		
 };
 
 VideosDetailsAssistant.prototype.activate = function(event) {

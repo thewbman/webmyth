@@ -140,11 +140,15 @@ RecordedDetailsAssistant.prototype.setup = function() {
 	$('recstartts-title').innerText = this.recordedObject.recStartTs.replace("T"," ");
 	$('filesize-title').innerText = Mojo.Format.formatNumber(parseInt(this.recordedObject.fileSize.substring(0,this.recordedObject.fileSize.length - 6)))+" MB";
 	
-	//Mojo.Event.listen(this.controller.get("recorded-screenshot"),Mojo.Event.tap, this.goScreenshot.bind(this));
-	
 	if((this.recordedObject.recStatus == -2)) {
 		$('currently-recording-title').innerText = "Currently Recording";
 	}
+	
+	
+	
+	this.controller.listen(this.controller.get( "header-menu" ), Mojo.Event.tap, function(){this.controller.sceneScroller.mojo.revealTop();}.bind(this));
+	
+
 	
 	this.getJobqueue();
 	

@@ -63,7 +63,7 @@ MusicListAssistant.prototype.setup = function() {
 	// Music filter list
 	this.musicListAttribs = {
 		itemTemplate: "musicList/musicListItem",
-		dividerTemplate: "musicList/musicDivider",
+		dividerTemplate: "dialog/listDivider",
 		swipeToDelete: false,
 		filterFunction: this.filterListFunction.bind(this),
 		dividerFunction: this.musicDividerFunction.bind(this),
@@ -90,7 +90,6 @@ MusicListAssistant.prototype.activate = function(event) {
 	//Keypress event
 	Mojo.Event.listen(this.controller.sceneElement, Mojo.Event.keyup, this.handleKey.bind(this));
 	
-	
 };
 
 MusicListAssistant.prototype.deactivate = function(event) {
@@ -104,8 +103,7 @@ MusicListAssistant.prototype.deactivate = function(event) {
 };
 
 MusicListAssistant.prototype.cleanup = function(event) {
-	/* this function should do any cleanup needed before the scene is destroyed as 
-	   a result of being popped off the scene stack */
+
 };
 
 MusicListAssistant.prototype.handleCommand = function(event) {
@@ -234,7 +232,7 @@ MusicListAssistant.prototype.readRemoteDbTableFail = function(event) {
 	//Stop spinner and hide
 	this.spinnerModel.spinning = false;
 	this.controller.modelChanged(this.spinnerModel, this);
-	$('myScrim').hide()	
+	$('myScrim').hide();
 	//$('failtext').innerHtml = "Failed to connect to remote script.  Please check you script setup.";
 	
 };
@@ -354,7 +352,7 @@ MusicListAssistant.prototype.updateSortMenu = function() {
 	
 	this.controller.modelChanged(this.sortMenuModel);
 	
-}
+};
 
 MusicListAssistant.prototype.musicGroupChanged = function(newGroup) {
 
@@ -430,7 +428,7 @@ MusicListAssistant.prototype.updateGroupMenu = function() {
 	
 	this.controller.modelChanged(this.groupMenuModel);
 	
-}
+};
 
 MusicListAssistant.prototype.filterListFunction = function(filterString, listWidget, offset, count) {
 	 

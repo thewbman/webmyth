@@ -1,8 +1,6 @@
 Todo - planned new features and updates:
  
 //Future
- - cleanup schedule recording scene
- - add backend log
  
  
 //Long term
@@ -18,6 +16,7 @@ Todo - planned new features and updates:
  - language translation support
  - make dialogs palm-dark
  - handle music playlists
+ - cleanup schedule recording scene
  
 
 //May never do

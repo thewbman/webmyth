@@ -114,8 +114,11 @@ function defaultCookie() {
 		currentMusicSort: 'artist-asc',
 		currentUpcomingGroup: 'Upcoming',
 		forceScriptScreenshots: false,
-		showVideoImages: true,
-		currentSearchSort: 'date-asc'
+		showVideoImages: false,
+		showVideoDetailsImage: true,
+		currentSearchSort: 'date-asc',
+		showLog: true,
+		currentLogGroup: 'all'
 		
 	};
 	
@@ -431,6 +434,25 @@ var trimByVideoUpperDirectory = function(fullList, directory_in) {
 		return trimmedList;
 		
 
+};
+
+var trimLogByModule = function(fullList, myModule) {
+	
+		var trimmedList = [];
+		var i, s;
+	
+		for (i = 0; i < fullList.length; i++) {
+	
+			s = fullList[i];
+			if ((s.module == myModule)) {
+				//Matches artist
+				trimmedList.push(s);
+			} else {
+				//Does not match
+			}
+		}
+		return trimmedList;
+		
 };
 
 var trimMusicByArtist = function(fullList, myArtist) {
