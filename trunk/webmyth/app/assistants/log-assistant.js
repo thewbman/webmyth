@@ -61,7 +61,7 @@ LogAssistant.prototype.setup = function() {
 	// Log filter list
 	this.logListAttribs = {
 		itemTemplate: "log/logListItem",
-		dividerTemplate: "dialogs/listDivider",
+		dividerTemplate: "log/logDivider",
 		swipeToDelete: false,
 		filterFunction: this.filterListFunction.bind(this),
 		dividerFunction: this.logDividerFunction.bind(this)	
