@@ -45,7 +45,7 @@ MusicListAssistant.prototype.setup = function() {
 	
 	
 	// Menu grouping at bottom of scene
-    this.cmdMenuModel = { label: $L('Music Menu'),
+	this.cmdMenuModel = { label: $L('Music Menu'),
                             items: [{label: $L('Sort'), submenu:'sort-menu', width: 90},{ icon: 'refresh', command: 'go-refresh' },{label: $L('Group'), submenu:'group-menu', width: 90}]};
  
 	this.sortMenuModel = { label: $L('Sort'), items: []};
@@ -63,7 +63,7 @@ MusicListAssistant.prototype.setup = function() {
 	// Music filter list
 	this.musicListAttribs = {
 		itemTemplate: "musicList/musicListItem",
-		dividerTemplate: "dialog/listDivider",
+		dividerTemplate: "musicList/musicDivider",
 		swipeToDelete: false,
 		filterFunction: this.filterListFunction.bind(this),
 		dividerFunction: this.musicDividerFunction.bind(this),
