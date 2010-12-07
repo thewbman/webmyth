@@ -1,0 +1,20 @@
+﻿30      MYTH_PROTO_VERSION 63 3875641D
+
+28      ANN Monitor wes-windows7 0
+
+26      RESCHEDULE_RECORDINGS -1
+
+24      QUERY_GETALLSCHEDULED
+22      QUERY_GETALLPENDING
+23      QUERY_GETCONFLICTING
+20      QUERY_GETEXPIRING
+
+63      QUERY_SG_GETFILELIST[]:[]wes-htpc[]:[]Videos[]:[]/external/tv
+
+15      QUERY_UPTIME
+
+6       DONE
+
+
+
+(have to add +1 character for return key ?)
