@@ -163,10 +163,10 @@ MasterRemoteAssistant.prototype.handleCommand = function(event) {
 			  case 'do-remoteHeaderAction':
 					switch(WebMyth.prefsCookieObject.remoteHeaderAction) {
 						case 'Pause':
-							WebMyth.sendKey('p');
+							this.sendTelnetKey('p');
 						break;
 						case 'Mute':
-							WebMyth.sendKey('f9');
+							this.sendTelnetKey('f9');
 						break;
 					}
 			   break;
@@ -308,35 +308,31 @@ MasterRemoteAssistant.prototype.handleKey = function(event) {
 };
 
 MasterRemoteAssistant.prototype.sendTelnetKey = function(value, event){
-	//this.sendTelnet("key "+value);
 	
-	//this.controller.stageController.parentSceneAssistant(this).sendKey(value); 
-	WebMyth.sendKey(value);
+	if(WebMyth.useService) {
+		WebMyth.sendServiceCmd(this, "key "+value);
+	} else {
+		WebMyth.sendKey(value);
+	}
 	
 	if(WebMyth.prefsCookieObject.remoteVibrate) {
 		this.controller.stageController.getAppController().playSoundNotification( "vibrate", "" );
 	};
 	
-	//Mojo.Log.info("Sending command '%s' to host", value);
 };
 
 MasterRemoteAssistant.prototype.sendJumpPoint = function(value, event){
-	//this.sendTelnet("key "+value);
 	
-	//this.controller.stageController.parentSceneAssistant(this).sendJump(value); 
-	WebMyth.sendJump(value);
+	if(WebMyth.useService) {
+		WebMyth.sendServiceCmd(this, "jump "+value);
+	} else {
+		WebMyth.sendJump(value);
+	}
 	
 	if(WebMyth.prefsCookieObject.remoteVibrate) {
 		this.controller.stageController.getAppController().playSoundNotification( "vibrate", "" );
 	};
 	
 	//Mojo.Log.info("Sending command '%s' to host", value);
-};
-
-MasterRemoteAssistant.prototype.sendTelnet = function(value, event){
-	//$('telnetPlug').SendTelnet(value);
-	this.controller.stageController.parentSceneAssistant(this).sendTelnet(value); 
-	
-	Mojo.Log.info("Sending command '%s' to host", value);
 };
 

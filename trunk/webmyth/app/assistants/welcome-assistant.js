@@ -19,16 +19,11 @@
  */
  
  function WelcomeAssistant() {
-	/* this is the creator function for your scene assistant object. It will be passed all the 
-	   additional parameters (after the scene name) that were passed to pushScene. The reference
-	   to the scene controller (this.controller) has not be established yet, so any initialization
-	   that needs the scene controller should be done in the setup function below. */
 	   
 	   this.backendsList = [];
 }
 
 WelcomeAssistant.prototype.setup = function() {
-	/* this function is for setup tasks that have to happen when the scene is first created */
 		
 		
 	//App menu widget
@@ -270,6 +265,11 @@ WelcomeAssistant.prototype.setup = function() {
 	//Get script veriosn
 	this.getScriptVersion();
 	
+	//Start telnet service
+	if(WebMyth.useService){
+		WebMyth.startCommunication(this);
+	}
+	
 };
 
 WelcomeAssistant.prototype.activate = function(event) {
@@ -322,6 +322,11 @@ WelcomeAssistant.prototype.activate = function(event) {
 	//Help button
 	Mojo.Event.listen(this.controller.get("helpButton"),Mojo.Event.tap, this.doHelpButton.bind(this));
 	
+	//Icon
+	Mojo.Event.listen(this.controller.get("welcome-header-icon"),Mojo.Event.tap, this.doWelcomeIcon.bind(this));
+	
+	
+	
 };
 
 WelcomeAssistant.prototype.deactivate = function(event) {
@@ -334,8 +339,6 @@ WelcomeAssistant.prototype.deactivate = function(event) {
 };
 
 WelcomeAssistant.prototype.cleanup = function(event) {
-	/* this function should do any cleanup needed before the scene is destroyed as 
-	   a result of being popped off the scene stack */
 	   
 };
 
@@ -513,6 +516,13 @@ WelcomeAssistant.prototype.alertNeedScript = function() {
 };
 
 
+WelcomeAssistant.prototype.doWelcomeIcon = function(event) {
+	WebMyth.mythprotocolCommand(this, "QUERY_UPTIME");
+	
+	//WebMyth.mythprotocolCommand(this, "QUERY_GETALLPENDING");
+	
+	Event.stop(event); 
+};
 
 WelcomeAssistant.prototype.doHelpButton = function(event) {
 	

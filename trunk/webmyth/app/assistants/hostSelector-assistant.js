@@ -159,6 +159,8 @@ HostSelectorAssistant.prototype.chooseList = function(event) {
 	WebMyth.prefsCookieObject.currentFrontendAddress = event.item.address;
 	WebMyth.prefsCookieObject.currentFrontendPort = event.item.port;
 	WebMyth.prefsCookie.put(WebMyth.prefsCookieObject);
+	
+	
 	 
 	if(this.pickType == "start") {
 		this.startCommunication();
@@ -173,35 +175,13 @@ HostSelectorAssistant.prototype.startCommunication = function(event) {
 	Mojo.Log.info("Starting communication ...");
 	
 	
+	if(WebMyth.useService) {
+			WebMyth.startNewCommunication(this);
+	}
+	
+	
 	//Open initial communication scene
 	Mojo.Controller.stageController.pushScene({name: WebMyth.prefsCookieObject.currentRemoteScene, disableSceneScroller: true});
 	
 };
-
-HostSelectorAssistant.prototype.startCommunication2 = function(event) {
-	
-	Mojo.Log.info("Starting communication ...");
-	
-	remoteStage = Mojo.Controller.getAppController().getStageController(WebMyth.prefsCookieObject.currentRemoteScene);
-	
-	
-		if (remoteStage) {
-			// Dashboard stage is already open
-			Mojo.Log.info("DELEGATING TO SCENE ASST");
-			remoteStage.popScenesTo();
-			remoteStage.pushScene(WebMyth.prefsCookieObject.currentRemoteScene);
-			remoteStage.activate();
-		} else {
-			//Mojo.Log.info("No dashboard Stage found.");
-			pushCard = function (stageController) {
-				stageController.pushScene(WebMyth.prefsCookieObject.currentRemoteScene);
-			};
-			Mojo.Controller.getAppController().createStageWithCallback({name: WebMyth.prefsCookieObject.currentRemoteScene, lightweight: true },
-				pushCard, "card");
-		}	
-		
-};
-
-
-
 

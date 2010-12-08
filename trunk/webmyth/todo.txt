@@ -1,9 +1,6 @@
 Todo - planned new features and updates:
  
 //Future
- 
- 
-//Long term
  - plugin for remote
  - progress/volume scrobble on remote ?
  - demo video(s)
@@ -21,3 +18,16 @@ Todo - planned new features and updates:
 
 //May never do
  - open remote in seperate card (had trouble with coding up and working correctly) 
+ 
+ 
+//Still use the script
+ - recorded details (SQL - current jobqueue)
+ - recorded details (SQL - new jobqueue)
+ - recorded details (SQL - undelete)
+ - setup recording (SQL - record schedule & cardinput)
+ - quide search (SQL)
+ - videos (SQL)
+ - videos details (SQL - upnp)
+ - music (SQL)
+ - log (SQL)
+ 

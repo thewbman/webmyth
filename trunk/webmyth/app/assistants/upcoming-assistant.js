@@ -178,14 +178,29 @@ UpcomingAssistant.prototype.getUpcoming = function(event) {
 	this.controller.sceneScroller.mojo.revealTop();
 	
 	var requestUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webmythPythonFile;
-	//requestUrl += "?op=getUpcoming";				//will record
 	requestUrl += "?op=getPending";				//matches any reocrding rule
-	//requestUrl += "?op=getScheduled";				//includes recording rules that don't match anything
-	
-	//requestHeaders: {Authorization: 'Basic ' + Base64.encode(WebMyth.prefsCookieObject.webserverUsername + ":" + WebMyth.prefsCookieObject.webserverPassword)},
 	
 	
-    try {
+	
+	if(WebMyth.useService){
+		Mojo.Log.info("Using protocol service to get upcoming");
+	
+		this.controller.serviceRequest('palm://com.thewbman.webmyth.service', {
+			method:"mythprotocolCommand",
+				parameters:{
+					"port":"6543", 
+					"address":WebMyth.prefsCookieObject.masterBackendIp,
+					"protocolVersionCommand": cleanProtocolVersion(WebMyth.prefsCookieObject.protoVer),
+					"command": "QUERY_GETALLPENDING",
+					"timeout": 4000								//gives service 4 full seconds to get all data, will return earlier if done
+					},
+				onSuccess: this.readUpcomingServiceSuccess.bind(this),
+				onFailure: this.remoteDbTableFail.bind(this)
+			});
+		
+		
+	} else { 
+	
         var request = new Ajax.Request(requestUrl,{
             method: 'get',
             evalJSON: 'true',
@@ -193,18 +208,44 @@ UpcomingAssistant.prototype.getUpcoming = function(event) {
             onSuccess: this.readRemoteDbTableSuccess.bind(this),
             onFailure: this.remoteDbTableFail.bind(this)  
         });
-    }
-    catch(e) {
-        Mojo.Log.error(e);
+		
     }
 	
 };
 
+UpcomingAssistant.prototype.readUpcomingServiceSuccess = function(response) {
+	
+	//Mojo.Log.info('Got service response: %j', response.reply);
+	
+	Mojo.Log.info('Got service response stats: %j', response.stats);
+	
+	if(response.stats.expectedLength != response.stats.parsedPrograms){
+		Mojo.Log.error("Got response mismatch: %j",response.stats);
+		Mojo.Controller.getAppController().showBanner("ERROR - should have "+response.stats.expectedLength+" programs", {source: 'notification'});
+		
+	}
+	
+	
+	//var fullUpcomingArray = parseUpcomingService(response.reply);
+	var fullUpcomingArray = response.reply;
+	
+	//Mojo.Log.info("Parsed upcoming is %j",fullUpcomingArray);
+		
+	//Update the list widget
+	this.fullResultList.clear();
+	Object.extend(this.fullResultList,cleanUpcoming(fullUpcomingArray));
+	
+	Mojo.Log.info('Cleaned upcoming: %j', this.fullResultList);
+	
+	this.groupChanged(WebMyth.prefsCookieObject.currentUpcomingGroup);
+	
+}
+
 UpcomingAssistant.prototype.remoteDbTableFail = function(event) {
-	Mojo.Log.error('Failed to get Ajax response');
+	Mojo.Log.error('Failed to get Upcoming response');
 	//
 	
-	this.resultList = [{ 'title':'Accesing remote table has failed.', 'subtitle':'Please check your server script.', 'starttime':''}];
+	this.resultList = [{ 'title':'Accesing remote table has failed.', 'subTitle':'Please check your settings', 'startTime':'1900-01-01T00:00:00'}];
 	
 	//Initial display
 	var listWidget = this.controller.get('upcomingList');
@@ -219,7 +260,6 @@ UpcomingAssistant.prototype.remoteDbTableFail = function(event) {
 };
 
 UpcomingAssistant.prototype.readRemoteDbTableSuccess = function(response) {
-	//return true;  //can escape this function for testing purposes
     
 	//Mojo.Log.info('Got Ajax response: ' + response.responseText);
 	
@@ -232,7 +272,7 @@ UpcomingAssistant.prototype.readRemoteDbTableSuccess = function(response) {
 	
 	this.groupChanged(WebMyth.prefsCookieObject.currentUpcomingGroup);
 	
-}
+};
 
 UpcomingAssistant.prototype.groupChanged = function(newGroup) {
 
@@ -329,7 +369,7 @@ UpcomingAssistant.prototype.filterListFunction = function(filterString, listWidg
 				//Mojo.Log.info("Found string in title", i);
 				someList.push(s);
 			}
-			else if (s.subtitle.toUpperCase().indexOf(filterString.toUpperCase())>=0){
+			else if (s.subTitle.toUpperCase().indexOf(filterString.toUpperCase())>=0){
 				//Mojo.Log.info("Found string in subtitle", i);
 				someList.push(s);
 			}
@@ -390,8 +430,8 @@ UpcomingAssistant.prototype.filterListFunction = function(filterString, listWidg
 };	
 
 UpcomingAssistant.prototype.goUpcomingDetails = function(event) {
-	var upcoming_chanid = event.item.chanid;
-	var upcoming_starttime = event.item.starttime;
+	var upcoming_chanid = event.item.chanId;
+	var upcoming_starttime = event.item.startTime;
 	
 	Mojo.Log.info("Selected individual recording: '%s' + '%s'", upcoming_chanid, upcoming_starttime);
 	
@@ -406,13 +446,16 @@ UpcomingAssistant.prototype.goUpcomingDetails = function(event) {
 };
 
 UpcomingAssistant.prototype.recorderDividerFunction = function(itemModel) {
-	 
-	//Divider function for list
-    //return itemModel.title.toString()[0];	
-	//return itemModel.starttime.substring(0,10);
-	var date = new Date(isoToJS(itemModel.starttime));
 	
-	return date.toLocaleString().substring(0,15);
+	if(WebMyth.useService){
+		var date = new Date(isoToJS(itemModel.startTime));
+	
+		return date.toLocaleString().substring(0,15);
+	} else {
+		var date = new Date(isoToJS(itemModel.starttime));
+	
+		return date.toLocaleString().substring(0,15);
+	}
 };
 
 UpcomingAssistant.prototype.setMyData = function(propertyValue, model) {
@@ -420,12 +463,9 @@ UpcomingAssistant.prototype.setMyData = function(propertyValue, model) {
 	
 	//And img source
 	var channelIconUrl = "http://"+WebMyth.prefsCookieObject.masterBackendIp+":6544/Myth/GetChannelIcon?ChanId=";
-	channelIconUrl += model.chanid;
+	channelIconUrl += model.chanId;
 	
-	//Mojo.Log.error("iconURL is "+channelIconUrl);
-	
-	//Mojo.Log.error('url is ' +screenshotUrl);
-	model.myImgSrc = channelIconUrl;
+	//Mojo.Log.info("iconURL is "+channelIconUrl);
 	
 	
 	
@@ -435,12 +475,12 @@ UpcomingAssistant.prototype.setMyData = function(propertyValue, model) {
 	
 	if(WebMyth.prefsCookieObject.showUpcomingChannelIcons) upcomingDetailsText += '<div class="left-list-text">';
 	
-	upcomingDetailsText += '<div class="palm-info-text truncating-text left">&nbsp;'+model.subtitle+'&nbsp;</div>';
-	upcomingDetailsText += '<div class="palm-info-text truncating-text left">&nbsp;&nbsp;'+model.starttime+'&nbsp;</div>';
+	upcomingDetailsText += '<div class="palm-info-text truncating-text left">&nbsp;'+model.subTitle+'&nbsp;</div>';
+	upcomingDetailsText += '<div class="palm-info-text truncating-text left">&nbsp;&nbsp;'+model.startTimeSpace+'&nbsp;</div>';
 	upcomingDetailsText += '<div class="palm-info-text truncating-text left">&nbsp;&nbsp;&nbsp;'+model.category+'</div>';
 	
-	if(model.recstatus == '-1') {
-		if((model.rectype == '8')||(model.rectype == '7')) {
+	if(model.recStatus == '-1') {
+		if((model.recType == '8')||(model.recType == '7')) {
 			upcomingDetailsText += '<div class="palm-info-text truncating-text left">&nbsp;&nbsp;&nbsp;&nbsp;(Forced) '+model.channum+" - "+model.channame+'</div>';
 		} else {
 			upcomingDetailsText += '<div class="palm-info-text truncating-text left">&nbsp;&nbsp;&nbsp;&nbsp;'+model.channum+" - "+model.channame+'</div>';
@@ -453,8 +493,8 @@ UpcomingAssistant.prototype.setMyData = function(propertyValue, model) {
 	if(WebMyth.prefsCookieObject.showUpcomingChannelIcons) {
 		upcomingDetailsText += '</div>';
 		upcomingDetailsText += '<div class="right-list-image">';
-		upcomingDetailsText += '<img id="img-'+model.chanid+'T'+model.starttime+'" class="upcoming-channelicon-small" src="';
-		upcomingDetailsText += 'http://'+WebMyth.prefsCookieObject.masterBackendIp+':6544/Myth/GetChannelIcon?ChanId='+model.chanid+'" />';
+		upcomingDetailsText += '<img id="img-'+model.chanId+'T'+model.startTime+'" class="upcoming-channelicon-small" src="';
+		upcomingDetailsText += channelIconUrl+'" />';
 		upcomingDetailsText += '</div>';
 	}
 	
