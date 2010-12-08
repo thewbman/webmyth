@@ -300,7 +300,7 @@ var trimByUpcomingGroup = function(fullList, myUpcomingType) {
 		for (i = 0; i < fullList.length; i++) {
 	
 			s = fullList[i];
-			if ((s.recstatus == '7')) {
+			if ((s.recStatus == '7')) {
 				//Matches conflicting
 				trimmedList.push(s);
 			} else {
@@ -318,7 +318,7 @@ var trimByUpcomingGroup = function(fullList, myUpcomingType) {
 		for (i = 0; i < fullList.length; i++) {
 	
 			s = fullList[i];
-			if ((s.recstatus == '7')||(s.recstatus == '-1')||(s.recstatus == '-2')) {
+			if ((s.recStatus == '7')||(s.recStatus == '-1')||(s.recStatus == '-2')) {
 				//Matches conflicting, will record, recording
 				trimmedList.push(s);
 			} else {
@@ -336,7 +336,7 @@ var trimByUpcomingGroup = function(fullList, myUpcomingType) {
 		for (i = 0; i < fullList.length; i++) {
 	
 			s = fullList[i];
-			if ((s.rectype == '7')||(s.rectype == '8')) {
+			if ((s.recType == '7')||(s.recType == '8')) {
 				//Matches forced do and don't record
 				trimmedList.push(s);
 			} else {
@@ -693,6 +693,32 @@ var updateGuideChannelsFromCookie = function(fullList, cookieList) {
 	}
 	
 	return updatedList;
+	
+}
+
+var cleanProtocolVersion = function(protoVer) {
+
+	var fullCommand = ""
+	
+	//Have to pad random token to protocol when >= 62
+	//  http://www.mythtv.org/wiki/Category:Myth_Protocol
+	
+	switch(protoVer) {
+		case '64':
+			fullCommand = "MYTH_PROTO_VERSION 64 8675309J";
+		  break;
+		case '63':
+			fullCommand = "MYTH_PROTO_VERSION 63 3875641D";
+		  break;
+		case '62':
+			fullCommand = "MYTH_PROTO_VERSION 62 78B5631E";
+		  break;
+		default: 
+			fullCommand = "MYTH_PROTO_VERSION "+protoVer;
+		  break;
+	}
+	
+	return fullCommand;
 	
 }
 
@@ -1074,6 +1100,179 @@ var cleanMusic = function(fullList) {
 	
 }
 
+var parseUpcomingService = function(fullResponse) {
+
+	finalList = [];
+	fullArray = fullResponse.split("[]:[]");
+	
+	Mojo.Log.info("Parsing upcoming total programs is "+fullArray[1]+", length is "+fullArray.length);
+	
+	var i, programNum = 0, fieldNum = 0;
+	var singleProgramJson = {};
+	var newDate = new Date();
+	
+	for(i = 2; i < fullArray.length; i++){
+		switch(fieldNum){
+			case 0:
+				singleProgramJson.title = fullArray[i];
+			  break;
+			case 1:
+				singleProgramJson.subTitle = fullArray[i];
+			  break;
+			case 2:
+				singleProgramJson.description = fullArray[i];
+			  break;
+			case 3:
+				singleProgramJson.category = fullArray[i];
+			  break;
+			case 4:
+				singleProgramJson.chanId = fullArray[i];
+			  break;
+			case 5:
+				singleProgramJson.channum = fullArray[i];
+			  break;
+			case 6:
+				singleProgramJson.callsign = fullArray[i];
+			  break;
+			case 7:
+				singleProgramJson.channame = fullArray[i];
+			  break;
+			case 8:
+				singleProgramJson.filename = fullArray[i];
+			  break;
+			case 9:
+				singleProgramJson.filesize = fullArray[i];
+			  break; 
+			  
+			case 10:
+				singleProgramJson.startTimeInt = fullArray[i];
+				
+				newDate.setTime(fullArray[i]*1000);
+				
+				singleProgramJson.startTime = dateJSToISO(newDate);
+				
+			  break;
+			case 11:
+				singleProgramJson.endTimeInt = fullArray[i];
+				
+				newDate.setTime(fullArray[i]*1000);
+				
+				singleProgramJson.endTime = dateJSToISO(newDate);
+			  break;
+			case 12:
+				singleProgramJson.findId = fullArray[i];
+			  break;
+			case 13:
+				singleProgramJson.hostname = fullArray[i];
+			  break;
+			case 14:
+				singleProgramJson.sourceId = fullArray[i];
+			  break;
+			case 15:
+				singleProgramJson.cardId = fullArray[i];
+			  break;
+			case 16:
+				singleProgramJson.inputId = fullArray[i];
+			  break;
+			case 17:
+				singleProgramJson.recPriority = fullArray[i];
+			  break;
+			case 18:
+				singleProgramJson.recStatus = fullArray[i];
+			  break;
+			case 19:
+				singleProgramJson.recordId = fullArray[i];
+			  break;
+			  
+			case 20:
+				singleProgramJson.recType = fullArray[i];
+			  break;
+			case 21:
+				singleProgramJson.dupin = fullArray[i];
+			  break;
+			case 22:
+				singleProgramJson.dupMethod = fullArray[i];
+			  break;
+			case 23:
+				singleProgramJson.recStartTsInt = fullArray[i];
+				
+				newDate.setTime(fullArray[i]*1000);
+				
+				singleProgramJson.recStartTs = dateJSToISO(newDate);
+			  break;
+			case 24:
+				singleProgramJson.recEndTsInt = fullArray[i];
+				
+				newDate.setTime(fullArray[i]*1000);
+				
+				singleProgramJson.recEndTs = dateJSToISO(newDate);
+			  break;
+			case 25:
+				singleProgramJson.programflags = fullArray[i];
+			  break;
+			case 26:
+				singleProgramJson.recGroup = fullArray[i];
+			  break;
+			case 27:
+				singleProgramJson.outputFilters = fullArray[i];
+			  break;
+			case 28:
+				singleProgramJson.seriesId = fullArray[i];
+			  break;
+			case 29:
+				singleProgramJson.programId = fullArray[i];
+			  break;
+			  
+			case 30:
+				singleProgramJson.lastModified = fullArray[i];
+			  break;
+			case 31:
+				singleProgramJson.stars = fullArray[i];
+			  break;
+			case 32:
+				singleProgramJson.airdate = fullArray[i];
+			  break;
+			case 33:
+				singleProgramJson.playgroup = fullArray[i];
+			  break;
+			case 34:
+				singleProgramJson.recpriority2 = fullArray[i];
+			  break;
+			case 35:
+				singleProgramJson.parentid = fullArray[i];
+			  break;
+			case 36:
+				singleProgramJson.storagegroup = fullArray[i];
+			  break;
+			case 37:
+				singleProgramJson.audio_props = fullArray[i];
+			  break;
+			case 38:
+				singleProgramJson.video_props = fullArray[i];
+			  break;
+			case 39:
+				singleProgramJson.subtitle_type = fullArray[i];
+			  break;
+			  
+			case 40:
+				//41st field, push and reset counters
+				singleProgramJson.year = fullArray[i];
+				finalList.push(singleProgramJson);
+				
+				singleProgramJson = {};
+				programNum++;
+				fieldNum = -1;
+			  break;
+		}
+		
+		fieldNum++;
+	}
+	
+	
+	return finalList;
+	
+}
+
 var cleanUpcoming = function(fullList) {
 
 	finalList = [];
@@ -1083,9 +1282,31 @@ var cleanUpcoming = function(fullList) {
 	for(i = 0; i < fullList.length; i++) {
 		s = fullList[i];
 		
-		s.recStatusText = recStatusDecode(s.recstatus);
-		s.startTime = s.starttime;
-		s.chanId = s.chanid;
+		if(s.recstatus){
+			s.recStatusText = recStatusDecode(s.recstatus);
+			s.recStatus = s.recstatus;
+		} else {
+			s.recStatusText = recStatusDecode(s.recStatus);
+		} 
+		
+		
+		if(s.starttime){
+			s.startTime = s.starttime;
+		}
+		
+		if(s.subtitle){
+			s.subTitle = s.subtitle;
+		}
+		
+		if(s.chanid){
+			s.chanId = s.chanid;
+		}
+		
+		if(s.rectype){
+			s.recType = s.rectype;
+		}
+		
+		s.startTimeSpace = s.startTime.replace("T"," ");
 
 		finalList.push(s);
 		

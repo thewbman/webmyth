@@ -45,7 +45,7 @@ MusicListAssistant.prototype.setup = function() {
 	
 	
 	// Menu grouping at bottom of scene
-	this.cmdMenuModel = { label: $L('Music Menu'),
+    this.cmdMenuModel = { label: $L('Music Menu'),
                             items: [{label: $L('Sort'), submenu:'sort-menu', width: 90},{ icon: 'refresh', command: 'go-refresh' },{label: $L('Group'), submenu:'group-menu', width: 90}]};
  
 	this.sortMenuModel = { label: $L('Sort'), items: []};
@@ -385,13 +385,14 @@ MusicListAssistant.prototype.musicGroupChanged = function(newGroup) {
 	
 	this.controller.sceneScroller.mojo.revealTop();
 	
+	
 	//Initial display
 	var listWidget = this.controller.get('musicList');
 	this.filterListFunction('', listWidget, 0, this.resultList.length);
 	listWidget.mojo.close();
 	//Mojo.Controller.getAppController().showBanner("Updated with latest data", {source: 'notification'});
 	
-	
+	f
 	//Stop spinner and hide
 	this.spinnerModel.spinning = false;
 	this.controller.modelChanged(this.spinnerModel, this);
@@ -437,7 +438,7 @@ MusicListAssistant.prototype.filterListFunction = function(filterString, listWid
 	
 	var totalSubsetSize = 0;
  
-	var i, s;
+	var i, s = {};
 	var someList = [];  // someList will be the subset of this.myListData that contains the filterString...
  
 	if (filterString !== '') {
@@ -458,15 +459,7 @@ MusicListAssistant.prototype.filterListFunction = function(filterString, listWid
 			else if (s.album_name.toUpperCase().indexOf(filterString.toUpperCase())>=0){
 				//Mojo.Log.info("Found string in full episode name", i);
 				someList.push(s);
-			}	/*
-			else if (s.releasedate.toUpperCase().indexOf(filterString.toUpperCase())>=0){
-				//Mojo.Log.info("Found string in release date", i);
-				someList.push(s);
-			}
-			else if (s.plot.toUpperCase().indexOf(filterString.toUpperCase())>=0){
-				//Mojo.Log.info("Found string in plot", i);
-				someList.push(s);
-			}	*/
+			}	
 		}
 	}
 	else {
@@ -504,6 +497,8 @@ MusicListAssistant.prototype.filterListFunction = function(filterString, listWid
 	// and the FilterList widget's FilterField count (displayed in the upper right corner)
 	
 	//Mojo.Log.info("subset is %j",subset);
+	
+	//Mojo.Log.info("offset is %s",offset);
 	
 	listWidget.mojo.noticeUpdatedItems(offset, subset);
 	listWidget.mojo.setLength(totalSubsetSize);

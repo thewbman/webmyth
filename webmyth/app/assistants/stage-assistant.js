@@ -25,6 +25,9 @@
 
 WebMyth = {};
 
+
+WebMyth.useService = true;
+
  
 /********************Globals**************************/
 //Setup App Menu
@@ -118,7 +121,6 @@ WebMyth.currentScriptVersion = 8;
 
 //Current frontend location
 WebMyth.currentLocation = "";
-WebMyth.usePlugin = false;
 
 //Selected channel in guide
 WebMyth.channelObject = {};
@@ -387,10 +389,22 @@ StageAssistant.prototype.handleCommand = function(event) {
 	  case 'do-remoteHeaderAction2':
 			switch(WebMyth.prefsCookieObject.remoteHeaderAction) {
 				case 'Pause':
-					WebMyth.sendKey('p');
+				
+					if(WebMyth.useService) {
+						WebMyth.sendServiceCmd(currentScene, "key p");
+					} else {
+						WebMyth.sendKey('p');
+					}
+					
 				break;
 				case 'Mute':
-					WebMyth.sendKey('f9');
+				
+					if(WebMyth.useService) {
+						WebMyth.sendServiceCmd(currentScene, "key f9");
+					} else {
+						WebMyth.sendKey('f9');
+					}
+					
 				break;
 			}
 	   break;
@@ -481,18 +495,218 @@ StageAssistant.prototype.socketIsClosed = function(a) {
 
 
 
+WebMyth.mythprotocolCommand = function(sceneController, protoCommand, successBanner){
+		
+	Mojo.Log.info("Starting new protocol command: "+protoCommand);
+		
+	sceneController.controller.serviceRequest('palm://com.thewbman.webmyth.service', {
+		method:"mythprotocolCommand",
+			parameters:{
+				"port":"6543", 
+				"address":WebMyth.prefsCookieObject.masterBackendIp,
+				"protocolVersionCommand": cleanProtocolVersion(WebMyth.prefsCookieObject.protoVer),
+				"command": protoCommand
+				},
+			onSuccess: function(response) {
+				Mojo.Log.info("Protocol command success of %j", response);
+				//Mojo.Controller.getAppController().showBanner("Protocol command success: "+response.reply, {source: 'notification'});
+				
+				if(successBanner) {
+					Mojo.Controller.getAppController().showBanner(successBanner, {source: 'notification'});
+				}	
+	
+				}.bind(this),
+			onFailure: function(response) {
+		  
+					Mojo.Log.info("Failed service connection status of %j", response);
+					Mojo.Controller.getAppController().showBanner("Protocol command FAIL", {source: 'notification'});
+	
+				}.bind(this),
+		});
+	
+};
 
+
+WebMyth.startNewCommunication = function(sceneController){
+		
+	Mojo.Log.info("Starting new service communication");
+		
+	 sceneController.controller.serviceRequest('palm://com.thewbman.webmyth.service', {
+		  method:"startCommunication",
+		  parameters:{"port":WebMyth.prefsCookieObject.currentFrontendPort, address:WebMyth.prefsCookieObject.currentFrontendAddress},
+		  onSuccess: function(response) {
+				Mojo.Log.info("Success service connection status of %j", response);
+				Mojo.Controller.getAppController().showBanner("Service connection success", {source: 'notification'});
+				
+				if(retryCommand) {
+					//we had a failed command send before
+					//Mojo.Log.info("Trying to retry command "+retryCommand);
+					
+					//sceneController.controller.window.setTimeout(WebMyth.sendServiceCmd(sceneController, retryCommand, true), 500);
+					
+				}
+	
+			}.bind(this),
+		  onFailure: function(response) {
+		  
+				if(retryCommand){
+					Mojo.Log.info("tried to reconnect - hopefully it worked");
+				} else {
+					Mojo.Log.info("Failed service connection status of %j", response);
+					Mojo.Controller.getAppController().showBanner("Start new FAIL", {source: 'notification'});
+				}
+				
+				//WebMyth.sendServiceCmd(sceneController, retryCommand, true);
+	
+			}.bind(this),
+		});
+	
+};
+
+WebMyth.startCommunication = function(sceneController, retryCommand){
+		
+	Mojo.Log.info("Starting service communication");
+		
+	 sceneController.controller.serviceRequest('palm://com.thewbman.webmyth.service', {
+		  method:"startCommunication",
+		  parameters:{"port":WebMyth.prefsCookieObject.currentFrontendPort, address:WebMyth.prefsCookieObject.currentFrontendAddress},
+		  onSuccess: function(response) {
+				Mojo.Log.info("Success service connection status of %j", response);
+				Mojo.Controller.getAppController().showBanner("Service connection success", {source: 'notification'});
+				
+				if(retryCommand) {
+					//we had a failed command send before
+					//Mojo.Log.info("Trying to retry command "+retryCommand);
+					
+					//sceneController.controller.window.setTimeout(WebMyth.sendServiceCmd(sceneController, retryCommand, true), 500);
+					
+				}
+	
+			}.bind(this),
+		  onFailure: function(response) {
+		  
+				if(retryCommand){
+					Mojo.Log.info("tried to reconnect - hopefully it worked");
+				} else {
+					Mojo.Log.info("Failed service connection status of %j", response);
+					Mojo.Controller.getAppController().showBanner("Start communication FAIL", {source: 'notification'});
+				}
+				
+				//WebMyth.sendServiceCmd(sceneController, retryCommand, true);
+	
+			}.bind(this),
+		});
+	
+};
+
+WebMyth.sendServiceCmd = function(sceneController, value, wasRetry){
+		
+	Mojo.Log.info("Sending service command '"+value+"'");
+		
+	 sceneController.controller.serviceRequest('palm://com.thewbman.webmyth.service', {
+		  method:"send",
+		  parameters:{"toSend":value},
+		  onSuccess: function(response) {
+				Mojo.Log.info("Success service send of %j", response);
+				//Mojo.Controller.getAppController().showBanner("Service send success: "+response.reply, {source: 'notification'});
+	
+			}.bind(this),
+		  onFailure: function(response) {
+				Mojo.Log.info("Failed service send status of %j", response);
+				Mojo.Controller.getAppController().showBanner("Failed to send - try again", {source: 'notification'});
+				
+				if(wasRetry){
+					Mojo.Log.info("was a retry that failed");
+					Mojo.Controller.getAppController().showBanner("Retry send failed", {source: 'notification'});
+				} else {
+					Mojo.Log.info("was not a retry, trying to restart communication");
+					WebMyth.startCommunication(sceneController, value);
+				}
+	
+			}.bind(this),
+	});
+	
+};
+
+WebMyth.playServiceChannel = function(sceneController, value){
+		
+	Mojo.Log.info("Sending service play channel '"+value+"'");
+		
+	 sceneController.controller.serviceRequest('palm://com.thewbman.webmyth.service', {
+		  method:"send",
+		  parameters:{"toSend":"query location"},
+		  onSuccess: function(response1) {
+				Mojo.Log.info("Success query location of %j", response1);
+				
+				if(response1.reply.search("LiveTV") == -1){
+					//Not on liveTV
+					Mojo.Log.info("Not on livetv, jumping now");
+					sceneController.controller.serviceRequest('palm://com.thewbman.webmyth.service', {
+						  method:"send",
+						  parameters:{"toSend":"jump livetv"},
+						  onSuccess: function(response2) {
+								Mojo.Log.info("Success jump livetv of %j", response2);
+								//WebMyth.sendServiceCommand(sceneController, "play chanid+"+value);
+								
+								
+								
+								sceneController.controller.serviceRequest('palm://com.thewbman.webmyth.service', {
+									  method:"send",
+									  parameters:{"toSend":"play chanid "+value},
+									  onSuccess: function(response2) {
+											Mojo.Log.info("Success play channid of %j", response2);
+									  }.bind(this),
+									  onFailure: function(response2) {
+											Mojo.Log.info("Failed play channid %j", response2);
+									  }.bind(this),
+								});
+											
+								
+								
+								
+								
+								
+								
+						  }.bind(this),
+						  onFailure: function(response2) {
+								Mojo.Log.info("Failed jump livetv %j", response2);
+						  }.bind(this),
+					});
+				} else {
+					//On livetv
+					Mojo.Log.info("On livetv, changing channel");
+					//WebMyth.sendServiceCommand(sceneController, "play chanid+"+value);
+					
+					
+								sceneController.controller.serviceRequest('palm://com.thewbman.webmyth.service', {
+									  method:"send",
+									  parameters:{"toSend":"play chanid "+value},
+									  onSuccess: function(response2) {
+											Mojo.Log.info("Success play channid of %j", response2);
+									  }.bind(this),
+									  onFailure: function(response2) {
+											Mojo.Log.info("Failed play channid %j", response2);
+									  }.bind(this),
+								});
+					
+					
+				}
+	
+			}.bind(this),
+		  onFailure: function(response1) {
+				Mojo.Log.info("Failed query location status of %j", response1);
+				Mojo.Controller.getAppController().showBanner("Failed to send - try again", {source: 'notification'});
+	
+			}.bind(this),
+	});
+	
+};
 
 WebMyth.sendKey = function(value){
 		
 		Mojo.Log.info("Sending key ",value);
 		
-		var fullCmd = "key "+value
-	
-	if(WebMyth.usePlugin){
-		//$('telnet_plugin_id').sendData(fullCmd);
-		
-	} else {
+		var fullCmd = "key "+value;
 	
 		var cmdvalue = encodeURIComponent(value);
 		
@@ -517,8 +731,6 @@ WebMyth.sendKey = function(value){
 				Mojo.Controller.getAppController().showBanner("ERROR - check remote.py scipt", {source: 'notification'});
 			}
 		});
-	
-	}
 	
 };
 

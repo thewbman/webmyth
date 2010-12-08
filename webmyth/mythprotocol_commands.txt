@@ -9,6 +9,8 @@
 23      QUERY_GETCONFLICTING
 20      QUERY_GETEXPIRING
 
+24      QUERY_RECORDINGS Play
+
 63      QUERY_SG_GETFILELIST[]:[]wes-htpc[]:[]Videos[]:[]/external/tv
 
 15      QUERY_UPTIME

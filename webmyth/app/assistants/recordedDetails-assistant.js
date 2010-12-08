@@ -21,15 +21,15 @@
 
 function RecordedDetailsAssistant(detailsObject) {
 	   
-	   this.recordedObject = detailsObject;
-	   this.standardFilename = '';
-	   this.downloadOrStream = '';
+	this.recordedObject = detailsObject;
+	this.standardFilename = '';
+	this.downloadOrStream = '';
 	   
-	   this.timeOffsetSeconds = 0;
+	this.timeOffsetSeconds = 0;
 	   
-	   this.screenshotUrl = "";
+	this.screenshotUrl = "";
   
-		this.jobqueueList = [{"hostname": "N/A", "comment": "", "jobType": "N/A", "statusText": "Attempting to get queue data ..." }];
+	this.jobqueueList = [{"hostname": "N/A", "comment": "", "jobType": "N/A", "statusText": "Attempting to get queue data ..." }];
 	   
 }
 
@@ -174,7 +174,7 @@ RecordedDetailsAssistant.prototype.activate = function(event) {
 
 		s = { 
 			"label": $L(WebMyth.hostsCookieObject[i].hostname),
-			"command": "go-play-"+WebMyth.hostsCookieObject[i].hostname,
+			"command": "go-play-"+WebMyth.hostsCookieObject[i].hostname+"[]:[]"+WebMyth.hostsCookieObject[i].address+"[]:[]"+WebMyth.hostsCookieObject[i].port,
 			"hostname": WebMyth.hostsCookieObject[i].hostname,
 			"port": WebMyth.hostsCookieObject[i].port 
 		};
@@ -487,21 +487,39 @@ RecordedDetailsAssistant.prototype.handleDownload = function(downloadOrStream_in
  
 };
 
-RecordedDetailsAssistant.prototype.playOnHost = function(host) {
+RecordedDetailsAssistant.prototype.playOnHost = function(frontend) {
 
-	//Attempting to play
-	var thisHostname = host;
-	WebMyth.prefsCookieObject.currentFrontend = host;
+	var frontendDecoder = frontend.split("[]:[]");
+	var cmd = "program "+this.recordedObject.chanId+" "+this.recordedObject.recStartTs+" resume";
 	
-	//var clean_starttime = this.recordedObject.starttime.replace(' ','T');
-	var clean_starttime = this.recordedObject.recStartTs;
 	
-	var cmd = "program "+this.recordedObject.chanId+" "+clean_starttime+" resume";
-	
+	Mojo.Log.info("Frontend is "+frontend);
 	Mojo.Log.info("Command to send is " + cmd);
+	
+	
+	if((WebMyth.prefsCookieObject.currentFrontend != frontendDecoder[0])){
+		Mojo.Log.info("Changing frontend to "+frontendDecoder[0]);
 
+		WebMyth.prefsCookieObject.currentFrontend = frontendDecoder[0];
+		WebMyth.prefsCookieObject.currentFrontendAddress = frontendDecoder[1];
+		WebMyth.prefsCookieObject.currentFrontendPort = frontendDecoder[2];
+		WebMyth.prefsCookie.put(WebMyth.prefsCookieObject);
+	
+		if(WebMyth.useService) {
+			WebMyth.startNewCommunication(this);
+		}
 		
-	WebMyth.sendPlay(cmd);
+	}
+	
+	
+	
+
+	
+	if(WebMyth.useService) {
+		WebMyth.sendServiceCmd(this, "play "+cmd);
+	} else {
+		WebMyth.sendPlay(cmd);
+	}
 	
 	
 	if(WebMyth.prefsCookieObject.playJumpRemote)  Mojo.Controller.stageController.pushScene({name: WebMyth.prefsCookieObject.currentRemoteScene, disableSceneScroller: true});
@@ -531,8 +549,11 @@ RecordedDetailsAssistant.prototype.handleDelete = function(selection_in) {
 	requestUrl += Base64.encode(command);	
 	
 	
+	if(WebMyth.useService){
+		WebMyth.mythprotocolCommand(this, command, "Successfully deleted");
+		
+	} else { 
 	
-    try {
         var request = new Ajax.Request(requestUrl,{
             method: 'get',
             evalJSON: 'false',
@@ -546,9 +567,6 @@ RecordedDetailsAssistant.prototype.handleDelete = function(selection_in) {
 				Mojo.Controller.getAppController().showBanner("Error deleting recording", {source: 'notification'});
 			}  
         });
-    }
-    catch(e) {
-        Mojo.Log.error(e);
     }
 	
 };
@@ -576,7 +594,6 @@ RecordedDetailsAssistant.prototype.handleUndelete = function() {
 	
 	
 	
-    try {
         var request = new Ajax.Request(requestUrl,{
             method: 'get',
             evalJSON: 'false',
@@ -590,10 +607,7 @@ RecordedDetailsAssistant.prototype.handleUndelete = function() {
 				Mojo.Controller.getAppController().showBanner("Error undeleting recording", {source: 'notification'});
 			}  
         });
-    }
-    catch(e) {
-        Mojo.Log.error(e);
-    }
+	
 	
 };
 
@@ -655,7 +669,7 @@ RecordedDetailsAssistant.prototype.successJobqueue = function(response) {
 		//Got empty response
 		this.jobqueueList.clear();
 		
-		this.jobqueueList.push({"hostname": "N/A", "comment": "", "jobType": "N/A", "statusText": "No recent jobs" });
+		this.jobqueueList.push({"hostname": "N/A", "comment": "", "jobType": "N/A", "statusText": "No recent or queued jobs" });
 		
 		this.controller.modelChanged(this.jobqueueListModel);
 	

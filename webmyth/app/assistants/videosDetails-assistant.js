@@ -332,15 +332,10 @@ VideosDetailsAssistant.prototype.handleDownload = function(downloadOrStream_in) 
  
 };
 
-VideosDetailsAssistant.prototype.playOnHost = function(host) {
+VideosDetailsAssistant.prototype.playOnHost = function(frontend) {
 
-	//Attempting to play
-	var thisHostname = host;
-	WebMyth.prefsCookieObject.currentFrontend = host;
-	
-	//var clean_starttime = this.videosObject.starttime.replace(' ','T');
-	var clean_starttime = this.videosObject.recStartTs;
-	
+	var frontendDecoder = frontend.split("[]:[]");
+
 	var cmd = "file ";
 	
 	if((this.videosObject.filename == this.videosObject.level1) && false) {
@@ -353,9 +348,31 @@ VideosDetailsAssistant.prototype.playOnHost = function(host) {
 	
 	
 	
+	Mojo.Log.info("Frontend is "+frontend);
 	Mojo.Log.info("Command to send is " + cmd);
 		
-	WebMyth.sendPlay(cmd);
+		
+	if((WebMyth.prefsCookieObject.currentFrontend != frontendDecoder[0])){
+		Mojo.Log.info("Changing frontend to "+frontendDecoder[0]);
+
+		WebMyth.prefsCookieObject.currentFrontend = frontendDecoder[0];
+		WebMyth.prefsCookieObject.currentFrontendAddress = frontendDecoder[1];
+		WebMyth.prefsCookieObject.currentFrontendPort = frontendDecoder[2];
+		WebMyth.prefsCookie.put(WebMyth.prefsCookieObject);
+	
+		if(WebMyth.useService) {
+			WebMyth.startNewCommunication(this);
+		}
+		
+	}
+		
+	
+	if(WebMyth.useService) {
+		WebMyth.sendServiceCmd(this, "play "+cmd);
+	} else {
+		WebMyth.sendPlay(cmd);
+	}
+	
 	
 	if(WebMyth.prefsCookieObject.playJumpRemote)  Mojo.Controller.stageController.pushScene({name: WebMyth.prefsCookieObject.currentRemoteScene, disableSceneScroller: true});
 	
@@ -434,7 +451,7 @@ VideosDetailsAssistant.prototype.updateHostsList = function() {
 
 		s = { 
 			"label": $L(WebMyth.hostsCookieObject[i].hostname),
-			"command": "go-play-"+WebMyth.hostsCookieObject[i].hostname,
+			"command": "go-play-"+WebMyth.hostsCookieObject[i].hostname+"[]:[]"+WebMyth.hostsCookieObject[i].address+"[]:[]"+WebMyth.hostsCookieObject[i].port,
 			"hostname": WebMyth.hostsCookieObject[i].hostname,
 			"port": WebMyth.hostsCookieObject[i].port 
 		};

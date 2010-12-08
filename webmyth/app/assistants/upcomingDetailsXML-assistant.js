@@ -20,10 +20,6 @@
 
 
 function UpcomingDetailsXMLAssistant(upcoming_chanid, upcoming_starttime) {
-	/* this is the creator function for your scene assistant object. It will be passed all the 
-	   additional parameters (after the scene name) that were passed to pushScene. The reference
-	   to the scene controller (this.controller) has not be established yet, so any initialization
-	   that needs the scene controller should be done in the setup function below. */
 	   
 	   this.chanid = upcoming_chanid;
 	   this.starttime = upcoming_starttime;
@@ -195,21 +191,37 @@ UpcomingDetailsXMLAssistant.prototype.openSetup = function() {
  
 };
 
-UpcomingDetailsXMLAssistant.prototype.openPlay = function(host) {
+UpcomingDetailsXMLAssistant.prototype.openPlay = function(frontend) {
 
-	//Attempting to play
-	var thisHostname = host;
-	WebMyth.prefsCookieObject.currentFrontend = host;
+	var frontendDecoder = frontend.split("[]:[]");
+	var cmd = "program "+this.upcomingObject.chanId+" "+this.upcomingObject.recStartTs+" resume";
 	
-	//var clean_starttime = this.recordedObject.starttime.replace(' ','T');
-	var clean_starttime = this.upcomingObject.recStartTs;
 	
-	var cmd = "program "+this.upcomingObject.chanId+" "+clean_starttime+" resume";
-	
+	Mojo.Log.info("Frontend is "+frontend);
 	Mojo.Log.info("Command to send is " + cmd);
+	
+	
+	if((WebMyth.prefsCookieObject.currentFrontend != frontendDecoder[0])){
+		Mojo.Log.info("Changing frontend to "+frontendDecoder[0]);
+
+		WebMyth.prefsCookieObject.currentFrontend = frontendDecoder[0];
+		WebMyth.prefsCookieObject.currentFrontendAddress = frontendDecoder[1];
+		WebMyth.prefsCookieObject.currentFrontendPort = frontendDecoder[2];
+		WebMyth.prefsCookie.put(WebMyth.prefsCookieObject);
+	
+		if(WebMyth.useService) {
+			WebMyth.startNewCommunication(this);
+		}
+		
+	}
 
 		
-	WebMyth.sendPlay(cmd);
+	
+	if(WebMyth.useService) {
+		WebMyth.sendServiceCmd(this, "play "+cmd);
+	} else {
+		WebMyth.sendPlay(cmd);
+	}
 	
 	
 	if(WebMyth.prefsCookieObject.playJumpRemote)  Mojo.Controller.stageController.pushScene({name: WebMyth.prefsCookieObject.currentRemoteScene, disableSceneScroller: true});
@@ -473,7 +485,7 @@ UpcomingDetailsXMLAssistant.prototype.finishedReadingDetails = function() {
 
 			s = { 
 				"label": $L(WebMyth.hostsCookieObject[i].hostname),
-				"command": "go-play-"+WebMyth.hostsCookieObject[i].hostname,
+				"command": "go-play-"+WebMyth.hostsCookieObject[i].hostname+"[]:[]"+WebMyth.hostsCookieObject[i].address+"[]:[]"+WebMyth.hostsCookieObject[i].port,
 				"hostname": WebMyth.hostsCookieObject[i].hostname,
 				"port": WebMyth.hostsCookieObject[i].port 
 			};

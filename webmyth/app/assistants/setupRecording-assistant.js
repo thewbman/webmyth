@@ -1460,7 +1460,7 @@ SetupRecordingAssistant.prototype.cancelRecord = function() {
 	query += " WHERE `recordid` = "+this.newRule.recordid+" LIMIT 1;";
 	
 	
-	Mojo.Log.error("query is "+query);
+	//Mojo.Log.info("query is "+query);
 	
 	var requestUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webmythPythonFile;
 	requestUrl += "?op=executeSQL";				
@@ -1570,7 +1570,13 @@ SetupRecordingAssistant.prototype.reschedule = function() {
 	requestUrl += this.newRule.recordid;	
 	
 	
-    try {
+	if(WebMyth.useService){
+		WebMyth.mythprotocolCommand(this, "RESCHEDULE_RECORDINGS "+this.newRule.recordid);
+		
+		this.controller.window.setTimeout(this.closeScene.bind(this), 4000);
+		
+	} else { 
+	
         var request = new Ajax.Request(requestUrl,{
             method: 'get',
             evalJSON: 'false',
@@ -1578,9 +1584,7 @@ SetupRecordingAssistant.prototype.reschedule = function() {
             onSuccess: this.rescheduleSuccess.bind(this),
             onFailure: this.rescheduleFail.bind(this)  
         });
-    }
-    catch(e) {
-        Mojo.Log.error(e);
+		
     }
 	
 };
@@ -1593,7 +1597,7 @@ SetupRecordingAssistant.prototype.rescheduleFail = function(event) {
 
 SetupRecordingAssistant.prototype.rescheduleSuccess = function(response) {
 
-    Mojo.Log.info('Got reschedule response : ' + response.responseText);
+    Mojo.Log.info('Got reschedule response: ' + response.responseText);
 	
 	//Delay 4 seconds to allow scheduler to run
 	this.controller.window.setTimeout(this.closeScene.bind(this), 4000);

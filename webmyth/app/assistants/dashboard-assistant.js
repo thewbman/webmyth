@@ -186,27 +186,29 @@ DashboardAssistant.prototype.buttonTap = function(element, event) {
 };
 
 DashboardAssistant.prototype.sendTelnetKey = function(value) {
-	//this.sendTelnet("key "+value);
 	
-	//this.controller.stageController.parentSceneAssistant(this).sendKey(value); 
-	WebMyth.sendKey(value);
+	if(WebMyth.useService) {
+		WebMyth.sendServiceCmd(this, "key "+value);
+	} else {
+		WebMyth.sendKey(value);
+	}
 	
 	if(WebMyth.prefsCookieObject.remoteVibrate) {
 		this.controller.stageController.getAppController().playSoundNotification( "vibrate", "" );
 	};
 	
-	//Mojo.Log.info("Sending command '%s' to host", value);
 };
 
 DashboardAssistant.prototype.sendJumpPoint = function(value){
-	//this.sendTelnet("key "+value);
 	
-	//this.controller.stageController.parentSceneAssistant(this).sendJump(value); 
-	WebMyth.sendJump(value);
+	if(WebMyth.useService) {
+		WebMyth.sendServiceCmd(this, "jump "+value);
+	} else {
+		WebMyth.sendJump(value);
+	}
 	
 	if(WebMyth.prefsCookieObject.remoteVibrate) {
 		this.controller.stageController.getAppController().playSoundNotification( "vibrate", "" );
 	};
 	
-	//Mojo.Log.info("Sending jump '%s' to host", value);
 };

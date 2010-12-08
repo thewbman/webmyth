@@ -75,8 +75,7 @@ GuideAssistant.prototype.setup = function() {
 	
 	// Menu grouping at bottom of scene
     this.cmdMenuModel = { label: $L('Guide Menu'), items: [
-        //{ toggleCmd: 'do-now', items: [{label: $L('Now'), command:'do-now'},{label: $L('Time'), command:'do-selectTime'},{label: $L('Channel'), command: 'do-selectChannel', submenu:'channel-menu'}]},
-		{ label: 'Sort', submenu: 'sort-menu', width: 90 },
+        { label: 'Sort', submenu: 'sort-menu', width: 90 },
 		{ icon: 'refresh', command: 'do-refresh' },
 		{ label: 'View', submenu: 'view-menu', width: 90 }]
 	};
@@ -1479,23 +1478,23 @@ GuideAssistant.prototype.channelPicker = function() {
 
 
 GuideAssistant.prototype.checkLocation = function() {
-	//Attempting to play livetv - have to start livetv then change channel
-	this.host = WebMyth.prefsCookieObject.currentFrontend;
-	//Mojo.Log.info("Checking current location as prep for "+this.channid+" on "+this.host);
 	
 	
-		//Mojo.Controller.getAppController().showBanner("Sending command to telnet", {source: 'notification'});
+	Mojo.Log.info("Checking current location as prep for "+this.channid+" on "+WebMyth.prefsCookieObject.currentFrontend);
+	
+	if(WebMyth.useService){
+		WebMyth.playServiceChannel(this, this.channid);
+		
+	} else {
 		
 		var requestUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webmythPythonFile;
 		requestUrl += "?op=remote&type=query";
-		requestUrl += "&host="+this.host+"&cmd=location";
+		requestUrl += "&host="+WebMyth.prefsCookieObject.currentFrontend+"&cmd=location";
 		
-		//Mojo.Log.error("requesting check URL: "+requestUrl);
 	
 		var request1 = new Ajax.Request(requestUrl, {
 			method: 'get',
 			onSuccess: function(response){
-				//Mojo.Log.info("got query response: %s, %s",response.responseText,response.responseText.search("LiveTV"));
 				
 				if(response.responseText.search("LiveTV") == -1) {
 					//Is not on LiveTV
@@ -1511,6 +1510,8 @@ GuideAssistant.prototype.checkLocation = function() {
 			}
 			
 		});
+		
+	}
 	
 };
 
@@ -1525,7 +1526,7 @@ GuideAssistant.prototype.jumpLive = function() {
 		
 		var requestUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webmythPythonFile;
 		requestUrl += "?op=remote&type=jump";
-		requestUrl += "&host="+this.host+"&cmd=livetv";
+		requestUrl += "&host="+WebMyth.prefsCookieObject.currentFrontend+"&cmd=livetv";
 		
 		//Mojo.Log.error("requesting jump live : "+requestUrl);
 	

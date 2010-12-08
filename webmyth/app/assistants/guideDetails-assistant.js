@@ -25,7 +25,7 @@ function GuideDetailsAssistant(detailsObject, forceRefresh) {
 	   
 	   this.forceRefresh = forceRefresh;
 	   
-	   this.host = WebMyth.prefsCookieObject.currentFrontend;
+	   
 }
 
 GuideDetailsAssistant.prototype.setup = function() {
@@ -54,7 +54,7 @@ GuideDetailsAssistant.prototype.setup = function() {
 								]};
 							
  
-	this.hostsMenuModel = { label: $L('Hosts'), items: []};
+	WebMyth.prefsCookieObject.currentFrontendsMenuModel = { label: $L('Hosts'), items: []};
  
 	this.moreMenuModel = { label: $L('moreMenu'), items: [
 		{"label": $L('Web'), items:[
@@ -136,7 +136,7 @@ GuideDetailsAssistant.prototype.activate = function(event) {
 
 			s = { 
 				"label": $L(WebMyth.hostsCookieObject[i].hostname),
-				"command": "go-play----"+WebMyth.hostsCookieObject[i].hostname,
+				"command": "go-play----"+WebMyth.hostsCookieObject[i].hostname+"[]:[]"+WebMyth.hostsCookieObject[i].address+"[]:[]"+WebMyth.hostsCookieObject[i].port,
 				"hostname": WebMyth.hostsCookieObject[i].hostname,
 				"port": WebMyth.hostsCookieObject[i].port 
 			};
@@ -144,8 +144,8 @@ GuideDetailsAssistant.prototype.activate = function(event) {
 			
 		};
 			
-		this.hostsMenuModel.items = hostsList;
-		this.controller.modelChanged(this.hostsMenuModel);
+		WebMyth.prefsCookieObject.currentFrontendsMenuModel.items = hostsList;
+		this.controller.modelChanged(WebMyth.prefsCookieObject.currentFrontendsMenuModel);
 		
 		this.cmdMenuModel.items[0].label = $L('Play');
 		this.cmdMenuModel.items[0].submenu = 'hosts-menu';
@@ -157,7 +157,7 @@ GuideDetailsAssistant.prototype.activate = function(event) {
 		this.cmdMenuModel.items[1].icon =  '';
 		
 				
-		this.controller.setupWidget('hosts-menu', '', this.hostsMenuModel);
+		this.controller.setupWidget('hosts-menu', '', WebMyth.prefsCookieObject.currentFrontendsMenuModel);
 		this.controller.modelChanged(this.cmdMenuModel);
 			
 	}
@@ -351,18 +351,38 @@ GuideDetailsAssistant.prototype.openWeb = function(website) {
 
 
 
-GuideDetailsAssistant.prototype.checkLocation = function(host) {
+GuideDetailsAssistant.prototype.checkLocation = function(frontend) {
+
 	//Attempting to play livetv - have to start livetv then change channel
-	this.host = host;
-	Mojo.Log.info("Checking current location as prep for "+this.guideObject.chanId+" on "+this.host);
+
+	var frontendDecoder = frontend.split("[]:[]");
 	
 	
-	if (Mojo.appInfo.skipPDK == "true") {
-		//Mojo.Controller.getAppController().showBanner("Sending command to telnet", {source: 'notification'});
+	
+	if((WebMyth.prefsCookieObject.currentFrontend != frontendDecoder[0])){
+		Mojo.Log.info("Changing frontend to "+frontendDecoder[0]);
+
+		WebMyth.prefsCookieObject.currentFrontend = frontendDecoder[0];
+		WebMyth.prefsCookieObject.currentFrontendAddress = frontendDecoder[1];
+		WebMyth.prefsCookieObject.currentFrontendPort = frontendDecoder[2];
+		WebMyth.prefsCookie.put(WebMyth.prefsCookieObject);
+	
+		if(WebMyth.useService) {
+			WebMyth.startNewCommunication(this);
+		}
+		
+	}
+	
+	Mojo.Log.info("Checking current location as prep for "+this.guideObject.chanId+" on "+WebMyth.prefsCookieObject.currentFrontend);
+	
+	if(WebMyth.useService){
+		WebMyth.playServiceChannel(this, this.guideObject.chanId);
+		
+	} else {
 		
 		var requestUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webmythPythonFile;
 		requestUrl += "?op=remote&type=query";
-		requestUrl += "&host="+this.host+"&cmd=location";
+		requestUrl += "&host="+WebMyth.prefsCookieObject.currentFrontend+"&cmd=location";
 		
 		Mojo.Log.error("requesting check URL: "+requestUrl);
 	
@@ -385,11 +405,8 @@ GuideDetailsAssistant.prototype.checkLocation = function(host) {
 			}
 		}
 		);
+		
 	}
-	else {
-		$('telnetPlug').SendTelnet(value);
-	}
-	
 	
 };
 
@@ -399,12 +416,10 @@ GuideDetailsAssistant.prototype.jumpLive = function() {
 	//Attempting to play livetv - have to start livetv then change channel
 	Mojo.Log.info("jumping to live tv");
 	
-	if (Mojo.appInfo.skipPDK == "true") {
-		//Mojo.Controller.getAppController().showBanner("Sending command to telnet", {source: 'notification'});
 		
 		var requestUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webmythPythonFile;
 		requestUrl += "?op=remote&type=jump";
-		requestUrl += "&host="+this.host+"&cmd=livetv";
+		requestUrl += "&host="+WebMyth.prefsCookieObject.currentFrontend+"&cmd=livetv";
 		
 		Mojo.Log.error("requesting jump live : "+requestUrl);
 	
@@ -417,10 +432,6 @@ GuideDetailsAssistant.prototype.jumpLive = function() {
 			}
 		}
 		);
-	}
-	else {
-		$('telnetPlug').SendTelnet(value);
-	}
 	
 	
 };
