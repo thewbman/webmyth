@@ -1,0 +1,19 @@
+[{
+    "library": {
+        "name": "foundations",
+        "version": "1.0"
+    }
+},
+{
+    "source": "StartCommunicationCommandAssistant.js" 
+},
+{
+    "source": "StartNewCommunicationCommandAssistant.js" 
+},
+{
+    "source": "SendCommandAssistant.js" 
+},
+{
+    "source": "MythprotocolCommandAssistant.js" 
+}
+]
