@@ -1,8 +1,10 @@
 #!/usr/bin/python
+# -*- coding: utf-8 -*-
+# coding: utf-8
 #
 # webmyth.py
 #
-# Original script impsired by Kyle Stoneman from http://www.legatissimo.info/node/355
+# Original script inspired by Kyle Stoneman from http://www.legatissimo.info/node/355
 # Modified beyond recognition for use in WebMyth   http://code.google.com/p/webmyth/
 #
 # This file needs to be saved on a local webserver in the 'cgi-bin' folder
@@ -25,7 +27,7 @@ myDBPassword = 'mythtv'
 # end of configuration
 #
 
-version = 8
+version = 9
 
 import cgi
 import cgitb
@@ -40,6 +42,32 @@ from telnetlib import Telnet
 from MythTV import MythDB, MythBE, Frontend, MythVideo, MythXML, MythLog, MythError, Video, ftopen
 
 import MySQLdb
+
+#Try using settings file is possible - thanks to muhgatus for the code
+mythtvMyConfig="/etc/mythtv/mysql.txt"
+
+def loadConfig():
+        """Load mysql configuration from MythTV mysql.txt settings file"""
+        global myDBHostName, myDBName, myDBUserName, myDBPassword
+        if os.path.exists(mythtvMyConfig):
+                try:
+                        f=open(mythtvMyConfig)
+                except:
+                        return
+                for line in f:
+                        key, value = line.strip().split('=')
+                        if 'DBHostName' in key:
+                                myDBHostName = value.strip()
+                        if 'DBUserName' in key:
+                                myDBUserName = value.strip()
+                        if 'DBName' in key:
+                                myDBName = value.strip()
+                        if 'DBPassword' in key:
+                                myDBPassword = value.strip()
+                f.close()
+
+loadConfig()
+
 
 
 form = cgi.FieldStorage()
@@ -470,8 +498,11 @@ else :
 	#op parameter was not given
 	result = "unknown"
 
+
+
+
 	
-if createJson == 1 :
+if createJson == 1:
 	count = 0
 	result = '[ '
 	while (count < len(alldata)) :
@@ -485,7 +516,10 @@ if createJson == 1 :
 			try :
 				result += string.replace(str(value), '"', '')
 			except UnicodeEncodeError :
-				result += 'ERROR - unicode encooding error'
+				try: 
+					result += string.replace(str(value.encode('ascii', 'replace')), '"', '')
+				except:
+					result += 'ERROR - unicode encooding error'
 			result += '", "'
 		result = result[:-3]
 		result += ' }, \n'
@@ -494,7 +528,7 @@ if createJson == 1 :
 	result = result[:-3]
 	result += ' ]'
 
-elif createJson == 2 :
+elif createJson == 2:
 	count = 0
 	singledata = alldata
 	result = '[ { "'
@@ -504,7 +538,10 @@ elif createJson == 2 :
 		try :
 			result += string.replace(str(value), '"', '')
 		except UnicodeEncodeError :
-			result += 'ERROR - unicode encooding error'
+			try: 
+				result += string.replace(str(value.encode('ascii', 'replace')), '"', '')
+			except:
+				result += 'ERROR - unicode encooding error'
 		result += '", "'
 	result = result[:-3]
 	result += " } ]"
@@ -533,6 +570,4 @@ elif header == 'download' :
 	print ""
 	#print str(os.path.getsize(dir+filename))
 	print file(dir+filename, "r").read()
-	
-
 	
