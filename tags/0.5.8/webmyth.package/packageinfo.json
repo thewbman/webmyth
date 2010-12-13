@@ -1,0 +1,12 @@
+{
+  "id": "com.thewbman.webmyth",
+  "package_format_version": 2,
+  "loc_name": "WebMyth",
+  "version": "0.5.2",
+  "icon": "icon.png",
+  "miniicon": "icon.png",
+  "vendor": "thewbman",
+  "vendorurl": "code.google.com/p/webmyth/",
+  "app": "com.thewbman.webmyth",
+  "services": ["com.thewbman.webmyth.service"]
+}
