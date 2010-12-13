@@ -1,0 +1,33 @@
+Todo - planned new features and updates:
+ 
+//Future
+ - plugin for remote
+ - progress/volume scrobble on remote ?
+ - demo video(s)
+ - add support for pin on backend ?
+ - search recording rules
+ - new app icons/theme
+ - fix pixelated icon
+ - non-email feedback?
+ - look into menu panel (style matters)
+ - language translation support
+ - make dialogs palm-dark
+ - handle music playlists
+ - cleanup schedule recording scene
+ 
+
+//May never do
+ - open remote in seperate card (had trouble with coding up and working correctly) 
+ 
+ 
+//Still use the script
+ - recorded details (SQL - current jobqueue)
+ - recorded details (SQL - new jobqueue)
+ - recorded details (SQL - undelete)
+ - setup recording (SQL - record schedule & cardinput)
+ - quide search (SQL)
+ - videos (SQL)
+ - videos details (SQL - upnp)
+ - music (SQL)
+ - log (SQL)
+ 
