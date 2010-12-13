@@ -70,14 +70,20 @@ MusicDetailsAssistant.prototype.setup = function() {
 
 MusicDetailsAssistant.prototype.activate = function(event) {
 
+	$('artist-group-title').innerText = $L('Artist');
+	$('album-group-title').innerText = $L('Album Details');
+	$('album-label').innerText = $L('Album');
+	$('track-label').innerText = $L('Track')+' #';
+	$('year-label').innerText = $L('Year');
+	
 	
 	//Update list of current hosts
 	var hostsList = [];
 	var i, s;
 
 	
-		var downloadCmd = { "label": "Download to Phone", "command": "go-down-download" }
-		var streamCmd = { "label": "Stream to Phone", "command": "go-down-stream" }
+		var downloadCmd = { "label": $L("Download to phone"), "command": "go-down-download" }
+		var streamCmd = { "label": $L("Stream to phone"), "command": "go-down-stream" }
 		
 		hostsList.push(downloadCmd);
 		hostsList.push(streamCmd);

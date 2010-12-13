@@ -87,7 +87,7 @@ AddHostAssistant.prototype.setup = function() {
 	this.controller.setupWidget("submitHostButtonId",
          {},
          {
-             label : "SUBMIT",
+             label : $L("Submit"),
              disabled: false
          }
      );
@@ -98,8 +98,13 @@ AddHostAssistant.prototype.setup = function() {
 };
 
 AddHostAssistant.prototype.activate = function(event) {
-	/* put in event handlers here that should only be in effect when this scene is active. For
-	   example, key handlers that are observing the document */
+
+	$('scene-title').innerText = $L("Add new host");
+	$('frontendGroupLabel').innerText = $L('Frontend');
+	$('hostLabel').innerText = $L('Host');
+	$('addressLabel').innerText = $L('Address');
+	$('portLabel').innerText = $L('Port');
+
 };
 
 AddHostAssistant.prototype.deactivate = function(event) {
@@ -121,30 +126,12 @@ AddHostAssistant.prototype.submitNewHost = function(event) {
 	};
 	
 	
-	//TODO: verify port is integer
-	
-	//TODO: resolve IP address to add into WebMyth.db
-	
-	//Mojo.Log.info("New hostname is %s", this.hostTextModel.value);
 	Mojo.Log.info("New hostname is %s", newHost.hostname);
 	
 	WebMyth.hostsCookieObject.push(newHost);
 	WebMyth.hostsCookie.put(WebMyth.hostsCookieObject);
 	 
-	 /*
-	var sql = "INSERT INTO 'hosts' (hostname, port) VALUES (?, ?)";
- 
-	WebMyth.db.transaction( function (transaction) {
-		transaction.executeSql(sql,  [newHost.hostname, newHost.port], 
-			function(transaction, results) {    // success handler
-				Mojo.Log.info("Successfully inserted record"); 
-            },
-            function(transaction, error) {      // error handler
-                Mojo.Log.error("Could not insert record: " + error.message);
-            }
-		);
-	});
-	*/
+
 	
 	
 	//Return to host selector

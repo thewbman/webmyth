@@ -1986,68 +1986,68 @@ var recStatusDecode = function(recStatusInt) {
 	
 		switch(parseInt(recStatusInt)) {
 			case -8:		
-				newStatusText = "Tuner Busy";
+				newStatusText = $L("Tuner Busy");
 			break;
 			case -7:		
-				newStatusText = "Low Disk Space";
+				newStatusText = $L("Low Disk Space");
 			break;
 			case -6:		
-				newStatusText = "Cancelled";
+				newStatusText = $L("Cancelled");
 			break;
 			case -5:		
-				newStatusText = "Deleted";
+				newStatusText = $L("Deleted");
 			break;
 			case -4:		
-				newStatusText = "Aborted";
+				newStatusText = $L("Aborted");
 			break;
 			case -3:		
-				newStatusText = "Recorded";
+				newStatusText = $L("Recorded");
 			break;
 			case -2:		
-				newStatusText = "Recording";
+				newStatusText = $L("Recording");
 			break;
 			case -1:		
-				newStatusText = "Will Record";
+				newStatusText = $L("Will Record");
 			break;
 			case 0:		
-				newStatusText = "Unknown";
+				newStatusText = $L("Unknown");
 			break;
 			case 1:		
-				newStatusText = "Force Don't Record";
+				newStatusText = $L("Force Don't Record");
 			break;
 			case 2:		
-				newStatusText = "Previously Recorded";
+				newStatusText = $L("Previously Recorded");
 			break;
 			case 3:		
-				newStatusText = "Current Recording";
+				newStatusText = $L("Current Recording");
 			break;
 			case 4:		
-				newStatusText = "Don't Record";
+				newStatusText = $L("Don't Record");
 			break;
 			case 5:		
-				newStatusText = "Earlier Showing";
+				newStatusText = $L("Earlier Showing");
 			break;
 			case 6:		
-				newStatusText = "Not Listed";
+				newStatusText = $L("Not Listed");
 			break;
 			case 7:		
-				newStatusText = "Conflict";
+				newStatusText = $L("Conflict");
 			break;
 			case 8:		
-				newStatusText = "Later Showing";
+				newStatusText = $L("Later Showing");
 			break;
 			case 9:		
-				newStatusText = "Repeat";
+				newStatusText = $L("Repeat");
 			break;
 			case 10:		
-				newStatusText = "Inactive";
+				newStatusText = $L("Inactive");
 			break;
 			case 11:		
-				newStatusText = "Never Record";
+				newStatusText = $L("Never Record");
 			break;
 			
 			default:
-				newStatusText = " No matching recording rule";
+				newStatusText = " "+$L("No matching recording rule");
 			break;
 		}	
 		

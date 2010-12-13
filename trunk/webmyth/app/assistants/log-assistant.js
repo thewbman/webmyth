@@ -35,7 +35,7 @@ LogAssistant.prototype.setup = function() {
 		spinning: true
 	}; 
 	this.controller.setupWidget('spinner', this.spinnerAttr, this.spinnerModel);
-	$('spinner-text').innerHTML = "Loading...";
+	$('spinner-text').innerHTML = $L("Loading")+"...";
 	
 	
 	//App menu widget
@@ -264,7 +264,7 @@ LogAssistant.prototype.finishedReadingLog = function() {
 	
 	Object.extend(this.resultList,this.fullResultList);
 	
-	$("scene-title").innerHTML = "Log ("+this.resultList.length+" items)";
+	$("scene-title").innerHTML = $L("Log")+" ("+this.resultList.length+" "+$L("items")+")";
 	
 	this.controller.sceneScroller.mojo.revealTop();
 	
@@ -298,36 +298,36 @@ LogAssistant.prototype.updateGroupMenu = function() {
 	
 	//Reset default sorting
 	this.groupMenuModel.items = [ 
-		{"label": "All", "command": "go-groupall" },
-		{"label": "Autoexpire", "command": "go-groupautoexpire" },
-		{"label": "Commflag", "command": "go-groupcommflag" },
-		{"label": "Jobqueue", "command": "go-groupjobqueue" },
-		{"label": "Mythbackend", "command": "go-groupmythbackend" },
-		{"label": "Mythfilldatabase", "command": "go-groupmythfilldatabase" },
-		{"label": "Scheduler", "command": "go-groupscheduler" }
+		{"label": $L("All"), "command": "go-groupall" },
+		{"label": $L("Autoexpire"), "command": "go-groupautoexpire" },
+		{"label": $L("Commflag"), "command": "go-groupcommflag" },
+		{"label": $L("Jobqueue"), "command": "go-groupjobqueue" },
+		{"label": $L("Mythbackend"), "command": "go-groupmythbackend" },
+		{"label": $L("Mythfilldatabase"), "command": "go-groupmythfilldatabase" },
+		{"label": $L("Scheduler"), "command": "go-groupscheduler" }
 	] ;
 	
 	switch(WebMyth.prefsCookieObject.currentLogGroup) {
 		case 'all':
-			this.groupMenuModel.items[0].label = '- All -';
+			this.groupMenuModel.items[0].label = '- '+this.groupMenuModel.items[0].label+' -';
 		  break;
 		case 'autoexpire':
-			this.groupMenuModel.items[1].label = '- Autoexpire -';
+			this.groupMenuModel.items[1].label = '- '+this.groupMenuModel.items[1].label+' -';
 		  break;
 		case 'commflag':
-			this.groupMenuModel.items[2].label = '- Commflag -';
+			this.groupMenuModel.items[2].label = '- '+this.groupMenuModel.items[2].label+' -';
 		  break;
 		case 'jobqueue':
-			this.groupMenuModel.items[3].label = '- Jobqueue -';
+			this.groupMenuModel.items[3].label = '- '+this.groupMenuModel.items[3].label+' -';
 		  break;
 		case 'mythbackend':
-			this.groupMenuModel.items[4].label = '- Mythbackend -';
+			this.groupMenuModel.items[4].label = '- '+this.groupMenuModel.items[4].label+' -';
 		  break;
 		case 'mythfilldatabase':
-			this.groupMenuModel.items[5].label = '- Mythfilldatabase -';
+			this.groupMenuModel.items[5].label = '- '+this.groupMenuModel.items[5].label+' -';
 		  break;
 		case 'scheduler':
-			this.groupMenuModel.items[6].label = '- Scheduler -';
+			this.groupMenuModel.items[6].label = '- '+this.groupMenuModel.items[6].label+' -';
 		  break;
 		default :
 			//this.sortMenuModel.items[0].label = 'Default';
@@ -419,7 +419,7 @@ LogAssistant.prototype.logDividerFunction = function(itemModel) {
 	//return itemModel.starttime.substring(0,10);
 	//var date = new Date(isoToJS(itemModel.starttime));
 	
-	var dividerData = itemModel.module;
+	var dividerData = $L(itemModel.module);
 	
 	
 	return dividerData;

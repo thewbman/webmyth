@@ -20,10 +20,6 @@
  
  
  function StatusAssistant() {
-	/* this is the creator function for your scene assistant object. It will be passed all the 
-	   additional parameters (after the scene name) that were passed to pushScene. The reference
-	   to the scene controller (this.controller) has not be established yet, so any initialization
-	   that needs the scene controller should be done in the setup function below. */
 	   
 	   this.encodersList = [];
 	   this.scheduledList = [];
@@ -41,7 +37,7 @@ StatusAssistant.prototype.setup = function() {
 		spinning: true
 	}; 
 	this.controller.setupWidget('spinner', this.spinnerAttr, this.spinnerModel);
-	$('spinner-text').innerHTML = "Loading...";
+	$('spinner-text').innerHTML = $L("Loading")+"...";
 	
 	
 	//App menu widget
@@ -186,6 +182,16 @@ StatusAssistant.prototype.setup = function() {
 };
 
 StatusAssistant.prototype.activate = function(event) {
+
+	$('scene-title').innerText = $L('Backend Status');
+	$('encodersDivider-label').innerText = $L('Encoders');
+	$('scheduledDivider-label').innerText = $L('Scheduled');
+	$('jobqueueDivider-label').innerText = $L('Job Queue');
+	$('storageLocationsDivider-label').innerText = $L('Storage Locations');
+	$('guideInformationDivider-label').innerText = $L('Guide Information');
+	$('otherInfoDivider-label').innerText = $L('Other Info');
+	
+
 	//Keypress event
 	Mojo.Event.listen(this.controller.sceneElement, Mojo.Event.keyup, this.handleKey.bind(this));
 };
@@ -485,12 +491,15 @@ StatusAssistant.prototype.readStatusSuccess = function(response) {
 		singleStorageNode = storageNode.childNodes[i];
 		if(singleStorageNode.nodeName == "Group") {
 			singleStorageJson = { 
-									"dir" : singleStorageNode.getAttributeNode("dir").nodeValue,
-									"id" : singleStorageNode.getAttributeNode("id").nodeValue,
-									"free" : Mojo.Format.formatNumber(parseInt(singleStorageNode.getAttributeNode("free").nodeValue)),
-									"total" : Mojo.Format.formatNumber(parseInt(singleStorageNode.getAttributeNode("total").nodeValue)),
-									"used" : Mojo.Format.formatNumber(parseInt(singleStorageNode.getAttributeNode("used").nodeValue))
-								};
+				"dir" : singleStorageNode.getAttributeNode("dir").nodeValue,
+				"id" : singleStorageNode.getAttributeNode("id").nodeValue,
+				"free" : Mojo.Format.formatNumber(parseInt(singleStorageNode.getAttributeNode("free").nodeValue)),
+				"freeText": $L("Free")+": "+Mojo.Format.formatNumber(parseInt(singleStorageNode.getAttributeNode("free").nodeValue))+" MB",
+				"total" : Mojo.Format.formatNumber(parseInt(singleStorageNode.getAttributeNode("total").nodeValue)),
+				"totalText": $L("Total")+": "+Mojo.Format.formatNumber(parseInt(singleStorageNode.getAttributeNode("total").nodeValue))+" MB",
+				"used" : Mojo.Format.formatNumber(parseInt(singleStorageNode.getAttributeNode("used").nodeValue)),
+				"usedText": $L("Used")+": "+Mojo.Format.formatNumber(parseInt(singleStorageNode.getAttributeNode("used").nodeValue))+" MB"
+			};
 			//Mojo.Log.info("Added storage group %j to list", singleStorageJson);
 			this.storageList.push(singleStorageJson);
 		}
@@ -504,37 +513,37 @@ StatusAssistant.prototype.readStatusSuccess = function(response) {
 	
 	var guideContent = '<div class="palm-row first">';
 	guideContent += '	<div class="palm-row-wrapper">';
-    guideContent += '        <div class="label" id="guideStart-label">last run</div>';
+    guideContent += '        <div class="label" id="guideStart-label">'+$L('Last Run')+'</div>';
 	guideContent += '		<div class="title" id="guideStart-title">'+guideNode.getAttributeNode("start").nodeValue.replace("T", " ")+'</div>';
 	guideContent += '	</div>';
     guideContent += '</div>';
 	guideContent += '<div class="palm-row">';
 	guideContent += '	<div class="palm-row-wrapper">';
-    guideContent += '        <div class="label" id="guideStatus-label">Last status</div>';
+    guideContent += '        <div class="label" id="guideStatus-label">'+$L('Last Status')+'</div>';
 	guideContent += '		<div class="title" id="guideStatus-title">'+guideNode.getAttributeNode("status").nodeValue+'</div>';
 	guideContent += '	</div>';
     guideContent += '</div>';
 	guideContent += '<div class="palm-row">';
 	guideContent += '	<div class="palm-row-wrapper">';
-    guideContent += '        <div class="label" id="guideThru-label">data until</div>';
+    guideContent += '        <div class="label" id="guideThru-label">'+$L('Data Until')+'</div>';
 	guideContent += '		<div class="title" id="guideThru-title">'+guideNode.getAttributeNode("guideThru").nodeValue.replace("T", " ")+'</div>';
 	guideContent += '	</div>';
     guideContent += '</div>';
 	guideContent += '<div class="palm-row">';
 	guideContent += '	<div class="palm-row-wrapper">';
-    guideContent += '        <div class="label" id="guideDays-label">Days</div>';
+    guideContent += '        <div class="label" id="guideDays-label">'+$L('Days')+'</div>';
 	guideContent += '		<div class="title" id="guideDays-title">'+guideNode.getAttributeNode("guideDays").nodeValue+'</div>';
 	guideContent += '	</div>';
     guideContent += '</div>';
 	guideContent += '<div class="palm-row">';
 	guideContent += '	<div class="palm-row-wrapper">';
-    guideContent += '        <div class="label" id="guideNext-label">Next run</div>';
+    guideContent += '        <div class="label" id="guideNext-label">'+$L('Next Run')+'</div>';
 	guideContent += '		<div class="title" id="guideNext-title">'+guideNode.getAttributeNode("next").nodeValue.replace("T", " ")+'</div>';
 	guideContent += '	</div>';
     guideContent += '</div>	';
 	guideContent += '<div class="palm-row last">';
 	guideContent += '	<div class="palm-row-wrapper">';
-    guideContent += '        <div class="label" id="guideComments-label">Comments</div>';
+    guideContent += '        <div class="label" id="guideComments-label">'+$L('Comments')+'</div>';
 	guideContent += '		<div class="title" id="guideComments-title">'+guideNode.childNodes[0].nodeValue+'</div>';
 	guideContent += '	</div>';
     guideContent += '</div>';
@@ -548,31 +557,37 @@ StatusAssistant.prototype.readStatusSuccess = function(response) {
 	
 	var generalStatusContent = '<div class="palm-row first">';
 	generalStatusContent +=	'	<div class="palm-row-wrapper">';
-    generalStatusContent +=	'		<div class="label" id="masterBackendIP-label">Master Backend</div>';
+    generalStatusContent +=	'		<div class="label" id="masterBackendIP-label">'+$L('Master Backend')+'</div>';
 	generalStatusContent +=	'		<div class="title" id="masterBackendIP-title">'+WebMyth.prefsCookieObject.masterBackendIp+'</div>';
 	generalStatusContent +=	'	</div>';
     generalStatusContent +=	'</div>';
 	generalStatusContent +=	'<div class="palm-row">';
 	generalStatusContent +=	'	<div class="palm-row-wrapper">';
-    generalStatusContent +=	'        <div class="label" id="version-label">Status Version</div>';
+    generalStatusContent +=	'        <div class="label" id="version-label">'+$L('Status Version')+'</div>';
 	generalStatusContent +=	'		<div class="title" id="version-title">'+statusNode.getAttributeNode("version").nodeValue+'</div>';
 	generalStatusContent +=	'	</div>';
     generalStatusContent +=	'</div>';
 	generalStatusContent +=	'<div class="palm-row">';
 	generalStatusContent +=	'	<div class="palm-row-wrapper">';
-    generalStatusContent +=	'        <div class="label" id="currentdate-label">Current Date</div>';
+    generalStatusContent +=	'        <div class="label" id="version-label">'+$L('MythTV Protocol Version')+'</div>';
+	generalStatusContent +=	'		<div class="title" id="version-title">'+WebMyth.prefsCookieObject.protoVer+'</div>';
+	generalStatusContent +=	'	</div>';
+    generalStatusContent +=	'</div>';
+	generalStatusContent +=	'<div class="palm-row">';
+	generalStatusContent +=	'	<div class="palm-row-wrapper">';
+    generalStatusContent +=	'        <div class="label" id="currentdate-label">'+$L('Current Date')+'</div>';
 	generalStatusContent +=	'		<div class="title" id="currentdate-title">'+statusNode.getAttributeNode("date").nodeValue+'</div>';
 	generalStatusContent +=	'	</div>';
     generalStatusContent +=	'</div>';
 	generalStatusContent +=	'<div class="palm-row">';
 	generalStatusContent +=	'	<div class="palm-row-wrapper">';
-    generalStatusContent +=	'        <div class="label" id="currenttime-label">Current Time</div>';
+    generalStatusContent +=	'        <div class="label" id="currenttime-label">'+$L('Current Time')+'</div>';
 	generalStatusContent +=	'		<div class="title" id="currenttime-title">'+statusNode.getAttributeNode("time").nodeValue+'</div>';
 	generalStatusContent +=	'	</div>';
     generalStatusContent +=	'</div>';
 	generalStatusContent +=	'<div class="palm-row last">';
 	generalStatusContent +=	'	<div class="palm-row-wrapper">';
-    generalStatusContent +=	'        <div class="label" id="avg3-label">Load Avg</div>';
+    generalStatusContent +=	'        <div class="label" id="avg3-label">'+$L('Load Avg')+'</div>';
 	generalStatusContent +=	'		<div class="title" id="all-avgs-title">';
 	generalStatusContent += loadNode.getAttributeNode("avg1").nodeValue+", "+loadNode.getAttributeNode("avg2").nodeValue+", "+loadNode.getAttributeNode("avg3").nodeValue;
 	generalStatusContent += '</div>';
@@ -596,13 +611,13 @@ StatusAssistant.prototype.setJobqueueData = function(propertyValue, model)  {
 	
 	switch(parseInt(model.type)) {
 		case 0:
-			jobType = "System Job";
+			jobType = $L("System Job");
 			break;
 		case 1:
-			jobType = "Transcode";
+			jobType = $L("Transcode");
 			break;
 		case 2:
-			jobType = "Commercial Flagging";
+			jobType = $L("Commercial Flagging");
 			break;
 		case 256:
 				if(WebMyth.settings.UserJobDesc1) {
@@ -639,52 +654,52 @@ StatusAssistant.prototype.setJobqueueData = function(propertyValue, model)  {
 	
 	switch(parseInt(model.status)) {
 		case 0:
-			statusText = "Unknown";
+			statusText = $L("Unknown");
 			break;
 		case 1:
-			statusText = "Queued";
+			statusText = $L("Queued");
 			break;
 		case 2:
-			statusText = "Pending";
+			statusText = $L("Pending");
 			break;
 		case 3:
-			statusText = "Starting";
+			statusText = $L("Starting");
 			break;
 		case 4:
-			statusText = "Running";
+			statusText = $L("Running");
 			break;
 		case 5:
-			statusText = "Stopped";
+			statusText = $L("Stopped");
 			break;
 		case 6:
-			statusText = "Paused";
+			statusText = $L("Paused");
 			break;
 		case 7:
-			statusText = "Retry";
+			statusText = $L("Retry");
 			break;
 		case 8:
-			statusText = "Erroring";
+			statusText = $L("Erroring");
 			break;
 		case 9:
-			statusText = "Aborting";
+			statusText = $L("Aborting");
 			break;
 		case 256:
-			statusText = "Done";
+			statusText = $L("Done");
 			break;
 		case 272:
-			statusText = "Finished";
+			statusText = $L("Finished");
 			break;
 		case 288:
-			statusText = "Aborted";
+			statusText = $L("Aborted");
 			break;
 		case 304:
-			statusText = "Errored";
+			statusText = $L("Errored");
 			break;
 		case 320:
-			statusText = "Cancelled";
+			statusText = $L("Cancelled");
 			break;
 		default:
-			statusText = "Unknown";
+			statusText = $L("Unknown");
 			break;
 	};
 			
@@ -712,40 +727,40 @@ StatusAssistant.prototype.setEncodersData = function(propertyValue, model)  {
 	
 	switch(parseInt(model.state)) {
 		case -1:
-			state = "Disconnected";
+			state = $L("Disconnected");
 			break;
 		case 0:
-			state = "Idle";
+			state = $L("Idle");
 			break;
 		case 1:
-			state = "Watching Live TV";
+			state = $L("Watching Live TV");
 			break;
 		case 2:
-			state = "Watching Pre-Recorded";
+			state = $L("Watching Pre-Recorded");
 			break;
 		case 3:
-			state = "Watching Video";
+			state = $L("Watching Video");
 			break;
 		case 4:
-			state = "Watching DVD";
+			state = $L("Watching DVD");
 			break;
 		case 5:
-			state = "Watching BD";
+			state = $L("Watching BD");
 			break;
 		case 6:
-			state = "Recording";
+			state = $L("Recording");
 			break;
 		case 7:
-			state = "Recording";
+			state = $L("Recording");
 			break;
 		case 8:
-			state = "Unknown Status 8";
+			state = $L("Unknown Status 8");
 			break;
 		case 9:
-			state = "Unknown Status 9";
+			state = $L("Unknown Status 9");
 			break;
 		default:
-			state = "Unknown";
+			state = $L("Unknown");
 			break;
 	};
 	
@@ -753,7 +768,7 @@ StatusAssistant.prototype.setEncodersData = function(propertyValue, model)  {
 	
 	var myDataModel = '<div class="palm-row-wrapper">';
 	//myDataModel += '<div class="title"> ';
-    myDataModel += '<div class="title">Encoder #'+model.id+' on '+model.hostname+' is '+state+'</div>';
+    myDataModel += '<div class="title">'+$L('Encoder')+' #'+model.id+' on '+model.hostname+' is '+state+'</div>';
     //myDataModel += '</div>';
 	
 	if(model.title) {

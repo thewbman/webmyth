@@ -19,21 +19,10 @@
  */
  
  function PreferencesAssistant() {
-	/* this is the creator function for your scene assistant object. It will be passed all the 
-	   additional parameters (after the scene name) that were passed to pushScene. The reference
-	   to the scene controller (this.controller) has not be established yet, so any initialization
-	   that needs the scene controller should be done in the setup function below. */
-	   
-	   
-		//useWebmythScript;
-		//showUpcoming;
-		//showVideos;
-	   
 	   
 }
 
 PreferencesAssistant.prototype.setup = function() {
-	/* this function is for setup tasks that have to happen when the scene is first created */
 		
 	//App menu widget
 	this.controller.setupWidget(Mojo.Menu.appMenu, WebMyth.appMenuAttr, WebMyth.appMenuModel);	
@@ -428,6 +417,40 @@ PreferencesAssistant.prototype.setup = function() {
 
 PreferencesAssistant.prototype.activate = function(event) {
 
+	$('scene-title').innerText = $L('Preferences');
+	$('webserver-group-title').innerText = $L('Webserver');
+		$('webserver-label').innerText = $L('Address');
+		$('username-label').innerText = $L('Username');
+		$('password-label').innerText = $L('Password');
+		$('stream-label').innerText = $L('Stream to Device');
+		$('script-label').innerText = $L('Script');
+		$('showUpcoming-label').innerText = $L('Show Upcoming');
+		$('showVideos-label').innerText = $L('Show Videos');
+		$('showMusic-label').innerText = $L('Show Music');
+		$('showLog-label').innerText = $L('Show Log');
+	$('backend-group-title').innerText = $L('Master Backend');
+		$('manualBackend-label').innerText = $L('Manual Backend IP');
+		$('backendAddress-label').innerText = $L('Address');
+	$('images-group-title').innerText = $L('Images');
+		$('showChannelIcons-label').innerText = $L('Show Channel Icons');
+		$('showVideoImagesList-label').innerText = $L('Show Video Images (List)');
+		$('showVideoImagesDetails-label').innerText = $L('Show Video Images (Details)');
+		$('scriptScreenshots-label').innerText = $L('Use script to provide screenshots');
+	$('remotePreferences-group-title').innerText = $L('Remote Preferences');
+		$('remoteVibrates-label').innerText = $L('Remote Vibrates');
+		$('remoteFullscreen-label').innerText = $L('Remote Fullscreen');
+		$('startRemotePlayback-label').innerText = $L('Start Remote After Playback Start');
+		$('startRemoteLivetv-label').innerText = $L('Start Remote After LiveTV Start');
+		$('dashboardRemote-label').innerText = $L('Dashboard Remote');
+	$('remoteScenes-group-title').innerText = $L('Remote Scenes');
+		$('navigation-label').innerText = $L('Navigation');
+		$('playback-label').innerText = $L('Playback');
+		$('music-label').innerText = $L('Music');
+		$('flick-label').innerText = $L('Flick');
+		$('master-label').innerText = $L('Master');
+		$('numbers-label').innerText = $L('Numbers');
+
+	
 		if (WebMyth.prefsCookieObject) {
 			
 			//Mojo.Log.error("initial cookie is %j", WebMyth.prefsCookieObject);

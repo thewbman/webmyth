@@ -41,7 +41,7 @@ MasterRemoteAssistant.prototype.setup = function() {
 		items: [{
 			items: [
 				{ icon: 'back', command: 'go-remotePrevious'},
-				{ label: "Master: " + WebMyth.prefsCookieObject.currentFrontend, command: 'do-remoteHeaderAction', width: 200 },
+				{ label: $L("Master")+": " + WebMyth.prefsCookieObject.currentFrontend, command: 'do-remoteHeaderAction', width: 200 },
 				{ icon: 'forward', command: 'go-remoteNext'}
 			]
 		}]
@@ -52,15 +52,15 @@ MasterRemoteAssistant.prototype.setup = function() {
 	
 	//Buttons
 		//navigation
-	this.controller.setupWidget("backButton", {}, { buttonClass:'small-button', label : "ESC", disabled: false } );
+	this.controller.setupWidget("backButton", {}, { buttonClass:'small-button', label : $L("ESC"), disabled: false } );
 	this.controller.setupWidget("upButton", {}, { label : "-", disabled: false } );
 	this.controller.setupWidget("leftButton", {}, { label : "-", disabled: false } );
-	this.controller.setupWidget("selectButton", {}, { label : "OK", disabled: false } );
+	this.controller.setupWidget("selectButton", {}, { label : $L("OK"), disabled: false } );
 	this.controller.setupWidget("rightButton", {}, { label : "-", disabled: false } );
 	this.controller.setupWidget("downButton", {}, { label : "-", disabled: false } );
 		//general
-	this.controller.setupWidget("infoButton", {}, { buttonClass:'small-button', label : "Info", disabled: false } );
-	this.controller.setupWidget("menuButton", {}, { buttonClass:'small-button', label : "Menu", disabled: false } );
+	this.controller.setupWidget("infoButton", {}, { buttonClass:'small-button', label : $L("Info"), disabled: false } );
+	this.controller.setupWidget("menuButton", {}, { buttonClass:'small-button', label : $L("Menu"), disabled: false } );
 		//playback
 	//this.controller.setupWidget("playButton", {}, { label : "Play", disabled: false } );
 	this.controller.setupWidget("pauseButton", {}, { label : "||", disabled: false } );
@@ -68,16 +68,16 @@ MasterRemoteAssistant.prototype.setup = function() {
 	//this.controller.setupWidget("rewindButton", {}, { label : "<<", disabled: false } );
 	this.controller.setupWidget("skipForwardButton", {}, { label : "-", disabled: false } );
 	this.controller.setupWidget("skipBackButton", {}, { label : "-", disabled: false } );
-	this.controller.setupWidget("deleteButton", {}, { buttonClass:'small-button', label : "Delete", disabled: false } );
+	this.controller.setupWidget("deleteButton", {}, { buttonClass:'small-button', label : $L("Delete"), disabled: false } );
 		//volume
 	this.controller.setupWidget("volumeUpButton", {}, { label : "-", disabled: false } );
 	this.controller.setupWidget("volumeDownButton", {}, { label : "-", disabled: false } );
 	this.controller.setupWidget("muteButton", {}, { label : "-", disabled: false } );
 		//jump buttons
-	this.controller.setupWidget("livetvButton", {}, { buttonClass:'small-button', label : "LiveTV", disabled: false } );
-	this.controller.setupWidget("musicButton", {}, { buttonClass:'small-button', label : "Music", disabled: false } );
-	this.controller.setupWidget("videosButton", {}, { buttonClass:'small-button', label : "Videos", disabled: false } );
-	this.controller.setupWidget("recordedButton", {}, { buttonClass:'small-button', label : "Record", disabled: false } );
+	this.controller.setupWidget("livetvButton", {}, { buttonClass:'small-button', label : $L("LiveTV"), disabled: false } );
+	this.controller.setupWidget("musicButton", {}, { buttonClass:'small-button', label : $L("Music"), disabled: false } );
+	this.controller.setupWidget("videosButton", {}, { buttonClass:'small-button', label : $L("Videos"), disabled: false } );
+	this.controller.setupWidget("recordedButton", {}, { buttonClass:'small-button', label : $L("Record"), disabled: false } );
 	
 
 	
@@ -126,7 +126,7 @@ MasterRemoteAssistant.prototype.activate = function(event) {
 	WebMyth.prefsCookie.put(WebMyth.prefsCookieObject); 
 	
 	//View menu widget
-	this.remoteViewMenuModel.items[0].items[1].label = "Master: " + WebMyth.prefsCookieObject.currentFrontend;  
+	this.remoteViewMenuModel.items[0].items[1].label = $L("Master")+": " + WebMyth.prefsCookieObject.currentFrontend;  
 	this.controller.modelChanged(this.remoteViewMenuModel);
 	
 	

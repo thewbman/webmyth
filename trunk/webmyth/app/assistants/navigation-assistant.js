@@ -38,7 +38,7 @@ NavigationAssistant.prototype.setup = function() {
 		items: [{
 			items: [
 				{ icon: 'back', command: 'go-remotePrevious'},
-				{ label: "Navigation: " + WebMyth.prefsCookieObject.currentFrontend, command: 'do-remoteHeaderAction', width: 200 },
+				{ label: $L("Navigation")+": " + WebMyth.prefsCookieObject.currentFrontend, command: 'do-remoteHeaderAction', width: 200 },
 				{ icon: 'forward', command: 'go-remoteNext'}
 			]
 		}]
@@ -48,15 +48,15 @@ NavigationAssistant.prototype.setup = function() {
 	
 	//Buttons
 		//navigation
-	this.controller.setupWidget("backButton", {}, { label : "ESC", disabled: false } );
+	this.controller.setupWidget("backButton", {}, { label : $L("ESC"), disabled: false } );
 	this.controller.setupWidget("upButton", {}, { label : "-", disabled: false } );
 	this.controller.setupWidget("leftButton", {}, { label : "-", disabled: false } );
-	this.controller.setupWidget("selectButton", {}, { label : "OK", disabled: false } );
+	this.controller.setupWidget("selectButton", {}, { label : $L("OK"), disabled: false } );
 	this.controller.setupWidget("rightButton", {}, { label : "-", disabled: false } );
 	this.controller.setupWidget("downButton", {}, { label : "-", disabled: false } );
 		//general
-	this.controller.setupWidget("infoButton", {}, { label : "Info", disabled: false } );
-	this.controller.setupWidget("menuButton", {}, { label : "Menu", disabled: false } );
+	this.controller.setupWidget("infoButton", {}, { label : $L("Info"), disabled: false } );
+	this.controller.setupWidget("menuButton", {}, { label : $L("Menu"), disabled: false } );
 		//playback
 	//this.controller.setupWidget("playButton", {}, { label : "Play", disabled: false } );
 	//this.controller.setupWidget("pauseButton", {}, { label : "||", disabled: false } );
@@ -107,7 +107,7 @@ NavigationAssistant.prototype.activate = function(event) {
 	
 	
 	//View menu widget
-	this.remoteViewMenuModel.items[0].items[1].label = "Navigation: " + WebMyth.prefsCookieObject.currentFrontend;  
+	this.remoteViewMenuModel.items[0].items[1].label = $L("Navigation")+": " + WebMyth.prefsCookieObject.currentFrontend;  
 	this.controller.modelChanged(this.remoteViewMenuModel);
 	
 	

@@ -38,7 +38,7 @@ MusicAssistant.prototype.setup = function() {
 		items: [{
 			items: [
 				{ icon: 'back', command: 'go-remotePrevious'},
-				{ label: "Music: " + WebMyth.prefsCookieObject.currentFrontend, command: 'do-remoteHeaderAction', width: 200 },
+				{ label: $L("Music")+": " + WebMyth.prefsCookieObject.currentFrontend, command: 'do-remoteHeaderAction', width: 200 },
 				{ icon: 'forward', command: 'go-remoteNext'}
 			]
 		}]
@@ -106,7 +106,7 @@ MusicAssistant.prototype.activate = function(event) {
 	WebMyth.prefsCookie.put(WebMyth.prefsCookieObject); 
 	
 	//View menu widget
-	this.remoteViewMenuModel.items[0].items[1].label = "Music: " + WebMyth.prefsCookieObject.currentFrontend;  
+	this.remoteViewMenuModel.items[0].items[1].label = $L("Music")+": " + WebMyth.prefsCookieObject.currentFrontend;  
 	this.controller.modelChanged(this.remoteViewMenuModel);
 	
 	

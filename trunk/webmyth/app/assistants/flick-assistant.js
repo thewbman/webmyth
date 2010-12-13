@@ -39,7 +39,7 @@ FlickAssistant.prototype.setup = function() {
 		items: [{
 			items: [
 				{ icon: 'back', command: 'go-remotePrevious'},
-				{ label: "Flick: " + WebMyth.prefsCookieObject.currentFrontend, command: 'do-remoteHeaderAction', width: 200 },
+				{ label: $L("Flick")+": " + WebMyth.prefsCookieObject.currentFrontend, command: 'do-remoteHeaderAction', width: 200 },
 				{ icon: 'forward', command: 'go-remoteNext'}
 			]
 		}]
@@ -69,16 +69,16 @@ FlickAssistant.prototype.setup = function() {
 
 FlickAssistant.prototype.activate = function(event) {
 	
-	//$('scene-title').innerHTML = 'Remote: '+WebMyth.prefsCookieObject.currentFrontend;
-	
 	WebMyth.prefsCookieObject.currentRemoteScene = 'flick';
 	WebMyth.prefsCookie.put(WebMyth.prefsCookieObject); 
 	
 	//View menu widget
-	this.remoteViewMenuModel.items[0].items[1].label = "Flick: " + WebMyth.prefsCookieObject.currentFrontend;  
+	this.remoteViewMenuModel.items[0].items[1].label = $L("Flick")+": " + WebMyth.prefsCookieObject.currentFrontend;  
 	this.controller.modelChanged(this.remoteViewMenuModel);
 	
 	this.controller.enableFullScreenMode(WebMyth.prefsCookieObject.remoteFullscreen);
+	
+	$('flickVolumeButtonId').innerText = $L("Volume");
 	
 
 };

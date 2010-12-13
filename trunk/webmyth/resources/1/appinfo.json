@@ -3,9 +3,9 @@
 	"version": "0.5.3",
 	"vendor": "thewbman",
 	"type": "web",
-	"main": "index.html",
-	"title": "WebMyth",
-	"icon": "icon.png",
+	"main": "../../index.html",
+	"title": "WebMyth1",
+	"icon": "../../icon.png",
 	"skipPDK": "true",
 	"usePlugin": "false",
 	"useXML": "true"

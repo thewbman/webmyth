@@ -37,7 +37,7 @@ MusicListAssistant.prototype.setup = function() {
 		spinning: true
 	}; 
 	this.controller.setupWidget('spinner', this.spinnerAttr, this.spinnerModel);
-	$('spinner-text').innerHTML = "Loading...<br />(this may take a while)";
+	$('spinner-text').innerHTML = $L("Loading")+"...<br />("+$L("this may take a while")+")";
 	
 	
 	//App menu widget
@@ -321,28 +321,28 @@ MusicListAssistant.prototype.updateSortMenu = function() {
 	
 	switch(WebMyth.prefsCookieObject.currentMusicSort) {
 		case 'album-asc':
-			this.sortMenuModel.items[0].label = '- Album-Asc -';
+			this.sortMenuModel.items[0].label = '- '+this.sortMenuModel.items[0].label+' -';
 		  break;
 		case 'album-desc':
-			this.sortMenuModel.items[1].label = '- Album-Desc -';
+			this.sortMenuModel.items[1].label = '- '+this.sortMenuModel.items[1].label+' -';
 		  break;
 		case 'artist-asc':
-			this.sortMenuModel.items[2].label = '- Artist-Asc -';
+			this.sortMenuModel.items[2].label = '- '+this.sortMenuModel.items[2].label+' -';
 		  break;
 		case 'artist-desc':
-			this.sortMenuModel.items[3].label = '- Artist-Desc -';
+			this.sortMenuModel.items[3].label = '- '+this.sortMenuModel.items[3].label+' -';
 		  break;
 		case 'name-asc':
-			this.sortMenuModel.items[4].label = '- Title-Asc -';
+			this.sortMenuModel.items[4].label = '- '+this.sortMenuModel.items[4].label+' -';
 		  break;
 		case 'name-desc':
-			this.sortMenuModel.items[5].label = '- Title-Desc -';
+			this.sortMenuModel.items[5].label = '- '+this.sortMenuModel.items[5].label+' -';
 		  break;
 		case 'year-asc':
-			this.sortMenuModel.items[6].label = '- Year-Asc -';
+			this.sortMenuModel.items[6].label = '- '+this.sortMenuModel.items[6].label+' -';
 		  break;
 		case 'year-desc':
-			this.sortMenuModel.items[7].label = '- Year-Desc -';
+			this.sortMenuModel.items[7].label = '- '+this.sortMenuModel.items[7].label+' -';
 		  break;
 		default :
 			//this.sortMenuModel.items[0].label = 'Default';
@@ -381,7 +381,7 @@ MusicListAssistant.prototype.musicGroupChanged = function(newGroup) {
 	}
 	
 	
-	$("scene-title").innerHTML = "Music ("+this.resultList.length+" items)";
+	$("scene-title").innerHTML = $L("Music")+" ("+this.resultList.length+" "+$L("items")+")";
 	
 	this.controller.sceneScroller.mojo.revealTop();
 	
@@ -404,22 +404,22 @@ MusicListAssistant.prototype.updateGroupMenu = function() {
 	
 	//Reset default sorting
 	this.groupMenuModel.items = [ 
-		{"label": "All", "command": "go-groupall" },
-		{"label": "Artist", "command": "go-groupartist" },
-		{"label": "Album", "command": "go-groupalbum" }
+		{"label": $L("All"), "command": "go-groupall" },
+		{"label": $L("Artist"), "command": "go-groupartist" },
+		{"label": $L("Album"), "command": "go-groupalbum" }
 	] ;
 	
 	switch(this.currentMusicGroup) {
 		case 'all':
-			this.groupMenuModel.items = [ {"label": "- All -", "command": "go-groupall" } ] ;
+			this.groupMenuModel.items = [ {"label": "- "+$L("All")+" -", "command": "go-groupall" } ] ;
 		  break;
 		case 'artist':
-			this.groupMenuModel.items[1].label = '- Artist: '+this.newArtist+' -';
-			this.groupMenuModel.items[2].label = 'Album: '+this.newAlbum;
+			this.groupMenuModel.items[1].label = '- '+this.groupMenuModel.items[1].label+': '+this.newArtist+' -';
+			this.groupMenuModel.items[2].label += ': '+this.newAlbum;
 		  break;
 		case 'album':
-			this.groupMenuModel.items[1].label = 'Artist: '+this.newArtist;
-			this.groupMenuModel.items[2].label = '- Album: '+this.newAlbum+' -';
+			this.groupMenuModel.items[1].label += ': '+this.newArtist;
+			this.groupMenuModel.items[2].label = '- '+this.groupMenuModel.items[2].label+': '+this.newAlbum+' -';
 		  break;
 		default :
 			//this.sortMenuModel.items[0].label = 'Default';
@@ -519,11 +519,11 @@ MusicListAssistant.prototype.goMusicDetails = function(event) {
 	
 	
 	var popupItems = [
-		{label: 'Download to phone', command: 'do-pickDownload'},
-		{label: 'Stream to phone', command: 'do-pickStream'},
-		{label: 'Details', command: 'do-pickDetails'},
-		{label: 'Artist: '+this.newArtist, command: 'do-pickArtist'},
-		{label: 'Album: '+this.newAlbum, command: 'do-pickAlbum'}
+		{label: $L('Download to phone'), command: 'do-pickDownload'},
+		{label: $L('Stream to phone'), command: 'do-pickStream'},
+		{label: $L('Details'), command: 'do-pickDetails'},
+		{label: $L('Artist')+': '+this.newArtist, command: 'do-pickArtist'},
+		{label: $L('Album')+': '+this.newAlbum, command: 'do-pickAlbum'}
 	];
 	
 	
@@ -715,21 +715,16 @@ MusicListAssistant.prototype.setMyData = function(propertyValue, model) {
 	
 	
 	musicDetailsText += '<div class="right-music-text">';
-	musicDetailsText += '<div class="palm-info-text truncating-text left">&nbsp;Artist: '+model.artist_name+'&nbsp;</div>';
-	musicDetailsText += '<div class="palm-info-text truncating-text left">&nbsp;&nbsp;Album: '+model.album_name+'&nbsp;</div>';
-	musicDetailsText += '<div class="palm-info-text truncating-text left">&nbsp;&nbsp;&nbsp;Track #: '+model.track+'</div>';
-	musicDetailsText += '<div class="palm-info-text truncating-text left">&nbsp;&nbsp;&nbsp;&nbsp;Year: '+model.year+'</div>';
+	musicDetailsText += '<div class="palm-info-text truncating-text left">&nbsp;'+$L('Artist')+': '+model.artist_name+'&nbsp;</div>';
+	musicDetailsText += '<div class="palm-info-text truncating-text left">&nbsp;&nbsp;'+$L('Album')+': '+model.album_name+'&nbsp;</div>';
+	musicDetailsText += '<div class="palm-info-text truncating-text left">&nbsp;&nbsp;&nbsp;'+$L('Track')+' #: '+model.track+'</div>';
+	musicDetailsText += '<div class="palm-info-text truncating-text left">&nbsp;&nbsp;&nbsp;&nbsp;'+$L('Year')+': '+model.year+'</div>';
 	musicDetailsText += '</div>';
 	
 	
 	musicDetailsText += '</div></div>';
-	
-	
-	
-	
 
 	
 	model.myData = musicDetailsText;
-	
 	
 };

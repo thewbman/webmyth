@@ -67,7 +67,7 @@ RecordedDetailsAssistant.prototype.setup = function() {
 				{"label": $L('Google'), "command": "go-web--Google"}	
 			]},	
 			{"label": $L('MythWeb'), "command": "go-mythweb"},	
-			{"label": $L('Setup schedule'), "command": "go-setup"},	
+			{"label": $L('Setup Schedule'), "command": "go-setup"},	
 			{"label": $L('Guide'), items:[
 				{"label": $L('Time'), "command": "go-guid-time"},
 				{"label": $L('Title Search'), "command": "go-guid-search"}
@@ -141,7 +141,7 @@ RecordedDetailsAssistant.prototype.setup = function() {
 	$('filesize-title').innerText = Mojo.Format.formatNumber(parseInt(this.recordedObject.fileSize.substring(0,this.recordedObject.fileSize.length - 6)))+" MB";
 	
 	if((this.recordedObject.recStatus == -2)) {
-		$('currently-recording-title').innerText = "Currently Recording";
+		$('currently-recording-title').innerText = $L("Currently Recording");
 	}
 	
 	
@@ -155,6 +155,24 @@ RecordedDetailsAssistant.prototype.setup = function() {
 };
 
 RecordedDetailsAssistant.prototype.activate = function(event) {
+
+	$('generalDetails-group-title').innerText = $L('General Details');
+		$('subtitle-label').innerText = $L('Subtitle');
+		$('category-label').innerText = $L('Category');
+	$('programDetails-group-title').innerText = $L('Program Details');
+		$('airdate-label').innerText = $L('Original Airdate');
+		$('seriesid-label').innerText = $L('Series ID');
+		$('programid-label').innerText = $L('Program ID');
+		$('channum-label').innerText = $L('Channel Number');
+		$('channame-label').innerText = $L('Channel Name');
+		$('starttime-label').innerText = $L('Start Time');
+		$('endtime-label').innerText = $L('End Time');
+	$('recordingDetails-group-title').innerText = $L('Recording Details');
+		$('hostname-label').innerText = $L('Hostname');
+		$('recgroup-label').innerText = $L('Recording Group');
+		$('recstartts-label').innerText = $L('Recording Start');
+		$('filesize-label').innerText = $L('Filesize');
+	$('jobqueue-group-title').innerText = $L('Queued or Recent Jobs');
 	
 	//Update list of current hosts
 	var hostsList = [];

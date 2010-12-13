@@ -1,3 +1,24 @@
+/*
+ *   WebMyth - An open source webOS app for controlling a MythTV frontend. 
+ *   http://code.google.com/p/WebMyth/
+ *   Copyright (C) 2010  Wes Brown
+ *
+ *   This program is free software; you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation; either version 2 of the License, or
+ *   (at your option) any later version.
+ *
+ *   This program is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
+ *
+ *   You should have received a copy of the GNU General Public License along
+ *   with this program; if not, write to the Free Software Foundation, Inc.,
+ *   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+
 function SearchHostsAssistant() {
 	/* this is the creator function for your scene assistant object. It will be passed all the 
 	   additional parameters (after the scene name) that were passed to pushScene. The reference
@@ -18,7 +39,8 @@ SearchHostsAssistant.prototype.setup = function() {
 	//List of hosts widget
 	this.enabledHostsListAttribs = {
 		itemTemplate: "searchHosts/foundHostsListItem",
-		swipeToDelete: false
+		swipeToDelete: false,
+		formatters:{myData: this.setMyData.bind(this)}
 	};
     this.enabledHostsListModel = {            
         //items: this.enabledResultList
@@ -48,8 +70,6 @@ SearchHostsAssistant.prototype.setup = function() {
 };
 
 SearchHostsAssistant.prototype.activate = function(event) {
-	/* put in event handlers here that should only be in effect when this scene is active. For
-	   example, key handlers that are observing the document */
 	   
 	Mojo.Log.info("Searching for hosts...");
 	
@@ -68,6 +88,11 @@ SearchHostsAssistant.prototype.activate = function(event) {
         Mojo.Log.error(e);
     }
 	
+	
+	
+	$('scene-title').innerText = $L("Hosts on Backend");
+	$('frontendsGroupLabel').innerText = $L('Frontends');
+	
 };
 
 SearchHostsAssistant.prototype.deactivate = function(event) {
@@ -84,8 +109,9 @@ SearchHostsAssistant.prototype.cleanup = function(event) {
 
 
 SearchHostsAssistant.prototype.getFrontendsSuccess = function(response) {
-	Mojo.Log.info("got response text: '%s'", response.responseText);
-	Mojo.Log.info("got frontends json: '%j'", response.responseJSON);
+	//Mojo.Log.info("got response text: '%s'", response.responseText);
+	//Mojo.Log.info("got frontends json: '%j'", response.responseJSON);
+	
 	var i, s;
 	 
 	this.resultList.clear();
@@ -130,3 +156,19 @@ SearchHostsAssistant.prototype.selectedHost = function(event) {
 	Mojo.Controller.stageController.swapScene("editHost");
 	
 };
+
+SearchHostsAssistant.prototype.setMyData = function(propertyValue, model) {
+
+	var hostDetailsText = "";
+	
+	hostDetailsText += '<div class="palm-row-wrapper">';
+	hostDetailsText += '<div class="title">';                          
+	hostDetailsText += '<div class="label">'+$L('Port')+": "+model.port+'</div>';
+	hostDetailsText += '<div class="textFieldClass truncating-text">'+model.hostname+'</div>';
+	hostDetailsText += '</div>';
+	hostDetailsText += '</div>';
+	
+	
+	model.myData = hostDetailsText;
+		
+}

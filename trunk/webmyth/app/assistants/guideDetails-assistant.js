@@ -25,7 +25,6 @@ function GuideDetailsAssistant(detailsObject, forceRefresh) {
 	   
 	   this.forceRefresh = forceRefresh;
 	   
-	   
 }
 
 GuideDetailsAssistant.prototype.setup = function() {
@@ -37,7 +36,7 @@ GuideDetailsAssistant.prototype.setup = function() {
 		spinning: true
 	}; 
 	this.controller.setupWidget('spinner', this.spinnerAttr, this.spinnerModel);
-	$('spinner-text').innerHTML = "Loading...";
+	$('spinner-text').innerHTML = $L("Loading")+"...";
 	
 	
 	Mojo.Log.info("Starting upcoming details scene '%j'", this.guideObject);
@@ -113,7 +112,19 @@ GuideDetailsAssistant.prototype.setup = function() {
 };
 
 GuideDetailsAssistant.prototype.activate = function(event) {
-	
+
+	$('generalDetails-group-title').innerText = $L('General Details');
+		$('subtitle-label').innerText = $L('Subtitle');
+		$('starttime-label').innerText = $L('Start Time');
+		$('endtime-label').innerText = $L('End Time');
+		$('recstatustext-label').innerText = $L('Status');
+	$('programDetails-group-title').innerText = $L('Program Details');
+		$('airdate-label').innerText = $L('Original Airdate');
+		$('programid-label').innerText = $L('Program ID');
+		$('channum-label').innerText = $L('Channel Number');
+		$('channame-label').innerText = $L('Channel Name');
+		
+		
 	var nowDate = new Date();
 	var nowDatePlus15 = new Date();
 	var nowDateMinus15 = new Date();

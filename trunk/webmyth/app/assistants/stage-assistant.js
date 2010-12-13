@@ -20,13 +20,14 @@
 
  
  function StageAssistant() {
-	/* this is the creator function for your stage assistant object */
+ 
 }
 
 WebMyth = {};
 
 
-WebMyth.useService = true;
+WebMyth.useService = false;
+WebMyth.telnetConnected = false;
 
  
 /********************Globals**************************/
@@ -35,23 +36,23 @@ WebMyth.appMenuAttr = {omitDefaultItems: true};
 WebMyth.appMenuModel = {
 	visible: true,
 	items: [
-		{label: "About", command: 'do-aboutApp'},
-		{label: "Preferences", command: 'do-prefsApp'},
-		{label: "Shortcuts", items: [
-			{label: "Remote", command: 'do-shortcutRemote', iconPath: 'images/palm/flat-button-next.png'},
-			{label: "Recorded", command: 'do-shortcutRecorded', shortcut: 'R'},
-			{label: "Upcoming", command: 'do-shortcutUpcoming', shortcut: 'U'},
-			{label: "Guide", command: 'do-shortcutGuide', shortcut: 'G'},
-			{label: "Status", command: 'do-shortcutStatus', shortcut: 'S'}
+		{label: $L("About"), command: 'do-aboutApp'},
+		{label: $L("Preferences"), command: 'do-prefsApp'},
+		{label: $L("Shortcuts"), items: [
+			{label: $L("Remote"), command: 'do-shortcutRemote', iconPath: 'images/palm/flat-button-next.png'},
+			{label: $L("Recorded"), command: 'do-shortcutRecorded', shortcut: 'R'},
+			{label: $L("Upcoming"), command: 'do-shortcutUpcoming', shortcut: 'U'},
+			{label: $L("Guide"), command: 'do-shortcutGuide', shortcut: 'G'},
+			{label: $L("Status"), command: 'do-shortcutStatus', shortcut: 'S'}
 			]
 		},
-		{label: "Help", items: [
-			{label: "Instructions", command: 'do-helpSetup'},
-			{label: "Tips", command: 'do-helpTips'},
-			{label: "FAQs", command: 'do-helpFAQs'},
-			{label: "Changelog", command: 'do-helpChangelog'},
-			{label: "Bulletin", command: 'do-helpBulletin'},
-			{label: "Email Developer", command: 'do-helpEmail'}
+		{label: $L("Help"), items: [
+			{label: $L("Instructions"), command: 'do-helpSetup'},
+			{label: $L("Tips"), command: 'do-helpTips'},
+			{label: $L("FAQs"), command: 'do-helpFAQs'},
+			{label: $L("Changelog"), command: 'do-helpChangelog'},
+			{label: $L("Bulletin"), command: 'do-helpBulletin'},
+			{label: $L("Email Developer"), command: 'do-helpEmail'}
 			]
 		}
 	]
@@ -67,7 +68,7 @@ WebMyth.remoteViewMenuModel = {
 	items: [{
 		items: [
 			{ icon: 'back', command: 'go-remotePrevious'},
-			{ label: "Remote", command: 'do-remoteHeaderAction', width: 200 },
+			{ label: $L("Remote"), command: 'do-remoteHeaderAction', width: 200 },
 			{ icon: 'forward', command: 'go-remoteNext'}
 		]
 	}]
@@ -162,14 +163,6 @@ StageAssistant.prototype.setup = function() {
 	window.document.addEventListener (Mojo.Event.activate, this.onFocusHandler.bind(this));
 	
 	
-	//Setup plugin connection
-	//this.handleConnect();
-	
-	//$('telnet_plugin_id').didReceiveData = this.didReceiveData.bind(this);
-	//$('telnet_plugin_id').didQueryLocation = this.didQueryLocation.bind(this);
-	//$('telnet_plugin_id').socketIsClosed = this.socketIsClosed.bind(this);
-	
-	
 	Mojo.Log.info("About to start first scene - welcome");
 	
 	//Start first scene
@@ -210,8 +203,8 @@ StageAssistant.prototype.handleCommand = function(event) {
 				title: "WebMyth - v" + Mojo.Controller.appInfo.version,
                 message: "Copyright 2010, Wes Brown <br>" + aboutinfo,
                 choices: [
-					{label: "OK", value: false},
-					{label: "Email Instructions", value: true}
+					{label: $L("OK"), value: false},
+					{label: $L("Email Instructions"), value: true}
 					],
                 allowHTMLMessage: true
             });
@@ -267,8 +260,8 @@ StageAssistant.prototype.handleCommand = function(event) {
 				title: "WebMyth - v" + Mojo.Controller.appInfo.version,
 				message:  WebMyth.helpMessage, 
 				choices: [
-                    {label: "OK", value: "ok"},
-					{label: "Email Instructions", value: "instructions"}
+                    {label: $L("OK"), value: "ok"},
+					{label: $L("Email Instructions"), value: "instructions"}
 					],
 				allowHTMLMessage: true
 			});	
@@ -485,12 +478,7 @@ StageAssistant.prototype.didQueryLocation = function(a) {
 	
 };
 
-StageAssistant.prototype.socketIsClosed = function(a) {
 
-	Mojo.Log.error("socket is closed response of %s", a);
-	Mojo.Controller.getAppController().showBanner(a, {source: 'notification'});
-	
-};
 
 
 
@@ -538,16 +526,13 @@ WebMyth.startNewCommunication = function(sceneController){
 				Mojo.Log.info("Success service connection status of %j", response);
 				Mojo.Controller.getAppController().showBanner("Service connection success", {source: 'notification'});
 				
-				if(retryCommand) {
-					//we had a failed command send before
-					//Mojo.Log.info("Trying to retry command "+retryCommand);
-					
-					//sceneController.controller.window.setTimeout(WebMyth.sendServiceCmd(sceneController, retryCommand, true), 500);
-					
-				}
+				WebMyth.telnetConnected = true;
+				
 	
 			}.bind(this),
 		  onFailure: function(response) {
+					
+				WebMyth.telnetConnected = false;
 		  
 				if(retryCommand){
 					Mojo.Log.info("tried to reconnect - hopefully it worked");
@@ -574,13 +559,8 @@ WebMyth.startCommunication = function(sceneController, retryCommand){
 				Mojo.Log.info("Success service connection status of %j", response);
 				Mojo.Controller.getAppController().showBanner("Service connection success", {source: 'notification'});
 				
-				if(retryCommand) {
-					//we had a failed command send before
-					//Mojo.Log.info("Trying to retry command "+retryCommand);
-					
-					//sceneController.controller.window.setTimeout(WebMyth.sendServiceCmd(sceneController, retryCommand, true), 500);
-					
-				}
+				WebMyth.telnetConnected = true;
+				
 	
 			}.bind(this),
 		  onFailure: function(response) {
@@ -590,6 +570,8 @@ WebMyth.startCommunication = function(sceneController, retryCommand){
 				} else {
 					Mojo.Log.info("Failed service connection status of %j", response);
 					Mojo.Controller.getAppController().showBanner("Start communication FAIL", {source: 'notification'});
+					
+					WebMyth.telnetConnected = false;
 				}
 				
 				//WebMyth.sendServiceCmd(sceneController, retryCommand, true);
@@ -598,6 +580,28 @@ WebMyth.startCommunication = function(sceneController, retryCommand){
 		});
 	
 };
+
+WebMyth.monitorTelnetConnection = function(sceneController){
+
+	Mojo.Log.info("Starting to monitor telnet connection");
+	
+	sceneController.controller.serviceRequest('palm://com.thewbman.webmyth.service', {
+		  method:"monitorConnection",
+		  parameters:{},
+		  onSuccess: function(response) {
+				Mojo.Log.info("Success monitor connection status of %j", response);
+				Mojo.Controller.getAppController().showBanner("Connection status: "+response.reply, {source: 'notification'});
+	
+			}.bind(this),
+		  onFailure: function(response) {
+		  
+				Mojo.Log.error("ERROR monitor connection status of %j", response);
+				Mojo.Controller.getAppController().showBanner("Monitor connection failure: ", {source: 'notification'});
+	
+			}.bind(this),
+		});
+
+}
 
 WebMyth.sendServiceCmd = function(sceneController, value, wasRetry){
 		

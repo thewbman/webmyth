@@ -44,9 +44,9 @@ HostSelectorAssistant.prototype.setup = function() {
 	this.hostsCommandMenuModel = {
 		visible: true,
 		items: [
-			{ label: "Add", command: 'go-addHost', width: 90 } ,
-			{ label: "Edit", command: 'go-editHost', width: 90 },
-			{ label: "Search", command: 'go-searchHost', width: 90 }
+			{ label: $L("Add"), command: 'go-addHost', width: 90 } ,
+			{ label: $L("Edit"), command: 'go-editHost', width: 90 },
+			{ label: $L("Search"), command: 'go-searchHost', width: 90 }
 		]
 	};
 	
@@ -86,7 +86,7 @@ HostSelectorAssistant.prototype.activate = function(event) {
 	
 	
 	//Reset from edit
-	$('scene-title').innerText = "Select Host";
+	$('scene-title').innerText = $L("Select Host");
 	this.pickType = "start";
 	
 	
@@ -115,7 +115,7 @@ HostSelectorAssistant.prototype.handleCommand = function(event) {
        break;
       case 'go-editHost':
         this.pickType = "edit";
-		$('scene-title').innerText = "Edit Host";
+		$('scene-title').innerText = $L("Edit Host");
        break;
       case 'go-searchHost':
 		Mojo.Controller.stageController.pushScene("searchHosts");
