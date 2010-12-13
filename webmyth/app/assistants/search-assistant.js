@@ -225,8 +225,6 @@ SearchAssistant.prototype.newSearch = function() {
 	});
 	
 
-	
-	//this.newSearchCallback({adsf: "asdf"});
 };
 
 SearchAssistant.prototype.newSearchCallback = function(value) {
@@ -240,13 +238,13 @@ SearchAssistant.prototype.newSearchCallback = function(value) {
 
 	
 	
-	$('scene-title').innerHTML = "Search: '"+this.searchString+"'";
+	$('scene-title').innerHTML = $L("Search")+": '"+this.searchString+"'";
 
 
 	//Restart spinner and show
 	this.spinnerModel.spinning = true;
 	this.controller.modelChanged(this.spinnerModel, this);
-	$('spinner-text').innerHTML = "Loading...";
+	$('spinner-text').innerHTML = $L("Loading")+"...";
 	$('myScrim').show();
 
 
@@ -257,7 +255,6 @@ SearchAssistant.prototype.newSearchCallback = function(value) {
 	query += ", `channel`.chanNum, `channel`.callsign, `channel`.name AS channelName";
 	query += " FROM `program` "
 	query += " LEFT OUTER JOIN `channel` ON `program`.chanid = `channel`.chanid ";
-	//query += " WHERE `title` LIKE '%colbert%' ";
 	query += ' WHERE `title` LIKE "%'+this.searchString+'%" ';
 	query += " ORDER BY startTime, chanNum ";
 	query += " LIMIT 1000 ";
@@ -292,7 +289,7 @@ SearchAssistant.prototype.readSearchFail = function(event) {
 	Mojo.Log.error('Failed to get search response');
 	
 	
-	$('scene-title').innerHTML = "Error in searching!!!";
+	$('scene-title').innerHTML = $L("Error in searching")+"!!!";
 	
 	
 	this.resultList.clear();
@@ -333,14 +330,14 @@ SearchAssistant.prototype.readSearchSuccess = function(response) {
 		//Mojo.Log.error('Cleaned search results: %j',this.resultList);
 		
 		
-		$('scene-title').innerHTML += " ("+this.resultList.length+" items)";
+		$('scene-title').innerHTML += " ("+this.resultList.length+" "+$L("items")+")";
 		$('scene-title').innerHTML = $('scene-title').innerHTML.substring(0,40);
 		
 	} else {
 		//No matching results from guide
 	
 		this.resultList.clear();
-		this.resultList.push({ 'title':'No matches', 'subTitle':'Sorry :(', 'startTime':'1900-01-01 00:00:00', 'channelName':'', 'category':'', 'chanNum':''});
+		this.resultList.push({ 'title':$L('No matches'), 'subTitle':$L('Sorry')+' :(', 'startTime':'1900-01-01 00:00:00', 'channelName':'', 'category':'', 'chanNum':''});
 	
 		Mojo.Log.error("no response results %j",this.resultList);
 	
@@ -429,28 +426,28 @@ SearchAssistant.prototype.updateSortMenu = function() {
 	
 	switch(WebMyth.prefsCookieObject.currentSearchSort) {
 		case 'category-asc':
-			this.sortMenuModel.items[0].label = '- Category-Asc -';
+			this.sortMenuModel.items[0].label = '- '+this.sortMenuModel.items[0].label+' -';
 		  break;
 		case 'category-desc':
-			this.sortMenuModel.items[1].label = '- Category-Desc -';
+			this.sortMenuModel.items[1].label = '- '+this.sortMenuModel.items[1].label+' -';
 		  break;
 		case 'channel-asc':
-			this.sortMenuModel.items[2].label = '- Channel-Asc -';
+			this.sortMenuModel.items[2].label = '- '+this.sortMenuModel.items[2].label+' -';
 		  break;
 		case 'channel-desc':
-			this.sortMenuModel.items[3].label = '- Channel-Desc -';
+			this.sortMenuModel.items[3].label = '- '+this.sortMenuModel.items[3].label+' -';
 		  break;
 		case 'date-asc':
-			this.sortMenuModel.items[4].label = '- Date-Asc -';
+			this.sortMenuModel.items[4].label = '- '+this.sortMenuModel.items[4].label+' -';
 		  break;
 		case 'date-desc':
-			this.sortMenuModel.items[5].label = '- Date-Desc -';
+			this.sortMenuModel.items[5].label = '- '+this.sortMenuModel.items[5].label+' -';
 		  break;
 		case 'title-asc':
-			this.sortMenuModel.items[6].label = '- Title-Asc -';
+			this.sortMenuModel.items[6].label = '- '+this.sortMenuModel.items[6].label+' -';
 		  break;
 		case 'title-desc':
-			this.sortMenuModel.items[7].label = '- Title-Desc -';
+			this.sortMenuModel.items[7].label = '- '+this.sortMenuModel.items[7].label+' -';
 		  break;
 		default :
 			//this.sortMenuModel.items[0].label = 'Default';
@@ -670,6 +667,7 @@ var SearchDialogAssistant = Class.create({
 		//Button
 		Mojo.Event.listen(this.controller.get('goSearchButton'),Mojo.Event.tap,this.searchButton.bind(this));
 
+		$('searchButtonWrapper').innerText = $L('Title Search');
 		
 	},
 	

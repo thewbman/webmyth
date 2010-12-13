@@ -40,7 +40,7 @@ UpcomingAssistant.prototype.setup = function() {
 		spinning: true
 	}; 
 	this.controller.setupWidget('spinner', this.spinnerAttr, this.spinnerModel);
-	$('spinner-text').innerHTML = "Loading...";
+	$('spinner-text').innerHTML = $L("Loading")+"...";
 	
 	
 	//App menu widget
@@ -288,7 +288,7 @@ UpcomingAssistant.prototype.groupChanged = function(newGroup) {
 	//Mojo.Log.info("grouped upcoming list is %j",this.resultList);
 	
 	
-	$("scene-title").innerHTML = "Upcoming Recordings ("+this.resultList.length+" items)";
+	$("scene-title").innerHTML = $L("Upcoming Recordings")+" ("+this.resultList.length+" items)";
 	
 	//this.fullResultList.sort(double_sort_by('starttime', 'title', false));
 	
@@ -327,16 +327,16 @@ UpcomingAssistant.prototype.updateGroupMenu = function() {
 	
 	switch(WebMyth.prefsCookieObject.currentUpcomingGroup) {
 		case 'All':
-			this.groupMenuModel.items[0].label = '- All -';
+			this.groupMenuModel.items[0].label = '- '+this.groupMenuModel.items[0].label+' -';
 		  break;
 		case 'Conflicting':
-			this.groupMenuModel.items[1].label = '- Conflicting -';
+			this.groupMenuModel.items[1].label = '- '+this.groupMenuModel.items[1].label+' -';
 		  break;
 		case 'Overrides':
-			this.groupMenuModel.items[2].label = '- Overrides -';
+			this.groupMenuModel.items[2].label = '- '+this.groupMenuModel.items[2].label+' -';
 		  break;
 		case 'Upcoming':
-			this.groupMenuModel.items[3].label = '- Upcoming -';
+			this.groupMenuModel.items[3].label = '- '+this.groupMenuModel.items[3].label+' -';
 		  break;
 		default :
 			//this.groupMenuModel.items[0].label = 'Default';

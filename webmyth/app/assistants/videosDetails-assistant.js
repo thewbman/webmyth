@@ -104,12 +104,28 @@ VideosDetailsAssistant.prototype.setup = function() {
 
 VideosDetailsAssistant.prototype.activate = function(event) {
 
+	$('generalDetails-group-title').innerText = $L('General Details');
+		$('subtitle-label').innerText = $L('Subtitle');
+		$('fullEpisode-label').innerText = $L('Episode');
+		$('category-label').innerText = $L('Category');
+	$('programDetails-group-title').innerText = $L('Program Details');
+		$('director-label').innerText = $L('Director');
+		$('rating-label').innerText = $L('Rating');
+		$('year-label').innerText = $L('Year');
+		$('releasedate-label').innerText = $L('Release Date');
+		$('length-label').innerText = $L('Length');
+	$('files-group-title').innerText = $L('Files');
+		$('insertdate-label').innerText = $L('Inserted');
+		$('host-label').innerText = $L('Host');
+		$('filename-label').innerText = $L('Filename');
+		$('coverfile-label').innerText = $L('Coverart');
+
 	//Update web list if we have homepage value
 	
 	var webList = [];
 	
 	if(this.videosObject.homepage != "None") {
-		webList.push({"label": "Homepage", "command": "go-web--Homepage"});
+		webList.push({"label": $L("Homepage"), "command": "go-web--Homepage"});
 	}
 	
 	webList.push({"label": $L('Wikipedia'), "command": "go-web--Wikipedia"});
@@ -429,8 +445,8 @@ VideosDetailsAssistant.prototype.getUpnpSuccess = function(response) {
 	this.hostsMenuModel.items = [];
 	
 	if(WebMyth.prefsCookieObject.allowRecordedDownloads) {
-		var downloadCmd = { "label": "Download to Phone", "command": "go-down-download" }
-		var streamCmd = { "label": "Stream to Phone", "command": "go-down-stream" }
+		var downloadCmd = { "label": $L("Download to Phone"), "command": "go-down-download" }
+		var streamCmd = { "label": $L("Stream to Phone"), "command": "go-down-stream" }
 		
 		this.hostsMenuModel.items.push(downloadCmd);
 		this.hostsMenuModel.items.push(streamCmd);

@@ -20,10 +20,6 @@
  
  
  function RecordedAssistant() {
-	/* this is the creator function for your scene assistant object. It will be passed all the 
-	   additional parameters (after the scene name) that were passed to pushScene. The reference
-	   to the scene controller (this.controller) has not be established yet, so any initialization
-	   that needs the scene controller should be done in the setup function below. */
 	   
 	  this.nullHandleCount = 0;
 	 
@@ -45,7 +41,7 @@ RecordedAssistant.prototype.setup = function() {
 		spinning: true
 	}; 
 	this.controller.setupWidget('spinner', this.spinnerAttr, this.spinnerModel);
-	$('spinner-text').innerHTML = "Loading...";
+	$('spinner-text').innerHTML = $L("Loading")+"...";
 	
 	
 	//App menu widget
@@ -333,7 +329,7 @@ RecordedAssistant.prototype.recgroupChanged = function(newRecgroup) {
 	this.filterListFunction('', listWidget, 0, this.resultList.length);
 	listWidget.mojo.close();
 	
-	$("scene-title").innerHTML = "Recorded Shows ("+this.resultList.length+" items)";
+	$("scene-title").innerHTML = $L("Recorded Shows")+" ("+this.resultList.length+" items)";
 	
 	//listWidget.mojo.close();
 	
@@ -479,7 +475,7 @@ RecordedAssistant.prototype.finishedReadingRecorded = function(event) {
 	//Insert new data
 	WebMyth.db.transaction( 
 		(function (transaction) {
-			transaction.executeSql("INSERT INTO 'recgroupXML' (groupname, displayname) VALUES ('AllRecgroupsOn', 'All');",  [], 
+			transaction.executeSql("INSERT INTO 'recgroupXML' (groupname, displayname) VALUES ('AllRecgroupsOn', '"+$L('All')+"');",  [], 
 					this.saveResults.bind(this),
 					function(transaction, error) {      // error handler
 						Mojo.Log.error("Could not insert AllRecgroupsOn because " + error.message);
@@ -866,7 +862,7 @@ RecordedAssistant.prototype.updateRecgroupList = function(transaction, results) 
 	//Mojo.Log.error("New recgroup list is '%j' with length %s", updatedList, updatedList.length);
 	
 	if (updatedList.length == 0) {
-		updatedList = [ {'label':'Default', 'value':'Default' } ];
+		updatedList = [ {'label':$L('Default'), 'value':'Default' } ];
 		Mojo.Log.info("Updated initial recgroup list is '%j' ", updatedList);
 		WebMyth.prefsCookieObject.currentRecgroup = 'Default';
 	} else {
@@ -921,7 +917,7 @@ RecordedAssistant.prototype.setMyData = function(propertyValue, model)  {
 	recordedDetailsText += '<div class="palm-info-text truncating-text left">&nbsp;&nbsp;&nbsp;'+model.category+'</div>';
 	
 	if(model.recStatus == -2){
-		recordedDetailsText += '<div class="palm-info-text truncating-text left">&nbsp;&nbsp;&nbsp;&nbsp;Currently Recording</div>';
+		recordedDetailsText += '<div class="palm-info-text truncating-text left">&nbsp;&nbsp;&nbsp;&nbsp;'+$L('Currently Recording')+'</div>';
 	} else {
 		recordedDetailsText += '<div class="palm-info-text truncating-text left">&nbsp;&nbsp;&nbsp;&nbsp;'+model.chanNum+" - "+model.channelName+'</div>';
 	}
@@ -938,32 +934,32 @@ RecordedAssistant.prototype.updateSortMenu = function() {
 	
 	//Reset default sorting
 	this.sortMenuModel.items = [ 
-			{"label": $L('Category-Asc'), "command": "go-sort-category-asc"},
-			{"label": $L('Category-Desc'), "command": "go-sort-category-desc"},
-			{"label": $L('Date-Asc'), "command": "go-sort-date-asc"},
-			{"label": $L('Date-Desc'), "command": "go-sort-date-desc"},
-			{"label": $L('Title-Asc'), "command": "go-sort-title-asc"},
-			{"label": $L('Title-Desc'), "command": "go-sort-title-desc"}
+			{"label": $L("Category-Asc"), "command": "go-sort-category-asc"},
+			{"label": $L("Category-Desc"), "command": "go-sort-category-desc"},
+			{"label": $L("Date-Asc"), "command": "go-sort-date-asc"},
+			{"label": $L("Date-Desc"), "command": "go-sort-date-desc"},
+			{"label": $L("Title-Asc"), "command": "go-sort-title-asc"},
+			{"label": $L("Title-Desc"), "command": "go-sort-title-desc"}
 	] ;
 	
 	switch(WebMyth.prefsCookieObject.currentRecSort) {
 		case 'category-asc':
-			this.sortMenuModel.items[0].label = '- Category-Asc -';
+			this.sortMenuModel.items[0].label = '- '+this.sortMenuModel.items[0].label+' -';
 		  break;
 		case 'category-desc':
-			this.sortMenuModel.items[1].label = '- Category-Desc -';
+			this.sortMenuModel.items[1].label = '- '+this.sortMenuModel.items[1].label+' -';
 		  break;
 		case 'date-asc':
-			this.sortMenuModel.items[2].label = '- Date-Asc -';
+			this.sortMenuModel.items[2].label = '- '+this.sortMenuModel.items[2].label+' -';
 		  break;
 		case 'date-desc':
-			this.sortMenuModel.items[3].label = '- Date-Desc -';
+			this.sortMenuModel.items[3].label = '- '+this.sortMenuModel.items[3].label+' -';
 		  break;
 		case 'title-asc':
-			this.sortMenuModel.items[4].label = '- Title-Asc -';
+			this.sortMenuModel.items[4].label = '- '+this.sortMenuModel.items[4].label+' -';
 		  break;
 		case 'title-desc':
-			this.sortMenuModel.items[5].label = '- Title-Desc -';
+			this.sortMenuModel.items[5].label = '- '+this.sortMenuModel.items[5].label+' -';
 		  break;
 		default :
 			//this.sortMenuModel.items[0].label = 'Default';

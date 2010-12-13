@@ -35,7 +35,7 @@ WelcomeAssistant.prototype.setup = function() {
 	this.controller.setupWidget("goRemoteButtonId",
          {},
          {
-             label : "Remote",
+             label : $L("Remote"),
              disabled: false
          }
      );
@@ -46,7 +46,7 @@ WelcomeAssistant.prototype.setup = function() {
 	this.controller.setupWidget("goRecordedButtonId",
          {},
          this.recordedButtonModel = {
-             label : "Recorded Shows",
+             label : $L("Recorded Shows"),
              disabled: false
          }
      );
@@ -57,7 +57,7 @@ WelcomeAssistant.prototype.setup = function() {
 	this.controller.setupWidget("goUpcomingButtonId",
 		 {},
 		 this.upcomingButtonModel = {
-			 label : "Upcoming Recordings",
+			 label : $L("Upcoming Recordings"),
 			 disabled: false
 		 }
 	 );
@@ -68,7 +68,7 @@ WelcomeAssistant.prototype.setup = function() {
 	this.controller.setupWidget("goGuideButtonId",
          {},
          {
-             label : "Program Guide",
+             label : $L("Program Guide"),
              disabled: false
          }
      );
@@ -79,7 +79,7 @@ WelcomeAssistant.prototype.setup = function() {
 	this.controller.setupWidget("goVideosButtonId",
          {},
          {
-             label : "Videos",
+             label : $L("Videos"),
              disabled: false
          }
      );
@@ -90,7 +90,7 @@ WelcomeAssistant.prototype.setup = function() {
 	this.controller.setupWidget("goMusicButtonId",
          {},
          {
-             label : "Music",
+             label : $L("Music"),
              disabled: false
          }
      );
@@ -101,7 +101,7 @@ WelcomeAssistant.prototype.setup = function() {
 	this.controller.setupWidget("goStatusButtonId",
          {},
          {
-             label : "Status",
+             label : $L("Status"),
              disabled: false
          }
      );
@@ -112,7 +112,7 @@ WelcomeAssistant.prototype.setup = function() {
 	this.controller.setupWidget("goLogButtonId",
          {},
          {
-             label : "Log",
+             label : $L("Log"),
              disabled: false
          }
      );
@@ -132,6 +132,12 @@ WelcomeAssistant.prototype.setup = function() {
 			//Metrix bulletin
 			//0.4.6 - bulletin 10
 			WebMyth.Metrix.checkBulletinBoard(this.controller, 10);
+			
+			//Send proto version
+			if(WebMyth.prefsCookieObject.protoVer) {
+				WebMyth.Metrix.customCounts("MythTV Stats", "ProtoVer", WebMyth.prefsCookieObject.protoVer);
+			}
+			
 		};
 		
 		myDefaultCookie = defaultCookie();
@@ -403,6 +409,16 @@ WelcomeAssistant.prototype.showButtons = function() {
 		$('goMusicButtonId').hide();
 	}
 	
+	if(WebMyth.prefsCookieObject.protoVer == null){
+		//Hide upcoming list is we don't have a protocol version yet (get from recorded list)
+		$('goUpcomingButtonId').hide();
+	} else {
+		$('goUpcomingButtonId').show();
+	}
+	
+	
+	
+	
 	if((WebMyth.prefsCookieObject.showMusic)&&(WebMyth.prefsCookieObject.showVideos)&&(WebMyth.prefsCookieObject.showUpcoming)) {
 		$('videoButtonWrapper').className = 'column1of2';
 		$('musicButtonWrapper').className = 'column2of2';
@@ -428,18 +444,18 @@ WelcomeAssistant.prototype.showButtons = function() {
 		$('recordedButtonWrapper').className = 'column1of2';
 		$('upcomingButtonWrapper').className = 'column2of2';
 		
-		this.recordedButtonModel.label = "Recorded";
+		this.recordedButtonModel.label = $L("Recorded");
 			this.controller.modelChanged(this.recordedButtonModel, this);
-		this.upcomingButtonModel.label = "Upcoming";
+		this.upcomingButtonModel.label = $L("Upcoming");
 			this.controller.modelChanged(this.upcomingButtonModel, this);
 			
 	} else {
 		$('recordedButtonWrapper').className = "";
 		$('upcomingButtonWrapper').className = "";
 		
-		this.recordedButtonModel.label = "Recorded shows";
+		this.recordedButtonModel.label = $L("Recorded Shows");
 			this.controller.modelChanged(this.recordedButtonModel, this);
-		this.upcomingButtonModel.label = "Upcoming recordings";
+		this.upcomingButtonModel.label = $L("Upcoming Recordings");
 			this.controller.modelChanged(this.upcomingButtonModel, this);
 	}
 	
@@ -507,7 +523,7 @@ WelcomeAssistant.prototype.alertNeedScript = function() {
         title: "WebMyth - v" + Mojo.Controller.appInfo.version,
         message:  WebMyth.helpMessage, 
 		choices: [{
-            label: "OK",
+            label: $L("OK"),
 			value: ""
 		}],
 		allowHTMLMessage: true
@@ -517,11 +533,30 @@ WelcomeAssistant.prototype.alertNeedScript = function() {
 
 
 WelcomeAssistant.prototype.doWelcomeIcon = function(event) {
-	WebMyth.mythprotocolCommand(this, "QUERY_UPTIME");
+
+	Mojo.Log.info("Starting MySQL test");
+		
+	 this.controller.serviceRequest('palm://com.thewbman.webmyth.service', {
+		  method:"mysqlQuery",
+		  parameters:{},
+		  onSuccess: function(response) {
+				Mojo.Log.info("Success mysql %j", response);
+				Mojo.Controller.getAppController().showBanner("Success MySQL", {source: 'notification'});
+				
 	
-	//WebMyth.mythprotocolCommand(this, "QUERY_GETALLPENDING");
+			}.bind(this),
+		  onFailure: function(response) {
+		  
+					Mojo.Log.error("Failed MySQL %j", response);
+					Mojo.Controller.getAppController().showBanner("MySQL FAIL", {source: 'notification'});
+					
+	
+			}.bind(this),
+		});
+		
 	
 	Event.stop(event); 
+	
 };
 
 WelcomeAssistant.prototype.doHelpButton = function(event) {
@@ -559,8 +594,8 @@ WelcomeAssistant.prototype.doHelpButton = function(event) {
 							title: "WebMyth - v" + Mojo.Controller.appInfo.version,
 							message:  WebMyth.helpMessage, 
 							choices: [
-								{label: "OK", value: "ok"},
-								{label: "Email Instructions", value: "instructions"}
+								{label: $L("OK"), value: "ok"},
+								{label: $L("Email Instructions"), value: "instructions"}
 								],
 							allowHTMLMessage: true
 						});	
@@ -611,10 +646,10 @@ WelcomeAssistant.prototype.doHelpButton = function(event) {
 			title: "WebMyth - v" + Mojo.Controller.appInfo.version,
 			//message:  script_message, 
 			choices: [
-					{label: "FAQs", value: 'faqs'},
-                    {label: "Instructions", value: 'instructions'},
-					{label: "Tips", value: 'tips'},
-					{label: "Email Developer", value: 'email'}
+					{label: $L("FAQs"), value: 'faqs'},
+                    {label: $L("Instructions"), value: 'instructions'},
+					{label: $L("Tips"), value: 'tips'},
+					{label: $L("Email Developer"), value: 'email'}
 					],
 			allowHTMLMessage: true
 		});
@@ -655,8 +690,8 @@ WelcomeAssistant.prototype.alertScriptUpdate = function(oldversion) {
 			title: "WebMyth - v" + Mojo.Controller.appInfo.version,
 			message:  script_message, 
 			choices: [
-                    {label: "OK", value: false},
-					{label: "Email Instructions", value: true}
+                    {label: $L("OK"), value: false},
+					{label: $L("Email Instructions"), value: true}
 					],
 			allowHTMLMessage: true
 		});
@@ -693,7 +728,7 @@ WelcomeAssistant.prototype.readMasterBackendSuccess = function(response) {
 	
 	
 	//Get backend IPs
-	//this.checkConnectionStatus();
+	this.checkConnectionStatus();
 
 };
 

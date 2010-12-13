@@ -38,7 +38,7 @@ PlaybackAssistant.prototype.setup = function() {
 		items: [{
 			items: [
 				{ icon: 'back', command: 'go-remotePrevious'},
-				{ label: "Playback: " + WebMyth.prefsCookieObject.currentFrontend, command: 'do-remoteHeaderAction', width: 200 },
+				{ label: $L("Playback")+": " + WebMyth.prefsCookieObject.currentFrontend, command: 'do-remoteHeaderAction', width: 200 },
 				{ icon: 'forward', command: 'go-remoteNext'}
 			]
 		}]
@@ -48,10 +48,10 @@ PlaybackAssistant.prototype.setup = function() {
 	
 	//Buttons
 		//navigation
-	this.controller.setupWidget("backButton", {}, { label : "ESC", disabled: false } );
+	this.controller.setupWidget("backButton", {}, { label : $L("ESC"), disabled: false } );
 	this.controller.setupWidget("upButton", {}, { label : "-", disabled: false } );
 	this.controller.setupWidget("leftButton", {}, { label : "-", disabled: false } );
-	this.controller.setupWidget("selectButton", {}, { label : "OK", disabled: false } );
+	this.controller.setupWidget("selectButton", {}, { label : $L("OK"), disabled: false } );
 	this.controller.setupWidget("rightButton", {}, { label : "-", disabled: false } );
 	this.controller.setupWidget("downButton", {}, { label : "-", disabled: false } );
 		//general
@@ -106,7 +106,7 @@ PlaybackAssistant.prototype.activate = function(event) {
 	
 	
 	//View menu widget
-	this.remoteViewMenuModel.items[0].items[1].label = "Playback: " + WebMyth.prefsCookieObject.currentFrontend;  
+	this.remoteViewMenuModel.items[0].items[1].label = $L("Playback")+": " + WebMyth.prefsCookieObject.currentFrontend;  
 	this.controller.modelChanged(this.remoteViewMenuModel);
 	
 	

@@ -42,7 +42,7 @@ VideosAssistant.prototype.setup = function() {
 		spinning: true
 	}; 
 	this.controller.setupWidget('spinner', this.spinnerAttr, this.spinnerModel);
-	$('spinner-text').innerHTML = "Loading...";
+	$('spinner-text').innerHTML = $L("Loading")+"...";
 	
 	
 	//App menu widget
@@ -56,10 +56,10 @@ VideosAssistant.prototype.setup = function() {
 	this.sortMenuModel = { label: $L('Sort'), items: []};
 	
 	this.groupMenuModel = { label: $L('Group'), items: [
-		{"label": "All", "command": "go-groupall" },
-		{"label": "Regular", "command": "go-groupVideo" },
-		{"label": "TV", "command": "go-groupTV" },
-		{"label": "Specials", "command": "go-groupSpecial" }
+		{"label": $L("All"), "command": "go-groupall" },
+		{"label": $L("Regular"), "command": "go-groupVideo" },
+		{"label": $L("TV"), "command": "go-groupTV" },
+		{"label": $L("Specials"), "command": "go-groupSpecial" }
 	]};
 
 	this.controller.setupWidget(Mojo.Menu.commandMenu, {menuClass: 'no-fade'}, this.cmdMenuModel);
@@ -405,28 +405,28 @@ VideosAssistant.prototype.updateSortMenu = function() {
 	
 	switch(WebMyth.prefsCookieObject.currentVideosSort) {
 		case 'insert-asc':
-			this.sortMenuModel.items[0].label = '- Date Added-Asc -';
+			this.sortMenuModel.items[0].label = '- '+this.sortMenuModel.items[0].label+' -';
 		  break;
 		case 'insert-desc':
-			this.sortMenuModel.items[1].label = '- Date Added-Desc -';
+			this.sortMenuModel.items[1].label = '- '+this.sortMenuModel.items[1].label+' -';
 		  break;
 		case 'released-asc':
-			this.sortMenuModel.items[2].label = '- Released-Asc -';
+			this.sortMenuModel.items[2].label = '- '+this.sortMenuModel.items[2].label+' -';
 		  break;
 		case 'released-desc':
-			this.sortMenuModel.items[3].label = '- Released-Desc -';
+			this.sortMenuModel.items[3].label = '- '+this.sortMenuModel.items[3].label+' -';
 		  break;
 		case 'season-asc':
-			this.sortMenuModel.items[4].label = '- Season-Asc -';
+			this.sortMenuModel.items[4].label = '- '+this.sortMenuModel.items[4].label+' -';
 		  break;
 		case 'season-desc':
-			this.sortMenuModel.items[5].label = '- Season-Desc -';
+			this.sortMenuModel.items[5].label = '- '+this.sortMenuModel.items[5].label+' -';
 		  break;
 		case 'title-asc':
-			this.sortMenuModel.items[6].label = '- Title-Asc -';
+			this.sortMenuModel.items[6].label = '- '+this.sortMenuModel.items[6].label+' -';
 		  break;
 		case 'title-desc':
-			this.sortMenuModel.items[7].label = '- Title-Desc -';
+			this.sortMenuModel.items[7].label = '- '+this.sortMenuModel.items[7].label+' -';
 		  break;
 		default :
 			//this.sortMenuModel.items[0].label = 'Default';
@@ -453,10 +453,10 @@ VideosAssistant.prototype.videosGroupChanged = function(newGroup) {
 	
 	if(newGroup == "Directory"){
 		Object.extend(this.resultList,trimByVideoDirectory(this.fullResultList, this.currentDirectoryObject.directory));
-		$("scene-title").innerHTML = "Videos ("+this.resultList.length+" items)";
+		$("scene-title").innerHTML = $L("Videos")+" ("+this.resultList.length+" "+$L("items")+")";
 		
 		if(this.currentDirectoryObject.directory != ""){
-			this.directoryList.push( {localDirectory: "&nbsp;&nbsp;-&nbsp;&nbsp;Return to top level&nbsp;&nbsp;-&nbsp;&nbsp;", directory: "", upperDirectory: "" } );
+			this.directoryList.push( {localDirectory: "&nbsp;&nbsp;-&nbsp;&nbsp;"+$L("Return to top level")+"&nbsp;&nbsp;-&nbsp;&nbsp;", directory: "", upperDirectory: "" } );
 		}
 		
 		var currentDirectories = trimByVideoUpperDirectory(this.fullDirectoryList, this.currentDirectoryObject.directory);
@@ -472,7 +472,7 @@ VideosAssistant.prototype.videosGroupChanged = function(newGroup) {
 		
 	} else {
 		Object.extend(this.resultList,trimByVideoType(this.fullResultList, newGroup));
-		$("scene-title").innerHTML = "Videos ("+this.resultList.length+" items)";
+		$("scene-title").innerHTML = $L("Videos")+" ("+this.resultList.length+" "+$L("items")+")";
 		
 		this.controller.modelChanged(this.videosDirectoryListModel);
 	}
@@ -496,11 +496,11 @@ VideosAssistant.prototype.updateGroupMenu = function() {
 	
 	//Reset default sorting
 	this.groupMenuModel.items = [ 
-		{"label": "All", "command": "go-groupall" },
-		{"label": "Directory", "command": "go-groupDirectory" },
-		{"label": "Regular", "command": "go-groupVideo" },
-		{"label": "TV", "command": "go-groupTV" },
-		{"label": "Specials", "command": "go-groupSpecial" }
+		{"label": $L("All"), "command": "go-groupall" },
+		{"label": $L("Directory"), "command": "go-groupDirectory" },
+		{"label": $L("Regular"), "command": "go-groupVideo" },
+		{"label": $L("TV"), "command": "go-groupTV" },
+		{"label": $L("Specials"), "command": "go-groupSpecial" }
 	] ;
 	
 	switch(WebMyth.prefsCookieObject.currentVideosGroup) {
@@ -647,7 +647,7 @@ VideosAssistant.prototype.videosDirectoryDividerFunction = function(itemModel) {
 	var divider = "";
 	
 	if(this.currentDirectoryObject.directory == ""){
-		divider = "Top Directory";
+		divider = $L("Top Directory");
 	} else {
 		divider = this.currentDirectoryObject.directory;
 	}
@@ -731,8 +731,8 @@ VideosAssistant.prototype.setMyData = function(propertyValue, model) {
 	
 	videosDetailsText += '<div class="palm-info-text truncating-text left">&nbsp;'+model.subtitle+'&nbsp;</div>';
 	videosDetailsText += '<div class="palm-info-text truncating-text left">&nbsp;&nbsp;'+model.plot+'&nbsp;</div>';
-	videosDetailsText += '<div class="palm-info-text truncating-text left">&nbsp;&nbsp;&nbsp;Episode: '+model.fullEpisode+'</div>';
-	videosDetailsText += '<div class="palm-info-text truncating-text left">&nbsp;&nbsp;&nbsp;&nbsp;Released: '+model.releasedate+'</div>';
+	videosDetailsText += '<div class="palm-info-text truncating-text left">&nbsp;&nbsp;&nbsp;'+$L('Episode')+': '+model.fullEpisode+'</div>';
+	videosDetailsText += '<div class="palm-info-text truncating-text left">&nbsp;&nbsp;&nbsp;&nbsp;'+$L('Released')+': '+model.releasedate+'</div>';
 	
 	
 	videosDetailsText += '</div></div>';

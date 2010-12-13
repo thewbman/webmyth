@@ -37,7 +37,7 @@ UpcomingDetailsXMLAssistant.prototype.setup = function() {
 		spinning: true
 	}; 
 	this.controller.setupWidget('spinner', this.spinnerAttr, this.spinnerModel);
-	$('spinner-text').innerHTML = "Loading...";
+	$('spinner-text').innerHTML = $L("Loading")+"...";
 	
 
 	//App menu widget
@@ -46,7 +46,7 @@ UpcomingDetailsXMLAssistant.prototype.setup = function() {
 
 	// Menu grouping at bottom of scene
     this.cmdMenuModel = { label: $L('Play Menu'),
-                            items: [{ label: 'Setup', command: 'go-setup', width: 90 },{ icon: 'refresh', command: 'go-refresh' },{label: $L('More'), submenu:'web-menu', width: 90}]};
+                            items: [{ label: $L('Setup'), command: 'go-setup', width: 90 },{ icon: 'refresh', command: 'go-refresh' },{label: $L('More'), submenu:'web-menu', width: 90}]};
  
 	this.webMenuModel = { label: $L('WebMenu'), items: [
 		{"label": $L('Web'), items:[
@@ -79,6 +79,21 @@ UpcomingDetailsXMLAssistant.prototype.setup = function() {
 };
 
 UpcomingDetailsXMLAssistant.prototype.activate = function(event) {
+
+	$('generalDetails-group-title').innerText = $L('General Details');
+		$('subtitle-label').innerText = $L('Subtitle');
+		$('category-label').innerText = $L('Category');
+		$('recstartts-label').innerText = $L('Recording Start');
+		$('recStatusText-label').innerText = $L('Recording Status');
+		$('encoderid-label').innerText = $L('Encoder ID');
+	$('programDetails-group-title').innerText = $L('Program Details');
+		$('airdate-label').innerText = $L('Original Airdate');
+		$('seriesid-label').innerText = $L('Series ID');
+		$('programid-label').innerText = $L('Program ID');
+		$('channum-label').innerText = $L('Channel Number');
+		$('channame-label').innerText = $L('Channel Name');
+		$('starttime-label').innerText = $L('Start Time');
+		$('endtime-label').innerText = $L('End Time');
 	
 };
 
@@ -460,7 +475,7 @@ UpcomingDetailsXMLAssistant.prototype.finishedReadingDetails = function() {
 	$('category-title').innerText = this.upcomingObject.category;
 	$('recstartts-title').innerText = this.upcomingObject.recStartTs.replace("T"," ");
 	$('recStatusText-title').innerText = this.upcomingObject.recStatusText;
-	$('encoderId-title').innerText = this.upcomingObject.encoderId;
+	$('encoderid-title').innerText = this.upcomingObject.encoderId;
 	
 	//$('recgroup-title').innerText = this.upcomingObject.recgroup;
 	$('starttime-title').innerText = this.upcomingObject.startTime.replace("T"," ");

@@ -82,7 +82,7 @@ EditHostAssistant.prototype.setup = function() {
 	this.controller.setupWidget("saveHostButtonId",
          {},
          {
-             label : "SAVE",
+             label : $L("Save"),
              disabled: false
          }
      );
@@ -101,6 +101,13 @@ EditHostAssistant.prototype.activate = function(event) {
 		this.controller.modelChanged(this.addressTextModel, this);
 	}
 
+	
+	$('scene-title').innerText = $L("Edit Host");
+	$('frontendGroupLabel').innerText = $L('Frontend');
+	$('hostLabel').innerText = $L('Host');
+	$('addressLabel').innerText = $L('Address');
+	$('portLabel').innerText = $L('Port');
+	
 };
 
 EditHostAssistant.prototype.deactivate = function(event) {

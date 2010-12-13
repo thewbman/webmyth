@@ -45,7 +45,7 @@ SetupRecordingAssistant.prototype.setup = function() {
 		spinning: true
 	}; 
 	this.controller.setupWidget('spinner', this.spinnerAttr, this.spinnerModel);
-	$('spinner-text').innerHTML = "Loading...";
+	$('spinner-text').innerHTML = $L("Loading")+"...";
 	
 	//App menu widget
 	this.controller.setupWidget(Mojo.Menu.appMenu, WebMyth.appMenuAttr, WebMyth.appMenuModel);
@@ -82,14 +82,14 @@ SetupRecordingAssistant.prototype.setup = function() {
 		this.controller.setupWidget("ruleTypeListId",
 			this.ruleTypeListAttributes = {
 				choices: [
-					{label: "Record anytime", value: 4},
-					{label: "Anytime on channel", value: 3},
-					{label: "Find one each week", value: 10},
-					{label: "Find one each day", value: 9},
-					{label: "Find one showing", value: 6},
-					{label: "This timeslot every week", value: 5},
-					{label: "This timeslot every day", value: 2},
-					{label: "Only this showing", value: 1}
+					{label: $L("Record anytime"), value: 4},
+					{label: $L("Anytime on channel"), value: 3},
+					{label: $L("Find one each week"), value: 10},
+					{label: $L("Find one each day"), value: 9},
+					{label: $L("Find one showing"), value: 6},
+					{label: $L("This timeslot every week"), value: 5},
+					{label: $L("This timeslot every day"), value: 2},
+					{label: $L("Only this showing"), value: 1}
 				]},
 			this.ruleTypeListModel = { value: 'None', disabled: false }
 		);
@@ -355,8 +355,30 @@ SetupRecordingAssistant.prototype.setup = function() {
 };
 
 SetupRecordingAssistant.prototype.activate = function(event) {
-	/* put in event handlers here that should only be in effect when this scene is active. For
-	   example, key handlers that are observing the document */
+
+	$('ruleTypeLabel').innerText = $L('Rule Type');
+	$('programLabel').innerText = $L('Program');
+		$('title-label').innerText = $L('Title');
+		$('subtitle-label').innerText = $L('Subtitle');
+		$('starttime-label').innerText = $L('Start Time');
+		$('recstatus-label').innerText = $L('Status');
+		$('station-label').innerText = $L('Channel Name');
+	$('programDetailsLabel').innerText = $L('Program Details');
+		$('category-label').innerText = $L('Category');
+		$('seriesid-label').innerText = $L('Series ID');
+		$('programid-label').innerText = $L('Program ID');
+		$('endtime-label').innerText = $L('End Time');
+		$('chanid-label').innerText = $L('ChanID');
+		
+		
+		
+		
+	$('recordingOptionsLabel').innerText = $L('Recording Options');
+	
+	$('jobOptionsLabel').innerText = $L('Job Options');
+		$('commercialFlag-label').innerText = $L('Commercial Flag');
+		$('transcode-label').innerText = $L('Transcode');
+	
 };
 
 SetupRecordingAssistant.prototype.deactivate = function(event) {
@@ -638,13 +660,13 @@ SetupRecordingAssistant.prototype.readRecordingRuleSuccess = function(response) 
 	
 	
 	//Fill in data values
-	$('header-title').innerHTML = "Edit recording rule #"+this.recordRule.recordid;
+	$('header-title').innerHTML = $L("Edit recording rule")+" #"+this.recordRule.recordid;
 
 		//rule type
 	if((this.recordRule.type == 7)||(this.recordRule.type == 8)) {		
 		//if manual override types		
-		this.ruleTypeListAttributes.choices.push({label: "Force  record", value: 7});
-		this.ruleTypeListAttributes.choices.push({label: "Force don't record", value: 8});
+		this.ruleTypeListAttributes.choices.push({label: $L("Force  record"), value: 7});
+		this.ruleTypeListAttributes.choices.push({label: $L("Force don't record"), value: 8});
 		
 		this.ruleTypeListModel.disabled = true;
 		this.ruleTypeListModel.value = this.recordRule.type;
@@ -766,7 +788,7 @@ SetupRecordingAssistant.prototype.getDefaultRule = function() {
 	Mojo.Log.info('Building default rule');
 	
 	//Fill in data values
-	$('header-title').innerHTML = "Create new recording rule";
+	$('header-title').innerHTML = $L("Create new recording rule");
 
 /*		//rule type
 	if((this.recordRule.type == 7)||(this.recordRule.type == 8)) {		

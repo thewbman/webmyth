@@ -52,7 +52,7 @@ GuideAssistant.prototype.setup = function() {
 		spinning: true
 	}; 
 	this.controller.setupWidget('spinner', this.spinnerAttr, this.spinnerModel);
-	$('spinner-text').innerHTML = "Loading...";
+	$('spinner-text').innerHTML = $L("Loading")+"...";
 	
 	//App menu widget
 	this.controller.setupWidget(Mojo.Menu.appMenu, WebMyth.appMenuAttr, WebMyth.appMenuModel);
@@ -75,9 +75,9 @@ GuideAssistant.prototype.setup = function() {
 	
 	// Menu grouping at bottom of scene
     this.cmdMenuModel = { label: $L('Guide Menu'), items: [
-        { label: 'Sort', submenu: 'sort-menu', width: 90 },
+        { label: $L('Sort'), submenu: 'sort-menu', width: 90 },
 		{ icon: 'refresh', command: 'do-refresh' },
-		{ label: 'View', submenu: 'view-menu', width: 90 }]
+		{ label: $L('View'), submenu: 'view-menu', width: 90 }]
 	};
 	
 	//this.channelMenuModel = { label: $L('Channel'), items: [] };
@@ -153,7 +153,7 @@ GuideAssistant.prototype.setup = function() {
 				//Not passed anything
 					
 				//Update header
-				this.guideViewMenuModel.items[0].items[1].label = "Now: "+dateObjectToJS(response.localtime).toLocaleString().substring(0,21);
+				this.guideViewMenuModel.items[0].items[1].label = $L("Now")+": "+dateObjectToJS(response.localtime).toLocaleString().substring(0,21);
 				this.controller.modelChanged(this.guideViewMenuModel);
 				
 				//Set variables to current
@@ -507,7 +507,7 @@ GuideAssistant.prototype.filterListFunction = function(filterString, listWidget,
 		(this.currentTimeObject.hour > 2)
 		) {
 		
-		this.controller.sceneScroller.mojo.revealElement(this.controller.get("Now Airing"));
+		this.controller.sceneScroller.mojo.revealElement(this.controller.get($L("Now Airing")));
 		this.controller.sceneScroller.mojo.adjustBy(0,-300);
 		
 	} else {
@@ -523,30 +523,28 @@ GuideAssistant.prototype.updateSortMenu = function() {
 	
 	//Reset default sorting
 	this.sortMenuModel.items = [ 
-		{label: '- Default -', command: 'do-sortDefault'},
-		{label: 'Category', command: 'do-sortCategory'} ,
-		{label: 'Recent Channels', command: 'do-sortRecent'} ,
-		{label: 'Recording Status', command: 'do-sortStatus'} ,
-		{label: 'Title', command: 'do-sortTitle'}
+		{label: '- '+$L('Default')+' -', command: 'do-sortDefault'},
+		{label: $L('Category'), command: 'do-sortCategory'} ,
+		{label: $L('Recent Channels'), command: 'do-sortRecent'} ,
+		{label: $L('Recording Status'), command: 'do-sortStatus'} ,
+		{label: $L('Title'), command: 'do-sortTitle'}
 	] ;
 	
 	if(WebMyth.guideCookieObject.manualSort) {
+		this.sortMenuModel.items[0].label = $L('Default');
+				
 		switch(WebMyth.guideCookieObject.manualSortType) {
 			case 'category':
-				this.sortMenuModel.items[0].label = 'Default';
-				this.sortMenuModel.items[1].label = '- Category -';
+				this.sortMenuModel.items[1].label = '- '+this.sortMenuModel.items[1].label+' -';
 			break;
 			case 'recent':
-				this.sortMenuModel.items[0].label = 'Default';
-				this.sortMenuModel.items[2].label = '- Recent Channels -';
+				this.sortMenuModel.items[2].label = '- '+this.sortMenuModel.items[2].label+' -';
 			break;
 			case 'status':
-				this.sortMenuModel.items[0].label = 'Default';
-				this.sortMenuModel.items[3].label = '- Recording Status -';
+				this.sortMenuModel.items[3].label = '- '+this.sortMenuModel.items[3].label+' -';
 			break;
 			case 'title':
-				this.sortMenuModel.items[0].label = 'Default';
-				this.sortMenuModel.items[4].label = '- Title -';
+				this.sortMenuModel.items[4].label = '- '+this.sortMenuModel.items[4].label+' -';
 			break;
 		}
 	}
@@ -559,27 +557,25 @@ GuideAssistant.prototype.updateSortMenu = function() {
 
 GuideAssistant.prototype.updateViewMenu = function() {
 
-	Mojo.Log.info("updating view menu with "+this.layoutStyle);
+	Mojo.Log.info("Updating view menu with "+this.layoutStyle);
 	
 	//Reset default sorting
 	this.viewMenuModel.items = [ 
-		{label: '- Now -', command: 'do-now'},
-		{label: 'Channel', command: 'do-selectChannel'} ,
-		{label: 'Search', command: 'do-selectSearch'} ,
-		{label: 'Time', command: 'do-selectTime'} 
+		{label: $L('Now'), command: 'do-now'},
+		{label: $L('Channel'), command: 'do-selectChannel'} ,
+		{label: $L('Search'), command: 'do-selectSearch'} ,
+		{label: $L('Time'), command: 'do-selectTime'} 
 	] ;
 	
 		switch(this.layoutStyle) {
 			case 'now':
-				//Use default
+				this.viewMenuModel.items[0].label = '- '+this.viewMenuModel.items[0].label+' -';
 			break;
 			case 'channel':
-				this.viewMenuModel.items[0].label = 'Now';
-				this.viewMenuModel.items[1].label = '- Channel: '+this.chanNum+' -';
+				this.viewMenuModel.items[1].label = '- '+this.viewMenuModel.items[1].label+': '+this.chanNum+' -';
 			break;
 			case 'time':
-				this.viewMenuModel.items[0].label = 'Now';
-				this.viewMenuModel.items[3].label = '- Time -';
+				this.viewMenuModel.items[3].label = '- '+this.viewMenuModel.items[3].label+' -';
 			break;
 		}
 	
@@ -617,42 +613,21 @@ GuideAssistant.prototype.goGuideDetails = function(event) {
 	var popupItems = [];
 	
 	if((event.item.startTime <  nowDateISO) && (event.item.endTime >  nowDateISO)) {
-		popupItems = [
-			{label: 'Play on '+WebMyth.prefsCookieObject.currentFrontend, command: 'do-playNow'},
-			{label: 'Details', command: 'do-pickDetails'},
-			{label: 'Setup Recording', command: 'do-pickSetupRecording'},
-			{label: 'Guide: Channel '+this.newChanNum, command: 'do-pickChannel'},
-			{label: 'Guide: '+event.item.startTime.replace("T"," ").substring(0,16), command: 'do-pickTime'},
-			{label: 'Search: '+event.item.title, command: 'do-pickSearch'}
-		]
+		popupItems.push({label: $L('Play on')+' '+WebMyth.prefsCookieObject.currentFrontend, command: 'do-playNow'});
+
 	} else if((event.item.startTime <  nowDatePlus15ISO) && (event.item.endTime >  nowDateISO)) {
-		popupItems = [
-			{label: 'Play (soon) on '+WebMyth.prefsCookieObject.currentFrontend, command: 'do-playNow'},
-			{label: 'Details', command: 'do-pickDetails'},
-			{label: 'Setup Recording', command: 'do-pickSetupRecording'},
-			{label: 'Guide: Channel '+this.newChanNum, command: 'do-pickChannel'},
-			{label: 'Guide: '+event.item.startTime.replace("T"," ").substring(0,16), command: 'do-pickTime'},
-			{label: 'Search: '+event.item.title, command: 'do-pickSearch'}
-		]
+		popupItems.push({label: $L('Play (soon) on')+' '+WebMyth.prefsCookieObject.currentFrontend, command: 'do-playNow'});
+		
 	} else if((event.item.startTime <  nowDateISO) && (event.item.endTime >  nowDateMinus15ISO)) {
-		popupItems = [
-			{label: 'Play (recent) on '+WebMyth.prefsCookieObject.currentFrontend, command: 'do-playNow'},
-			{label: 'Details', command: 'do-pickDetails'},
-			{label: 'Setup Recording', command: 'do-pickSetupRecording'},
-			{label: 'Guide: Channel '+this.newChanNum, command: 'do-pickChannel'},
-			{label: 'Guide: '+event.item.startTime.replace("T"," ").substring(0,16), command: 'do-pickTime'},
-			{label: 'Search: '+event.item.title, command: 'do-pickSearch'}
-		]
-	} else {
-		popupItems = [
-			{label: 'Details', command: 'do-pickDetails'},
-			{label: 'Setup Recording', command: 'do-pickSetupRecording'},
-			{label: 'Guide: Channel '+this.newChanNum, command: 'do-pickChannel'},
-			{label: 'Guide: '+event.item.startTime.replace("T"," ").substring(0,16), command: 'do-pickTime'},
-			{label: 'Search: '+event.item.title, command: 'do-pickSearch'}
-		]
-	}
+		popupItems.push({label: $L('Play (recent) on')+' '+WebMyth.prefsCookieObject.currentFrontend, command: 'do-playNow'});
+	} 
 	
+	popupItems.push({label: $L('Details'), command: 'do-pickDetails'});
+	popupItems.push({label: $L('Setup Recording'), command: 'do-pickSetupRecording'});
+	popupItems.push({label: $L('Guide')+': Channel '+this.newChanNum, command: 'do-pickChannel'});
+	popupItems.push({label: $L('Guide')+': '+event.item.startTime.replace("T"," ").substring(0,16), command: 'do-pickTime'});
+	popupItems.push({label: $L('Search')+': '+event.item.title, command: 'do-pickSearch'});
+
 	
 	
 	this.popupIndex = event.index;
@@ -983,7 +958,7 @@ GuideAssistant.prototype.selectedNow = function() {
 	//Update header label
 	var date = new Date(dateObjectToJS(this.timeObject));
 	this.guideViewMenuModel.items[0].items[0] = {};
-	this.guideViewMenuModel.items[0].items[1].label = "Now: "+date.toLocaleString().substring(0,21);
+	this.guideViewMenuModel.items[0].items[1].label = $L("Now")+": "+date.toLocaleString().substring(0,21);
 	this.guideViewMenuModel.items[0].items[1].width = 260;
 	this.guideViewMenuModel.items[0].items[2].icon = 'forward';
 	this.guideViewMenuModel.items[0].items[2].command = 'do-guideNext';
@@ -1015,11 +990,11 @@ GuideAssistant.prototype.guideDividerFunction = function(itemModel) {
 	} else {
 	
 		if(itemModel.endTime < this.currentTimeISO) {
-			divider = "In the Past";
+			divider = $L("In the Past");
 		} else if(itemModel.startTime < this.currentTimeISO) {
-			divider = "Now Airing";
+			divider = $L("Now Airing");
 		} else {
-			divider = "Upcoming";
+			divider = $L("Upcoming");
 		}
 	
 	}
@@ -1106,7 +1081,7 @@ GuideAssistant.prototype.setMyData = function(propertyValue, model) {
 	
 	guideDetailsText += '<div class="title truncating-text left guide-list-title">'+model.title+'</div>';
 	guideDetailsText += '<div class="palm-info-text truncating-text left">&nbsp;'+model.subTitle+'&nbsp;</div>';
-	guideDetailsText += '<div class="palm-info-text truncating-text left">&nbsp;&nbsp;'+model.startTimeHourMinute+' to '+model.endTimeHourMinute+'&nbsp;</div>';
+	guideDetailsText += '<div class="palm-info-text truncating-text left">&nbsp;&nbsp;'+model.startTimeHourMinute+' '+$L('to')+' '+model.endTimeHourMinute+'&nbsp;</div>';
 	guideDetailsText += '<div class="palm-info-text truncating-text left">&nbsp;&nbsp;&nbsp;'+model.category+'</div>';
 	guideDetailsText += '<div class="palm-info-text truncating-text left">&nbsp;&nbsp;&nbsp;&nbsp;'+model.channelName+'</div>';
 	guideDetailsText += '</div>';
@@ -1192,7 +1167,7 @@ GuideAssistant.prototype.readGuideSuccess = function(response) {
 	var singleChannelNode, singleChannelChildNode, singleChannelJson;
 	var singleProgramNode, singleProgramNode, singleProgramJson;
 	var singleProgramChildNode;
-	var StartTime, EndTime, StartChanId, EndChanId, NumOfChannels, Count, AsOf, Version, ProtoVer;
+	//var StartTime, EndTime, StartChanId, EndChanId, NumOfChannels, Count, AsOf, Version, ProtoVer;
 	var newChannelList = [];
 	
 	
@@ -1216,31 +1191,31 @@ GuideAssistant.prototype.readGuideSuccess = function(response) {
 		topSingleNode = topNode.childNodes[i];
 		switch(topSingleNode.nodeName) {
 			case 'StartTime':
-				StartTime = topSingleNode.childNodes[0].nodeValue;
+				//StartTime = topSingleNode.childNodes[0].nodeValue;
 				break;
 			case 'EndTime':
-				EndTime = topSingleNode.childNodes[0].nodeValue;
+				//EndTime = topSingleNode.childNodes[0].nodeValue;
 				break;
 			case 'StartChanId':
-				StartChanId = topSingleNode.childNodes[0].nodeValue;
+				//StartChanId = topSingleNode.childNodes[0].nodeValue;
 				break;
 			case 'EndChanId':
-				EndChanId = topSingleNode.childNodes[0].nodeValue;
+				//EndChanId = topSingleNode.childNodes[0].nodeValue;
 				break;
 			case 'NumOfChannels':
-				NumOfChannels = topSingleNode.childNodes[0].nodeValue;
+				//NumOfChannels = topSingleNode.childNodes[0].nodeValue;
 				break;
 			case 'Count':
-				Count = topSingleNode.childNodes[0].nodeValue;
+				//Count = topSingleNode.childNodes[0].nodeValue;
 				break;
 			case 'AsOf':
-				AsOf = topSingleNode.childNodes[0].nodeValue;
+				//AsOf = topSingleNode.childNodes[0].nodeValue;
 				break;
 			case 'Version':
-				Version = topSingleNode.childNodes[0].nodeValue;
+				//Version = topSingleNode.childNodes[0].nodeValue;
 				break;
 			case 'ProtoVer':
-				ProtoVer = topSingleNode.childNodes[0].nodeValue;
+				WebMyth.prefsCookieObject.protoVer = topSingleNode.childNodes[0].nodeValue;
 				break;
 			case 'ProgramGuide':
 				//Mojo.Log.error('starting to parse ProgramGuide');

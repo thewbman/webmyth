@@ -6,13 +6,13 @@
 <div class="palm-header-spacer"></div>
 
 <div class="palm-group">        
- <div class="palm-group-title"><span x-mojo-loc="">Webserver address</span></div>
+   <div class="palm-group-title" id="webserver-group-title">Webserver</div>
   <div class="palm-list">
 	
 	<div class="palm-row first">
 		<div class="palm-row-wrapper textfield-group" x-mojo-focus-highlight="true">
 			<div class="title">                            
-				<div class="label">Web Server</div>
+				<div class="label" id="webserver-label">Address</div>
 				<div x-mojo-element="TextField" id="webserverTextFieldId" class="textFieldClass" style="overflow: hidden; max-height:240px;"></div>
 			</div>
 		</div>
@@ -21,7 +21,7 @@
 	<div class="palm-row">
 		<div class="palm-row-wrapper textfield-group" x-mojo-focus-highlight="true">
 			<div class="title">                            
-				<div class="label">Username</div>
+				<div class="label" id="username-label">Username</div>
 				<div x-mojo-element="TextField" id="usernameFieldId" class="textFieldClass"></div>
 			</div>
 		</div>
@@ -30,7 +30,7 @@
 	<div class="palm-row">
 		<div class="palm-row-wrapper textfield-group" x-mojo-focus-highlight="true">
 			<div class="title">                            
-				<div class="label">Password</div>
+				<div class="label" id="password-label">Password</div>
 				<div x-mojo-element="PasswordField" id="passwordFieldId" class="passwordClass"></div>
 			</div>
 		</div>
@@ -38,7 +38,7 @@
 	
 	<div class="palm-row">
 		<div class="palm-row-wrapper" x-mojo-focus-highlight="true">         
-			<div class="label right">Stream to Device</div>
+			<div class="label right" id="stream-label">Stream to Device</div>
 			<div x-mojo-element="ToggleButton" id="allowDownloadStreamToggleId" class="left"></div>
 		</div>
 	</div>
@@ -53,7 +53,7 @@
 	<div class="palm-row">
 		<div class="palm-row-wrapper textfield-group" x-mojo-focus-highlight="true">
 			<div class="title">                            
-				<div class="label">Script</div>
+				<div class="label" id="script-label">Script</div>
 				<div x-mojo-element="TextField" id="webmythPythonFieldId" class="textFieldClass"></div>
 			</div>
 		</div>
@@ -61,28 +61,28 @@
 
 	<div class="palm-row">
 		<div class="palm-row-wrapper" x-mojo-focus-highlight="true">         
-			<div class="label right">show upcoming</div>
+			<div class="label right" id="showUpcoming-label">show upcoming</div>
 			<div x-mojo-element="ToggleButton" id="showUpcomingToggleId" class="left"></div>
 		</div>
 	</div>
 
 	<div class="palm-row">
 		<div class="palm-row-wrapper" x-mojo-focus-highlight="true">         
-			<div class="label right">Show videos</div>
+			<div class="label right" id="showVideos-label">Show videos</div>
 			<div x-mojo-element="ToggleButton" id="showVideosToggleId" class="left"></div>
 		</div>
 	</div>
 
 	<div class="palm-row">
 		<div class="palm-row-wrapper" x-mojo-focus-highlight="true">         
-			<div class="label right">Show music</div>
+			<div class="label right" id="showMusic-label">Show music</div>
 			<div x-mojo-element="ToggleButton" id="showMusicToggleId" class="left"></div>
 		</div>
 	</div>
 
 	<div class="palm-row last">
 		<div class="palm-row-wrapper" x-mojo-focus-highlight="true">         
-			<div class="label right">Show backend log</div>
+			<div class="label right" id="showLog-label">Show backend log</div>
 			<div x-mojo-element="ToggleButton" id="showLogToggleId" class="left"></div>
 		</div>
 	</div>
@@ -93,12 +93,12 @@
 
 
 <div class="palm-group">        
- <div class="palm-group-title"><span x-mojo-loc="">Master Backend</span></div>
+   <div class="palm-group-title" id="backend-group-title">Webserver</div>
   <div class="palm-list">
 	
 	<div class="palm-row first">
 		<div class="palm-row-wrapper" x-mojo-focus-highlight="true">         
-			<div class="label right">Manual Backend IP</div>
+			<div class="label right" id="manualBackend-label">Manual Backend IP</div>
 			<div x-mojo-element="ToggleButton" id="manualMasterBackendToggleId" class="left"></div>
 		</div>
 	</div>
@@ -106,7 +106,7 @@
 	<div class="palm-row last">
 		<div class="palm-row-wrapper textfield-group" x-mojo-focus-highlight="true">
 			<div class="title">                            
-				<div class="label">Master Backend</div>
+				<div class="label" id="backendAddress-label">Master Backend</div>
 				<div x-mojo-element="TextField" id="masterBackendTextFieldId" class="textFieldClass"></div>
 			</div>
 		</div>
@@ -117,34 +117,34 @@
 
 
 <div class="palm-group">        
- <div class="palm-group-title"><span x-mojo-loc="">Images</span></div>
+   <div class="palm-group-title" id="images-group-title">Images</div>
   <div class="palm-list">
 	
 		<div class="palm-row first">
 			<div class="palm-row-wrapper" x-mojo-focus-highlight="true">         
 				<div x-mojo-element="ToggleButton" id="upcomingChannelIconsToggleId"></div>
-				<div class="title left">Show Channel Icons</div>
+				<div class="title left" id="showChannelIcons-label">Show Channel Icons</div>
 			</div>
 		</div>
 		
 		<div class="palm-row">
 			<div class="palm-row-wrapper" x-mojo-focus-highlight="true">         
 				<div x-mojo-element="ToggleButton" id="videoImagesToggleId"></div>
-				<div class="title left">Show Video Images (List)</div>
+				<div class="title left" id="showVideoImagesList-label">Show Video Images (List)</div>
 			</div>
 		</div>
 		
 		<div class="palm-row">
 			<div class="palm-row-wrapper" x-mojo-focus-highlight="true">         
 				<div x-mojo-element="ToggleButton" id="showVideoDetailsImageToggleId"></div>
-				<div class="title left">Show Video Images (Details)</div>
+				<div class="title left" id="showVideoImagesDetails-label">Show Video Images (Details)</div>
 			</div>
 		</div>
 
 		<div class="palm-row last">
 			<div class="palm-row-wrapper" x-mojo-focus-highlight="true">         
 				<div x-mojo-element="ToggleButton" id="forceScriptScreenshotsToggleId"></div>
-				<div class="title left">Use script to provide screenshots</div>
+				<div class="title left" id="scriptScreenshots-label">Use script to provide screenshots</div>
 			</div>
 		</div>
 
@@ -153,7 +153,7 @@
 
 
 <div class="palm-group">
-	<div class="palm-group-title" id="preferences-global">Remote preferences</div>
+	<div class="palm-group-title" id="remotePreferences-group-title">Remote preferences</div>
 	<div class="palm-list">
    
 <!--   
@@ -173,35 +173,35 @@
 		<div class="palm-row">
 			<div class="palm-row-wrapper" x-mojo-focus-highlight="true">         
 				<div x-mojo-element="ToggleButton" id="vibrateToggleId"></div>
-				<div class="title left">Remote Vibrates</div>
+				<div class="title left" id="remoteVibrates-label">Remote Vibrates</div>
 			</div>
 		</div>
 		
 		<div class="palm-row">
 			<div class="palm-row-wrapper" x-mojo-focus-highlight="true">         
 				<div x-mojo-element="ToggleButton" id="remoteFullscreenToggleId"></div>
-				<div class="title left">Remote Fullscreen</div>
+				<div class="title left" id="remoteFullscreen-label">Remote Fullscreen</div>
 			</div>
 		</div>
 		
 		<div class="palm-row">
 			<div class="palm-row-wrapper" x-mojo-focus-highlight="true">         
 				<div x-mojo-element="ToggleButton" id="playJumpRemoteToggleId"></div>
-				<div class="title left">Start Remote After Playback Start</div>
+				<div class="title left" id="startRemotePlayback-label">Start Remote After Playback Start</div>
 			</div>
 		</div>
 		
 		<div class="palm-row">
 			<div class="palm-row-wrapper" x-mojo-focus-highlight="true">         
 				<div x-mojo-element="ToggleButton" id="guideJumpRemoteToggleId"></div>
-				<div class="title left">Start Remote After LiveTV Start</div>
+				<div class="title left" id="startRemoteLivetv-label">Start Remote After LiveTV Start</div>
 			</div>
 		</div>
 		
 		<div class="palm-row last">
 			<div class="palm-row-wrapper" x-mojo-focus-highlight="true">         
 				<div x-mojo-element="ToggleButton" id="dashboardRemoteToggleId"></div>
-				<div class="title left">Dashboard Remote</div>
+				<div class="title left" id="dashboardRemote-label">Dashboard Remote</div>
 			</div>
 		</div>
 	
@@ -211,49 +211,49 @@
 
 
 <div class="palm-group">
-	<div class="palm-group-title" id="preferences-remote-scenes">Remote Scenes</div>
-	<div class="palm-list">
+	<div class="palm-group-title" id="remoteScenes-group-title">Remote Scenes</div>
+		<div class="palm-list">
         
 		
 		<div class="palm-row first">
 			<div class="palm-row-wrapper" x-mojo-focus-highlight="true">         
 				<div x-mojo-element="ToggleButton" id="remoteNavigationToggleId"></div>
-				<div class="title left">Navigation</div>
+				<div class="title left" id="navigation-label">Navigation</div>
 			</div>
 		</div>
 		
 		<div class="palm-row">
 			<div class="palm-row-wrapper" x-mojo-focus-highlight="true">         
 				<div x-mojo-element="ToggleButton" id="remotePlaybackToggleId"></div>
-				<div class="title left">Playback</div>
+				<div class="title left" id="playback-label">Playback</div>
 			</div>
 		</div>
 		
 		<div class="palm-row">
 			<div class="palm-row-wrapper" x-mojo-focus-highlight="true">         
 				<div x-mojo-element="ToggleButton" id="remoteMusicToggleId"></div>
-				<div class="title left">Music</div>
+				<div class="title left" id="music-label">Music</div>
 			</div>
 		</div>
 		
 		<div class="palm-row">
 			<div class="palm-row-wrapper" x-mojo-focus-highlight="true">         
 				<div x-mojo-element="ToggleButton" id="remoteFlickToggleId"></div>
-				<div class="title left">Flick</div>
+				<div class="title left" id="flick-label">Flick</div>
 			</div>
 		</div>
 		
 		<div class="palm-row">
 			<div class="palm-row-wrapper" x-mojo-focus-highlight="true">         
 				<div x-mojo-element="ToggleButton" id="remoteMasterToggleId"></div>
-				<div class="title left">Master</div>
+				<div class="title left" id="master-label">Master</div>
 			</div>
 		</div>
 		
 		<div class="palm-row last">
 			<div class="palm-row-wrapper" x-mojo-focus-highlight="true">         
 				<div x-mojo-element="ToggleButton" id="remoteNumberpadToggleId"></div>
-				<div class="title left">Numbers</div>
+				<div class="title left" id="numbers-label">Numbers</div>
 			</div>
 		</div>
 	

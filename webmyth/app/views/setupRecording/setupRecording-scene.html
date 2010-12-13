@@ -9,7 +9,7 @@
 <table id="ruleTypeGroup" class="palm-divider labeled collapsible right" x-mojo-touch-feedback="delayed">
 	<tr>
 		<td class="left"></td>
-		<td class="label">rule Type</td>
+		<td class="label" id="ruleTypeLabel">rule Type</td>
 		<td class="right"></td>
 		<td><div id="ruleTypeArrow" class="palm-arrow-expanded"></div></td>
 	</tr>
@@ -30,7 +30,7 @@
 <table id="programGroup" class="palm-divider labeled collapsible right" x-mojo-touch-feedback="delayed">
 	<tr>
 		<td class="left"></td>
-		<td class="label">Program</td>
+		<td class="label" id="programLabel">Program</td>
 		<td class="right"></td>
 		<td><div id="programArrow" class="palm-arrow-expanded"></div></td>
 	</tr>
@@ -54,14 +54,14 @@
 	
 	<div class="palm-row">
 		<div class="palm-row-wrapper">
-            <div class="label" id="starttime-label">Start</div>
+            <div class="label" id="starttime-label">Start Time</div>
 			<div class="title" id="starttime-title"></div>
 		</div>
     </div>
 	
 	<div class="palm-row">
 		<div class="palm-row-wrapper">
-            <div class="label" id="recstatus-label">status</div>
+            <div class="label" id="recstatus-label">Status</div>
 			<div class="title" id="recstatus-title"></div>
 		</div>
     </div>
@@ -79,7 +79,7 @@
 <table id="programDetailsGroup" class="palm-divider labeled collapsible right" x-mojo-touch-feedback="delayed">
 	<tr>
 		<td class="left"></td>
-		<td class="label">Program Details</td>
+		<td class="label" id="programDetailsLabel">Program Details</td>
 		<td class="right"></td>
 		<td><div id="programDetailsArrow" class="palm-arrow-closed"></div></td>
 	</tr>
@@ -90,8 +90,8 @@
 
 	<div class="palm-row first">
 		<div class="palm-row-wrapper">
-            <div class="label" id="description-label">description</div>
-			<div class="title" id="description-title"></div>
+            <!--<div class="label" id="description-label">description</div>-->
+			<div class="palm-info-text" id="description-title"></div>
 		</div>
     </div>
 	
@@ -137,7 +137,7 @@
 <table id="recordingOptionsGroup" class="palm-divider labeled collapsible right" x-mojo-touch-feedback="delayed">
 	<tr>
 		<td class="left"></td>
-		<td class="label">recording Options</td>
+		<td class="label" id="recordingOptionsLabel">recording Options</td>
 		<td class="right"></td>
 		<td><div id="recordingOptionsArrow" class="palm-arrow-closed"></div></td>
 	</tr>
@@ -302,7 +302,7 @@
 <table id="jobOptionsGroup" class="palm-divider labeled collapsible right" x-mojo-touch-feedback="delayed">
 	<tr>
 		<td class="left"></td>
-		<td class="label">job Options</td>
+		<td class="label" id="jobOptionsLabel">job Options</td>
 		<td class="right"></td>
 		<td><div id="jobOptionsArrow" class="palm-arrow-closed"></div></td>
 	</tr>
@@ -313,8 +313,8 @@
 	<div class="palm-row first">
 		<div class="palm-row-wrapper" x-mojo-focus-highlight="true">
 			<div class="title">                           
+				<div id="commercialFlag-label" class="label">Commercial flag</div>
 				<div x-mojo-element="CheckBox" id="autocommflagFieldId" class="checkboxClass"></div> 
-				<div class="label">Commercial flag</div>
 			</div>
 		</div>
 	</div>
@@ -322,7 +322,7 @@
 	<div class="palm-row">
 		<div class="palm-row-wrapper" x-mojo-focus-highlight="true">
 			<div class="title">                            
-				<div class="label">Transcode</div>
+				<div id="transcode-label" class="label">Transcode</div>
 				<div x-mojo-element="CheckBox" id="autotranscodeFieldId" class="checkboxClass"></div>
 			</div>
 		</div>
