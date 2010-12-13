@@ -532,28 +532,7 @@ WelcomeAssistant.prototype.alertNeedScript = function() {
 };
 
 
-WelcomeAssistant.prototype.doWelcomeIcon = function(event) {
-
-	Mojo.Log.info("Starting MySQL test");
-		
-	 this.controller.serviceRequest('palm://com.thewbman.webmyth.service', {
-		  method:"mysqlQuery",
-		  parameters:{},
-		  onSuccess: function(response) {
-				Mojo.Log.info("Success mysql %j", response);
-				Mojo.Controller.getAppController().showBanner("Success MySQL", {source: 'notification'});
-				
-	
-			}.bind(this),
-		  onFailure: function(response) {
-		  
-					Mojo.Log.error("Failed MySQL %j", response);
-					Mojo.Controller.getAppController().showBanner("MySQL FAIL", {source: 'notification'});
-					
-	
-			}.bind(this),
-		});
-		
+WelcomeAssistant.prototype.doWelcomeIcon = function(event) {	
 	
 	Event.stop(event); 
 	
