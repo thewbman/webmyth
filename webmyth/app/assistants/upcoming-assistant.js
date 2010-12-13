@@ -185,19 +185,11 @@ UpcomingAssistant.prototype.getUpcoming = function(event) {
 	if(WebMyth.useService){
 		Mojo.Log.info("Using protocol service to get upcoming");
 	
-		this.controller.serviceRequest('palm://com.thewbman.webmyth.service', {
-			method:"mythprotocolCommand",
-				parameters:{
-					"port":"6543", 
-					"address":WebMyth.prefsCookieObject.masterBackendIp,
-					"protocolVersionCommand": cleanProtocolVersion(WebMyth.prefsCookieObject.protoVer),
-					"command": "QUERY_GETALLPENDING",
-					"timeout": 4000								//gives service 4 full seconds to get all data, will return earlier if done
-					},
-				onSuccess: this.readUpcomingServiceSuccess.bind(this),
-				onFailure: this.remoteDbTableFail.bind(this)
-			});
+		//adsf - Add back service command here
 		
+		
+		
+		//asdf
 		
 	} else { 
 	
