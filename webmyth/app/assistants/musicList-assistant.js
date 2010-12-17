@@ -19,10 +19,16 @@
  */
  
  
-function MusicListAssistant() {
+function MusicListAssistant(allMusic) {
 
 	  this.fullResultList = [];		//Full raw data 
 	  this.resultList = [];			//Filtered down list
+	  
+	  if(allMusic){
+		Object.extend(this.fullResultList,allMusic); 
+	  }
+	  
+	  this.playlistsList = [];
 	  
 	  this.currentMusicGroup = 'all';
 	  
@@ -60,6 +66,39 @@ MusicListAssistant.prototype.setup = function() {
 
 	
 	
+	
+	//Playlists drawer
+	this.controller.setupWidget("playlistsDrawer",
+		this.playlistsDrawerAttributes = {
+			modelProperty: 'open',
+			unstyled: true
+		},
+		this.scheduledModel = {
+			open: false
+		}
+	);
+	this.playlistsDrawer = this.controller.get("playlistsDrawer");
+	this.controller.listen(this.controller.get("playlistsDrawerGroup"),Mojo.Event.tap,this.togglePlaylistsDrawer.bindAsEventListener(this));
+	
+	// Music playlists list
+	this.musicPlaylistsListAttribs = {
+		itemTemplate: "musicList/musicPlaylistsListItem",
+		dividerTemplate: "musicList/musicDivider",
+		swipeToDelete: false,
+		//dividerFunction: this.musicPlaylistsDividerFunction.bind(this),
+		reorderable: false
+	};
+    this.musicPlaylistsListModel = {            
+        items: this.playlistsList,
+		disabled: false
+    };
+	this.controller.setupWidget( "musicPlaylistsList" , this.musicPlaylistsListAttribs, this.musicPlaylistsListModel);
+	
+	//Event listeners
+	Mojo.Event.listen(this.controller.get( "musicPlaylistsList" ), Mojo.Event.listTap, this.goMusicPlaylist.bind(this));
+	
+	
+	
 	// Music filter list
 	this.musicListAttribs = {
 		itemTemplate: "musicList/musicListItem",
@@ -81,11 +120,22 @@ MusicListAssistant.prototype.setup = function() {
 	
 	
 	//List of music
-	this.getMusic();
+	if(this.fullResultList.length == 0){
+		this.getMusic();
+	} else {
+		this.controller.window.setTimeout(this.finishedReadingMusic.bind(this), 50);
+	}
 	
 };
 
 MusicListAssistant.prototype.activate = function(event) {
+
+	$('playlistsDivider-label').innerText = $L('Playlists');
+	
+	//Playlist
+	this.playlistsList.clear();
+	this.controller.modelChanged(this.musicPlaylistsListModel);
+	this.getMusicPlaylists();
 
 	//Keypress event
 	Mojo.Event.listen(this.controller.sceneElement, Mojo.Event.keyup, this.handleKey.bind(this));
@@ -130,6 +180,8 @@ MusicListAssistant.prototype.handleCommand = function(event) {
 			this.spinnerModel.spinning = true;
 			this.controller.modelChanged(this.spinnerModel, this);
 			$('myScrim').show();
+			
+			this.getMusicPlaylists();
 		
 			this.getMusic();
 			
@@ -177,6 +229,69 @@ MusicListAssistant.prototype.handleKey = function(event) {
 
 
 
+MusicListAssistant.prototype.togglePlaylistsDrawer = function() {
+
+	this.playlistsDrawer.mojo.setOpenState(!this.playlistsDrawer.mojo.getOpenState());	
+
+	if (this.playlistsDrawer.mojo.getOpenState() == true){
+		this.controller.get("playlistsArrow").removeClassName("palm-arrow-closed").addClassName("palm-arrow-expanded")
+	} else {
+		this.controller.get("playlistsArrow").removeClassName("palm-arrow-expanded").addClassName("palm-arrow-closed")
+	}
+	
+};
+
+MusicListAssistant.prototype.getMusicPlaylists = function(event) {
+
+	//Update list from webmyth python script
+	//Mojo.Log.error('Starting music playlists gathering');
+	
+	var query = "SELECT * ";
+	query += " FROM music_playlists ";
+	
+	
+	var requestUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webmythPythonFile;
+	requestUrl += "?op=executeSQLwithResponse";				
+	requestUrl += "&query64=";		
+	requestUrl += Base64.encode(query);	
+	
+
+	
+    try {
+        var request = new Ajax.Request(requestUrl,{
+            method: 'get',
+            evalJSON: 'true',
+			requestHeaders: {Authorization: 'Basic ' + Base64.encode(WebMyth.prefsCookieObject.webserverUsername + ":" + WebMyth.prefsCookieObject.webserverPassword)},
+            onSuccess: this.readMusicPlaylistsSuccess.bind(this),
+            onFailure: this.readMusicPlaylistsFail.bind(this)  
+        });
+    }
+    catch(e) {
+        Mojo.Log.error(e);
+    }
+	
+};
+
+MusicListAssistant.prototype.readMusicPlaylistsFail = function(event) {
+
+	Mojo.Log.error('Failed to get music playlists');
+	
+};
+
+MusicListAssistant.prototype.readMusicPlaylistsSuccess = function(response) {
+	//return true;  //can escape this function for testing purposes
+    
+	//Mojo.Log.info('Got playlists response: %j',response.responseJSON);
+	
+	this.playlistsList.clear();
+	Object.extend(this.playlistsList,cleanMusicPlaylists(response.responseJSON));
+	
+	//Mojo.Log.info("Cleaned music playlists if %j",this.playlistsList);
+	
+	this.controller.modelChanged(this.musicPlaylistsListModel);
+	
+};
+
 MusicListAssistant.prototype.getMusic = function(event) {
 
 	//Update list from webmyth python script
@@ -189,7 +304,7 @@ MusicListAssistant.prototype.getMusic = function(event) {
 	
 	//SELECT music_songs.song_id, music_songs.name, music_songs.filename, music_songs.year, music_songs.track, music_artists.artist_name, music_albums.album_name, music_albums.year AS album_year, music_albums.compilation FROM music_songs, music_artists, music_albums WHERE music_songs.artist_id = music_artists.artist_id AND music_songs.album_id = music_albums.album_id
 	
-	var query = "SELECT music_songs.song_id, music_songs.name, music_songs.filename, music_songs.year, music_songs.track, "; 
+	var query = "SELECT music_songs.song_id, music_songs.name, music_songs.filename, music_songs.year, music_songs.track, music_songs.length, "; 
 	query += " music_songs.artist_id, music_artists.artist_name, music_songs.album_id, music_albums.album_name, music_albums.compilation ";
 	query += " FROM music_songs ";
 	query += " LEFT JOIN music_artists ON music_songs.artist_id = music_artists.artist_id "
@@ -208,8 +323,8 @@ MusicListAssistant.prototype.getMusic = function(event) {
             method: 'get',
             evalJSON: 'true',
 			requestHeaders: {Authorization: 'Basic ' + Base64.encode(WebMyth.prefsCookieObject.webserverUsername + ":" + WebMyth.prefsCookieObject.webserverPassword)},
-            onSuccess: this.readRemoteDbTableSuccess.bind(this),
-            onFailure: this.readRemoteDbTableFail.bind(this)  
+            onSuccess: this.readMusicSuccess.bind(this),
+            onFailure: this.readMusicFail.bind(this)  
         });
     }
     catch(e) {
@@ -218,7 +333,7 @@ MusicListAssistant.prototype.getMusic = function(event) {
 	
 };
 
-MusicListAssistant.prototype.readRemoteDbTableFail = function(event) {
+MusicListAssistant.prototype.readMusicFail = function(event) {
 
 	Mojo.Log.error('Failed to get music response');
 	
@@ -233,11 +348,10 @@ MusicListAssistant.prototype.readRemoteDbTableFail = function(event) {
 	this.spinnerModel.spinning = false;
 	this.controller.modelChanged(this.spinnerModel, this);
 	$('myScrim').hide();
-	//$('failtext').innerHtml = "Failed to connect to remote script.  Please check you script setup.";
 	
 };
 
-MusicListAssistant.prototype.readRemoteDbTableSuccess = function(response) {
+MusicListAssistant.prototype.readMusicSuccess = function(response) {
 	//return true;  //can escape this function for testing purposes
     
 	//Mojo.Log.info('Got Ajax response: %j',response.responseJSON);
@@ -387,12 +501,15 @@ MusicListAssistant.prototype.musicGroupChanged = function(newGroup) {
 	
 	
 	//Initial display
-	var listWidget = this.controller.get('musicList');
-	this.filterListFunction('', listWidget, 0, this.resultList.length);
-	listWidget.mojo.close();
-	//Mojo.Controller.getAppController().showBanner("Updated with latest data", {source: 'notification'});
+	try {
+		var listWidget = this.controller.get('musicList');
+		this.filterListFunction('', listWidget, 0, this.resultList.length);
+		listWidget.mojo.close();
+	} catch(e) {
+		Mojo.Log.error("Error in initial music list filtering");
+	}
 	
-	f
+	
 	//Stop spinner and hide
 	this.spinnerModel.spinning = false;
 	this.controller.modelChanged(this.spinnerModel, this);
@@ -505,6 +622,14 @@ MusicListAssistant.prototype.filterListFunction = function(filterString, listWid
 	listWidget.mojo.setCount(totalSubsetSize);
 	
 };	
+
+MusicListAssistant.prototype.goMusicPlaylist = function(event) {
+	
+	Mojo.Log.info("Selected individual music playlist: '%j'", event.item);
+	
+	Mojo.Controller.stageController.swapScene("musicPlaylist", event.item, this.fullResultList, this.playlistsList);
+	
+}
 
 MusicListAssistant.prototype.goMusicDetails = function(event) {
 	//var upcoming_chanid = event.item.chanid;
@@ -652,6 +777,14 @@ MusicListAssistant.prototype.handleDownload = function(downloadOrStream_in) {
 		});	
 	}
  
+};
+
+MusicListAssistant.prototype.musicPlaylistsDividerFunction = function(itemModel) {
+	 	
+	var dividerData = "Playlists";
+		
+	return dividerData;
+	
 };
 
 MusicListAssistant.prototype.musicDividerFunction = function(itemModel) {

@@ -946,12 +946,24 @@ WelcomeAssistant.prototype.checkConnectionStatus = function() {
 			method: 'getstatus',
 			parameters: {subscribe: false},
 			onSuccess: function(response) {
-				//Mojo.Log.info("Got connection status of %j", response);
+				Mojo.Log.info("Got connection status of %j", response);
 				
 				if(response.wifi.state == "connected") {
 					//this.getHostsList();
 					
 					this.getSettings();
+				} else if(response.wan.state == "disconnected") {
+				
+					// show update dialog
+					this.controller.showAlertDialog({                            
+								onChoose: function(value) {} ,                                       
+								title: "WebMyth - v" + Mojo.Controller.appInfo.version,
+								message: "Could not find a network connection.  WebMyth requires a network connection to operate.",
+								choices: [                                                          
+									{ label: $L("OK"), value: "ok", type: "affirmative" }   
+								]                                                                   
+					}); 
+				
 				}
 	
 			}.bind(this),

@@ -484,7 +484,6 @@ StageAssistant.prototype.didQueryLocation = function(a) {
 //adsf - Add back service commands here
 
 
-
 //asdf
 
 WebMyth.sendKey = function(value){
