@@ -5,6 +5,21 @@
 </div>
 <div class="palm-header-spacer"></div>
 
+<table id="playlistsDrawerGroup" class="palm-divider labeled collapsible right" x-mojo-touch-feedback="delayed">
+	<tr>
+		<td class="left"></td>
+		<td class="label" id="playlistsDivider-label">Playlists</td>
+		<td class="right"></td>
+		<td><div id="playlistsArrow" class="palm-arrow-closed"></div></td>
+	</tr>
+</table>
+<div  x-mojo-element="Drawer" id="playlistsDrawer">
+  <div class="palm-list">
+		<div class="palm-row-wrapper">
+			<div x-mojo-element="List" id="musicPlaylistsList"></div>
+		</div>
+  </div>
+</div>
 
 <div x-mojo-element="FilterList" id="musicList"></div>
 

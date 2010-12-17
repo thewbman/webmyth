@@ -254,7 +254,7 @@ Metrix.prototype.checkBulletinBoard = function(controller,minBulletinVersion, fo
 
 Metrix.prototype.bulletinTimeCheck = function(controller, forceReview, url, response)
 {
-  Mojo.Log.info("inside Metrix check time "+forceReview+url+response);
+  //Mojo.Log.info("inside Metrix check time "+forceReview+url+response);
   
   var timeUTC = response.utc;
 
@@ -272,7 +272,7 @@ Metrix.prototype.bulletinTimeCheck = function(controller, forceReview, url, resp
   
 Metrix.prototype.checkBulletinSuccess = function(timeUTC,controller, forceReview, transport)
 {
-  Mojo.Log.info("inside Metrix bulletin success");
+  //Mojo.Log.info("inside Metrix bulletin success");
   
   var version = transport.responseXML.getElementsByTagName("version").item(0).textContent;
   var msgArray = [];

@@ -20,15 +20,12 @@
  
  
  function UpcomingAssistant() {
-	/* this is the creator function for your scene assistant object. It will be passed all the 
-	   additional parameters (after the scene name) that were passed to pushScene. The reference
-	   to the scene controller (this.controller) has not be established yet, so any initialization
-	   that needs the scene controller should be done in the setup function below. */
 	   
 	  this.nullHandleCount = 0;
 	 
 	  this.fullResultList = [];		//Full raw data 
 	  this.resultList = [];			//Filtered down list
+	  
 }
 
 UpcomingAssistant.prototype.setup = function() {
@@ -258,9 +255,16 @@ UpcomingAssistant.prototype.readRemoteDbTableSuccess = function(response) {
 		
 	//Update the list widget
 	this.fullResultList.clear();
-	Object.extend(this.fullResultList,cleanUpcoming(response.responseJSON));
+	var cleanedUpcomingResponse = cleanUpcoming(response.responseJSON);
+	Object.extend(this.fullResultList,cleanedUpcomingResponse.fullUpcomingList);
 	
 	Mojo.Log.info('Cleaned upcoming: %j', this.fullResultList);
+	
+	if(cleanedUpcomingResponse.conflicts == 1){
+		Mojo.Controller.getAppController().showBanner("There is "+cleanedUpcomingResponse.conflicts+" conflicting recording", {source: 'notification'});
+	} else if(cleanedUpcomingResponse.conflicts > 1){
+		Mojo.Controller.getAppController().showBanner("There are "+cleanedUpcomingResponse.conflicts+" conflicting recordings", {source: 'notification'});
+	}
 	
 	this.groupChanged(WebMyth.prefsCookieObject.currentUpcomingGroup);
 	

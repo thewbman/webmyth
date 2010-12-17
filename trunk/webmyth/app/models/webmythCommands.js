@@ -493,6 +493,31 @@ var trimMusicByAlbum = function(fullList, myAlbum) {
 		
 };
 
+var trimMusicPlaylist = function(fullList, myGroup) {
+	
+		var trimmedList = [];
+		var i, s, matchGroup;
+		
+		if(myGroup == "inPlaylist") {
+			matchGroup = true;
+		} else {
+			matchGroup = false;
+		}
+	
+		for (i = 0; i < fullList.length; i++) {
+	
+			s = fullList[i];
+			if ((s.inPlaylist == matchGroup)) {
+				trimmedList.push(s);
+			} else {
+				//does not match
+			}
+		}
+		
+		return trimmedList;
+		
+};
+
 var trimByChanidStarttime = function(fullList, chanid_in, starttime_in) {
 	
 		var i, s;
@@ -1100,6 +1125,168 @@ var cleanMusic = function(fullList) {
 	
 }
 
+var cleanMusicPlaylists = function(fullList) {
+
+	finalList = [];
+	
+	finalList.push({"type": "1 - New", "playlist_id": "-1", "playlist_name": "Create new", "display_name": "+ Create new +", "playlist_songs": "", "length": "0", "songcount": "0", "hostname": ""});
+	
+	var i, j, k, s, t = [], u = [];
+	
+	for(i = 0; i < fullList.length; i++) {
+		s = fullList[i];
+		
+		if(s.hostname == ""){
+			s.type = "3 - Named";
+			s.display_name = s.playlist_name;
+			finalList.push(s);
+		} else if(s.playlist_name == "default_playlist_storage") {
+			s.type = "2 - Host";
+			s.display_name = "Frontend: "+s.hostname;
+			finalList.push(s);
+		}
+		
+	}
+	
+	finalList.sort(double_sort_by('type', 'hostname', false));
+	
+	return finalList;
+	
+}
+
+var parseMusicInPlaylist = function(fullList, playlistObject) {
+	
+	var playlistOrderList = [];
+	var	finalList = [];
+	
+	var myPlaylist = playlistObject.playlist_songs.split(",");
+	
+	var i, j, s = {};
+	var sortListIndex = 0;
+		
+	//Flag music if in playlist
+	for(j = 0; j < myPlaylist.length; j++) {
+		
+		if(myPlaylist[j] > 0) {
+			//Make sure we are not getting playlists, just songs
+			playlistOrderList.push({'song_id': myPlaylist[j], 'order': j});
+		}	
+	}
+	
+	playlistOrderList.sort(sort_by('song_id', false));
+	
+	
+	//Prep music list
+	fullList.sort(sort_by('song_id', false));
+	
+	for(i = 0; i < fullList.length; i++) {
+		s = fullList[i];
+		
+		s.playlistOrder = 1000000;
+		s.inPlaylist = false;
+		
+		if(playlistOrderList.length > 0) {		
+			if(s.song_id == playlistOrderList[sortListIndex].song_id) {
+				s.playlistOrder = playlistOrderList[sortListIndex].order;
+				s.inPlaylist = true;
+				
+				sortListIndex++;
+				
+				if(sortListIndex >= playlistOrderList.length){
+					sortListIndex--;
+				}
+				
+				//Mojo.Log.info("Updated music item %j",s);
+			
+			}
+		}
+		
+		finalList.push(s);
+		
+	}
+	
+	finalList.sort(sort_by('playlistOrder', false));
+	
+	return finalList;	
+	
+}
+
+var parseMusicPlaylists = function(fullList, playlistObject) {
+	
+	var playlistOrderList = [];
+	var finalList = [];
+	
+	var myPlaylist = playlistObject.playlist_songs.split(",");
+	
+	var i, j, s = {};
+	var sortListIndex = 0;
+	
+	
+	//Flag named playlists if in host playlist
+	for(j = 0; j < myPlaylist.length; j++) {
+		
+		if(myPlaylist[j] < 0) {
+			//Make sure we are not getting songs, just playlsits
+			playlistOrderList.push({'playlist_id': parseInt(myPlaylist[j]), 'order': j});
+		}	
+	}
+	
+	playlistOrderList.sort(sort_by('song_id', false));
+	
+	//Mojo.Log.info("Sorted playlists list is %j",playlistOrderList);
+	
+	
+	switch(playlistObject.type){
+		case '1 - New':
+			//do nothing
+		  break;
+		  
+		
+		case '2 - Host':
+	
+			//Get named playlists
+			for(i = 0; i < fullList.length; i++) {
+				s = fullList[i];
+			
+				if(s.type == "3 - Named") {
+				
+					s.inPlaylist = false;
+		
+					if(playlistOrderList.length > 0) {
+						if(s.playlist_id == parseInt(playlistOrderList[sortListIndex].playlist_id)*(-1)) {
+							s.playlistOrder = playlistOrderList[sortListIndex].order;
+							s.inPlaylist = true;
+							
+							sortListIndex++;
+							
+							if(sortListIndex >= playlistOrderList.length){
+								sortListIndex--;
+							}
+							
+							//Mojo.Log.info("Updated playlist item %j",s);
+						
+						}
+					}
+				
+					finalList.push(s);
+				}
+				
+			}
+	
+		  break;
+		  
+		
+		case '3 - Named':
+			//do nothing
+		  break;
+	
+	} 
+		
+
+	return finalList;	
+	
+}
+
 var parseUpcomingService = function(fullResponse) {
 
 	finalList = [];
@@ -1278,6 +1465,7 @@ var cleanUpcoming = function(fullList) {
 	finalList = [];
 	
 	var i, s = {};
+	var conflicts = 0;
 	
 	for(i = 0; i < fullList.length; i++) {
 		s = fullList[i];
@@ -1306,13 +1494,18 @@ var cleanUpcoming = function(fullList) {
 			s.recType = s.rectype;
 		}
 		
+		
+		if(s.recStatus == 7){
+			conflicts++;
+		}
+		
 		s.startTimeSpace = s.startTime.replace("T"," ");
 
 		finalList.push(s);
 		
 	}
 	
-	return finalList;
+	return {'fullUpcomingList': finalList, 'conflicts': conflicts} ;
 	
 }
 

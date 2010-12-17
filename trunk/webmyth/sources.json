@@ -147,5 +147,9 @@
     {
         "scenes": "log",
         "source": "app/assistants/log-assistant.js"
+    },
+    {
+        "scenes": "musicPlaylist",
+        "source": "app/assistants/musicPlaylist-assistant.js"
     }
 ]

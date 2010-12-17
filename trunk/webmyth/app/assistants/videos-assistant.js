@@ -68,7 +68,7 @@ VideosAssistant.prototype.setup = function() {
 
 	
 	
-	// Videos directory filter list
+	// Videos directory list
 	this.videosDirectoryListAttribs = {
 		itemTemplate: "videos/videosDirectoryItem",
 		dividerTemplate: "videos/videosDivider",
