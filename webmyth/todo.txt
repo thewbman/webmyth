@@ -13,7 +13,13 @@ Todo - planned new features and updates:
  - make dialogs palm-dark
  - cleanup schedule recording scene
  - refresh recorded details
- - update script to support old programinfo fields
+ - contdown keepalive
+ - add D M I to flick remote
+ - tweak livetv control
+ - ask to delete schedule
+ - reduce music data
+ - use dark backround color
+ - push link to mythtv
  
 
 //May never do
@@ -31,4 +37,7 @@ Todo - planned new features and updates:
  - music (SQL)
  - music playlists (SQL)
  - log (SQL)
+ - search hosts
+ - welcome settings (SQL)
+ - welcome script version
  

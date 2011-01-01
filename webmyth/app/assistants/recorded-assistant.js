@@ -189,24 +189,24 @@ RecordedAssistant.prototype.handleCommand = function(event) {
 
 RecordedAssistant.prototype.handleKey = function(event) {
 
-	Mojo.Log.info("handleKey %o, %o", event.originalEvent.metaKey, event.originalEvent.keyCode);
+	//Mojo.Log.info("handleKey %o, %o", event.originalEvent.metaKey, event.originalEvent.keyCode);
 	
 	if(event.originalEvent.metaKey) {
 		switch(event.originalEvent.keyCode) {
 			case 71:
-				Mojo.Log.info("g - shortcut key to guide");
+				//Mojo.Log.info("g - shortcut key to guide");
 				Mojo.Controller.stageController.swapScene("guide");	
 				break;
 			case 82:
-				Mojo.Log.info("r - shortcut key to recorded");
+				//Mojo.Log.info("r - shortcut key to recorded");
 				Mojo.Controller.stageController.swapScene("recorded");
 				break;
 			case 83:
-				Mojo.Log.info("s - shortcut key to status");
+				//Mojo.Log.info("s - shortcut key to status");
 				Mojo.Controller.stageController.swapScene("status");
 				break;
 			case 85:
-				Mojo.Log.info("u - shortcut key to upcoming");
+				//Mojo.Log.info("u - shortcut key to upcoming");
 				Mojo.Controller.stageController.swapScene("upcoming");
 				break;
 			default:
@@ -224,16 +224,15 @@ RecordedAssistant.prototype.handleKey = function(event) {
 
 RecordedAssistant.prototype.getRecorded = function() {
 
-	if(Mojo.appInfo.useXML == "true") {
 	
 		//Update list from XML backend
-		Mojo.Log.info('Starting remote data gathering from XMl backend');
+		Mojo.Log.info('Starting recorded data gathering from XML backend');
 		
 		this.controller.sceneScroller.mojo.revealTop();
 		
 		var requestUrl = "http://"+WebMyth.prefsCookieObject.masterBackendIp+":6544/Myth/GetRecorded";
 
-		Mojo.Log.info("XML Recorded URL is: "+requestUrl);
+		//Mojo.Log.info("XML Recorded URL is: "+requestUrl);
 			
 		try {
 			var request = new Ajax.Request(requestUrl,{
@@ -247,31 +246,7 @@ RecordedAssistant.prototype.getRecorded = function() {
 			Mojo.Log.error(e);
 		}
 	
-	} else {
-	
-		//Update list from python script
-		Mojo.Log.info('Starting remote data gathering from script');
-		
-		this.controller.sceneScroller.mojo.revealTop();
-		
-		var requestUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webmythPythonFile;
-		requestUrl += "?op=getRecorded";
-	 
-		try {
-			var request = new Ajax.Request(requestUrl,{
-				method: 'get',
-				evalJSON: 'true',
-				onSuccess: this.readRemoteScriptSuccess.bind(this),
-				onFailure: this.useLocalDataTable.bind(this)  
-			});
-		}
-		catch(e) {
-			Mojo.Log.error(e);
-		}
-  
-	}
-	
-	
+
 	
 };
 
@@ -421,7 +396,7 @@ RecordedAssistant.prototype.queryDataHandler = function(transaction, results) {
 		);
 		
 		
-		Mojo.Log.info("Done with data query");
+		//Mojo.Log.info("Done with data query");
 		
 		//Stop spinner and hide
 		this.spinnerModel.spinning = false;
@@ -443,7 +418,7 @@ RecordedAssistant.prototype.queryErrorHandler = function(transaction, errors) {
 
 RecordedAssistant.prototype.finishedReadingRecorded = function(event) {	
 
-	Mojo.Log.info("Finished getting data, now saving");
+	//Mojo.Log.info("Finished getting data, now saving");
 	
 	this.sortChanged(WebMyth.prefsCookieObject.currentRecSort);
 		
@@ -454,7 +429,7 @@ RecordedAssistant.prototype.finishedReadingRecorded = function(event) {
 	WebMyth.db.transaction( function (transaction) {
 		transaction.executeSql("DELETE FROM 'recordedXML'; ",  [], 
 			function(transaction, results) {    // success handler
-				Mojo.Log.info("Successfully truncated recorded");
+				//Mojo.Log.info("Successfully truncated recorded");
 			},
 			function(transaction, error) {      // error handler
 				Mojo.Log.error("Could not truncate recorded because " + error.message);
@@ -464,7 +439,7 @@ RecordedAssistant.prototype.finishedReadingRecorded = function(event) {
 	WebMyth.db.transaction( function (transaction) {
 		transaction.executeSql("DELETE FROM 'recgroupXML'; ",  [], 
 			function(transaction, results) {    // success handler
-				Mojo.Log.info("Successfully truncated recgroup");
+				//Mojo.Log.info("Successfully truncated recgroup");
 			},
 			function(transaction, error) {      // error handler
 				Mojo.Log.error("Could not truncate recgroup because " + error.message);
@@ -606,30 +581,30 @@ RecordedAssistant.prototype.readRecordedXMLSuccess = function(response) {
 									
 									
 									if(singleProgramChildNode.nodeName == "Channel") {
-										singleProgramJson.inputId = singleProgramChildNode.getAttributeNode("inputId").nodeValue;
-										singleProgramJson.chanFilters = singleProgramChildNode.getAttributeNode("chanFilters").nodeValue;
-										singleProgramJson.commFree = singleProgramChildNode.getAttributeNode("commFree").nodeValue;
+				//						singleProgramJson.inputId = singleProgramChildNode.getAttributeNode("inputId").nodeValue;
+				//						singleProgramJson.chanFilters = singleProgramChildNode.getAttributeNode("chanFilters").nodeValue;
+				//						singleProgramJson.commFree = singleProgramChildNode.getAttributeNode("commFree").nodeValue;
 										singleProgramJson.channelName = singleProgramChildNode.getAttributeNode("channelName").nodeValue;
-										singleProgramJson.sourceId = singleProgramChildNode.getAttributeNode("sourceId").nodeValue;
+				//						singleProgramJson.sourceId = singleProgramChildNode.getAttributeNode("sourceId").nodeValue;
 										singleProgramJson.chanId = singleProgramChildNode.getAttributeNode("chanId").nodeValue;
 										singleProgramJson.chanNum = singleProgramChildNode.getAttributeNode("chanNum").nodeValue;
-										singleProgramJson.callSign = singleProgramChildNode.getAttributeNode("callSign").nodeValue;
+				//						singleProgramJson.callSign = singleProgramChildNode.getAttributeNode("callSign").nodeValue;
 									} 
 									
 									if(singleProgramChildNode.nodeName == "Recording") {
-										singleProgramJson.recPriority = singleProgramChildNode.getAttributeNode("recPriority").nodeValue;
-										singleProgramJson.playGroup = singleProgramChildNode.getAttributeNode("playGroup").nodeValue;
+				//						singleProgramJson.recPriority = singleProgramChildNode.getAttributeNode("recPriority").nodeValue;
+				//						singleProgramJson.playGroup = singleProgramChildNode.getAttributeNode("playGroup").nodeValue;
 										singleProgramJson.recStatus = singleProgramChildNode.getAttributeNode("recStatus").nodeValue;
 										singleProgramJson.recStartTs = singleProgramChildNode.getAttributeNode("recStartTs").nodeValue;
 										singleProgramJson.recStartTsSpace = singleProgramChildNode.getAttributeNode("recStartTs").nodeValue.replace("T"," ");
 										singleProgramJson.recGroup = singleProgramChildNode.getAttributeNode("recGroup").nodeValue;
-										singleProgramJson.dupMethod = singleProgramChildNode.getAttributeNode("dupMethod").nodeValue;
+				//						singleProgramJson.dupMethod = singleProgramChildNode.getAttributeNode("dupMethod").nodeValue;
 										singleProgramJson.recType = singleProgramChildNode.getAttributeNode("recType").nodeValue;
-										singleProgramJson.encoderId = singleProgramChildNode.getAttributeNode("encoderId").nodeValue;
-										singleProgramJson.recProfile = singleProgramChildNode.getAttributeNode("recProfile").nodeValue;
-										singleProgramJson.recEndTs = singleProgramChildNode.getAttributeNode("recEndTs").nodeValue;
+				//						singleProgramJson.encoderId = singleProgramChildNode.getAttributeNode("encoderId").nodeValue;
+				//						singleProgramJson.recProfile = singleProgramChildNode.getAttributeNode("recProfile").nodeValue;
+				//						singleProgramJson.recEndTs = singleProgramChildNode.getAttributeNode("recEndTs").nodeValue;
 										singleProgramJson.recordId = singleProgramChildNode.getAttributeNode("recordId").nodeValue;
-										singleProgramJson.dupInType = singleProgramChildNode.getAttributeNode("dupInType").nodeValue;
+				//						singleProgramJson.dupInType = singleProgramChildNode.getAttributeNode("dupInType").nodeValue;
 									}
 									
 								}
@@ -640,13 +615,14 @@ RecordedAssistant.prototype.readRecordedXMLSuccess = function(response) {
 						
 					}
 				}
+				
 				Mojo.Log.info('Done parsing Recorded');
-				//Mojo.Log.error("Recorded full json is %j", this.fullResultList);
+				//Mojo.Log.info("Recorded full json is %j", this.fullResultList);
 	
 				
 				break;
 			default:
-				//Mojo.Log.error("node name is "+topSingleNode.nodeName);
+				//Mojo.Log.info("node name is "+topSingleNode.nodeName);
 				break;
 		}
 	}
@@ -713,12 +689,12 @@ RecordedAssistant.prototype.goRecordedDetails = function(event) {
 	
 	Mojo.Log.info("Selected individual recording: '%s' + '%s'", recorded_chanid, recorded_recStartTs);
 	
-	detailsObject = trimByChanidRecstartts(this.fullResultList, recorded_chanid, recorded_recStartTs)
+	//detailsObject = trimByChanidRecstartts(this.fullResultList, recorded_chanid, recorded_recStartTs)
 
 	//Mojo.Log.info("Selected object is: '%j'", detailsObject);
 	
 	//Open recordedDetails communication scene
-	Mojo.Controller.stageController.pushScene("recordedDetails", detailsObject);
+	Mojo.Controller.stageController.pushScene("recordedDetails", event.item);
 	
 
 };

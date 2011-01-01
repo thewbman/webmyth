@@ -1455,12 +1455,16 @@ GuideAssistant.prototype.channelPicker = function() {
 GuideAssistant.prototype.checkLocation = function() {
 	
 	
-	Mojo.Log.info("Checking current location as prep for "+this.channid+" on "+WebMyth.prefsCookieObject.currentFrontend);
 	
-	if(WebMyth.useService){
+	if(WebMyth.usePlugin){
+		WebMyth.playPluginChannel(this.channid);
+		
+	} else if(WebMyth.useService){
 		WebMyth.playServiceChannel(this, this.channid);
 		
 	} else {
+	
+		Mojo.Log.info("Checking current location as prep for "+this.channid+" on "+WebMyth.prefsCookieObject.currentFrontend);
 		
 		var requestUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webmythPythonFile;
 		requestUrl += "?op=remote&type=query";

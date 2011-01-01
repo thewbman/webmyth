@@ -26,8 +26,12 @@
 WebMyth = {};
 
 
+WebMyth.usePlugin = true;
+WebMyth.nextFrontendCommand = "";
+
 WebMyth.useService = false;
-WebMyth.telnetConnected = false;
+WebMyth.frontendLocation = "";
+WebMyth.frontendRetries = 0;
 
 //had to replace my service calls with a palm service to avoid app rejection
  
@@ -163,6 +167,15 @@ StageAssistant.prototype.setup = function() {
 	window.document.addEventListener (Mojo.Event.deactivate, this.onBlurHandler.bind(this));
 	window.document.addEventListener (Mojo.Event.activate, this.onFocusHandler.bind(this));
 	
+	if(WebMyth.usePlugin) {
+		$('webmyth_service_id').pluginStatus = this.pluginStatus.bind(this);
+		$('webmyth_service_id').backgroundFrontendSocketResponse = this.backgroundFrontendSocketResponse.bind(this);
+		$('webmyth_service_id').didReceiveData = this.didReceiveData.bind(this);
+		$('webmyth_service_id').pluginErrorMessage = this.pluginErrorMessage.bind(this);
+		$('webmyth_service_id').didQueryLocation = this.didQueryLocation.bind(this);
+		$('webmyth_service_id').socketIsClosed = this.socketIsClosed.bind(this);
+		
+	}
 	
 	Mojo.Log.info("About to start first scene - welcome");
 	
@@ -457,40 +470,209 @@ StageAssistant.prototype.startDashboard = function() {
 	
 };
 
-StageAssistant.prototype.handleConnect = function(event) {
 
-	$('telnet_plugin_id').openSocket(WebMyth.prefsCookieObject.currentFrontendAddress, WebMyth.prefsCookieObject.currentFrontendPort);
+
+WebMyth.newPluginSocket = function(retryCommand) {
+
+	try {
 	
-	Mojo.Log.info("opening telnet socket");
+		if(retryCommand) {
+			Mojo.Log.error("Had to restart socket and sending last command");
+			WebMyth.nextFrontendCommand = retryCommand;
+		}
+		
+		var response1 = $('webmyth_service_id').closeSocket();
+		var response2 = $('webmyth_service_id').openBackgroundFrontendSocket(WebMyth.prefsCookieObject.currentFrontendAddress, WebMyth.prefsCookieObject.currentFrontendPort);
+		Mojo.Log.info("Opening new plugin frontend socket: "+response1+response2);
+		
+	} catch(e) {
 	
+		Mojo.Log.error("ERROR telnet socket: %s",e);
+		Mojo.Controller.getAppController().showBanner("Error connecting to frontend", {source: 'notification'});	
+		
+	}
+};
+
+WebMyth.startTelnetPlugin = function() {
+
+	try {
+	
+		var response = $('webmyth_service_id').openFrontendSocket(WebMyth.prefsCookieObject.currentFrontendAddress, WebMyth.prefsCookieObject.currentFrontendPort);
+		Mojo.Log.info("Opening telnet socket: "+response);
+		
+	} catch(e) {
+	
+		Mojo.Log.error("ERROR telnet socket: %s",e);
+		Mojo.Controller.getAppController().showBanner("Error connecting to frontend", {source: 'notification'});	
+		
+	}
+};
+
+WebMyth.playPluginChannel = function(value){
+
+	Mojo.Log.info("Sending plugin play channel "+value);
+	
+	try {
+		var response1 = $('webmyth_service_id').sendData("query location");
+	
+		Mojo.Log.info("Plugin location response of '%s'", response1);
+				
+			if(response1.search("LiveTV") == -1){
+				//Not on liveTV
+				Mojo.Log.info("Not on livetv, jumping now ");
+			
+				var response2 = $('webmyth_service_id').sendData("jump livetv");
+				
+				//App will pause JS until we get plugin response
+				var response3 = $('webmyth_service_id').sendData("play chanid "+value);
+				
+			} else {
+				//On livetv
+				Mojo.Log.info("On livetv, changing channel");
+					
+				var response3 = $('webmyth_service_id').sendData("play chanid "+value);
+					
+					
+			}
+
+	} catch(e) {
+		Mojo.Log.error("Error sending playPluginChannel: %s",e);
+	}
+	
+};
+
+
+
+StageAssistant.prototype.startTelnetPlugin = function() {
+
+	try {
+	
+		var response = $('webmyth_service_id').openFrontendSocket(WebMyth.prefsCookieObject.currentFrontendAddress, WebMyth.prefsCookieObject.currentFrontendPort);
+		Mojo.Log.info("Opening telnet socket: "+response);
+		
+	} catch(e) {
+	
+		Mojo.Log.error("ERROR telnet socket: %s",e);
+		Mojo.Controller.getAppController().showBanner("Error connecting to frontend", {source: 'notification'});	
+		
+	}
+};
+
+StageAssistant.prototype.pluginStatus = function(a) {
+
+	Mojo.Log.error("Plugin status of '%s'", a);
+	
+	
+	if(a == "Initialized") {
+		setTimeout(function() {
+			WebMyth.newPluginSocket();
+		}, 250);
+	}
+	
+
+};
+
+StageAssistant.prototype.backgroundFrontendSocketResponse = function(success, message) {
+
+	Mojo.Log.info("backgroundFrontendSocketResponse of '%s', '%s'", success, message);
+	
+	if(success == 0){
+        Mojo.Controller.getAppController().showBanner("Error conecting to frontend", {source: 'notification'});
+	} else if (WebMyth.nextFrontendCommand == ""){
+		
+		//do nothing
+		
+	} else {
+		
+		setTimeout(function() {
+			WebMyth.sendCommand(WebMyth.nextFrontendCommand);
+			
+			WebMyth.nextFrontendCommand = "";
+		}, 100);
+		
+	}
+
 };
 
 StageAssistant.prototype.didReceiveData = function(a) {
 
-	Mojo.Log.error("plugin response of %s", a);
+	Mojo.Log.info("Plugin response of '%s'", a);
 	Mojo.Controller.getAppController().showBanner(a, {source: 'notification'});
-	
+
+};
+
+StageAssistant.prototype.pluginErrorMessage = function(a) {
+
+        Mojo.Log.info("Plugin ERROR of '%s'", a);
+        Mojo.Controller.getAppController().showBanner("ERROR: "+a, {source: 'notification'});
+
 };
 
 StageAssistant.prototype.didQueryLocation = function(a) {
 
-	//Mojo.Log.error("query location plugin response of %s", a);
-	WebMyth.currentLocation = a;
-	
+        //Mojo.Log.error("query location plugin response of %s", a);
+        WebMyth.currentLocation = a;
+
+};
+
+StageAssistant.prototype.socketIsClosed = function(a) {
+
+	Mojo.Log.error("Socket is closed %s", a);
+	Mojo.Controller.getAppController().showBanner("Socket is closed", {source: 'notification'});
+
 };
 
 
 
-//adsf - Add back service commands here
 
 
-//asdf
+
+WebMyth.sendCommand = function(fullCmd){
+			
+	var response = "";
+	
+	if(WebMyth.usePlugin){
+	
+		try{
+			response = $('webmyth_service_id').sendData(fullCmd);
+			
+			Mojo.Log.info("Plugin command response of '%s'", response);
+			
+			if((response == "sendto() failed")||(response == "recvMsgSize == 0")){
+				Mojo.Controller.getAppController().showBanner("Failed to send to frontend", {source: 'notification'});
+			}
+			
+		} catch(e) {
+			Mojo.Log.error("WebMyth.sendCommand error: %s",e);
+		}
+        
+	} else {
+	
+		//
+		
+	}
+	
+};
 
 WebMyth.sendKey = function(value){
 		
-		Mojo.Log.info("Sending key ",value);
+	Mojo.Log.info("Sending key ",value);
 		
-		var fullCmd = "key "+value;
+	var fullCmd = "key "+value;
+	var response = "";
+	
+	if(WebMyth.usePlugin){
+		response = $('webmyth_service_id').sendData(fullCmd);
+		
+        Mojo.Log.info("Plugin key response of '%s'", response);
+        //Mojo.Controller.getAppController().showBanner(response, {source: 'notification'});
+
+		if((response == "sendto() failed")||(response == "recvMsgSize == 0")){
+			//Send failed - restart socket and try again
+			WebMyth.newPluginSocket(fullCmd);
+		}
+		
+	} else {
 	
 		var cmdvalue = encodeURIComponent(value);
 		
@@ -515,14 +697,27 @@ WebMyth.sendKey = function(value){
 				Mojo.Controller.getAppController().showBanner("ERROR - check remote.py scipt", {source: 'notification'});
 			}
 		});
+		
+	}
 	
 };
 
 WebMyth.sendJump = function(value) {
 
+	var fullCmd = "jump "+value;
+	var response = "";
 	
 	if(WebMyth.usePlugin){
-		//$('telnet_plugin_id').sendData("jump "+value);
+	
+		response = $('webmyth_service_id').sendData("jump "+value);
+		
+        Mojo.Log.info("Plugin 'jump' response of '%s'", response);
+        //Mojo.Controller.getAppController().showBanner(response, {source: 'notification'});
+
+		if((response == "sendto() failed")||(response == "recvMsgSize == 0")){
+			//Send failed - restart socket and try again
+			WebMyth.newPluginSocket(fullCmd);
+		}
 		
 	} else {
 	
@@ -556,8 +751,20 @@ WebMyth.sendJump = function(value) {
 
 WebMyth.sendPlay = function(value) {
 	
+	var fullCmd = "play "+value;
+	var response = "";
+	
 	if(WebMyth.usePlugin){
-		//$('telnet_plugin_id').sendData("play "+value);
+	
+		response = $('webmyth_service_id').sendData("play "+value);
+		
+        Mojo.Log.info("Plugin 'play' response of '%s'", response);
+        //Mojo.Controller.getAppController().showBanner(response, {source: 'notification'});
+
+		if((response == "sendto() failed")||(response == "recvMsgSize == 0")){
+			//Send failed - restart socket and try again
+			WebMyth.newPluginSocket(fullCmd);
+		}
 		
 	} else {
 	
@@ -591,14 +798,11 @@ WebMyth.sendPlay = function(value) {
 
 WebMyth.sendQuery = function(value) {
 	
-	var response = $('telnet_plugin_id').sendDataWithResponse("query "+value);
+	var response = $('webmyth_service_id').sendDataWithResponse("query "+value);
 	
-	
-	Mojo.Log.error("inside query response of "+response);
+	Mojo.Log.error("Inside query response of "+response);
 	
 	return response;
-	
-	
 	
 };
 
@@ -642,3 +846,352 @@ WebMyth.downloadToPhone = function(input_parameters) {
 	
 };
 
+
+
+//adsf - Add back service commands here
+
+WebMyth.telnetTimeout = 0;
+WebMyth.welcomeSceneController = 0;
+
+
+WebMyth.mythprotocolCommand = function(sceneController, protoCommand, successBanner){
+		
+	Mojo.Log.info("Starting new protocol command: "+protoCommand);
+		
+	sceneController.controller.serviceRequest('palm://com.thewbman.webmyth.service', {
+		method:"mythprotocolCommand",
+			parameters:{
+				"port":"WebMyth.prefsCookieObject.masterBackendPort", 
+				"address":WebMyth.prefsCookieObject.masterBackendIp,
+				"protocolVersion": WebMyth.prefsCookieObject.protoVer,
+				"command": protoCommand
+				},
+			onSuccess: function(response) {
+				Mojo.Log.info("Protocol command success of %j", response);
+				//Mojo.Controller.getAppController().showBanner("Protocol command success: "+response.reply, {source: 'notification'});
+				
+				if(successBanner) {
+					Mojo.Controller.getAppController().showBanner(successBanner, {source: 'notification'});
+				}	
+	
+				}.bind(this),
+			onFailure: function(response) {
+		  
+					Mojo.Log.info("Failed service connection status of %j", response);
+					Mojo.Controller.getAppController().showBanner("Protocol command FAIL", {source: 'notification'});
+	
+				}.bind(this),
+		});
+	
+};
+
+WebMyth.startNewCommunication = function(sceneController1){
+
+	var sceneController = WebMyth.welcomeSceneController;
+
+	
+	//Close any existing keep alive processes
+	clearInterval(WebMyth.telnetTimeout); 
+	WebMyth.frontendRetries = 0;
+		
+	Mojo.Log.info("Starting new service communication");
+		
+	 sceneController.controller.serviceRequest('palm://com.thewbman.webmyth.service', {
+		  method:"startCommunication",
+		  parameters:{"port":WebMyth.prefsCookieObject.currentFrontendPort, address:WebMyth.prefsCookieObject.currentFrontendAddress},
+		  onSuccess: function(response) {
+				Mojo.Log.info("Success service connection status of %j", response);
+				
+				if(response.hasError){
+					Mojo.Controller.getAppController().showBanner(response.error, {source: 'notification'});
+				} else {
+					Mojo.Controller.getAppController().showBanner("New service connection success", {source: 'notification'});
+					//Start trying to keep alive
+					WebMyth.telnetTimeout = setTimeout(function() { WebMyth.keepTelnetAlive(sceneController); }, 1000);
+				}
+				
+	
+			}.bind(this),
+		  onFailure: function(response) {
+					
+				WebMyth.telnetConnected = false;
+		  
+					Mojo.Log.info("Failed service connection status of %j", response);
+					Mojo.Controller.getAppController().showBanner("Start new FAIL", {source: 'notification'});
+				
+				//WebMyth.sendServiceCmd(sceneController, retryCommand, true);
+	
+			}.bind(this),
+		});
+	
+};
+
+WebMyth.startCommunication = function(sceneController1, retryCommand){
+
+	var sceneController = WebMyth.welcomeSceneController;
+	
+	
+	//Close any existing keep alive processes
+	clearInterval(WebMyth.telnetTimeout); 
+	WebMyth.frontendRetries = 0;
+		
+	Mojo.Log.info("Starting service communication");
+		
+	sceneController.controller.serviceRequest('palm://com.thewbman.webmyth.service', {
+		  method:"startCommunication",
+		  parameters:{"port":WebMyth.prefsCookieObject.currentFrontendPort, address:WebMyth.prefsCookieObject.currentFrontendAddress},
+		  onSuccess: function(response) {
+				Mojo.Log.info("Success service connection status of %j", response);
+				
+				
+				if(response.hasError){
+					Mojo.Controller.getAppController().showBanner(response.error, {source: 'notification'});
+				} else {
+					Mojo.Controller.getAppController().showBanner("Service connection success", {source: 'notification'});
+					
+					if(retryCommand){
+						Mojo.Log.info("Tring to resend last command");
+						
+						WebMyth.sendServiceCmd(sceneController, retryCommand);
+					
+						//Start trying to keep alive
+						WebMyth.telnetTimeout = setTimeout(function() { WebMyth.keepTelnetAlive(sceneController); }, 3000);
+					
+					} else {
+					
+						//Start trying to keep alive
+						WebMyth.telnetTimeout = setTimeout(function() { WebMyth.keepTelnetAlive(sceneController); }, 500);
+						
+					}
+				}
+	
+			}.bind(this),
+		  onFailure: function(response) {
+		  
+				if(retryCommand){
+					Mojo.Log.info("Tried to reconnect - hopefully it worked");
+					
+					//Start trying to keep alive
+					WebMyth.telnetTimeout = setTimeout(function() { WebMyth.keepTelnetAlive(sceneController); }, 1000);
+				
+				} else {
+					Mojo.Log.info("Failed service connection status of %j", response);
+					Mojo.Controller.getAppController().showBanner("Start communication FAIL", {source: 'notification'});
+					
+					WebMyth.telnetConnected = false;
+				}
+				
+				//WebMyth.sendServiceCmd(sceneController, retryCommand, true);
+	
+			}.bind(this),
+		});
+	
+};
+
+WebMyth.sendServiceCmd = function(sceneController1, value, wasRetry){
+
+	var sceneController = WebMyth.welcomeSceneController;
+
+	
+	//Close any existing keep alive processes
+	clearInterval(WebMyth.telnetTimeout); 
+	WebMyth.frontendRetries = 0;
+		
+	Mojo.Log.info("Sending service command '"+value+"'");
+		
+	 sceneController.controller.serviceRequest('palm://com.thewbman.webmyth.service', {
+		  method:"send",
+		  parameters:{"toSend":value},
+		  onSuccess: function(response) {
+				Mojo.Log.info("Success service send of %j", response);
+				//Mojo.Controller.getAppController().showBanner("Service send success: "+response.reply, {source: 'notification'});
+				
+				if(response.hasError){
+					Mojo.Log.error(response.error);
+					
+					if(wasRetry){
+						Mojo.Log.error("Was a retry that failed");
+						Mojo.Controller.getAppController().showBanner("Retry send failed", {source: 'notification'});
+					} else {
+						Mojo.Log.error("Was not a retry, trying to restart communication");
+						WebMyth.startCommunication(sceneController, value);
+					}
+					
+				} else {
+					
+					//Start trying to keep alive
+					WebMyth.telnetTimeout = setTimeout(function() { WebMyth.keepTelnetAlive(sceneController); }, 3000);
+				
+				}
+	
+			}.bind(this),
+		  onFailure: function(response) {
+				Mojo.Log.info("Failed service send status of %j", response);
+				Mojo.Controller.getAppController().showBanner("Failed to send - try again", {source: 'notification'});
+				
+				if(wasRetry){
+					Mojo.Log.error("Was a retry that failed");
+					Mojo.Controller.getAppController().showBanner("Retry send failed", {source: 'notification'});
+				} else {
+					Mojo.Log.error("Was not a retry, trying to restart communication");
+					WebMyth.startCommunication(sceneController, value);
+				}
+	
+			}.bind(this),
+	});
+	
+};
+
+WebMyth.keepTelnetAlive = function(sceneController1){
+
+	var sceneController = WebMyth.welcomeSceneController;
+
+	WebMyth.frontendRetries++;
+		
+	//Mojo.Log.info("Keeping telnet connection alive");
+	var value = "query location", wasRetry = false;
+	
+	//Close any existing keep alive processes
+	clearInterval(WebMyth.telnetTimeout); 
+		
+	 sceneController.controller.serviceRequest('palm://com.thewbman.webmyth.service', {
+		  method:"send",
+		  parameters:{"toSend":value},
+		  onSuccess: function(response) {
+				Mojo.Log.info("Success %s keep alive %j", WebMyth.frontendRetries, response);
+					
+				if(response.hasError){
+					Mojo.Log.error(response.error);
+					
+					if(wasRetry){
+						Mojo.Log.error("Was a retry that failed");
+						Mojo.Controller.getAppController().showBanner("Retry send failed", {source: 'notification'});
+					} else {
+						Mojo.Log.error("Was not a retry, trying to restart communication");
+						WebMyth.startCommunication(sceneController, value);
+					}
+					
+				} else if (WebMyth.frontendRetries > 20){
+				
+					//Go silent after 20 retries/60 seconds
+				
+					WebMyth.frontendLocation =  "";
+				
+					Mojo.Log.info("Stopping keep alive due to inactivity");
+				
+				} else {
+				
+					WebMyth.frontendLocation =  response.reply;
+				
+					//Restart function after 3 seconds
+					WebMyth.telnetTimeout = setTimeout(function() { WebMyth.keepTelnetAlive(sceneController); }, 3000);
+				
+				}
+	
+			}.bind(this),
+		  onFailure: function(response) {
+				Mojo.Log.info("Failed to keep alive: %j", response);
+	
+			}.bind(this),
+	});
+	
+};
+
+WebMyth.playServiceChannel = function(sceneController1, value, wasRetry){
+
+	var sceneController = WebMyth.welcomeSceneController;
+
+	//Close any existing keep alive processes
+	clearInterval(WebMyth.telnetTimeout); 
+	WebMyth.frontendRetries = 0;
+		
+	Mojo.Log.info("Sending service play channel "+value);
+	
+	if(WebMyth.frontendLocation == ""){
+		//We have stopped keeping alive - need to restart to get location now
+		Mojo.Log.info("We have stopped keeping alive - need to restart to get location now");
+		
+		WebMyth.startCommunication(sceneController);
+		
+		if(wasRetry){
+			//To keep use from endless loop
+			Mojo.Log.error("Was retry - giving up");
+			Mojo.Controller.getAppController().showBanner("Failed to start channel play", {source: 'notification'});
+		} else {
+			Mojo.Log.error("Was not retry - retrying playServiceChannel");
+			setTimeout(function() { WebMyth.playServiceChannel(sceneController, value, true); }, 1500);
+		}
+		
+	} else {
+				
+			if(WebMyth.frontendLocation.search("LiveTV") == -1){
+				//Not on liveTV
+				Mojo.Log.info("Not on livetv, jumping now - "+WebMyth.frontendLocation);
+				sceneController.controller.serviceRequest('palm://com.thewbman.webmyth.service', {
+					  method:"send",
+					  parameters:{"toSend":"jump livetv"},
+					  onSuccess: function(response2) {
+							Mojo.Log.info("Success jump livetv of %j", response2);
+							//WebMyth.sendServiceCommand(sceneController, "play chanid+"+value);
+							
+							WebMyth.frontendRetries = 0;
+							
+							//Wait to send channel to let livetv setup
+							setTimeout(function() { 
+								sceneController.controller.serviceRequest('palm://com.thewbman.webmyth.service', {
+									  method:"send",
+									  parameters:{"toSend":"play chanid "+value},
+									  onSuccess: function(response2) {
+											Mojo.Log.info("Success play channid of %j", response2);
+					
+											//Start trying to keep alive
+											WebMyth.telnetTimeout = setTimeout(function() { WebMyth.keepTelnetAlive(sceneController); }, 5000);
+											
+									  }.bind(this),
+									  onFailure: function(response2) {
+											Mojo.Log.info("Failed play channid %j", response2);
+									  }.bind(this),
+								});
+								
+							}, 3000);				
+								
+								
+					 }.bind(this),
+					 onFailure: function(response2) {
+							Mojo.Log.info("Failed jump livetv %j", response2);
+					  }.bind(this),
+				});
+			} else {
+				//On livetv
+				Mojo.Log.info("On livetv, changing channel");
+				//WebMyth.sendServiceCommand(sceneController, "play chanid+"+value);
+					
+				WebMyth.frontendRetries = 0;
+					
+					
+				sceneController.controller.serviceRequest('palm://com.thewbman.webmyth.service', {
+					  method:"send",
+					  parameters:{"toSend":"play chanid "+value},
+					  onSuccess: function(response2) {
+							Mojo.Log.info("Success play channid of %j", response2);
+				
+							//Start trying to keep alive
+							WebMyth.telnetTimeout = setTimeout(function() { WebMyth.keepTelnetAlive(sceneController); }, 5000);
+								
+					  }.bind(this),
+					  onFailure: function(response2) {
+							Mojo.Log.info("Failed play channid %j", response2);
+					  }.bind(this),
+				});
+					
+					
+			}
+
+	}
+	
+};
+
+
+
+
+//asdf

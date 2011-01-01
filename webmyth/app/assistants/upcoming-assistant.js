@@ -109,7 +109,7 @@ UpcomingAssistant.prototype.handleCommand = function(event) {
   } else if(event.type == Mojo.Event.command) {
 		myCommand = event.command.substring(0,10);
 		mySelection = event.command.substring(10);
-		Mojo.Log.error("command: "+myCommand+" selection: "+mySelection);
+		//Mojo.Log.error("command: "+myCommand+" selection: "+mySelection);
 
 		switch(myCommand) {
 			case 'go-refresh':		
@@ -174,21 +174,35 @@ UpcomingAssistant.prototype.getUpcoming = function(event) {
 	
 	this.controller.sceneScroller.mojo.revealTop();
 	
-	var requestUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webmythPythonFile;
-	requestUrl += "?op=getPending";				//matches any reocrding rule
 	
-	
-	
-	if(WebMyth.useService){
+	if(WebMyth.usePlugin){
+		
+		this.controller.window.setTimeout(this.getUpcomingPlugin.bind(this), 100);
+		
+	} else if(WebMyth.useService){
 		Mojo.Log.info("Using protocol service to get upcoming");
 	
 		//adsf - Add back service command here
 		
-		
+				this.controller.serviceRequest('palm://com.thewbman.webmyth.service', {
+			method:"mythprotocolCommand",
+				parameters:{
+					"port":"6543", 
+					"address":WebMyth.prefsCookieObject.masterBackendIp,
+					"protocolVersion": WebMyth.prefsCookieObject.protoVer,
+					"command": "QUERY_GETALLPENDING",
+					"timeout": 8000								//gives service 8 full seconds to get all data, will return earlier if done
+					},
+				onSuccess: this.readUpcomingServiceSuccess.bind(this),
+				onFailure: this.remoteDbTableFail.bind(this)
+			});
 		
 		//asdf
 		
 	} else { 
+	
+		var requestUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webmythPythonFile;
+		requestUrl += "?op=getPending";				//matches any recording rule
 	
         var request = new Ajax.Request(requestUrl,{
             method: 'get',
@@ -202,6 +216,80 @@ UpcomingAssistant.prototype.getUpcoming = function(event) {
 	
 };
 
+UpcomingAssistant.prototype.getUpcomingPlugin = function() {
+
+	//Mojo.Log.error("Using protocol plugin to get upcoming");
+	
+	WebMyth.hasConflicts = 0;
+		
+	try{ 
+	
+		var response1 = $('webmyth_service_id').mythprotocolBackgroundCommand(WebMyth.prefsCookieObject.masterBackendIp, WebMyth.prefsCookieObject.masterBackendPort, WebMyth.prefsCookieObject.protoVer, "QUERY_GETALLPENDING");
+	
+		Mojo.Log.info("Got mythprotocolBackgroundCommand response: "+response1);
+		$('webmyth_service_id').backgroundProtocolCommandResponse = this.backgroundProtocolCommandResponse.bind(this);    
+   
+	
+		//var response1 = $('webmyth_service_id').mythprotocolCommand(WebMyth.prefsCookieObject.masterBackendIp, WebMyth.prefsCookieObject.masterBackendPort, WebMyth.prefsCookieObject.protoVer, "QUERY_GETALLPENDING");
+	
+		//$('debugText').innerText = response1;
+		//Mojo.Log.error("plugin response with length "+response1.length+" is "+response1);
+		
+		//var pluginResponseList = parseUpcomingPlugin(response1);
+		
+		//Mojo.Log.info('parseUpcomingPlugin: %j', pluginResponseList);
+		/*
+		this.fullResultList.clear();
+		//Object.extend(this.fullResultList,cleanUpcoming(pluginResponseList));
+		//Object.extend(this.fullResultList,cleanUpcoming(parseUpcomingPlugin(response1)));
+		Object.extend(this.fullResultList,parseUpcomingPlugin(response1));
+			
+		//Mojo.Log.error('Cleaned upcoming: %j', this.fullResultList);
+			
+		if(WebMyth.hasConflicts != 0){
+			Mojo.Controller.getAppController().showBanner("There are conflicting recordings", {source: 'notification'});
+		} 
+			
+		this.groupChanged(WebMyth.prefsCookieObject.currentUpcomingGroup);
+		*/
+	
+	} catch(e) {
+	
+		Mojo.Log.error('Failed to get Upcoming plugin response: %s',e);
+		
+		Mojo.Controller.getAppController().showBanner("Plugin failed, trying script method", {source: 'notification'});
+		
+		
+		var requestUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webmythPythonFile;
+		requestUrl += "?op=getPending";				//matches any recording rule
+	
+        var request = new Ajax.Request(requestUrl,{
+            method: 'get',
+            evalJSON: 'true',
+			requestHeaders: {Authorization: 'Basic ' + Base64.encode(WebMyth.prefsCookieObject.webserverUsername + ":" + WebMyth.prefsCookieObject.webserverPassword)},
+            onSuccess: this.readRemoteDbTableSuccess.bind(this),
+            onFailure: this.remoteDbTableFail.bind(this)  
+        });
+		
+	}
+	
+};
+
+UpcomingAssistant.prototype.backgroundProtocolCommandResponse = function(response2) {
+
+	this.fullResultList.clear();
+	Object.extend(this.fullResultList,parseUpcomingPlugin(response2));
+			
+	//Mojo.Log.error('Cleaned upcoming: %j', this.fullResultList);
+			
+	if(WebMyth.hasConflicts != 0){
+		Mojo.Controller.getAppController().showBanner("There are conflicting recordings", {source: 'notification'});
+	} 
+			
+	this.groupChanged(WebMyth.prefsCookieObject.currentUpcomingGroup);
+
+}
+
 UpcomingAssistant.prototype.readUpcomingServiceSuccess = function(response) {
 	
 	//Mojo.Log.info('Got service response: %j', response.reply);
@@ -214,25 +302,25 @@ UpcomingAssistant.prototype.readUpcomingServiceSuccess = function(response) {
 		
 	}
 	
-	
-	//var fullUpcomingArray = parseUpcomingService(response.reply);
-	var fullUpcomingArray = response.reply;
-	
-	//Mojo.Log.info("Parsed upcoming is %j",fullUpcomingArray);
 		
 	//Update the list widget
 	this.fullResultList.clear();
-	Object.extend(this.fullResultList,cleanUpcoming(fullUpcomingArray));
+	//var cleanedUpcomingResponse = cleanUpcoming(response.reply);
+	Object.extend(this.fullResultList,cleanUpcoming(response.reply));
 	
 	Mojo.Log.info('Cleaned upcoming: %j', this.fullResultList);
+	
+	if(response.stats.conflicts != 0){
+		Mojo.Controller.getAppController().showBanner("There are conflicting recordings", {source: 'notification'});
+	} 
 	
 	this.groupChanged(WebMyth.prefsCookieObject.currentUpcomingGroup);
 	
 }
 
-UpcomingAssistant.prototype.remoteDbTableFail = function(event) {
-	Mojo.Log.error('Failed to get Upcoming response');
-	//
+UpcomingAssistant.prototype.remoteDbTableFail = function(response) {
+	Mojo.Log.error('Failed to get Upcoming response = %j',response);
+	
 	
 	this.resultList = [{ 'title':'Accesing remote table has failed.', 'subTitle':'Please check your settings', 'startTime':'1900-01-01T00:00:00'}];
 	
@@ -251,20 +339,31 @@ UpcomingAssistant.prototype.remoteDbTableFail = function(event) {
 UpcomingAssistant.prototype.readRemoteDbTableSuccess = function(response) {
     
 	//Mojo.Log.info('Got Ajax response: ' + response.responseText);
+	var conflicts = 0, s = {};
 	
 		
 	//Update the list widget
 	this.fullResultList.clear();
-	var cleanedUpcomingResponse = cleanUpcoming(response.responseJSON);
-	Object.extend(this.fullResultList,cleanedUpcomingResponse.fullUpcomingList);
+	//var cleanedUpcomingResponse = cleanUpcoming(response.responseJSON);
+	//Object.extend(this.fullResultList,cleanedUpcomingResponse.fullUpcomingList);
+	Object.extend(this.fullResultList,cleanUpcoming(response.responseJSON));
 	
 	Mojo.Log.info('Cleaned upcoming: %j', this.fullResultList);
 	
-	if(cleanedUpcomingResponse.conflicts == 1){
-		Mojo.Controller.getAppController().showBanner("There is "+cleanedUpcomingResponse.conflicts+" conflicting recording", {source: 'notification'});
-	} else if(cleanedUpcomingResponse.conflicts > 1){
-		Mojo.Controller.getAppController().showBanner("There are "+cleanedUpcomingResponse.conflicts+" conflicting recordings", {source: 'notification'});
+	for(var i = 0; i < this.fullResultList.length; i++){
+		//s = this.fullResultList[i];
+		
+		//Mojo.Log.info("checking upcoming program %j",s);
+		if(this.fullResultList[i].recStatus == 7){
+			conflicts++;
+		}
 	}
+	
+	Mojo.Log.info("Found "+conflicts+" conflicts");
+	
+	if(conflicts > 0){
+		Mojo.Controller.getAppController().showBanner("There are conflicting recordings", {source: 'notification'});
+	} 
 	
 	this.groupChanged(WebMyth.prefsCookieObject.currentUpcomingGroup);
 	
@@ -443,7 +542,7 @@ UpcomingAssistant.prototype.goUpcomingDetails = function(event) {
 
 UpcomingAssistant.prototype.recorderDividerFunction = function(itemModel) {
 	
-	if(WebMyth.useService){
+	if((WebMyth.useService)||(WebMyth.usePlugin)){
 		var date = new Date(isoToJS(itemModel.startTime));
 	
 		return date.toLocaleString().substring(0,15);

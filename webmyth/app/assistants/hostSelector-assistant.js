@@ -20,10 +20,6 @@
 
 
 function HostSelectorAssistant(jumpRemote) {
-	/* this is the creator function for your scene assistant object. It will be passed all the 
-	   additional parameters (after the scene name) that were passed to pushScene. The reference
-	   to the scene controller (this.controller) has not be established yet, so any initialization
-	   that needs the scene controller should be done in the setup function below. */
 	  
 	  this.jumpToRemote = jumpRemote;
 	  
@@ -34,7 +30,6 @@ function HostSelectorAssistant(jumpRemote) {
 	  this.resultList = [];
 	  
 };
-
 
 HostSelectorAssistant.prototype.setup = function() {
 	
@@ -108,7 +103,12 @@ HostSelectorAssistant.prototype.cleanup = function(event) {
 };
 
 HostSelectorAssistant.prototype.handleCommand = function(event) {
-  if(event.type == Mojo.Event.command) {
+
+  if(event.type == Mojo.Event.forward) {
+  
+	Mojo.Controller.stageController.pushScene({name: WebMyth.prefsCookieObject.currentRemoteScene, disableSceneScroller: true});
+	
+  } else if(event.type == Mojo.Event.command) {
     switch(event.command) {
       case 'go-addHost':
         Mojo.Controller.stageController.pushScene("addHost");
@@ -126,10 +126,6 @@ HostSelectorAssistant.prototype.handleCommand = function(event) {
 
 
 
-HostSelectorAssistant.prototype.errorHandler = function(transaction, error) { 
-    Mojo.Log.error('Error was '+error.message+' (Code '+error.code+')'); 
-    return true;
-};
 
 HostSelectorAssistant.prototype.deleteHost = function(event) {
 	
@@ -176,7 +172,9 @@ HostSelectorAssistant.prototype.startCommunication = function(event) {
 	
 	
 	if(WebMyth.useService) {
-			WebMyth.startNewCommunication(this);
+		WebMyth.startNewCommunication(this);
+	} else if (WebMyth.usePlugin) {
+		WebMyth.newPluginSocket();
 	}
 	
 	

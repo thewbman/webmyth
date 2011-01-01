@@ -178,28 +178,28 @@ VideosAssistant.prototype.handleCommand = function(event) {
 
 VideosAssistant.prototype.handleKey = function(event) {
 
-	Mojo.Log.info("handleKey %o, %o", event.originalEvent.metaKey, event.originalEvent.keyCode);
+	//Mojo.Log.info("handleKey %o, %o", event.originalEvent.metaKey, event.originalEvent.keyCode);
 	
 	if(event.originalEvent.metaKey) {
 		switch(event.originalEvent.keyCode) {
 			case 71:
-				Mojo.Log.info("g - shortcut key to guide");
+				//Mojo.Log.info("g - shortcut key to guide");
 				Mojo.Controller.stageController.swapScene("guide");	
 				break;
 			case 82:
-				Mojo.Log.info("r - shortcut key to recorded");
+				//Mojo.Log.info("r - shortcut key to recorded");
 				Mojo.Controller.stageController.swapScene("recorded");
 				break;
 			case 83:
-				Mojo.Log.info("s - shortcut key to status");
+				//Mojo.Log.info("s - shortcut key to status");
 				Mojo.Controller.stageController.swapScene("status");
 				break;
 			case 85:
-				Mojo.Log.info("u - shortcut key to upcoming");
+				//Mojo.Log.info("u - shortcut key to upcoming");
 				Mojo.Controller.stageController.swapScene("upcoming");
 				break;
 			default:
-				Mojo.Log.info("No shortcut key");
+				//Mojo.Log.info("No shortcut key");
 				break;
 		}
 	}
@@ -327,7 +327,7 @@ VideosAssistant.prototype.readRemoteDbTableSuccess = function(response) {
 	
 	this.directoryList.clear();
 	Object.extend(this.fullDirectoryList,cleanVideosDirectory(this.fullResultList.sort(sort_by('filename', false))));
-	Mojo.Log.info("Video directory list is %s long and is %j",this.fullDirectoryList.length,this.fullDirectoryList);
+	//Mojo.Log.info("Video directory list is %s long and is %j",this.fullDirectoryList.length,this.fullDirectoryList);
 	
 	
 	
@@ -347,7 +347,7 @@ VideosAssistant.prototype.finishedReadingVideos = function() {
 VideosAssistant.prototype.sortChanged = function(newSort) {
 
 	//Add sorting options here
-	Mojo.Log.info("new sort is "+newSort);
+	//Mojo.Log.info("new sort is "+newSort);
 	
 	WebMyth.prefsCookieObject.currentVideosSort = newSort;
 	
@@ -440,7 +440,7 @@ VideosAssistant.prototype.updateSortMenu = function() {
 VideosAssistant.prototype.videosGroupChanged = function(newGroup) {
 
 	//May add filtering of results later
-	Mojo.Log.info("new grouping is "+newGroup);
+	//Mojo.Log.info("new grouping is "+newGroup);
 	
 	this.controller.sceneScroller.mojo.revealTop();
 	
@@ -569,7 +569,7 @@ VideosAssistant.prototype.filterListFunction = function(filterString, listWidget
 	}
 	else {
 
-		Mojo.Log.info("No filter string");
+		//Mojo.Log.info("No filter string");
 
 		var len = this.resultList.length;
  
@@ -632,7 +632,7 @@ VideosAssistant.prototype.goVideosDetails = function(event) {
 
 VideosAssistant.prototype.goVideosDirectory = function(event) {
 	
-	Mojo.Log.info("Selected individual directory: '%j'", event.item);
+	//Mojo.Log.info("Selected individual directory: '%j'", event.item);
 	
 	this.currentDirectoryObject = event.item;
 
