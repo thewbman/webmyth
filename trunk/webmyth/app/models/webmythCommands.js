@@ -99,6 +99,7 @@ function defaultCookie() {
 		remoteVibrate: false,
 		remoteFullscreen: false,
 		masterBackendIp: '-',
+		masterBackendPort: 6543,
 		manualMasterBackend: false,
 		playJumpRemote: true,
 		guideJumpRemote: false,
@@ -721,32 +722,6 @@ var updateGuideChannelsFromCookie = function(fullList, cookieList) {
 	
 }
 
-var cleanProtocolVersion = function(protoVer) {
-
-	var fullCommand = ""
-	
-	//Have to pad random token to protocol when >= 62
-	//  http://www.mythtv.org/wiki/Category:Myth_Protocol
-	
-	switch(protoVer) {
-		case '64':
-			fullCommand = "MYTH_PROTO_VERSION 64 8675309J";
-		  break;
-		case '63':
-			fullCommand = "MYTH_PROTO_VERSION 63 3875641D";
-		  break;
-		case '62':
-			fullCommand = "MYTH_PROTO_VERSION 62 78B5631E";
-		  break;
-		default: 
-			fullCommand = "MYTH_PROTO_VERSION "+protoVer;
-		  break;
-	}
-	
-	return fullCommand;
-	
-}
-
 var cleanGuideChannels = function(fullList) {
 
 	this.updatedList = [], finalList = [];
@@ -775,7 +750,7 @@ var cleanGuideChannels = function(fullList) {
 
 var cleanJobqueue = function(fullList) {
 
-	finalList = [];
+	var finalList = [];
 	
 	var i, j, s, t = [];
 	
@@ -892,7 +867,7 @@ var cleanJobqueue = function(fullList) {
 
 var cleanSearchResults = function(fullList, nowDateISO) {
 
-	finalList = [];
+	var finalList = [];
 	
 	var i, s = {};
 	
@@ -913,7 +888,7 @@ var cleanSearchResults = function(fullList, nowDateISO) {
 
 var cleanVideos = function(fullList) {
 
-	finalList = [];
+	var finalList = [];
 	
 	var i, j, s, t = [];
 	
@@ -993,7 +968,7 @@ var cleanVideos = function(fullList) {
 
 var cleanVideosDirectory = function(fullList) {
 
-	finalList = [];
+	var finalList = [];
 	
 	var i, s = {}, t = {}, u = [];
 	
@@ -1094,7 +1069,7 @@ var cleanVideosDirectory = function(fullList) {
 
 var cleanMusic = function(fullList) {
 
-	finalList = [];
+	var finalList = [];
 	
 	var i, j, k, s, t = [], u = [];
 	
@@ -1127,7 +1102,7 @@ var cleanMusic = function(fullList) {
 
 var cleanMusicPlaylists = function(fullList) {
 
-	finalList = [];
+	var finalList = [];
 	
 	finalList.push({"type": "1 - New", "playlist_id": "-1", "playlist_name": "Create new", "display_name": "+ Create new +", "playlist_songs": "", "length": "0", "songcount": "0", "hostname": ""});
 	
@@ -1287,12 +1262,45 @@ var parseMusicPlaylists = function(fullList, playlistObject) {
 	
 }
 
-var parseUpcomingService = function(fullResponse) {
+var parseUpcomingPlugin = function(fullData) {
 
-	finalList = [];
-	fullArray = fullResponse.split("[]:[]");
+	//Determine how we should parse
+	// http://www.mythtv.org/wiki/ProgramInfo_%28Myth_Protocol%29
 	
-	Mojo.Log.info("Parsing upcoming total programs is "+fullArray[1]+", length is "+fullArray.length);
+	var finalList = [];
+	
+	//Mojo.Log.error("about to start parsing upcoming plugin "+fullData);
+	
+	if(WebMyth.prefsCookieObject.protoVer >= 57){
+		finalList = parseUpcoming57(fullData);
+	} else if(WebMyth.prefsCookieObject.protoVer >= 41){
+		finalList = parseUpcoming41(fullData);
+	} else if(WebMyth.prefsCookieObject.protoVer >= 35){
+		finalList = parseUpcoming35(fullData);
+	} else if(WebMyth.prefsCookieObject.protoVer >= 32){
+		finalList = parseUpcoming32(fullData);
+	} else if(WebMyth.prefsCookieObject.protoVer >= 31){
+		finalList = parseUpcoming31(fullData);
+	} else if(WebMyth.prefsCookieObject.protoVer >= 25){
+		finalList = parseUpcoming25(fullData);
+	} 
+	
+	return finalList;
+
+};
+
+var parseUpcoming57 = function(fullResponse) {	
+
+	//Protocol verion 57 and up - 41 fields
+
+	var finalList = [];
+	var fullArray = fullResponse.split("[]:[]");
+	
+	//Mojo.Log.error("Parsing upcoming total programs is "+fullArray[1]+", length is "+fullArray.length);
+	
+	WebMyth.expectedLength = fullArray[1];
+	WebMyth.hasConflicts = fullArray[0].substring(8,9);
+	
 	
 	var i, programNum = 0, fieldNum = 0;
 	var singleProgramJson = {};
@@ -1325,10 +1333,10 @@ var parseUpcomingService = function(fullResponse) {
 				singleProgramJson.channame = fullArray[i];
 			  break;
 			case 8:
-				singleProgramJson.filename = fullArray[i];
+				//singleProgramJson.filename = fullArray[i];
 			  break;
 			case 9:
-				singleProgramJson.filesize = fullArray[i];
+				//singleProgramJson.filesize = fullArray[i];
 			  break; 
 			  
 			case 10:
@@ -1337,6 +1345,7 @@ var parseUpcomingService = function(fullResponse) {
 				newDate.setTime(fullArray[i]*1000);
 				
 				singleProgramJson.startTime = dateJSToISO(newDate);
+				singleProgramJson.startTimeSpace = singleProgramJson.startTime.replace("T"," ");
 				
 			  break;
 			case 11:
@@ -1346,39 +1355,40 @@ var parseUpcomingService = function(fullResponse) {
 				
 				singleProgramJson.endTime = dateJSToISO(newDate);
 			  break;
-			case 12:
-				singleProgramJson.findId = fullArray[i];
+		/*	case 12:
+				//singleProgramJson.findId = fullArray[i];
 			  break;
 			case 13:
-				singleProgramJson.hostname = fullArray[i];
+				//singleProgramJson.hostname = fullArray[i];
 			  break;
 			case 14:
-				singleProgramJson.sourceId = fullArray[i];
+				//singleProgramJson.sourceId = fullArray[i];
 			  break;
 			case 15:
-				singleProgramJson.cardId = fullArray[i];
+				//singleProgramJson.cardId = fullArray[i];
 			  break;
 			case 16:
-				singleProgramJson.inputId = fullArray[i];
+				//singleProgramJson.inputId = fullArray[i];
 			  break;
 			case 17:
-				singleProgramJson.recPriority = fullArray[i];
-			  break;
+				//singleProgramJson.recPriority = fullArray[i];
+			  break;  */
 			case 18:
 				singleProgramJson.recStatus = fullArray[i];
+				singleProgramJson.recStatusText = recStatusDecode(fullArray[i]);
 			  break;
 			case 19:
-				singleProgramJson.recordId = fullArray[i];
+				//singleProgramJson.recordId = fullArray[i];
 			  break;
 			  
 			case 20:
 				singleProgramJson.recType = fullArray[i];
 			  break;
 			case 21:
-				singleProgramJson.dupin = fullArray[i];
+				//singleProgramJson.dupin = fullArray[i];
 			  break;
 			case 22:
-				singleProgramJson.dupMethod = fullArray[i];
+				//singleProgramJson.dupMethod = fullArray[i];
 			  break;
 			case 23:
 				singleProgramJson.recStartTsInt = fullArray[i];
@@ -1394,56 +1404,57 @@ var parseUpcomingService = function(fullResponse) {
 				
 				singleProgramJson.recEndTs = dateJSToISO(newDate);
 			  break;
-			case 25:
-				singleProgramJson.programflags = fullArray[i];
+		/*	case 25:
+				//singleProgramJson.programflags = fullArray[i];
 			  break;
 			case 26:
-				singleProgramJson.recGroup = fullArray[i];
+				//singleProgramJson.recGroup = fullArray[i];
 			  break;
 			case 27:
-				singleProgramJson.outputFilters = fullArray[i];
+				//singleProgramJson.outputFilters = fullArray[i];
 			  break;
 			case 28:
-				singleProgramJson.seriesId = fullArray[i];
+				//singleProgramJson.seriesId = fullArray[i];
 			  break;
 			case 29:
-				singleProgramJson.programId = fullArray[i];
+				//singleProgramJson.programId = fullArray[i];
 			  break;
 			  
 			case 30:
-				singleProgramJson.lastModified = fullArray[i];
+				//singleProgramJson.lastModified = fullArray[i];
 			  break;
 			case 31:
-				singleProgramJson.stars = fullArray[i];
+				//singleProgramJson.stars = fullArray[i];
 			  break;
 			case 32:
-				singleProgramJson.airdate = fullArray[i];
+				//singleProgramJson.airdate = fullArray[i];
 			  break;
 			case 33:
-				singleProgramJson.playgroup = fullArray[i];
+				//singleProgramJson.playgroup = fullArray[i];
 			  break;
 			case 34:
-				singleProgramJson.recpriority2 = fullArray[i];
+				//singleProgramJson.recpriority2 = fullArray[i];
 			  break;
 			case 35:
-				singleProgramJson.parentid = fullArray[i];
+				//singleProgramJson.parentid = fullArray[i];
 			  break;
 			case 36:
-				singleProgramJson.storagegroup = fullArray[i];
+				//singleProgramJson.storagegroup = fullArray[i];
 			  break;
 			case 37:
-				singleProgramJson.audio_props = fullArray[i];
+				//singleProgramJson.audio_props = fullArray[i];
 			  break;
 			case 38:
-				singleProgramJson.video_props = fullArray[i];
+				//singleProgramJson.video_props = fullArray[i];
 			  break;
 			case 39:
-				singleProgramJson.subtitle_type = fullArray[i];
-			  break;
+				//singleProgramJson.subtitle_type = fullArray[i];
+			  break;  */
 			  
 			case 40:
 				//41st field, push and reset counters
-				singleProgramJson.year = fullArray[i];
+				//singleProgramJson.year = fullArray[i];
+				
 				finalList.push(singleProgramJson);
 				
 				singleProgramJson = {};
@@ -1456,13 +1467,979 @@ var parseUpcomingService = function(fullResponse) {
 	}
 	
 	
+	WebMyth.parsedPrograms = programNum;
+	
+	
+	return finalList;
+	
+}
+
+var parseUpcoming41 = function(fullResponse) {	
+
+	//Protocol verion 41 and up - 47 fields
+
+	var finalList = [];
+	var fullArray = fullResponse.split("[]:[]");
+	
+	//Mojo.Log.info("Parsing upcoming total programs is "+fullArray[1]+", length is "+fullArray.length);
+	
+	WebMyth.expectedLength = fullArray[1];
+	WebMyth.hasConflicts = fullArray[0].substring(8,9);
+	
+	
+	var i, programNum = 0, fieldNum = 0;
+	var singleProgramJson = {};
+	var newDate = new Date();
+	
+	for(i = 2; i < fullArray.length; i++){
+		switch(fieldNum){
+			case 0:
+				singleProgramJson.title = fullArray[i];
+			  break;
+			case 1:
+				singleProgramJson.subTitle = fullArray[i];
+			  break;
+			case 2:
+				singleProgramJson.description = fullArray[i];
+			  break;
+			case 3:
+				singleProgramJson.category = fullArray[i];
+			  break;
+			case 4:
+				singleProgramJson.chanId = fullArray[i];
+			  break;
+			case 5:
+				singleProgramJson.channum = fullArray[i];
+			  break;
+			case 6:
+				singleProgramJson.callsign = fullArray[i];
+			  break;
+			case 7:
+				singleProgramJson.channame = fullArray[i];
+			  break;
+		/*	case 8:
+				//singleProgramJson.filename = fullArray[i];
+			  break;
+			case 9:
+				//singleProgramJson.fs_high = fullArray[i];
+			  break; 
+			case 10:
+				//singleProgramJson.fs_low = fullArray[i];
+			  break; */
+			case 11:
+				singleProgramJson.startTimeInt = fullArray[i];
+				
+				newDate.setTime(fullArray[i]*1000);
+				
+				singleProgramJson.startTime = dateJSToISO(newDate);
+				singleProgramJson.startTimeSpace = singleProgramJson.startTime.replace("T"," ");
+				
+			  break;
+			case 12:
+				singleProgramJson.endTimeInt = fullArray[i];
+				
+				newDate.setTime(fullArray[i]*1000);
+				
+				singleProgramJson.endTime = dateJSToISO(newDate);
+			  break;
+			case 13:
+		/*		//singleProgramJson.duplicate = fullArray[i];
+			  break;
+			case 14:
+				//singleProgramJson.shareable = fullArray[i];
+			  break;
+			case 15:
+				//singleProgramJson.findId = fullArray[i];
+			  break;
+			case 16:
+				//singleProgramJson.hostname = fullArray[i];
+			  break;
+			case 17:
+				//singleProgramJson.sourceId = fullArray[i];
+			  break;
+			case 18:
+				//singleProgramJson.cardId = fullArray[i];
+			  break;
+			case 19:
+				//singleProgramJson.inputId = fullArray[i];
+			  break;
+			  
+			case 20:
+				//singleProgramJson.recPriority = fullArray[i];
+			  break;  */
+			case 21:
+				singleProgramJson.recStatus = fullArray[i];
+				singleProgramJson.recStatusText = recStatusDecode(fullArray[i]);
+			  break;
+			case 22:
+				//singleProgramJson.recordId = fullArray[i];
+			  break;
+			case 23:
+				singleProgramJson.recType = fullArray[i];
+			  break;
+			case 24:
+				//singleProgramJson.dupin = fullArray[i];
+			  break;
+			case 25:
+				//singleProgramJson.dupMethod = fullArray[i];
+			  break;
+			case 26:
+				singleProgramJson.recStartTsInt = fullArray[i];
+				
+				newDate.setTime(fullArray[i]*1000);
+				
+				singleProgramJson.recStartTs = dateJSToISO(newDate);
+			  break;
+			case 27:
+				singleProgramJson.recEndTsInt = fullArray[i];
+				
+				newDate.setTime(fullArray[i]*1000);
+				
+				singleProgramJson.recEndTs = dateJSToISO(newDate);
+			  break;
+		/*	case 28:
+				//singleProgramJson.repeat = fullArray[i];
+			  break;
+			case 29:
+				//singleProgramJson.programflags = fullArray[i];
+			  break;
+			  
+			case 30:
+				//singleProgramJson.recGroup = fullArray[i];
+			  break;
+			case 31:
+				//singleProgramJson.commfree = fullArray[i];
+			  break;
+			case 32:
+				//singleProgramJson.outputFilters = fullArray[i];
+			  break;
+			case 33:
+				//singleProgramJson.seriesId = fullArray[i];
+			  break;
+			case 34:
+				//singleProgramJson.programId = fullArray[i];
+			  break;
+			case 35:
+				//singleProgramJson.lastModified = fullArray[i];
+			  break;
+			case 36:
+				//singleProgramJson.stars = fullArray[i];
+			  break;
+			case 37:
+				//singleProgramJson.airdate = fullArray[i];
+			  break;
+			case 38:
+				//singleProgramJson.hasairdate = fullArray[i];
+			  break;
+			case 39:
+				//singleProgramJson.playgroup = fullArray[i];
+			  break;
+			  
+			case 40:
+				//singleProgramJson.recpriority2 = fullArray[i];
+			  break;
+			case 41:
+				//singleProgramJson.parentid = fullArray[i];
+			  break;
+			case 42:
+				//singleProgramJson.storagegroup = fullArray[i];
+			  break;
+			case 43:
+				//singleProgramJson.audio_props = fullArray[i];
+			  break;
+			case 44:
+				//singleProgramJson.video_props = fullArray[i];
+			  break;
+			case 45:
+				//singleProgramJson.subtitle_type = fullArray[i];
+			  break;  */
+			case 46:
+				//47th field, push and reset counters
+				//singleProgramJson.year = fullArray[i];
+				
+				finalList.push(singleProgramJson);
+				
+				singleProgramJson = {};
+				programNum++;
+				fieldNum = -1;
+			  break;
+		}
+		
+		fieldNum++;
+	}
+	
+	
+	WebMyth.parsedPrograms = programNum;
+	
+	
+	return finalList;
+	
+}
+
+var parseUpcoming35 = function(fullResponse) {	
+
+	//Protocol verion 35 and up - 46 fields
+
+	var finalList = [];
+	var fullArray = fullResponse.split("[]:[]");
+	
+	//Mojo.Log.info("Parsing upcoming total programs is "+fullArray[1]+", length is "+fullArray.length);
+	
+	WebMyth.expectedLength = fullArray[1];
+	WebMyth.hasConflicts = fullArray[0].substring(8,9);
+	
+	
+	var i, programNum = 0, fieldNum = 0;
+	var singleProgramJson = {};
+	var newDate = new Date();
+	
+	for(i = 2; i < fullArray.length; i++){
+		switch(fieldNum){
+			case 0:
+				singleProgramJson.title = fullArray[i];
+			  break;
+			case 1:
+				singleProgramJson.subTitle = fullArray[i];
+			  break;
+			case 2:
+				singleProgramJson.description = fullArray[i];
+			  break;
+			case 3:
+				singleProgramJson.category = fullArray[i];
+			  break;
+			case 4:
+				singleProgramJson.chanId = fullArray[i];
+			  break;
+			case 5:
+				singleProgramJson.channum = fullArray[i];
+			  break;
+			case 6:
+				singleProgramJson.callsign = fullArray[i];
+			  break;
+			case 7:
+				singleProgramJson.channame = fullArray[i];
+			  break;
+		/*	case 8:
+				//singleProgramJson.filename = fullArray[i];
+			  break;
+			case 9:
+				//singleProgramJson.fs_high = fullArray[i];
+			  break; 
+			case 10:
+				//singleProgramJson.fs_low = fullArray[i];
+			  break; */
+			case 11:
+				singleProgramJson.startTimeInt = fullArray[i];
+				
+				newDate.setTime(fullArray[i]*1000);
+				
+				singleProgramJson.startTime = dateJSToISO(newDate);
+				singleProgramJson.startTimeSpace = singleProgramJson.startTime.replace("T"," ");
+				
+			  break;
+			case 12:
+				singleProgramJson.endTimeInt = fullArray[i];
+				
+				newDate.setTime(fullArray[i]*1000);
+				
+				singleProgramJson.endTime = dateJSToISO(newDate);
+			  break;
+			case 13:
+		/*		//singleProgramJson.duplicate = fullArray[i];
+			  break;
+			case 14:
+				//singleProgramJson.shareable = fullArray[i];
+			  break;
+			case 15:
+				//singleProgramJson.findId = fullArray[i];
+			  break;
+			case 16:
+				//singleProgramJson.hostname = fullArray[i];
+			  break;
+			case 17:
+				//singleProgramJson.sourceId = fullArray[i];
+			  break;
+			case 18:
+				//singleProgramJson.cardId = fullArray[i];
+			  break;
+			case 19:
+				//singleProgramJson.inputId = fullArray[i];
+			  break;
+			  
+			case 20:
+				//singleProgramJson.recPriority = fullArray[i];
+			  break;  */
+			case 21:
+				singleProgramJson.recStatus = fullArray[i];
+				singleProgramJson.recStatusText = recStatusDecode(fullArray[i]);
+			  break;
+			case 22:
+				//singleProgramJson.recordId = fullArray[i];
+			  break;
+			case 23:
+				singleProgramJson.recType = fullArray[i];
+			  break;
+			case 24:
+				//singleProgramJson.dupin = fullArray[i];
+			  break;
+			case 25:
+				//singleProgramJson.dupMethod = fullArray[i];
+			  break;
+			case 26:
+				singleProgramJson.recStartTsInt = fullArray[i];
+				
+				newDate.setTime(fullArray[i]*1000);
+				
+				singleProgramJson.recStartTs = dateJSToISO(newDate);
+			  break;
+			case 27:
+				singleProgramJson.recEndTsInt = fullArray[i];
+				
+				newDate.setTime(fullArray[i]*1000);
+				
+				singleProgramJson.recEndTs = dateJSToISO(newDate);
+			  break;
+		/*	case 28:
+				//singleProgramJson.repeat = fullArray[i];
+			  break;
+			case 29:
+				//singleProgramJson.programflags = fullArray[i];
+			  break;
+			  
+			case 30:
+				//singleProgramJson.recGroup = fullArray[i];
+			  break;
+			case 31:
+				//singleProgramJson.commfree = fullArray[i];
+			  break;
+			case 32:
+				//singleProgramJson.outputFilters = fullArray[i];
+			  break;
+			case 33:
+				//singleProgramJson.seriesId = fullArray[i];
+			  break;
+			case 34:
+				//singleProgramJson.programId = fullArray[i];
+			  break;
+			case 35:
+				//singleProgramJson.lastModified = fullArray[i];
+			  break;
+			case 36:
+				//singleProgramJson.stars = fullArray[i];
+			  break;
+			case 37:
+				//singleProgramJson.airdate = fullArray[i];
+			  break;
+			case 38:
+				//singleProgramJson.hasairdate = fullArray[i];
+			  break;
+			case 39:
+				//singleProgramJson.playgroup = fullArray[i];
+			  break;
+			  
+			case 40:
+				//singleProgramJson.recpriority2 = fullArray[i];
+			  break;
+			case 41:
+				//singleProgramJson.parentid = fullArray[i];
+			  break;
+			case 42:
+				//singleProgramJson.storagegroup = fullArray[i];
+			  break;
+			case 43:
+				//singleProgramJson.audio_props = fullArray[i];
+			  break;
+			case 44:
+				//singleProgramJson.video_props = fullArray[i];
+			  break;  */
+			case 45:
+				//last field, push and reset counters
+				//singleProgramJson.subtitle_type = fullArray[i];
+				
+				finalList.push(singleProgramJson);
+				
+				singleProgramJson = {};
+				programNum++;
+				fieldNum = -1;
+			  break;
+		}
+		
+		fieldNum++;
+	}
+	
+	
+	WebMyth.parsedPrograms = programNum;
+	
+	
+	return finalList;
+	
+}
+
+var parseUpcoming32 = function(fullResponse) {	
+
+	//Protocol verion 32 and up - 43 fields
+
+	var finalList = [];
+	var fullArray = fullResponse.split("[]:[]");
+	
+	//Mojo.Log.info("Parsing upcoming total programs is "+fullArray[1]+", length is "+fullArray.length);
+	
+	WebMyth.expectedLength = fullArray[1];
+	WebMyth.hasConflicts = fullArray[0].substring(8,9);
+	
+	
+	var i, programNum = 0, fieldNum = 0;
+	var singleProgramJson = {};
+	var newDate = new Date();
+	
+	for(i = 2; i < fullArray.length; i++){
+		switch(fieldNum){
+			case 0:
+				singleProgramJson.title = fullArray[i];
+			  break;
+			case 1:
+				singleProgramJson.subTitle = fullArray[i];
+			  break;
+			case 2:
+				singleProgramJson.description = fullArray[i];
+			  break;
+			case 3:
+				singleProgramJson.category = fullArray[i];
+			  break;
+			case 4:
+				singleProgramJson.chanId = fullArray[i];
+			  break;
+			case 5:
+				singleProgramJson.channum = fullArray[i];
+			  break;
+			case 6:
+				singleProgramJson.callsign = fullArray[i];
+			  break;
+			case 7:
+				singleProgramJson.channame = fullArray[i];
+			  break;
+		/*	case 8:
+				//singleProgramJson.filename = fullArray[i];
+			  break;
+			case 9:
+				//singleProgramJson.fs_high = fullArray[i];
+			  break; 
+			case 10:
+				//singleProgramJson.fs_low = fullArray[i];
+			  break; */
+			case 11:
+				singleProgramJson.startTimeInt = fullArray[i];
+				
+				newDate.setTime(fullArray[i]*1000);
+				
+				singleProgramJson.startTime = dateJSToISO(newDate);
+				singleProgramJson.startTimeSpace = singleProgramJson.startTime.replace("T"," ");
+				
+			  break;
+			case 12:
+				singleProgramJson.endTimeInt = fullArray[i];
+				
+				newDate.setTime(fullArray[i]*1000);
+				
+				singleProgramJson.endTime = dateJSToISO(newDate);
+			  break;
+			case 13:
+		/*		//singleProgramJson.duplicate = fullArray[i];
+			  break;
+			case 14:
+				//singleProgramJson.shareable = fullArray[i];
+			  break;
+			case 15:
+				//singleProgramJson.findId = fullArray[i];
+			  break;
+			case 16:
+				//singleProgramJson.hostname = fullArray[i];
+			  break;
+			case 17:
+				//singleProgramJson.sourceId = fullArray[i];
+			  break;
+			case 18:
+				//singleProgramJson.cardId = fullArray[i];
+			  break;
+			case 19:
+				//singleProgramJson.inputId = fullArray[i];
+			  break;
+			  
+			case 20:
+				//singleProgramJson.recPriority = fullArray[i];
+			  break;  */
+			case 21:
+				singleProgramJson.recStatus = fullArray[i];
+				singleProgramJson.recStatusText = recStatusDecode(fullArray[i]);
+			  break;
+			case 22:
+				//singleProgramJson.recordId = fullArray[i];
+			  break;
+			case 23:
+				singleProgramJson.recType = fullArray[i];
+			  break;
+			case 24:
+				//singleProgramJson.dupin = fullArray[i];
+			  break;
+			case 25:
+				//singleProgramJson.dupMethod = fullArray[i];
+			  break;
+			case 26:
+				singleProgramJson.recStartTsInt = fullArray[i];
+				
+				newDate.setTime(fullArray[i]*1000);
+				
+				singleProgramJson.recStartTs = dateJSToISO(newDate);
+			  break;
+			case 27:
+				singleProgramJson.recEndTsInt = fullArray[i];
+				
+				newDate.setTime(fullArray[i]*1000);
+				
+				singleProgramJson.recEndTs = dateJSToISO(newDate);
+			  break;
+		/*	case 28:
+				//singleProgramJson.repeat = fullArray[i];
+			  break;
+			case 29:
+				//singleProgramJson.programflags = fullArray[i];
+			  break;
+			  
+			case 30:
+				//singleProgramJson.recGroup = fullArray[i];
+			  break;
+			case 31:
+				//singleProgramJson.commfree = fullArray[i];
+			  break;
+			case 32:
+				//singleProgramJson.outputFilters = fullArray[i];
+			  break;
+			case 33:
+				//singleProgramJson.seriesId = fullArray[i];
+			  break;
+			case 34:
+				//singleProgramJson.programId = fullArray[i];
+			  break;
+			case 35:
+				//singleProgramJson.lastModified = fullArray[i];
+			  break;
+			case 36:
+				//singleProgramJson.stars = fullArray[i];
+			  break;
+			case 37:
+				//singleProgramJson.airdate = fullArray[i];
+			  break;
+			case 38:
+				//singleProgramJson.hasairdate = fullArray[i];
+			  break;
+			case 39:
+				//singleProgramJson.playgroup = fullArray[i];
+			  break;
+			  
+			case 40:
+				//singleProgramJson.recpriority2 = fullArray[i];
+			  break;
+			case 41:
+				//singleProgramJson.parentid = fullArray[i];
+			  break;  */
+			case 42:
+				//last field, push and reset counters
+				//singleProgramJson.storagegroup = fullArray[i];
+				
+				finalList.push(singleProgramJson);
+				
+				singleProgramJson = {};
+				programNum++;
+				fieldNum = -1;
+			  break;
+		}
+		
+		fieldNum++;
+	}
+	
+	
+	WebMyth.parsedPrograms = programNum;
+	
+	
+	return finalList;
+	
+}
+
+var parseUpcoming31 = function(fullResponse) {	
+
+	//Protocol verion 31 and up - 42 fields
+
+	var finalList = [];
+	var fullArray = fullResponse.split("[]:[]");
+	
+	//Mojo.Log.info("Parsing upcoming total programs is "+fullArray[1]+", length is "+fullArray.length);
+	
+	WebMyth.expectedLength = fullArray[1];
+	WebMyth.hasConflicts = fullArray[0].substring(8,9);
+	
+	
+	var i, programNum = 0, fieldNum = 0;
+	var singleProgramJson = {};
+	var newDate = new Date();
+	
+	for(i = 2; i < fullArray.length; i++){
+		switch(fieldNum){
+			case 0:
+				singleProgramJson.title = fullArray[i];
+			  break;
+			case 1:
+				singleProgramJson.subTitle = fullArray[i];
+			  break;
+			case 2:
+				singleProgramJson.description = fullArray[i];
+			  break;
+			case 3:
+				singleProgramJson.category = fullArray[i];
+			  break;
+			case 4:
+				singleProgramJson.chanId = fullArray[i];
+			  break;
+			case 5:
+				singleProgramJson.channum = fullArray[i];
+			  break;
+			case 6:
+				singleProgramJson.callsign = fullArray[i];
+			  break;
+			case 7:
+				singleProgramJson.channame = fullArray[i];
+			  break;
+		/*	case 8:
+				//singleProgramJson.filename = fullArray[i];
+			  break;
+			case 9:
+				//singleProgramJson.fs_high = fullArray[i];
+			  break; 
+			case 10:
+				//singleProgramJson.fs_low = fullArray[i];
+			  break; */
+			case 11:
+				singleProgramJson.startTimeInt = fullArray[i];
+				
+				newDate.setTime(fullArray[i]*1000);
+				
+				singleProgramJson.startTime = dateJSToISO(newDate);
+				singleProgramJson.startTimeSpace = singleProgramJson.startTime.replace("T"," ");
+				
+			  break;
+			case 12:
+				singleProgramJson.endTimeInt = fullArray[i];
+				
+				newDate.setTime(fullArray[i]*1000);
+				
+				singleProgramJson.endTime = dateJSToISO(newDate);
+			  break;
+			case 13:
+		/*		//singleProgramJson.duplicate = fullArray[i];
+			  break;
+			case 14:
+				//singleProgramJson.shareable = fullArray[i];
+			  break;
+			case 15:
+				//singleProgramJson.findId = fullArray[i];
+			  break;
+			case 16:
+				//singleProgramJson.hostname = fullArray[i];
+			  break;
+			case 17:
+				//singleProgramJson.sourceId = fullArray[i];
+			  break;
+			case 18:
+				//singleProgramJson.cardId = fullArray[i];
+			  break;
+			case 19:
+				//singleProgramJson.inputId = fullArray[i];
+			  break;
+			  
+			case 20:
+				//singleProgramJson.recPriority = fullArray[i];
+			  break;  */
+			case 21:
+				singleProgramJson.recStatus = fullArray[i];
+				singleProgramJson.recStatusText = recStatusDecode(fullArray[i]);
+			  break;
+			case 22:
+				//singleProgramJson.recordId = fullArray[i];
+			  break;
+			case 23:
+				singleProgramJson.recType = fullArray[i];
+			  break;
+			case 24:
+				//singleProgramJson.dupin = fullArray[i];
+			  break;
+			case 25:
+				//singleProgramJson.dupMethod = fullArray[i];
+			  break;
+			case 26:
+				singleProgramJson.recStartTsInt = fullArray[i];
+				
+				newDate.setTime(fullArray[i]*1000);
+				
+				singleProgramJson.recStartTs = dateJSToISO(newDate);
+			  break;
+			case 27:
+				singleProgramJson.recEndTsInt = fullArray[i];
+				
+				newDate.setTime(fullArray[i]*1000);
+				
+				singleProgramJson.recEndTs = dateJSToISO(newDate);
+			  break;
+		/*	case 28:
+				//singleProgramJson.repeat = fullArray[i];
+			  break;
+			case 29:
+				//singleProgramJson.programflags = fullArray[i];
+			  break;
+			  
+			case 30:
+				//singleProgramJson.recGroup = fullArray[i];
+			  break;
+			case 31:
+				//singleProgramJson.commfree = fullArray[i];
+			  break;
+			case 32:
+				//singleProgramJson.outputFilters = fullArray[i];
+			  break;
+			case 33:
+				//singleProgramJson.seriesId = fullArray[i];
+			  break;
+			case 34:
+				//singleProgramJson.programId = fullArray[i];
+			  break;
+			case 35:
+				//singleProgramJson.lastModified = fullArray[i];
+			  break;
+			case 36:
+				//singleProgramJson.stars = fullArray[i];
+			  break;
+			case 37:
+				//singleProgramJson.airdate = fullArray[i];
+			  break;
+			case 38:
+				//singleProgramJson.hasairdate = fullArray[i];
+			  break;
+			case 39:
+				//singleProgramJson.playgroup = fullArray[i];
+			  break;
+			  
+			case 40:
+				//singleProgramJson.recpriority2 = fullArray[i];
+			  break;  */
+			case 41:
+				//last field, push and reset counters
+				//singleProgramJson.parentid = fullArray[i];
+				
+				finalList.push(singleProgramJson);
+				
+				singleProgramJson = {};
+				programNum++;
+				fieldNum = -1;
+			  break;
+		}
+		
+		fieldNum++;
+	}
+	
+	
+	WebMyth.parsedPrograms = programNum;
+	
+	
+	return finalList;
+	
+}
+
+var parseUpcoming25 = function(fullResponse) {	
+
+	//Protocol verion 25 and up - 41 fields
+	//MythTV version 0.19 - won't support any older versions
+
+	var finalList = [];
+	var fullArray = fullResponse.split("[]:[]");
+	
+	//Mojo.Log.info("Parsing upcoming total programs is "+fullArray[1]+", length is "+fullArray.length);
+	
+	WebMyth.expectedLength = fullArray[1];
+	WebMyth.hasConflicts = fullArray[0].substring(8,9);
+	
+	
+	var i, programNum = 0, fieldNum = 0;
+	var singleProgramJson = {};
+	var newDate = new Date();
+	
+	for(i = 2; i < fullArray.length; i++){
+		switch(fieldNum){
+			case 0:
+				singleProgramJson.title = fullArray[i];
+			  break;
+			case 1:
+				singleProgramJson.subTitle = fullArray[i];
+			  break;
+			case 2:
+				singleProgramJson.description = fullArray[i];
+			  break;
+			case 3:
+				singleProgramJson.category = fullArray[i];
+			  break;
+			case 4:
+				singleProgramJson.chanId = fullArray[i];
+			  break;
+			case 5:
+				singleProgramJson.channum = fullArray[i];
+			  break;
+			case 6:
+				singleProgramJson.callsign = fullArray[i];
+			  break;
+			case 7:
+				singleProgramJson.channame = fullArray[i];
+			  break;
+		/*	case 8:
+				//singleProgramJson.filename = fullArray[i];
+			  break;
+			case 9:
+				//singleProgramJson.fs_high = fullArray[i];
+			  break; 
+			case 10:
+				//singleProgramJson.fs_low = fullArray[i];
+			  break; */
+			case 11:
+				singleProgramJson.startTimeInt = fullArray[i];
+				
+				newDate.setTime(fullArray[i]*1000);
+				
+				singleProgramJson.startTime = dateJSToISO(newDate);
+				singleProgramJson.startTimeSpace = singleProgramJson.startTime.replace("T"," ");
+				
+			  break;
+			case 12:
+				singleProgramJson.endTimeInt = fullArray[i];
+				
+				newDate.setTime(fullArray[i]*1000);
+				
+				singleProgramJson.endTime = dateJSToISO(newDate);
+			  break;
+			case 13:
+		/*		//singleProgramJson.duplicate = fullArray[i];
+			  break;
+			case 14:
+				//singleProgramJson.shareable = fullArray[i];
+			  break;
+			case 15:
+				//singleProgramJson.findId = fullArray[i];
+			  break;
+			case 16:
+				//singleProgramJson.hostname = fullArray[i];
+			  break;
+			case 17:
+				//singleProgramJson.sourceId = fullArray[i];
+			  break;
+			case 18:
+				//singleProgramJson.cardId = fullArray[i];
+			  break;
+			case 19:
+				//singleProgramJson.inputId = fullArray[i];
+			  break;
+			  
+			case 20:
+				//singleProgramJson.recPriority = fullArray[i];
+			  break;  */
+			case 21:
+				singleProgramJson.recStatus = fullArray[i];
+				singleProgramJson.recStatusText = recStatusDecode(fullArray[i]);
+			  break;
+			case 22:
+				//singleProgramJson.recordId = fullArray[i];
+			  break;
+			case 23:
+				singleProgramJson.recType = fullArray[i];
+			  break;
+			case 24:
+				//singleProgramJson.dupin = fullArray[i];
+			  break;
+			case 25:
+				//singleProgramJson.dupMethod = fullArray[i];
+			  break;
+			case 26:
+				singleProgramJson.recStartTsInt = fullArray[i];
+				
+				newDate.setTime(fullArray[i]*1000);
+				
+				singleProgramJson.recStartTs = dateJSToISO(newDate);
+			  break;
+			case 27:
+				singleProgramJson.recEndTsInt = fullArray[i];
+				
+				newDate.setTime(fullArray[i]*1000);
+				
+				singleProgramJson.recEndTs = dateJSToISO(newDate);
+			  break;
+		/*	case 28:
+				//singleProgramJson.repeat = fullArray[i];
+			  break;
+			case 29:
+				//singleProgramJson.programflags = fullArray[i];
+			  break;
+			  
+			case 30:
+				//singleProgramJson.recGroup = fullArray[i];
+			  break;
+			case 31:
+				//singleProgramJson.commfree = fullArray[i];
+			  break;
+			case 32:
+				//singleProgramJson.outputFilters = fullArray[i];
+			  break;
+			case 33:
+				//singleProgramJson.seriesId = fullArray[i];
+			  break;
+			case 34:
+				//singleProgramJson.programId = fullArray[i];
+			  break;
+			case 35:
+				//singleProgramJson.lastModified = fullArray[i];
+			  break;
+			case 36:
+				//singleProgramJson.stars = fullArray[i];
+			  break;
+			case 37:
+				//singleProgramJson.airdate = fullArray[i];
+			  break;
+			case 38:
+				//singleProgramJson.hasairdate = fullArray[i];
+			  break;
+			case 39:
+				//singleProgramJson.playgroup = fullArray[i];
+			  break;  */
+			  
+			case 40:
+				//last field, push and reset counters
+				//singleProgramJson.recpriority2 = fullArray[i];
+				
+				finalList.push(singleProgramJson);
+				
+				singleProgramJson = {};
+				programNum++;
+				fieldNum = -1;
+			  break;
+		}
+		
+		fieldNum++;
+	}
+	
+	
+	WebMyth.parsedPrograms = programNum;
+	
+	
 	return finalList;
 	
 }
 
 var cleanUpcoming = function(fullList) {
 
-	finalList = [];
+	var finalList = [];
 	
 	var i, s = {};
 	var conflicts = 0;
@@ -1505,13 +2482,13 @@ var cleanUpcoming = function(fullList) {
 		
 	}
 	
-	return {'fullUpcomingList': finalList, 'conflicts': conflicts} ;
-	
+	//return {'fullUpcomingList': finalList, 'conflicts': conflicts} ;
+	return finalList;
 }
 
 var cleanInputs = function(fullList) {
 
-	finalList = [];
+	var finalList = [];
 	
 	var i, j, k, s, t = {}, u = [];
 	
@@ -1536,15 +2513,21 @@ var cleanInputs = function(fullList) {
 
 var cleanSettings = function(fullList) {
 
-	settingsObject = { hosts: [] };
-	hosts = [];
-	hostObject = {};
+	//When updating this be sure to check query in welcome scene
+
+	var settingsObject = { hosts: [] };
+	var hosts = [];
+	var controlPorts = [];
+	var backendPorts = [];
+	var hostObject = {}, portObject = {}, backendObject;
 	
-	var i, j, s = {}, t = {};
+	var i, j, k, l, s = {}, t = {};
 	
 	
 	for(i = 0; i < fullList.length; i++) {
 		s = fullList[i];
+		
+		//Mojo.Log.error("Single settings is %j",s);
 		
 		if(s.value == "AutoCommercialFlag") {
 			settingsObject.AutoCommercialFlag = s.data;
@@ -1572,13 +2555,22 @@ var cleanSettings = function(fullList) {
 			settingsObject.UserJobDesc4 = s.data;
 		} else if(s.value == "MasterServerIP") {
 			settingsObject.MasterServerIP = s.data;
+		} else if(s.value == "MasterServerPort") {
+			settingsObject.MasterServerPort = s.data;
 		} else if(s.value == "BackendServerIP") {
-			//Mojo.Log.error("backend ip of "+s.data);
 			hostObject = { "hostname": s.hostname, "ip": s.data, "master": false };
 			settingsObject.hosts.push(hostObject);
+		} else if(s.value == "NetworkControlPort") {
+			portObject = { "hostname": s.hostname, "controlPort": s.data };
+			controlPorts.push(portObject);
+		} else if(s.value == "BackendServerPort") {
+			backendObject = { "hostname": s.hostname, "BackendServerPort": s.data };
+			backendPorts.push(backendObject);
 		}
 		
 	}
+	
+	//Mojo.Log.error("Clean settings initial JSON is %j",settingsObject);
 	
 	
 	for(j = 0; j < settingsObject.hosts.length; j++) {
@@ -1587,8 +2579,22 @@ var cleanSettings = function(fullList) {
 		if(t.ip == settingsObject.MasterServerIP) {
 			t.master = true;
 		}
+		
+		for(k = 0; k < controlPorts.length; k++) {
+			if(t.hostname == controlPorts[k].hostname) {
+				t.controlPort = controlPorts[k].controlPort;
+			}
+		}
+		
+		for(l = 0; l < backendPorts.length; l++) {
+			if(t.hostname == backendPorts[l].hostname) {
+				t.BackendServerPort = backendPorts[l].BackendServerPort;
+			}
+		}
 	}
 	
+	
+	//Mojo.Log.error("Final settings JSON is %j",settingsObject);
 	
 	return settingsObject;
 	
@@ -1596,7 +2602,7 @@ var cleanSettings = function(fullList) {
 
 var cleanHostsCookie = function(fullList) {
 
-	finalList = [];
+	var finalList = [];
 	
 	var i, s = {};
 	

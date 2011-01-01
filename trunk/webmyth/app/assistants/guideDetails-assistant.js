@@ -366,6 +366,7 @@ GuideDetailsAssistant.prototype.checkLocation = function(frontend) {
 
 	//Attempting to play livetv - have to start livetv then change channel
 
+	//Using MythTV's field seperator for decoding
 	var frontendDecoder = frontend.split("[]:[]");
 	
 	
@@ -378,7 +379,12 @@ GuideDetailsAssistant.prototype.checkLocation = function(frontend) {
 		WebMyth.prefsCookieObject.currentFrontendPort = frontendDecoder[2];
 		WebMyth.prefsCookie.put(WebMyth.prefsCookieObject);
 	
-		if(WebMyth.useService) {
+		if(WebMyth.usePlugin) {
+			WebMyth.startTelnetPlugin();
+			
+			setTimeout(function () {}, 250);		//Pause a little bit to let new telnet connection setup
+			
+		} else if(WebMyth.useService) {
 			WebMyth.startNewCommunication(this);
 		}
 		
@@ -386,9 +392,13 @@ GuideDetailsAssistant.prototype.checkLocation = function(frontend) {
 	
 	Mojo.Log.info("Checking current location as prep for "+this.guideObject.chanId+" on "+WebMyth.prefsCookieObject.currentFrontend);
 	
-	if(WebMyth.useService){
-		WebMyth.playServiceChannel(this, this.guideObject.chanId);
+	
+	if(WebMyth.usePlugin){
+		WebMyth.playPluginChannel(this.guideObject.chanId);
 		
+	} else if(WebMyth.useService){
+		WebMyth.playServiceChannel(this, this.guideObject.chanId);
+			
 	} else {
 		
 		var requestUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webmythPythonFile;

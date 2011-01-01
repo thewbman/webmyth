@@ -18,7 +18,7 @@
  *   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
  
- function WelcomeAssistant() {
+function WelcomeAssistant() {
 	   
 	   this.backendsList = [];
 }
@@ -157,6 +157,7 @@ WelcomeAssistant.prototype.setup = function() {
 		if (WebMyth.prefsCookieObject.remoteVibrate == null) WebMyth.prefsCookieObject.remoteVibrate = myDefaultCookie.remoteVibrate;
 		if (WebMyth.prefsCookieObject.remoteFullscreen == null) WebMyth.prefsCookieObject.remoteFullscreen = myDefaultCookie.remoteFullscreen;
 		if (WebMyth.prefsCookieObject.masterBackendIp == null) WebMyth.prefsCookieObject.masterBackendIp = myDefaultCookie.masterBackendIp;
+		if (WebMyth.prefsCookieObject.masterBackendPort == null) WebMyth.prefsCookieObject.masterBackendPort = myDefaultCookie.masterBackendPort;
 		if (WebMyth.prefsCookieObject.manualMasterBackend == null) WebMyth.prefsCookieObject.manualMasterBackend = myDefaultCookie.manualMasterBackend;
 		if (WebMyth.prefsCookieObject.remoteHeaderAction == null) WebMyth.prefsCookieObject.remoteHeaderAction = myDefaultCookie.remoteHeaderAction;
 		if (WebMyth.prefsCookieObject.playJumpRemote == null) WebMyth.prefsCookieObject.playJumpRemote = myDefaultCookie.playJumpRemote;
@@ -273,12 +274,20 @@ WelcomeAssistant.prototype.setup = function() {
 	
 	//Start telnet service
 	if(WebMyth.useService){
+		WebMyth.welcomeSceneController = this;
 		WebMyth.startCommunication(this);
+	}
+	
+	//Start frontend plugin
+	if(WebMyth.usePlugin){
+		//WebMyth.newPluginSocket("query location");
 	}
 	
 };
 
 WelcomeAssistant.prototype.activate = function(event) {
+
+	WebMyth.welcomeSceneController = this;
 	
 	if(WebMyth.prefsCookieObject.webserverName == '') {
 	
@@ -536,8 +545,85 @@ WelcomeAssistant.prototype.doWelcomeIcon = function(event) {
 	
 	Event.stop(event); 
 	
+	Mojo.Log.info("Starting plugin test - query location")
+	
+	try {
+		var response = $('webmyth_service_id').sendData("query location");
+		
+		if((response == "sendto() failed")||(response == "recvMsgSize == 0")){
+			$('debugText').innerText = "Failed to send, try again";
+			WebMyth.newPluginSocket();
+			
+		} else {
+			$('debugText').innerText = response;
+		}
+	}
+	catch(e) {
+		Mojo.Log.error("plug-in error %s",e);
+	}
+	
+	/*
+	Mojo.Log.info("Doing Upnp search")
+	
+	var request3 = this.controller.serviceRequest('palm://com.thewbman.webmyth.service', {
+		  method:"upnp",
+		  parameters:{
+			"text": "Hello world"
+			},
+		  onSuccess: function(response) {
+				Mojo.Log.error("Success upnp status of %j", response);
+				Mojo.Controller.getAppController().showBanner("Upnp success", {source: 'notification'});
+	
+			}.bind(this),
+		  onFailure: function(response) {
+		  
+					Mojo.Log.error("Failed upnp status of %j", response);
+					Mojo.Controller.getAppController().showBanner("Upnp FAIL", {source: 'notification'});
+					
+	
+			}.bind(this),
+		});
+	*/
+	
+	
+	
+	/*
+	
+	Mojo.Log.info("Starting MySQL communication");
+		
+	var request2 = this.controller.serviceRequest('palm://com.thewbman.webmyth.service', {
+		  method:"mysqlQuery",
+		  parameters:{
+			"host": WebMyth.prefsCookieObject.databaseHost, 
+			"port": 3306,
+			"database": WebMyth.prefsCookieObject.databaseName,
+			"username": WebMyth.prefsCookieObject.databaseUsername,
+			"password": WebMyth.prefsCookieObject.databasePassword,
+			"query":"SELECT * FROM `channel` ;"
+			},
+		  onSuccess: function(response) {
+				Mojo.Log.info("Success service connection status of %j", response);
+				Mojo.Controller.getAppController().showBanner("MySQL success", {source: 'notification'});
+	
+			}.bind(this),
+		  onFailure: function(response) {
+		  
+					Mojo.Log.info("Failed service connection status of %j", response);
+					Mojo.Controller.getAppController().showBanner("MySQL FAIL", {source: 'notification'});
+					
+				
+				//WebMyth.sendServiceCmd(sceneController, retryCommand, true);
+	
+			}.bind(this),
+		});
+	
+	*/
+	
+	
 };
 
+
+			
 WelcomeAssistant.prototype.doHelpButton = function(event) {
 	
 		//Mojo.Log.info("Inside doHelpButton");
@@ -741,7 +827,26 @@ WelcomeAssistant.prototype.getSettings = function() {
 	
 	//Mojo.Log.error("Starting to get settingss");
 		
-	var query = "SELECT * FROM `settings`  WHERE `value` != 'MythWelcomeDateFormat' ;";
+	//var query = "SELECT * FROM `settings`  WHERE `value` != 'MythWelcomeDateFormat' ;";
+	var query = "SELECT * FROM `settings`  WHERE ";
+	query += " `value` = 'AutoCommercialFlag'";
+	query += " OR `value` = 'AutoTranscode' ";
+	query += " OR `value` = 'AutoRunUserJob1' ";
+	query += " OR `value` = 'AutoRunUserJob2' ";
+	query += " OR `value` = 'AutoRunUserJob3' ";
+	query += " OR `value` = 'AutoRunUserJob4' ";
+	query += " OR `value` = 'DefaultStartOffset' ";
+	query += " OR `value` = 'DefaultEndOffset' ";
+	query += " OR `value` = 'UserJobDesc1' ";
+	query += " OR `value` = 'UserJobDesc2' ";
+	query += " OR `value` = 'UserJobDesc3' ";
+	query += " OR `value` = 'UserJobDesc4' ";
+	query += " OR `value` = 'MasterServerIP' ";
+	query += " OR `value` = 'MasterServerPort' ";
+	query += " OR `value` = 'BackendServerIP' ";
+	query += " OR `value` = 'NetworkControlPort' ";
+	query += " OR `value` = 'BackendServerPort' ";
+	query += " ;";
 	
 	
 	var requestUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webmythPythonFile;
@@ -769,11 +874,13 @@ WelcomeAssistant.prototype.getSettings = function() {
 
 WelcomeAssistant.prototype.readSettingsSuccess = function(response) {
 
-	//Mojo.Log.info('Got settings table rule responseJSON: %j', response.responseJSON);
+	//Mojo.Log.error('Got settings table rule responseJSON: %j', response.responseJSON);
 	
 	this.settings = cleanSettings(response.responseJSON);
 	
 	Mojo.Log.info("Cleaned settings is %j",this.settings);
+	
+	WebMyth.prefsCookieObject.masterBackendPort = this.settings.MasterServerPort;
 	
 	WebMyth.settings.clear();
 	Object.extend(WebMyth.settings,this.settings);
@@ -938,17 +1045,17 @@ WelcomeAssistant.prototype.gotConnectionFailed = function(response) {
 WelcomeAssistant.prototype.checkConnectionStatus = function() {
 	
 	//Update backends from XML
-	Mojo.Log.info('Starting to get connection status');
+	//Mojo.Log.error('Starting to get connection status');
 	
 	
-	//Check we are on WiFi before trying to get backends
-	this.controller.serviceRequest('palm://com.palm.connectionmanager', {
+	//Check we have a network before trying to get backends
+	this.controller.serviceRequest('palm://com.palm.connectionmanager/', {
 			method: 'getstatus',
 			parameters: {subscribe: false},
 			onSuccess: function(response) {
-				Mojo.Log.info("Got connection status of %j", response);
+				//Mojo.Log.info("Got connection status of %j", response);
 				
-				if(response.wifi.state == "connected") {
+				if((response.wifi.state == "connected")||(response.wan.state == "connected")) {
 					//this.getHostsList();
 					
 					this.getSettings();

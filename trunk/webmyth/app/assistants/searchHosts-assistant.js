@@ -20,10 +20,6 @@
 
 
 function SearchHostsAssistant() {
-	/* this is the creator function for your scene assistant object. It will be passed all the 
-	   additional parameters (after the scene name) that were passed to pushScene. The reference
-	   to the scene controller (this.controller) has not be established yet, so any initialization
-	   that needs the scene controller should be done in the setup function below. */
 	   
 	  this.resultList = [];
 	  this.enabledResultList = [];
@@ -73,22 +69,22 @@ SearchHostsAssistant.prototype.activate = function(event) {
 	   
 	Mojo.Log.info("Searching for hosts...");
 	
-	var requestUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webmythPythonFile;
-	requestUrl += "?op=getHosts";
-	
-    try {
-        var request = new Ajax.Request(requestUrl,{
-            method: 'get',
-            evalJSON: 'true',
-            onSuccess: this.getFrontendsSuccess.bind(this),
-            onFailure: this.getFrontendsFailure.bind(this)  
-        });
-    }
-    catch(e) {
-        Mojo.Log.error(e);
-    }
-	
-	
+
+		var requestUrl = "http://"+WebMyth.prefsCookieObject.masterBackendIp+":6544/Myth/GetHosts";
+		
+		try {
+			var request = new Ajax.Request(requestUrl,{
+				method: 'get',
+				evalJSON: 'false',
+				onSuccess: this.getFrontendsXMLSuccess.bind(this),
+				onFailure: this.getFrontendsFailure.bind(this)  
+			});
+		}
+		catch(e) {
+			Mojo.Log.error(e);
+		}
+		
+
 	
 	$('scene-title').innerText = $L("Hosts on Backend");
 	$('frontendsGroupLabel').innerText = $L('Frontends');
@@ -96,17 +92,99 @@ SearchHostsAssistant.prototype.activate = function(event) {
 };
 
 SearchHostsAssistant.prototype.deactivate = function(event) {
-	/* remove any event handlers you added in activate and do any other cleanup that should happen before
-	   this scene is popped or another scene is pushed on top */
+
 };
 
 SearchHostsAssistant.prototype.cleanup = function(event) {
-	/* this function should do any cleanup needed before the scene is destroyed as 
-	   a result of being popped off the scene stack */
+
 };
 
 
 
+
+SearchHostsAssistant.prototype.getFrontendsXMLSuccess = function(response) {
+	
+	//Mojo.Log.info("Got frontends XML: '%j'", response.responseText);
+	
+	var hostsList = [];
+	
+	var xmlstring = response.responseText.trim();
+	var xmlobject = (new DOMParser()).parseFromString(xmlstring, "text/xml");
+	
+	//Mojo.Log.error("Hosts response is %s",xmlstring);
+	
+	//Local variables
+	var topNode, topNodesCount, topSingleNode, hostsNode, singleHostNode;
+	var singleHostJson = {};
+	var Count;
+	
+	
+	
+	//Start parsing
+	topNode = xmlobject.getElementsByTagName("GetHostsResponse")[0];
+	var topNodesCount = topNode.childNodes.length;
+	for(var i = 0; i < topNodesCount; i++) {
+		topSingleNode = topNode.childNodes[i];
+		//Mojo.Log.info("Node name is "+topSingleNode.nodeName);
+		
+		switch(topSingleNode.nodeName) {
+			case 'Count':
+				//Count = topSingleNode.childNodes[0].nodeValue;
+				break;
+			case 'Hosts':
+				//Mojo.Log.info('Starting to parse Hosts');
+				hostsNode = topSingleNode;
+				for(var j = 0; j < hostsNode.childNodes.length; j++) {
+					singleHostNode = hostsNode.childNodes[j];
+					//Mojo.Log.info("Node name is "+singleHostNode.nodeName);
+					if(singleHostNode.nodeName == 'Host') {
+						//Mojo.Log.info('Inside Host if');
+						singleHostJson = {
+									"hostname": singleHostNode.childNodes[0].nodeValue, 
+									"port": 6546
+						}
+										
+						hostsList.push(singleHostJson);
+						//Mojo.Log.info("Single host json is %j", singleHostJson);
+							
+						
+					}
+				}
+				//Mojo.Log.info('Done parsing Hosts');
+				//Mojo.Log.error("Hosts full json is %j", hostsList);
+				
+				break;
+			default:
+				break;
+		}
+	}
+	
+	//Mojo.Log.info("Done with XML parsing");
+	
+	
+	try{
+		var i, j, s = {};
+		//Search for changed port in settings
+		for(i = 0; i < hostsList.length; i++) {
+			s = hostsList[i];
+			
+			for(j = 0; j < WebMyth.settings.hosts.length; j++){
+				if(s.hostname == WebMyth.settings.hosts[j].hostname) {
+					s.port = WebMyth.settings.hosts[j].controlPort;
+				}
+			}
+		
+		}
+	} catch(e) {
+		Mojo.Log.error("Could not add ports to hosts: %s",e);
+	}
+	 
+	this.resultList.clear();
+	Object.extend(this.resultList,hostsList.sort(sort_by('hostname', false)));
+
+	this.controller.modelChanged(this.enabledHostsListModel);
+	
+};
 
 SearchHostsAssistant.prototype.getFrontendsSuccess = function(response) {
 	//Mojo.Log.info("got response text: '%s'", response.responseText);

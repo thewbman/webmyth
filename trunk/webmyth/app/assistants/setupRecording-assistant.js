@@ -31,7 +31,6 @@ function SetupRecordingAssistant(programObject) {
 	
 	this.finishedGettingDefaults = true;	//preloaded on welcome scene
 	
-
 }
 
 SetupRecordingAssistant.prototype.setup = function() {
@@ -58,8 +57,10 @@ SetupRecordingAssistant.prototype.setup = function() {
 			{"label": $L('Force record'), "command": "do-override-record"},
 			{"label": $L("Force don't record"), "command": "do-override-dontrecord"},
 			{"label": $L("Never record"), "command": "do-override-neverrecord"},
-			{"label": $L("Delete schedule"), "command": "do-cancel-rule"}
-			]};
+			{"label": $L("Delete schedule"), items: [
+				{"label": $L("Delete"), "command": "do-cancel-rule"}
+			]}
+		]};
 	
 	this.controller.setupWidget(Mojo.Menu.commandMenu, {menuClass: 'no-fade'}, this.cmdMenuModel);
 	this.controller.setupWidget('more-menu', '', this.moreMenuModel);
@@ -518,8 +519,10 @@ SetupRecordingAssistant.prototype.setupOverrideMenu = function() {
 	this.overrideMenuModel = { label: $L('Override'), items: [
 			{"label": $L('Force record'), "command": "do-override-toggle"},
 			{"label": $L("Never record"), "command": "do-override-neverrecord"},
-			{"label": $L("Schedule normally"), "command": "do-cancel-rule"}
-			]};
+			{"label": $L("Schedule normally"), items: [
+				{"label": $L("Schedule normally"), "command": "do-cancel-rule"}
+			]}
+		]};
 			
 	if(this.recordRule.type == 7) {
 		this.overrideMenuModel.items[0].label = "Force don't record";
@@ -1292,7 +1295,7 @@ SetupRecordingAssistant.prototype.overrideRecord = function() {
 	query += '" ;';
 	
 	
-	Mojo.Log.error("query is "+query);
+	//Mojo.Log.error("query is "+query);
 	
 	this.newRule.recordid = -1;				//so that we reschedule all
 	
@@ -1340,7 +1343,7 @@ SetupRecordingAssistant.prototype.overrideDontRecord = function() {
 	this.newRule.recordid = -1;				//so that we reschedule all
 	
 	
-	Mojo.Log.error("query is "+query);
+	//Mojo.Log.error("query is "+query);
 	
 	var requestUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webmythPythonFile;
 	requestUrl += "?op=executeSQL";				
@@ -1377,7 +1380,7 @@ SetupRecordingAssistant.prototype.neverRecord = function() {
 	//this.newRule.recordid = -1;				//so that we reschedule all
 	
 	
-	Mojo.Log.error("query is "+query);
+	//Mojo.Log.error("query is "+query);
 	
 	var requestUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webmythPythonFile;
 	requestUrl += "?op=executeSQL";				
@@ -1414,7 +1417,7 @@ SetupRecordingAssistant.prototype.forgetOld = function() {
 	//this.newRule.recordid = -1;				//so that we reschedule all
 	
 	
-	Mojo.Log.error("query is "+query);
+	//Mojo.Log.error("query is "+query);
 	
 	var requestUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webmythPythonFile;
 	requestUrl += "?op=executeSQL";				
@@ -1452,7 +1455,7 @@ SetupRecordingAssistant.prototype.toggleOverride = function() {
 		var query = "";
 	}
 	
-	Mojo.Log.error("query is "+query);
+	//Mojo.Log.error("query is "+query);
 	
 	var requestUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webmythPythonFile;
 	requestUrl += "?op=executeSQL";				
@@ -1592,7 +1595,14 @@ SetupRecordingAssistant.prototype.reschedule = function() {
 	requestUrl += this.newRule.recordid;	
 	
 	
-	if(WebMyth.useService){
+	if(WebMyth.usePlugin){
+	
+		var response1 = $('webmyth_service_id').mythprotocolCommand(WebMyth.prefsCookieObject.masterBackendIp, WebMyth.prefsCookieObject.masterBackendPort, WebMyth.prefsCookieObject.protoVer, "RESCHEDULE_RECORDINGS "+this.newRule.recordid);
+		Mojo.Log.info("Plugin protocol response: "+response1);
+		
+		this.controller.window.setTimeout(this.closeScene.bind(this), 4000);
+		
+	} else if(WebMyth.useService){
 		WebMyth.mythprotocolCommand(this, "RESCHEDULE_RECORDINGS "+this.newRule.recordid);
 		
 		this.controller.window.setTimeout(this.closeScene.bind(this), 4000);
@@ -1627,7 +1637,7 @@ SetupRecordingAssistant.prototype.rescheduleSuccess = function(response) {
 	
 };
 
-SetupRecordingAssistant.prototype.closeScene = function(response) {
+SetupRecordingAssistant.prototype.closeScene = function() {
 
 	Mojo.Controller.stageController.popScene();
 	

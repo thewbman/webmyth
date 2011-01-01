@@ -108,7 +108,7 @@ RecordedDetailsAssistant.prototype.setup = function() {
 				}
 				
 	
-				Mojo.Log.error("Screenshot URL is "+ this.screenshotUrl);
+				//Mojo.Log.error("Screenshot URL is "+ this.screenshotUrl);
 
 				$('recorded-screenshot').src = this.screenshotUrl;
 				
@@ -567,7 +567,14 @@ RecordedDetailsAssistant.prototype.handleDelete = function(selection_in) {
 	requestUrl += Base64.encode(command);	
 	
 	
-	if(WebMyth.useService){
+	if(WebMyth.usePlugin){
+	
+		var response1 = $('webmyth_service_id').mythprotocolCommand(WebMyth.prefsCookieObject.masterBackendIp, WebMyth.prefsCookieObject.masterBackendPort, WebMyth.prefsCookieObject.protoVer, command);
+		Mojo.Log.info("Plugin protocol response: "+response1);
+		
+		Mojo.Controller.getAppController().showBanner("Successfully deleted", {source: 'notification'});
+		
+	} else if(WebMyth.useService){
 		WebMyth.mythprotocolCommand(this, command, "Successfully deleted");
 		
 	} else { 

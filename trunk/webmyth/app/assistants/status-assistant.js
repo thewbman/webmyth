@@ -194,11 +194,14 @@ StatusAssistant.prototype.activate = function(event) {
 
 	//Keypress event
 	Mojo.Event.listen(this.controller.sceneElement, Mojo.Event.keyup, this.handleKey.bind(this));
+	
 };
 
 StatusAssistant.prototype.deactivate = function(event) {
+
 	//Keypress event
 	Mojo.Event.stopListening(this.controller.sceneElement, Mojo.Event.keyup, this.handleKey.bind(this));
+	
 };
 
 StatusAssistant.prototype.cleanup = function(event) {

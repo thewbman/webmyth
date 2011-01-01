@@ -312,6 +312,8 @@ FlickAssistant.prototype.handleVolumeFlick = function(event) {
   
 };
 
+
+
 FlickAssistant.prototype.sendTelnetKey = function(value, event){
 
 	if(WebMyth.useService) {
