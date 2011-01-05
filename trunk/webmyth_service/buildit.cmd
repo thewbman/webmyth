@@ -8,7 +8,7 @@ set DEBUG=0
 set SRC=webmyth_service.cpp
 
 @rem List the libraries needed
-set LIBS=-lSDL -lGLESv2 -lpdl
+set LIBS=-lSDL -lpdl
 
 @rem Name your output executable
 set OUTFILE=webmyth_service

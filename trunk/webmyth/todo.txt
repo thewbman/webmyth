@@ -4,7 +4,6 @@ Todo - planned new features and updates:
  - plugin for remote
  - progress/volume scrobble on remote ?
  - demo video(s)
- - add support for pin on backend ?
  - search recording rules
  - new app icons/theme
  - fix pixelated icon
@@ -12,14 +11,11 @@ Todo - planned new features and updates:
  - look into menu panel (style matters)
  - make dialogs palm-dark
  - cleanup schedule recording scene
- - refresh recorded details
- - contdown keepalive
  - add D M I to flick remote
- - tweak livetv control
- - ask to delete schedule
  - reduce music data
  - use dark backround color
  - push link to mythtv
+ - fix background iimage
  
 
 //May never do
@@ -37,7 +33,6 @@ Todo - planned new features and updates:
  - music (SQL)
  - music playlists (SQL)
  - log (SQL)
- - search hosts
  - welcome settings (SQL)
- - welcome script version
+ - status encoders name (SQL)
  

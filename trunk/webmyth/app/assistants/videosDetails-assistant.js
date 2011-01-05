@@ -225,7 +225,7 @@ VideosDetailsAssistant.prototype.openWeb = function(website) {
 			url = this.videosObject.homepage;
 		  break;
 		case 'Wikipedia':
-			url = "http://en.m.wikipedia.org/wiki/Special:Search?search="+this.videosObject.title;
+			url = "http://"+Mojo.Locale.getCurrentLocale().substring(0,2)+".m.wikipedia.org/wiki/Special:Search?search="+this.videosObject.title;
 		  break;
 		case 'themoviedb':
 			url = "http://www.themoviedb.org/search/movies?search[text]="+this.videosObject.title;

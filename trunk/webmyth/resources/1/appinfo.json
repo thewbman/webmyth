@@ -6,7 +6,5 @@
 	"main": "../../index.html",
 	"title": "WebMyth1",
 	"icon": "../../icon.png",
-	"skipPDK": "true",
-	"usePlugin": "false",
-	"useXML": "true"
+	"plug-ins": true
 }

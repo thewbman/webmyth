@@ -187,7 +187,7 @@ MusicDetailsAssistant.prototype.openWeb = function(website) {
   
   switch(website) {
 	case 'Wikipedia':
-		url = "http://en.m.wikipedia.org/wiki/Special:Search?search="+this.musicObject.artist_name;
+		url = "http://"+Mojo.Locale.getCurrentLocale().substring(0,2)+".m.wikipedia.org/wiki/Special:Search?search="+this.musicObject.artist_name;
 	  break;
 	case 'Google':
 		url = "http://www.google.com/m/search?client=ms-palm-webOS&channel=iss&q="+this.musicObject.artist_name+"+"+this.musicObject.name;

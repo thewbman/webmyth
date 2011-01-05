@@ -20,10 +20,7 @@
 
 
 function FlickAssistant() {
-	/* this is the creator function for your scene assistant object. It will be passed all the 
-	   additional parameters (after the scene name) that were passed to pushScene. The reference
-	   to the scene controller (this.controller) has not be established yet, so any initialization
-	   that needs the scene controller should be done in the setup function below. */
+
 }
 
 FlickAssistant.prototype.setup = function() {
@@ -54,6 +51,9 @@ FlickAssistant.prototype.setup = function() {
 	
 	//Escape button
 	Mojo.Event.listen(this.controller.get("flickEscButtonId"),Mojo.Event.tap, this.sendTelnetKey.bind(this, "escape"));
+	Mojo.Event.listen(this.controller.get("flickDeleteButtonId"),Mojo.Event.tap, this.sendTelnetKey.bind(this, "d"));
+	Mojo.Event.listen(this.controller.get("flickMenuButtonId"),Mojo.Event.tap, this.sendTelnetKey.bind(this, "m"));
+	Mojo.Event.listen(this.controller.get("flickInfoButtonId"),Mojo.Event.tap, this.sendTelnetKey.bind(this, "i"));
 	//Nav flick button
 	Mojo.Event.listen(this.controller.get("flickNavButtonId"),Mojo.Event.tap, this.sendTelnetKey.bind(this, "space"));
 	Mojo.Event.listen(this.controller.get("flickNavButtonId"),Mojo.Event.flick, this.handleNavFlick.bind(this));

@@ -62,8 +62,10 @@ WebMyth.appMenuModel = {
 		}
 	]
 };
+
+
 //Create WebMyth.db for use or open existing
-WebMyth.db;
+//WebMyth.db;
 
 
 //Setup remote view menu
@@ -160,7 +162,7 @@ StageAssistant.prototype.setup = function() {
 	WebMyth.Metrix = new Metrix(); 
 	
 	//Setup db
-	WebMyth.db = createHostnameDb();
+	//WebMyth.db = createHostnameDb();
 	
 	
 	//Notice focus changes for doign dashbaord remote
@@ -488,7 +490,7 @@ WebMyth.newPluginSocket = function(retryCommand) {
 	} catch(e) {
 	
 		Mojo.Log.error("ERROR telnet socket: %s",e);
-		Mojo.Controller.getAppController().showBanner("Error connecting to frontend", {source: 'notification'});	
+		Mojo.Controller.getAppController().showBanner("Error connecting to frontend - check IP", {source: 'notification'});	
 		
 	}
 };

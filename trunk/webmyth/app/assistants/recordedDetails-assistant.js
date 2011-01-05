@@ -378,7 +378,7 @@ RecordedDetailsAssistant.prototype.openWeb = function(website) {
   
   switch(website) {
 	case 'Wikipedia':
-		url = "http://en.m.wikipedia.org/wiki/Special:Search?search="+this.recordedObject.title;
+		url = "http://"+Mojo.Locale.getCurrentLocale().substring(0,2)+".m.wikipedia.org/wiki/Special:Search?search="+this.recordedObject.title;
 	  break;
 	case 'themoviedb':
 		url = "http://www.themoviedb.org/search/movies?search[text]="+this.recordedObject.title;

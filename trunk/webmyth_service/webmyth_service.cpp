@@ -38,8 +38,8 @@
 #include <string>
 
 
-#include <my_global.h>
-#include <mysql.h>
+//#include <my_global.h>
+//#include <mysql.h>
 
 
 
@@ -1032,10 +1032,10 @@ PDL_bool upnpCommand(PDL_JSParameters *params){
 PDL_bool mysqlCommand(PDL_JSParameters *params){
 	//function(host, port, db, username, password, query)
 	
-	syslog(LOG_INFO, "MySQL client version: %s\n", mysql_get_client_info());
+	//syslog(LOG_INFO, "MySQL client version: %s\n", mysql_get_client_info());
 
 	
-	PDL_JSReply(params, mysql_get_client_info());
+	//PDL_JSReply(params, mysql_get_client_info());
 
     return PDL_TRUE;
 	
