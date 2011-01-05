@@ -2486,6 +2486,37 @@ var cleanUpcoming = function(fullList) {
 	return finalList;
 }
 
+var cleanRecordedGroup = function(fullList) {
+
+	var finalList = [];
+	
+	finalList.push({label: $L('All'), recgroup: $L('All'), command: "go-groupAllRecgroupsOn", id: 0});
+	
+	var i, s = {}, currentLabel = 'All';
+	
+	fullList.sort(sort_by('label', false));
+	
+	for(i = 0; i < fullList.length; i++) {
+		s = {};
+		s = fullList[i];
+		s.id = i+1;
+		
+		if(s.label == currentLabel) {
+			//Same recgroup as last, don't add to list
+			Mojo.Log.info("not adding to recgroup %j",s);
+		} else {
+			currentLabel = s.label;
+			s.id = i+1;
+			finalList.push(s);
+		}
+
+		
+	}
+	
+	return finalList;
+	
+}
+
 var cleanInputs = function(fullList) {
 
 	var finalList = [];

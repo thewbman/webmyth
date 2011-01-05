@@ -38,15 +38,60 @@ FaqsAssistant.prototype.setup = function() {
 FaqsAssistant.prototype.activate = function(event) {
 
 	$('scene-title').innerText = $L("FAQs");
+	
+	//Keypress event
+	Mojo.Event.listen(this.controller.sceneElement, Mojo.Event.keyup, this.handleKey.bind(this));
 
 };
 
 FaqsAssistant.prototype.deactivate = function(event) {
-	/* remove any event handlers you added in activate and do any other cleanup that should happen before
-	   this scene is popped or another scene is pushed on top */
+
+	//Keypress event
+	Mojo.Event.stopListening(this.controller.sceneElement, Mojo.Event.keyup, this.handleKey.bind(this));
+	
 };
 
 FaqsAssistant.prototype.cleanup = function(event) {
-	/* this function should do any cleanup needed before the scene is destroyed as 
-	   a result of being popped off the scene stack */
+
 };
+
+FaqsAssistant.prototype.handleCommand = function(event) {
+
+  if(event.type == Mojo.Event.forward) {
+  
+	Mojo.Controller.stageController.pushScene({name: WebMyth.prefsCookieObject.currentRemoteScene, disableSceneScroller: true});
+	
+  } 
+  
+};
+
+FaqsAssistant.prototype.handleKey = function(event) {
+
+	//Mojo.Log.info("FAQs handleKey %o, %o", event.originalEvent.metaKey, event.originalEvent.keyCode);
+	
+	if(event.originalEvent.metaKey) {
+		switch(event.originalEvent.keyCode) {
+			case 71:
+				Mojo.Log.info("g - shortcut key to guide");
+				Mojo.Controller.stageController.swapScene("guide");	
+				break;
+			case 82:
+				Mojo.Log.info("r - shortcut key to recorded");
+				Mojo.Controller.stageController.swapScene("recorded");
+				break;
+			case 83:
+				Mojo.Log.info("s - shortcut key to status");
+				Mojo.Controller.stageController.swapScene("status");
+				break;
+			case 85:
+				Mojo.Log.info("u - shortcut key to upcoming");
+				Mojo.Controller.stageController.swapScene("upcoming");
+				break;
+			default:
+				Mojo.Log.info("No shortcut key");
+				break;
+		}
+	}
+	Event.stop(event); 
+};
+

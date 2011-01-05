@@ -251,7 +251,7 @@ UpcomingDetailsXMLAssistant.prototype.openWeb = function(website) {
   
   switch(website) {
 	case 'Wikipedia':
-		url = "http://en.m.wikipedia.org/wiki/Special:Search?search="+this.upcomingObject.title;
+		url = "http://"+Mojo.Locale.getCurrentLocale().substring(0,2)+".m.wikipedia.org/wiki/Special:Search?search="+this.upcomingObject.title;
 	  break;
 	case 'themoviedb':
 		url = "http://www.themoviedb.org/search/movies?search[text]="+this.upcomingObject.title;

@@ -314,6 +314,112 @@ body.palm-dark {
 	background-color: #222222;
 }
 
+.flickDeleteButton {
+	position: absolute;
+	left: 265px;
+	height: 40px;
+	width: 40px;
+	-webkit-border-radius: 20px;
+	border-radius: 20px;
+	
+	border-style: solid;
+	border-color: #000000;
+	
+	background-color: rgba(50, 50, 50, 0.1);
+	
+	text-align: center;
+	vertical-align: middle;
+	font-size: 28px;
+}
+
+.flickDeleteButton:active {
+	background-color: #222222;
+}
+
+.flickMenuButton {
+	position: absolute;
+	left: 10px;
+	top: 180px;
+	height: 40px;
+	width: 40px;
+	-webkit-border-radius: 20px;
+	border-radius: 20px;
+	
+	border-style: solid;
+	border-color: #000000;
+	
+	background-color: rgba(50, 50, 50, 0.1);
+	
+	text-align: center;
+	vertical-align: middle;
+	font-size: 28px;
+}
+
+.height-480 .flickMenuButton {
+	position: absolute;
+	left: 10px;
+	top: 240px;
+	height: 40px;
+	width: 40px;
+	-webkit-border-radius: 20px;
+	border-radius: 20px;
+	
+	border-style: solid;
+	border-color: #000000;
+	
+	background-color: rgba(50, 50, 50, 0.1);
+	
+	text-align: center;
+	vertical-align: middle;
+	font-size: 28px;
+}
+
+.flickMenuButton:active {
+	background-color: #222222;
+}
+
+.flickInfoButton {
+	position: absolute;
+	left: 265px;
+	top: 180px;
+	height: 40px;
+	width: 40px;
+	-webkit-border-radius: 20px;
+	border-radius: 20px;
+	
+	border-style: solid;
+	border-color: #000000;
+	
+	background-color: rgba(50, 50, 50, 0.1);
+	
+	text-align: center;
+	vertical-align: middle;
+	font-size: 28px;
+}
+
+.height-480 .flickInfoButton {
+	position: absolute;
+	left: 265px;
+	top: 240px;
+	height: 40px;
+	width: 40px;
+	-webkit-border-radius: 20px;
+	border-radius: 20px;
+	
+	border-style: solid;
+	border-color: #000000;
+	
+	background-color: rgba(50, 50, 50, 0.1);
+	
+	text-align: center;
+	vertical-align: middle;
+	font-size: 28px;
+}
+
+.flickInfoButton:active {
+	background-color: #222222;
+}
+
 /*
  * Dashboard
  */

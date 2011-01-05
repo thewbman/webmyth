@@ -565,10 +565,19 @@ SetupRecordingAssistant.prototype.getEncoderInputs = function() {
 	//Get the exisiting recording
 	Mojo.Log.info('Starting getting encoder inputs');
 		
-	
+	/*
 	var requestUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webmythPythonFile;
 	requestUrl += "?op=getSQL";				
 	requestUrl += "&table=cardinput";				
+	*/
+	
+	var query = "SELECT cardinputid, displayname FROM cardinput";
+	
+	
+	var requestUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webmythPythonFile;
+	requestUrl += "?op=executeSQLwithResponse";				
+	requestUrl += "&query64=";		
+	requestUrl += Base64.encode(query);	
 	
 	
 	

@@ -20,11 +20,15 @@
  
  
  function StatusAssistant() {
-	   
-	   this.encodersList = [];
-	   this.scheduledList = [];
-	   this.jobqueueList = [{"id":"-1", "noJobs":"true"}];
-	   this.storageList = [];
+	
+	this.encodersList = [];
+	this.cardinputsList = [];
+	this.scheduledList = [];
+	this.jobqueueList = [{"id":"-1", "noJobs":"true"}];
+	this.storageList = [];
+	
+	this.doneStatusXML = false;
+	this.doneCardinputs = false;
 	   
 }
 
@@ -179,6 +183,8 @@ StatusAssistant.prototype.setup = function() {
 	
 	this.getStatus();
 	
+	this.getCardinputs();
+	
 };
 
 StatusAssistant.prototype.activate = function(event) {
@@ -205,8 +211,7 @@ StatusAssistant.prototype.deactivate = function(event) {
 };
 
 StatusAssistant.prototype.cleanup = function(event) {
-	/* this function should do any cleanup needed before the scene is destroyed as 
-	   a result of being popped off the scene stack */
+
 };
 
 StatusAssistant.prototype.handleCommand = function(event) {
@@ -288,6 +293,37 @@ StatusAssistant.prototype.getStatus = function() {
 	
 };
 
+StatusAssistant.prototype.getCardinputs = function() {
+	
+	//Getting encoder names from table 'cardinput'
+	
+	var query = "SELECT cardid, displayname FROM cardinput";
+	
+	
+	var requestUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webmythPythonFile;
+	requestUrl += "?op=executeSQLwithResponse";				
+	requestUrl += "&query64=";		
+	requestUrl += Base64.encode(query);	
+	
+	
+    try {
+        var request = new Ajax.Request(requestUrl,{
+            method: 'get',
+            evalJSON: 'true',
+			requestHeaders: {Authorization: 'Basic ' + Base64.encode(WebMyth.prefsCookieObject.webserverUsername + ":" + WebMyth.prefsCookieObject.webserverPassword)},
+			onSuccess: this.readCardinputsSuccess.bind(this),
+            onFailure: function() {
+						Mojo.Log.info("Failed to get encoder names from SQL")	
+				}   
+        });
+    }
+    catch(e) {
+        Mojo.Log.error(e);
+    }
+	
+	
+};
+
 StatusAssistant.prototype.toggleGeneralDrawer = function() {
 	this.generalStatusDrawer.mojo.setOpenState(!this.generalStatusDrawer.mojo.getOpenState());
 	
@@ -363,7 +399,23 @@ StatusAssistant.prototype.toggleGuideDrawer = function() {
 
 
 
+StatusAssistant.prototype.readCardinputsSuccess = function(response) {
 
+	Mojo.Log.error("Got encoders SQL response: %j",response.responseJSON);
+	
+	this.cardinputsList.clear();
+	
+	Object.extend(this.cardinputsList, response.responseJSON);
+	
+	
+	//Show encoders names only after we get both XML status and SQL response
+	this.doneCardinputs = true;
+	
+	if(this.doneStatusXML) {
+		this.combineEncoders();
+	}
+
+}
 
 StatusAssistant.prototype.readStatusFail = function(response) {
 	Mojo.Log.error("Failed to get status information");	
@@ -417,6 +469,13 @@ StatusAssistant.prototype.readStatusSuccess = function(response) {
 	} 
 	//Mojo.Log.info("Full encoder list is %j", this.encodersList);
 	this.controller.modelChanged(this.encodersListModel);
+	
+	//Show encoders names only after we get both XML status and SQL response
+	this.doneStatusXML = true;
+	
+	if(this.doneCardinputs) {
+		this.combineEncoders();
+	}
 		
 	
 	//Scheduled
@@ -607,6 +666,101 @@ StatusAssistant.prototype.readStatusSuccess = function(response) {
 	
 };
 
+StatusAssistant.prototype.combineEncoders = function() {
+
+	Mojo.Log.info("Combining encoders data from XML and SQL");
+	
+	var i, j, s = {};
+	
+	for(i = 0; i < this.encodersList.length; i++){
+		//s = this.encodersList[i];
+	
+		for(j = 0; j < this.cardinputsList.length; j++){
+			
+			if(this.cardinputsList[j].cardid == this.encodersList[i].id){
+				this.encodersList[i].displayname = this.cardinputsList[j].displayname;
+			}
+			
+		}
+	
+	}
+	
+	this.controller.modelChanged(this.encodersListModel);
+	
+}
+
+
+StatusAssistant.prototype.setEncodersData = function(propertyValue, model)  { 
+	
+	var state;
+	
+	switch(parseInt(model.state)) {
+		case -1:
+			state = $L("Disconnected");
+			break;
+		case 0:
+			state = $L("Idle");
+			break;
+		case 1:
+			state = $L("Watching Live TV");
+			break;
+		case 2:
+			state = $L("Watching Pre-Recorded");
+			break;
+		case 3:
+			state = $L("Watching Video");
+			break;
+		case 4:
+			state = $L("Watching DVD");
+			break;
+		case 5:
+			state = $L("Watching BD");
+			break;
+		case 6:
+			state = $L("Recording");
+			break;
+		case 7:
+			state = $L("Recording");
+			break;
+		case 8:
+			state = $L("Unknown Status 8");
+			break;
+		case 9:
+			state = $L("Unknown Status 9");
+			break;
+		default:
+			state = $L("Unknown");
+			break;
+	};
+	
+			
+	
+	var myDataModel = '<div class="palm-row-wrapper">';
+	//myDataModel += '<div class="title"> ';
+    myDataModel += '<div class="title">'+$L('Encoder')+' #'+model.id;
+	
+	if(model.displayname){
+		if(model.displayname == ""){
+			//don't diplay name if blank
+		} else {
+			myDataModel += ' ('+model.displayname+')';
+		}
+	}	
+	
+	myDataModel += ' on '+model.hostname+' is '+state+'</div>';
+    //myDataModel += '</div>';
+	
+	if(model.title) {
+		myDataModel += '<div class="palm-info-text">'+model.title+': '+model.subTitle+'<br />';
+		myDataModel += 'Program finishes at '+model.endTime+'</div>';
+	}
+	
+	myDataModel += '</div>';
+	
+	model.myEncodersData = myDataModel;
+	
+
+};
 
 StatusAssistant.prototype.setJobqueueData = function(propertyValue, model)  { 
 	
@@ -722,67 +876,3 @@ StatusAssistant.prototype.setJobqueueData = function(propertyValue, model)  {
 	
 
 };
-
-
-StatusAssistant.prototype.setEncodersData = function(propertyValue, model)  { 
-	
-	var state;
-	
-	switch(parseInt(model.state)) {
-		case -1:
-			state = $L("Disconnected");
-			break;
-		case 0:
-			state = $L("Idle");
-			break;
-		case 1:
-			state = $L("Watching Live TV");
-			break;
-		case 2:
-			state = $L("Watching Pre-Recorded");
-			break;
-		case 3:
-			state = $L("Watching Video");
-			break;
-		case 4:
-			state = $L("Watching DVD");
-			break;
-		case 5:
-			state = $L("Watching BD");
-			break;
-		case 6:
-			state = $L("Recording");
-			break;
-		case 7:
-			state = $L("Recording");
-			break;
-		case 8:
-			state = $L("Unknown Status 8");
-			break;
-		case 9:
-			state = $L("Unknown Status 9");
-			break;
-		default:
-			state = $L("Unknown");
-			break;
-	};
-	
-			
-	
-	var myDataModel = '<div class="palm-row-wrapper">';
-	//myDataModel += '<div class="title"> ';
-    myDataModel += '<div class="title">'+$L('Encoder')+' #'+model.id+' on '+model.hostname+' is '+state+'</div>';
-    //myDataModel += '</div>';
-	
-	if(model.title) {
-		myDataModel += '<div class="palm-info-text">'+model.title+': '+model.subTitle+'<br />';
-		myDataModel += 'Program finishes at '+model.endTime+'</div>';
-	}
-	
-	myDataModel += '</div>';
-	
-	model.myEncodersData = myDataModel;
-	
-
-};
-

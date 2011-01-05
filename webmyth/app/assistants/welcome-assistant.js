@@ -272,15 +272,20 @@ WelcomeAssistant.prototype.setup = function() {
 	//Get script veriosn
 	this.getScriptVersion();
 	
+	//Start plugin
+	if((Mojo.Environment.DeviceInfo.modelNameAscii == "Device")||(Mojo.Environment.DeviceInfo.modelNameAscii == "Emulator")) {
+		WebMyth.usePlugin = false;
+		Mojo.Controller.getAppController().showBanner("On "+Mojo.Environment.DeviceInfo.modelNameAscii+" - no plugin", {source: 'notification'});
+	} else {
+		if(WebMyth.usePlugin){
+			WebMyth.newPluginSocket("query location");
+		}
+	}
+	
 	//Start telnet service
 	if(WebMyth.useService){
 		WebMyth.welcomeSceneController = this;
 		WebMyth.startCommunication(this);
-	}
-	
-	//Start frontend plugin
-	if(WebMyth.usePlugin){
-		//WebMyth.newPluginSocket("query location");
 	}
 	
 };
@@ -539,6 +544,7 @@ WelcomeAssistant.prototype.alertNeedScript = function() {
     });
 	
 };
+
 
 
 WelcomeAssistant.prototype.doWelcomeIcon = function(event) {	
