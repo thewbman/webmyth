@@ -109,12 +109,14 @@ VideosAssistant.prototype.setup = function() {
 	Mojo.Event.listen(this.controller.get( "header-menu" ), Mojo.Event.tap, function(){this.controller.sceneScroller.mojo.revealTop();}.bind(this));
 	
 	
-	//Storage groups for video playback
-	this.getStorageGroups();
-	
 	//List of videos
 	this.getVideos();
-
+	
+	
+	if(WebMyth.usePlugin){
+		$('webmyth_service_id').mysqlVideosResponse = this.mysqlVideosResponse.bind(this);
+		$('webmyth_service_id').mysqlVideosStoragegroupResponse = this.mysqlVideosStoragegroupResponse.bind(this);
+	}
 
 };
 
@@ -144,7 +146,7 @@ VideosAssistant.prototype.handleCommand = function(event) {
 	 if(event.type == Mojo.Event.command) {
 		myCommand = event.command.substring(0,7);
 		mySelection = event.command.substring(8);
-		Mojo.Log.error("command: "+myCommand+" host: "+mySelection);
+		//Mojo.Log.error("command: "+myCommand+" host: "+mySelection);
 
 		switch(myCommand) {
 		  case 'go-sort':		//sort
@@ -182,21 +184,37 @@ VideosAssistant.prototype.handleKey = function(event) {
 	
 	if(event.originalEvent.metaKey) {
 		switch(event.originalEvent.keyCode) {
-			case 71:
-				//Mojo.Log.info("g - shortcut key to guide");
-				Mojo.Controller.stageController.swapScene("guide");	
+			case 72:
+				Mojo.Log.info("h - shortcut key to hostSelector");
+				Mojo.Controller.stageController.swapScene("hostSelector");
 				break;
 			case 82:
-				//Mojo.Log.info("r - shortcut key to recorded");
+				Mojo.Log.info("r - shortcut key to recorded");
 				Mojo.Controller.stageController.swapScene("recorded");
 				break;
+			case 85:
+				Mojo.Log.info("u - shortcut key to upcoming");
+				Mojo.Controller.stageController.swapScene("upcoming");
+				break;
+			case 71:
+				Mojo.Log.info("g - shortcut key to guide");
+				Mojo.Controller.stageController.swapScene("guide");	
+				break;
+			case 86:
+				Mojo.Log.info("v - shortcut key to videos");
+				Mojo.Controller.stageController.swapScene("videos");	
+				break;
+			case 77:
+				Mojo.Log.info("m - shortcut key to musicList");
+				Mojo.Controller.stageController.swapScene("musicList");	
+				break;
 			case 83:
-				//Mojo.Log.info("s - shortcut key to status");
+				Mojo.Log.info("s - shortcut key to status");
 				Mojo.Controller.stageController.swapScene("status");
 				break;
-			case 85:
-				//Mojo.Log.info("u - shortcut key to upcoming");
-				Mojo.Controller.stageController.swapScene("upcoming");
+			case 76:
+				Mojo.Log.info("l - shortcut key to log");
+				Mojo.Controller.stageController.swapScene("log");	
 				break;
 			default:
 				//Mojo.Log.info("No shortcut key");
@@ -217,24 +235,39 @@ VideosAssistant.prototype.getStorageGroups = function(event) {
 	
 	this.controller.sceneScroller.mojo.revealTop();
 	
-	var requestUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webmythPythonFile;
-	//requestUrl += "?op=getStorageGroup";	
-	requestUrl += "?op=getSQL&table=storagegroup";
+	
+	var query = "SELECT * FROM storagegroup ;";
 	
 	
+	if(WebMyth.usePlugin){
 	
-    try {
-        var request = new Ajax.Request(requestUrl,{
-            method: 'get',
-            evalJSON: 'true',
-			requestHeaders: {Authorization: 'Basic ' + Base64.encode(WebMyth.prefsCookieObject.webserverUsername + ":" + WebMyth.prefsCookieObject.webserverPassword)},
-            onSuccess: this.readStorageGroupsSuccess.bind(this),
-            onFailure: this.readStorageGroupsFail.bind(this)  
-        });
-    }
-    catch(e) {
-        Mojo.Log.error(e);
-    }
+		var response1 = $('webmyth_service_id').mysqlCommand(WebMyth.prefsCookieObject.databaseHost,WebMyth.prefsCookieObject.databaseUsername,WebMyth.prefsCookieObject.databasePassword,WebMyth.prefsCookieObject.databaseName,WebMyth.prefsCookieObject.databasePort,"mysqlVideosStoragegroupResponse",query.substring(0,250),query.substring(250,500),query.substring(500,750),query.substring(750,1000),query.substring(1000,1250),query.substring(1250,1500),query.substring(1500,1750),query.substring(1750,2000),query.substring(2000,2250),query.substring(2250,2500));
+		
+		Mojo.Log.error("Videos plugin response "+response1);
+		
+	} else {
+	
+		var requestUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webmythPythonFile;
+		//requestUrl += "?op=getVideos";	
+		//requestUrl += "?op=getSQL&table=videometadata";
+		requestUrl += "?op=executeSQLwithResponse";			
+		requestUrl += "&query64=";		
+		requestUrl += Base64.encode(query);	
+	
+		try {
+			var request = new Ajax.Request(requestUrl,{
+				method: 'get',
+				evalJSON: 'true',
+				requestHeaders: {Authorization: 'Basic ' + Base64.encode(WebMyth.prefsCookieObject.webserverUsername + ":" + WebMyth.prefsCookieObject.webserverPassword)},
+				onSuccess: this.readStorageGroupsSuccess.bind(this),
+				onFailure: this.readStorageGroupsFail.bind(this)  
+			});
+		}
+		catch(e) {
+			Mojo.Log.error(e);
+		}
+	
+	}
 	
 };
 
@@ -255,6 +288,20 @@ VideosAssistant.prototype.readStorageGroupsSuccess = function(response) {
 	
 }
 
+VideosAssistant.prototype.mysqlVideosStoragegroupResponse = function(response) {
+
+	Mojo.Log.error("Got storagegroup plugin response: "+response);
+	
+	var storagegroupJson = JSON.parse(response);
+	
+	Mojo.Log.error("Plugin videos JSON %j",storagegroupJson);
+	
+	//Update the storage group list
+	this.storageGroups.clear();
+	Object.extend(this.storageGroups,storagegroupJson);
+	
+}
+
 VideosAssistant.prototype.getVideos = function(event) {
 
 	//Update list from webmyth python script
@@ -271,28 +318,62 @@ VideosAssistant.prototype.getVideos = function(event) {
 	query += " LEFT OUTER JOIN videocategory ON videocategory.intid = videometadata.category ";
 	
 	
+	if(WebMyth.usePlugin){
 	
-	var requestUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webmythPythonFile;
-	//requestUrl += "?op=getVideos";	
-	//requestUrl += "?op=getSQL&table=videometadata";
-	requestUrl += "?op=executeSQLwithResponse";			
-	requestUrl += "&query64=";		
-	requestUrl += Base64.encode(query);	
+		var response1 = $('webmyth_service_id').mysqlCommand(WebMyth.prefsCookieObject.databaseHost,WebMyth.prefsCookieObject.databaseUsername,WebMyth.prefsCookieObject.databasePassword,WebMyth.prefsCookieObject.databaseName,WebMyth.prefsCookieObject.databasePort,"mysqlVideosResponse",query.substring(0,250),query.substring(250,500),query.substring(500,750),query.substring(750,1000),query.substring(1000,1250),query.substring(1250,1500),query.substring(1500,1750),query.substring(1750,2000),query.substring(2000,2250),query.substring(2250,2500));
+		
+		Mojo.Log.error("Videos plugin response "+response1);
+		
+	} else {
 	
-    try {
-        var request = new Ajax.Request(requestUrl,{
-            method: 'get',
-            evalJSON: 'true',
-			requestHeaders: {Authorization: 'Basic ' + Base64.encode(WebMyth.prefsCookieObject.webserverUsername + ":" + WebMyth.prefsCookieObject.webserverPassword)},
-            onSuccess: this.readRemoteDbTableSuccess.bind(this),
-            onFailure: this.readRemoteDbTableFail.bind(this)  
-        });
-    }
-    catch(e) {
-        Mojo.Log.error(e);
-    }
+		var requestUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webmythPythonFile;
+		//requestUrl += "?op=getVideos";	
+		//requestUrl += "?op=getSQL&table=videometadata";
+		requestUrl += "?op=executeSQLwithResponse";			
+		requestUrl += "&query64=";		
+		requestUrl += Base64.encode(query);	
+		
+		try {
+			var request = new Ajax.Request(requestUrl,{
+				method: 'get',
+				evalJSON: 'true',
+				requestHeaders: {Authorization: 'Basic ' + Base64.encode(WebMyth.prefsCookieObject.webserverUsername + ":" + WebMyth.prefsCookieObject.webserverPassword)},
+				onSuccess: this.readRemoteDbTableSuccess.bind(this),
+				onFailure: this.readRemoteDbTableFail.bind(this)  
+			});
+		}
+		catch(e) {
+			Mojo.Log.error(e);
+		}
+	}
 	
 };
+
+VideosAssistant.prototype.mysqlVideosResponse = function(response) {
+
+	Mojo.Log.error("Got Videos plugin response: "+response);
+	
+	//var videosJson = JSON.parse(response);
+	
+	//Mojo.Log.error("Plugin videos JSON %j",videosJson);
+	
+	//Update the list widget
+	this.fullResultList.clear();
+	Object.extend(this.fullResultList,cleanVideos(JSON.parse(response)));
+	//Mojo.Log.info('Cleaned Videos is: %j',this.fullResultList);
+	
+	
+	this.directoryList.clear();
+	Object.extend(this.fullDirectoryList,cleanVideosDirectory(this.fullResultList.sort(sort_by('filename', false))));
+	//Mojo.Log.info("Video directory list is %s long and is %j",this.fullDirectoryList.length,this.fullDirectoryList);
+	
+	
+	
+	//$("scene-title").innerHTML = "Videos ("+this.fullResultList.length+" items)";
+	
+	this.finishedReadingVideos();
+	
+}
 
 VideosAssistant.prototype.readRemoteDbTableFail = function(event) {
 
@@ -340,6 +421,11 @@ VideosAssistant.prototype.readRemoteDbTableSuccess = function(response) {
 
 VideosAssistant.prototype.finishedReadingVideos = function() {
 
+	//Storage groups for video playback  (because we cannot call the plugin directly from a previous plugin callback)
+	this.controller.window.setTimeout(this.getStorageGroups.bind(this), 250);
+
+	
+	//Sort returned list
 	this.sortChanged(WebMyth.prefsCookieObject.currentVideosSort);
 	
 }

@@ -25,17 +25,11 @@ function SetupRecordingAssistant(programObject) {
 	
 	this.inputs = [];
 	
-	this.finishedGettingRule = false;
-	this.finishedGettingInputs = false;
-	this.finishedGettingSettings = false;	
-	
-	this.finishedGettingDefaults = true;	//preloaded on welcome scene
-	
 }
 
 SetupRecordingAssistant.prototype.setup = function() {
 
-	Mojo.Log.info("program object is %j", this.programObject);
+	Mojo.Log.info("Program object is %j", this.programObject);
 
 	//Show and start the animated spinner
 	this.spinnerAttr= {
@@ -337,21 +331,15 @@ SetupRecordingAssistant.prototype.setup = function() {
 	
 	
 	
-	this.getEncoderInputs();
-	
-	//this.getGeneralSettings();  //preloaded from welcome
-	
-	
-	
-	
-	//Get data
-	if(this.programObject.recordId){
-		//if we were given a object that has a recording
-		this.getExistingRecord();
-	} else {
-		//load up defaults
-		this.getDefaultRule();
+	if(WebMyth.usePlugin){
+		$('webmyth_service_id').mysqlScheduleCardinputResponse = this.mysqlScheduleCardinputResponse.bind(this);
+		$('webmyth_service_id').mysqlScheduleRecordidResponse = this.mysqlScheduleRecordidResponse.bind(this);
+		$('webmyth_service_id').mysqlScheduleExecuteResponse = this.mysqlScheduleExecuteResponse.bind(this);
 	}
+	
+	
+	//Get encoder inputs first
+	this.getEncoderInputs();
 	
 };
 
@@ -370,26 +358,26 @@ SetupRecordingAssistant.prototype.activate = function(event) {
 		$('programid-label').innerText = $L('Program ID');
 		$('endtime-label').innerText = $L('End Time');
 		$('chanid-label').innerText = $L('ChanID');
-		
-		
-		
-		
 	$('recordingOptionsLabel').innerText = $L('Recording Options');
 	
 	$('jobOptionsLabel').innerText = $L('Job Options');
 		$('commercialFlag-label').innerText = $L('Commercial Flag');
 		$('transcode-label').innerText = $L('Transcode');
+
+	//Keypress event
+	Mojo.Event.listen(this.controller.sceneElement, Mojo.Event.keyup, this.handleKey.bind(this));
 	
 };
 
 SetupRecordingAssistant.prototype.deactivate = function(event) {
-	/* remove any event handlers you added in activate and do any other cleanup that should happen before
-	   this scene is popped or another scene is pushed on top */
+
+	//Keypress event
+	Mojo.Event.stopListening(this.controller.sceneElement, Mojo.Event.keyup, this.handleKey.bind(this));
+	
 };
 
 SetupRecordingAssistant.prototype.cleanup = function(event) {
-	/* this function should do any cleanup needed before the scene is destroyed as 
-	   a result of being popped off the scene stack */
+
 };
 
 SetupRecordingAssistant.prototype.handleCommand = function(event) {
@@ -457,6 +445,52 @@ SetupRecordingAssistant.prototype.handleCommand = function(event) {
   
 };
 
+SetupRecordingAssistant.prototype.handleKey = function(event) {
+
+	//Mojo.Log.info("FAQs handleKey %o, %o", event.originalEvent.metaKey, event.originalEvent.keyCode);
+	
+	if(event.originalEvent.metaKey) {
+		switch(event.originalEvent.keyCode) {
+			case 72:
+				Mojo.Log.info("h - shortcut key to hostSelector");
+				Mojo.Controller.stageController.swapScene("hostSelector");
+				break;
+			case 82:
+				Mojo.Log.info("r - shortcut key to recorded");
+				Mojo.Controller.stageController.swapScene("recorded");
+				break;
+			case 85:
+				Mojo.Log.info("u - shortcut key to upcoming");
+				Mojo.Controller.stageController.swapScene("upcoming");
+				break;
+			case 71:
+				Mojo.Log.info("g - shortcut key to guide");
+				Mojo.Controller.stageController.swapScene("guide");	
+				break;
+			case 86:
+				Mojo.Log.info("v - shortcut key to videos");
+				Mojo.Controller.stageController.swapScene("videos");	
+				break;
+			case 77:
+				Mojo.Log.info("m - shortcut key to musicList");
+				Mojo.Controller.stageController.swapScene("musicList");	
+				break;
+			case 83:
+				Mojo.Log.info("s - shortcut key to status");
+				Mojo.Controller.stageController.swapScene("status");
+				break;
+			case 76:
+				Mojo.Log.info("l - shortcut key to log");
+				Mojo.Controller.stageController.swapScene("log");	
+				break;
+			default:
+				Mojo.Log.info("No shortcut key");
+				break;
+		}
+	}
+	Event.stop(event); 
+};
+
 
 
 
@@ -512,6 +546,8 @@ SetupRecordingAssistant.prototype.toggleJobOptionsDrawer = function() {
 	}
 };
 
+
+
 SetupRecordingAssistant.prototype.setupOverrideMenu = function() {
 
     this.cmdMenuModel.items = [{},{},{label: $L('Override'), submenu:'override-menu', width: 110},{},{}];
@@ -560,40 +596,72 @@ SetupRecordingAssistant.prototype.setupCreateMenu = function() {
 };
 
 
+
 SetupRecordingAssistant.prototype.getEncoderInputs = function() {
 
 	//Get the exisiting recording
 	Mojo.Log.info('Starting getting encoder inputs');
 		
-	/*
-	var requestUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webmythPythonFile;
-	requestUrl += "?op=getSQL";				
-	requestUrl += "&table=cardinput";				
-	*/
 	
-	var query = "SELECT cardinputid, displayname FROM cardinput";
-	
-	
-	var requestUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webmythPythonFile;
-	requestUrl += "?op=executeSQLwithResponse";				
-	requestUrl += "&query64=";		
-	requestUrl += Base64.encode(query);	
+	var query = "SELECT cardinputid, displayname FROM cardinput ;";
 	
 	
 	
-    try {
-        var request = new Ajax.Request(requestUrl,{
-            method: 'get',
-            evalJSON: 'true',
-			requestHeaders: {Authorization: 'Basic ' + Base64.encode(WebMyth.prefsCookieObject.webserverUsername + ":" + WebMyth.prefsCookieObject.webserverPassword)},
-            onSuccess: this.readInputsSuccess.bind(this),
-            onFailure: this.readInputsFail.bind(this)  
-        });
-    }
-    catch(e) {
-        Mojo.Log.error(e);
-    }
+	
+	try {
+	
+		if(WebMyth.usePlugin){
+		
+			var response1 = $('webmyth_service_id').mysqlCommand(WebMyth.prefsCookieObject.databaseHost,WebMyth.prefsCookieObject.databaseUsername,WebMyth.prefsCookieObject.databasePassword,WebMyth.prefsCookieObject.databaseName,WebMyth.prefsCookieObject.databasePort,"mysqlScheduleCardinputResponse",query.substring(0,250),query.substring(250,500),query.substring(500,750),query.substring(750,1000),query.substring(1000,1250),query.substring(1250,1500),query.substring(1500,1750),query.substring(1750,2000),query.substring(2000,2250),query.substring(2250,2500));
+			
+			Mojo.Log.error("Schedule recording cardinput response "+response1);
+			
+		} else {
+		
+			var requestUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webmythPythonFile;
+			requestUrl += "?op=executeSQLwithResponse";				
+			requestUrl += "&query64=";		
+			requestUrl += Base64.encode(query);	
+		
+			var request = new Ajax.Request(requestUrl,{
+				method: 'get',
+				evalJSON: 'true',
+				requestHeaders: {Authorization: 'Basic ' + Base64.encode(WebMyth.prefsCookieObject.webserverUsername + ":" + WebMyth.prefsCookieObject.webserverPassword)},
+				onSuccess: this.readInputsSuccess.bind(this),
+				onFailure: this.readInputsFail.bind(this)  
+			});
+		}
+	
+	} catch(e) {
+	
+		Mojo.Log.error(e);
 
+	}
+	
+};
+
+SetupRecordingAssistant.prototype.mysqlScheduleCardinputResponse = function(response) {
+
+	Mojo.Log.error("Got schedule cardinput plugin response: "+response);
+	
+	var cardinputJson = JSON.parse(response);
+	
+	
+	this.inputs = cleanInputs(cardinputJson).sort(double_sort_by('value', 'label', false));
+	
+    //Mojo.Log.info('Cleaned inputs is: %j', this.inputs);
+	
+		
+	
+	//Get data
+	if(this.programObject.recordId){
+		//if we were given a object that has a recording
+		setTimeout(this.getExistingRecord.bind(this), 50);
+	} else {
+		//load up defaults
+		this.getDefaultRule();
+	}
+	
 };
 
 SetupRecordingAssistant.prototype.readInputsFail = function(event) {
@@ -610,11 +678,14 @@ SetupRecordingAssistant.prototype.readInputsSuccess = function(response) {
 	
     //Mojo.Log.info('Cleaned inputs is: %j', this.inputs);
 	
-	
-	this.finishedGettingInputs = true;
 		
-	if(this.finishedGettingRule == true) {
-		this.updateInputs();
+	//Get data
+	if(this.programObject.recordId){
+		//if we were given a object that has a recording
+		this.getExistingRecord();
+	} else {
+		//load up defaults
+		this.getDefaultRule();
 	}
 	
 };
@@ -624,31 +695,57 @@ SetupRecordingAssistant.prototype.getExistingRecord = function() {
 	//Get the exisiting recording
 	Mojo.Log.info('Starting getting existing recording info');
 		
-	
+	//mysql this
 	this.controller.sceneScroller.mojo.revealTop();
 	
-	var requestUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webmythPythonFile;
-	requestUrl += "?op=getRecord";				
-	requestUrl += "&recordId="+this.programObject.recordId;				
+	var query = "SELECT * FROM record WHERE recordid="+this.programObject.recordId+" LIMIT 1; ";
 	
 	
-	//Mojo.Log.info('Record details URL is '+requestUrl);
 	
+	try {
 	
-    try {
-        var request = new Ajax.Request(requestUrl,{
-            method: 'get',
-            evalJSON: 'true',
-			requestHeaders: {Authorization: 'Basic ' + Base64.encode(WebMyth.prefsCookieObject.webserverUsername + ":" + WebMyth.prefsCookieObject.webserverPassword)},
-            onSuccess: this.readRecordingRuleSuccess.bind(this),
-            onFailure: this.readRecordingRuleFail.bind(this)  
-        });
-    }
-    catch(e) {
-        Mojo.Log.error(e);
-    }
+		if(WebMyth.usePlugin){
+		
+			var response1 = $('webmyth_service_id').mysqlCommand(WebMyth.prefsCookieObject.databaseHost,WebMyth.prefsCookieObject.databaseUsername,WebMyth.prefsCookieObject.databasePassword,WebMyth.prefsCookieObject.databaseName,WebMyth.prefsCookieObject.databasePort,"mysqlScheduleRecordidResponse",query.substring(0,250),query.substring(250,500),query.substring(500,750),query.substring(750,1000),query.substring(1000,1250),query.substring(1250,1500),query.substring(1500,1750),query.substring(1750,2000),query.substring(2000,2250),query.substring(2250,2500));
+			
+			Mojo.Log.error("Schedule recording recordid response "+response1);
+			
+		} else {
+		
+			var requestUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webmythPythonFile;
+			requestUrl += "?op=executeSQLwithResponse";				
+			requestUrl += "&query64=";		
+			requestUrl += Base64.encode(query);	
+		
+			var request = new Ajax.Request(requestUrl,{
+				method: 'get',
+				evalJSON: 'true',
+				requestHeaders: {Authorization: 'Basic ' + Base64.encode(WebMyth.prefsCookieObject.webserverUsername + ":" + WebMyth.prefsCookieObject.webserverPassword)},
+				onSuccess: this.readRecordingRuleSuccess.bind(this),
+				onFailure: this.readRecordingRuleFail.bind(this)  
+			});
+			
+		}
+	
+	} catch(e) {
+	
+		Mojo.Log.error(e);
 
+	}
+	
 };
+
+SetupRecordingAssistant.prototype.mysqlScheduleRecordidResponse = function(response) {
+
+	Mojo.Log.error("Got schedule recordid plugin response: "+response);
+	
+	var recordidJson = JSON.parse(response);
+	
+	this.recordRule = recordidJson[0];
+	
+	this.displayRuleValues();
+	
+}
 
 SetupRecordingAssistant.prototype.readRecordingRuleFail = function(event) {
 	
@@ -669,7 +766,11 @@ SetupRecordingAssistant.prototype.readRecordingRuleSuccess = function(response) 
 	
 	this.recordRule = response.responseJSON[0];
 	
-	
+	this.displayRuleValues();
+
+}
+
+SetupRecordingAssistant.prototype.displayRuleValues = function() {
 	
 	//Fill in data values
 	$('header-title').innerHTML = $L("Edit recording rule")+" #"+this.recordRule.recordid;
@@ -782,15 +883,12 @@ SetupRecordingAssistant.prototype.readRecordingRuleSuccess = function(response) 
 	$('myScrim').hide()
 	
 	
-	this.finishedGettingRule = true;
 	
-	if(this.finishedGettingInputs == true) {
-		this.updateInputs();
-	} 
+	//Update list of preffered input
+	this.updateInputs();
 	
-	if(this.finishedGettingDefaults == true) {
-		this.updateDefaults();
-	} 
+	
+	this.updateSettingsDefaults();
 	
 
 };
@@ -904,75 +1002,19 @@ SetupRecordingAssistant.prototype.getDefaultRule = function() {
 	
 	//Setup some defaults for creating new rule
 	this.recordRule = { recordid: "-1", last_record: "0000-00-00 00:00:00", last_delete: "0000-00-00 00:00:00", prefinput: "0" };
+
 	
-	this.finishedGettingRule = true;
+	
+	this.controller.sceneScroller.mojo.revealTop();
 	
 	
-	if(this.finishedGettingInputs == true) {
-		this.updateInputs();
-	} 
-	
-	if(this.finishedGettingDefaults == true) {
-		this.updateDefaults();
-	} 
+	//Update list of preffered input
+	this.updateInputs();
+	 
+	//Update jobqueue names and 
+	this.updateSettingsDefaults(); 
 	
 
-};
-
-SetupRecordingAssistant.prototype.getGeneralSettings = function() {
-
-	//Get the exisiting recording
-	Mojo.Log.info('Starting getting general settings');
-	
-	
-	var query = "SELECT * FROM `settings`  WHERE `hostname` IS NULL ;";
-	
-	
-	
-	var requestUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webmythPythonFile;
-	requestUrl += "?op=executeSQLwithResponse";				
-	requestUrl += "&query64=";		
-	requestUrl += Base64.encode(query);	
-	
-	
-	
-    try {
-        var request = new Ajax.Request(requestUrl,{
-            method: 'get',
-            evalJSON: 'true',
-			requestHeaders: {Authorization: 'Basic ' + Base64.encode(WebMyth.prefsCookieObject.webserverUsername + ":" + WebMyth.prefsCookieObject.webserverPassword)},
-			onSuccess: this.readSettingsSuccess.bind(this),
-            onFailure: this.readSettingsFail.bind(this)  
-        });
-    }
-    catch(e) {
-        Mojo.Log.error(e);
-    }
-
-};
-
-SetupRecordingAssistant.prototype.readSettingsFail = function(event) {
-	
-	Mojo.Log.error('Failed to get general settings');
-
-};
-
-SetupRecordingAssistant.prototype.readSettingsSuccess = function(response) {
-
-	//Mojo.Log.info('Got settings table rule responseJSON: %j', response.responseJSON);
-	
-	WebMyth.settings = cleanSettings(response.responseJSON);
-	
-	Mojo.Log.info("Cleaned settings is %j",WebMyth.settings);
-	
-	
-	
-	this.finishedGettingDefaults = true;
-		
-	if(this.finishedGettingRule == true) {
-		this.updateDefaults();
-	}
-	
 };
 
 SetupRecordingAssistant.prototype.updateInputs = function() {
@@ -993,7 +1035,7 @@ SetupRecordingAssistant.prototype.updateInputs = function() {
 
 };
 
-SetupRecordingAssistant.prototype.updateDefaults = function() {
+SetupRecordingAssistant.prototype.updateSettingsDefaults = function() {
 
     Mojo.Log.info("Updating default settings");
 	
@@ -1010,54 +1052,54 @@ SetupRecordingAssistant.prototype.updateDefaults = function() {
 		//load up defaults
 
 
-		//recording options
-/*	this.profileModel.value = this.recordRule.profile;
-		this.controller.modelChanged(this.profileModel, this);
-	this.transcoderModel.value = this.recordRule.transcoder;
-		this.controller.modelChanged(this.transcoderModel, this);
-	this.recgroupModel.value = this.recordRule.recgroup;
-		this.controller.modelChanged(this.recgroupModel, this);
-	this.storagegroupModel.value = this.recordRule.storagegroup;
-		this.controller.modelChanged(this.storagegroupModel, this);
-	this.playgroupModel.value = this.recordRule.playgroup;
-		this.controller.modelChanged(this.playgroupModel, this); 
-	this.recpriorityModel.value = this.recordRule.recpriority;
-		this.controller.modelChanged(this.recpriorityModel, this);
-	this.dupmethodListModel.value = this.recordRule.dupmethod;
-		this.controller.modelChanged(this.dupmethodListModel, this); 
-	this.dupinListModel.value = splitDupin(this.recordRule.dupin).dupin1;
-		this.controller.modelChanged(this.dupinListModel, this); 
-	this.filterListModel.value = splitDupin(this.recordRule.dupin).dupin2;
-		this.controller.modelChanged(this.filterListModel, this);
-	this.inactiveModel.value = intToBool(this.recordRule.inactive);
-		this.controller.modelChanged(this.inactiveModel, this);
-	this.autoexpireModel.value = intToBool(this.recordRule.autoexpire);
-		this.controller.modelChanged(this.autoexpireModel, this);
-	this.maxnewestModel.value = intToBool(this.recordRule.maxnewest);
-		this.controller.modelChanged(this.maxnewestModel, this);
-	this.maxepisodesModel.value = this.recordRule.maxepisodes;
-		this.controller.modelChanged(this.maxepisodesModel, this);		*/
+			//recording options
+	/*	this.profileModel.value = this.recordRule.profile;
+			this.controller.modelChanged(this.profileModel, this);
+		this.transcoderModel.value = this.recordRule.transcoder;
+			this.controller.modelChanged(this.transcoderModel, this);
+		this.recgroupModel.value = this.recordRule.recgroup;
+			this.controller.modelChanged(this.recgroupModel, this);
+		this.storagegroupModel.value = this.recordRule.storagegroup;
+			this.controller.modelChanged(this.storagegroupModel, this);
+		this.playgroupModel.value = this.recordRule.playgroup;
+			this.controller.modelChanged(this.playgroupModel, this); 
+		this.recpriorityModel.value = this.recordRule.recpriority;
+			this.controller.modelChanged(this.recpriorityModel, this);
+		this.dupmethodListModel.value = this.recordRule.dupmethod;
+			this.controller.modelChanged(this.dupmethodListModel, this); 
+		this.dupinListModel.value = splitDupin(this.recordRule.dupin).dupin1;
+			this.controller.modelChanged(this.dupinListModel, this); 
+		this.filterListModel.value = splitDupin(this.recordRule.dupin).dupin2;
+			this.controller.modelChanged(this.filterListModel, this);
+		this.inactiveModel.value = intToBool(this.recordRule.inactive);
+			this.controller.modelChanged(this.inactiveModel, this);
+		this.autoexpireModel.value = intToBool(this.recordRule.autoexpire);
+			this.controller.modelChanged(this.autoexpireModel, this);
+		this.maxnewestModel.value = intToBool(this.recordRule.maxnewest);
+			this.controller.modelChanged(this.maxnewestModel, this);
+		this.maxepisodesModel.value = this.recordRule.maxepisodes;
+			this.controller.modelChanged(this.maxepisodesModel, this);		*/
+			
+		this.startoffsetModel.value = WebMyth.settings.DefaultStartOffset;
+			this.controller.modelChanged(this.startoffsetModel, this);
+		this.endoffsetModel.value = WebMyth.settings.DefaultEndOffset;
+			this.controller.modelChanged(this.endoffsetModel, this);
 		
-	this.startoffsetModel.value = WebMyth.settings.DefaultStartOffset;
-		this.controller.modelChanged(this.startoffsetModel, this);
-	this.endoffsetModel.value = WebMyth.settings.DefaultEndOffset;
-		this.controller.modelChanged(this.endoffsetModel, this);
-	
-	
-	
-		//job options
-	this.autocommflagModel.value = intToBool(WebMyth.settings.AutoCommercialFlag);
-		this.controller.modelChanged(this.autocommflagModel, this);
-	this.autotranscodeModel.value = intToBool(WebMyth.settings.AutoTranscode);
-		this.controller.modelChanged(this.autotranscodeModel, this);
-	this.autouserjob1Model.value = intToBool(WebMyth.settings.AutoRunUserJob1);
-		this.controller.modelChanged(this.autouserjob1Model, this);
-	this.autouserjob2Model.value = intToBool(WebMyth.settings.AutoRunUserJob2);
-		this.controller.modelChanged(this.autouserjob2Model, this);
-	this.autouserjob3Model.value = intToBool(WebMyth.settings.AutoRunUserJob3);
-		this.controller.modelChanged(this.autouserjob3Model, this);
-	this.autouserjob4Model.value = intToBool(WebMyth.settings.AutoRunUserJob4);
-		this.controller.modelChanged(this.autouserjob4Model, this);
+		
+		
+			//job options
+		this.autocommflagModel.value = intToBool(WebMyth.settings.AutoCommercialFlag);
+			this.controller.modelChanged(this.autocommflagModel, this);
+		this.autotranscodeModel.value = intToBool(WebMyth.settings.AutoTranscode);
+			this.controller.modelChanged(this.autotranscodeModel, this);
+		this.autouserjob1Model.value = intToBool(WebMyth.settings.AutoRunUserJob1);
+			this.controller.modelChanged(this.autouserjob1Model, this);
+		this.autouserjob2Model.value = intToBool(WebMyth.settings.AutoRunUserJob2);
+			this.controller.modelChanged(this.autouserjob2Model, this);
+		this.autouserjob3Model.value = intToBool(WebMyth.settings.AutoRunUserJob3);
+			this.controller.modelChanged(this.autouserjob3Model, this);
+		this.autouserjob4Model.value = intToBool(WebMyth.settings.AutoRunUserJob4);
+			this.controller.modelChanged(this.autouserjob4Model, this);
 	
 	}
 	
@@ -1194,27 +1236,38 @@ SetupRecordingAssistant.prototype.updateRule = function() {
 	query += '", autouserjob3 = "'+this.newRule.autouserjob3+'", autouserjob4 = "'+this.newRule.autouserjob4;
 	query += '" WHERE `recordid` = '+this.newRule.recordid+' LIMIT 1;';
 	
-	Mojo.Log.error("query is "+query);
-	
-	var requestUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webmythPythonFile;
-	requestUrl += "?op=executeSQL";				
-	requestUrl += "&query64=";		
-	requestUrl += Base64.encode(query);	
+	Mojo.Log.error("Query is "+query);
 	
 	
+	try{
 	
-    try {
-        var request = new Ajax.Request(requestUrl,{
-            method: 'get',
-            evalJSON: 'false',
-			requestHeaders: {Authorization: 'Basic ' + Base64.encode(WebMyth.prefsCookieObject.webserverUsername + ":" + WebMyth.prefsCookieObject.webserverPassword)},
-            onSuccess: this.executeSqlSuccess.bind(this),
-            onFailure: this.executeSqlFail.bind(this)  
-        });
-    }
-    catch(e) {
-        Mojo.Log.error(e);
-    }
+		if(WebMyth.usePlugin){
+		
+			var response1 = $('webmyth_service_id').mysqlExecute(WebMyth.prefsCookieObject.databaseHost,WebMyth.prefsCookieObject.databaseUsername,WebMyth.prefsCookieObject.databasePassword,WebMyth.prefsCookieObject.databaseName,WebMyth.prefsCookieObject.databasePort,"mysqlScheduleExecuteResponse",query.substring(0,250),query.substring(250,500),query.substring(500,750),query.substring(750,1000),query.substring(1000,1250),query.substring(1250,1500),query.substring(1500,1750),query.substring(1750,2000),query.substring(2000,2250),query.substring(2250,2500));
+			
+			Mojo.Log.error("Schedule execute response "+response1);
+			
+		} else {
+		
+			var requestUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webmythPythonFile;
+			requestUrl += "?op=executeSQL";				
+			requestUrl += "&query64=";		
+			requestUrl += Base64.encode(query);	
+			
+			var request = new Ajax.Request(requestUrl,{
+				method: 'get',
+				evalJSON: 'false',
+				requestHeaders: {Authorization: 'Basic ' + Base64.encode(WebMyth.prefsCookieObject.webserverUsername + ":" + WebMyth.prefsCookieObject.webserverPassword)},
+				onSuccess: this.executeSqlSuccess.bind(this),
+				onFailure: this.executeSqlFail.bind(this)  
+			});
+		}
+	
+	} catch(e) {
+	
+		Mojo.Log.error(e);
+
+	}
 	
 };
 
@@ -1239,6 +1292,7 @@ SetupRecordingAssistant.prototype.createRule = function() {
 		$('myScrim').hide();
 		
 	} else {
+	
 		var query = 'INSERT INTO `record` SET `type` = "'+this.newRule.type+'", `title` = "'+this.newRule.title+'", `subtitle` = "'+this.newRule.subtitle;
 		query += '", startdate = "'+this.newRule.startdate+'", starttime = "'+this.newRule.starttime+'", station = "'+this.newRule.station;
 		query += '", description = "'+this.newRule.description+'", category = "'+this.newRule.category+'", seriesid = "'+this.newRule.seriesid;
@@ -1259,28 +1313,36 @@ SetupRecordingAssistant.prototype.createRule = function() {
 		
 		
 		
-	Mojo.Log.error("query is "+query);
+		try{
 		
-		var requestUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webmythPythonFile;
-		requestUrl += "?op=executeSQL";				
-		requestUrl += "&query64=";		
-		requestUrl += Base64.encode(query);	
+			if(WebMyth.usePlugin){
+			
+				var response1 = $('webmyth_service_id').mysqlExecute(WebMyth.prefsCookieObject.databaseHost,WebMyth.prefsCookieObject.databaseUsername,WebMyth.prefsCookieObject.databasePassword,WebMyth.prefsCookieObject.databaseName,WebMyth.prefsCookieObject.databasePort,"mysqlScheduleExecuteResponse",query.substring(0,250),query.substring(250,500),query.substring(500,750),query.substring(750,1000),query.substring(1000,1250),query.substring(1250,1500),query.substring(1500,1750),query.substring(1750,2000),query.substring(2000,2250),query.substring(2250,2500));
+				
+				Mojo.Log.error("Schedule execute response "+response1);
+				
+			} else {
+			
+				var requestUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webmythPythonFile;
+				requestUrl += "?op=executeSQL";				
+				requestUrl += "&query64=";		
+				requestUrl += Base64.encode(query);		
+			
+				var request = new Ajax.Request(requestUrl,{
+					method: 'get',
+					evalJSON: 'false',
+					requestHeaders: {Authorization: 'Basic ' + Base64.encode(WebMyth.prefsCookieObject.webserverUsername + ":" + WebMyth.prefsCookieObject.webserverPassword)},
+					onSuccess: this.executeSqlSuccess.bind(this),
+					onFailure: this.executeSqlFail.bind(this)  
+				});
+			}
 		
+		} catch(e) {
 		
-		
-		try {
-			var request = new Ajax.Request(requestUrl,{
-				method: 'get',
-				evalJSON: 'false',
-				requestHeaders: {Authorization: 'Basic ' + Base64.encode(WebMyth.prefsCookieObject.webserverUsername + ":" + WebMyth.prefsCookieObject.webserverPassword)},
-				onSuccess: this.executeSqlSuccess.bind(this),
-				onFailure: this.executeSqlFail.bind(this)  
-			});
-		}
-		catch(e) {
 			Mojo.Log.error(e);
+
 		}
-		
+
 	}
 	
 };
@@ -1303,30 +1365,40 @@ SetupRecordingAssistant.prototype.overrideRecord = function() {
 	query += '", last_record = "'+this.newRule.last_record+'", last_delete = "'+this.newRule.last_delete;
 	query += '" ;';
 	
-	
-	//Mojo.Log.error("query is "+query);
+	Mojo.Log.error("Query("+query.length+") is "+query);
 	
 	this.newRule.recordid = -1;				//so that we reschedule all
 	
-	var requestUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webmythPythonFile;
-	requestUrl += "?op=executeSQL";				
-	requestUrl += "&query64=";		
-	requestUrl += Base64.encode(query);	
 	
+	try{
 	
+		if(WebMyth.usePlugin){
+		
+			var response1 = $('webmyth_service_id').mysqlExecute(WebMyth.prefsCookieObject.databaseHost,WebMyth.prefsCookieObject.databaseUsername,WebMyth.prefsCookieObject.databasePassword,WebMyth.prefsCookieObject.databaseName,WebMyth.prefsCookieObject.databasePort,"mysqlScheduleExecuteResponse",query.substring(0,250),query.substring(250,500),query.substring(500,750),query.substring(750,1000),query.substring(1000,1250),query.substring(1250,1500),query.substring(1500,1750),query.substring(1750,2000),query.substring(2000,2250),query.substring(2250,2500));
+			
+			Mojo.Log.error("Schedule execute response "+response1);
+			
+		} else {
+		
+			var requestUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webmythPythonFile;
+			requestUrl += "?op=executeSQL";				
+			requestUrl += "&query64=";		
+			requestUrl += Base64.encode(query);	
+			
+			var request = new Ajax.Request(requestUrl,{
+				method: 'get',
+				evalJSON: 'false',
+				requestHeaders: {Authorization: 'Basic ' + Base64.encode(WebMyth.prefsCookieObject.webserverUsername + ":" + WebMyth.prefsCookieObject.webserverPassword)},
+				onSuccess: this.executeSqlSuccess.bind(this),
+				onFailure: this.executeSqlFail.bind(this)  
+			});
+		}
 	
-    try {
-        var request = new Ajax.Request(requestUrl,{
-            method: 'get',
-            evalJSON: 'false',
-			requestHeaders: {Authorization: 'Basic ' + Base64.encode(WebMyth.prefsCookieObject.webserverUsername + ":" + WebMyth.prefsCookieObject.webserverPassword)},
-            onSuccess: this.executeSqlSuccess.bind(this),
-            onFailure: this.executeSqlFail.bind(this)  
-        });
-    }
-    catch(e) {
-        Mojo.Log.error(e);
-    }
+	} catch(e) {
+	
+		Mojo.Log.error(e);
+
+	}
 	
 };
 
@@ -1348,31 +1420,40 @@ SetupRecordingAssistant.prototype.overrideDontRecord = function() {
 	query += '", last_record = "'+this.newRule.last_record+'", last_delete = "'+this.newRule.last_delete;
 	query += '" ;';
 	
-	
 	this.newRule.recordid = -1;				//so that we reschedule all
 	
-	
-	//Mojo.Log.error("query is "+query);
-	
-	var requestUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webmythPythonFile;
-	requestUrl += "?op=executeSQL";				
-	requestUrl += "&query64=";		
-	requestUrl += Base64.encode(query);	
+	Mojo.Log.error("Query("+query.length+") is "+query);
 	
 	
+	try{
 	
-    try {
-        var request = new Ajax.Request(requestUrl,{
-            method: 'get',
-            evalJSON: 'false',
-			requestHeaders: {Authorization: 'Basic ' + Base64.encode(WebMyth.prefsCookieObject.webserverUsername + ":" + WebMyth.prefsCookieObject.webserverPassword)},
-            onSuccess: this.executeSqlSuccess.bind(this),
-            onFailure: this.executeSqlFail.bind(this)  
-        });
-    }
-    catch(e) {
-        Mojo.Log.error(e);
-    }
+		if(WebMyth.usePlugin){
+		
+			var response1 = $('webmyth_service_id').mysqlExecute(WebMyth.prefsCookieObject.databaseHost,WebMyth.prefsCookieObject.databaseUsername,WebMyth.prefsCookieObject.databasePassword,WebMyth.prefsCookieObject.databaseName,WebMyth.prefsCookieObject.databasePort,"mysqlScheduleExecuteResponse",query.substring(0,250),query.substring(250,500),query.substring(500,750),query.substring(750,1000),query.substring(1000,1250),query.substring(1250,1500),query.substring(1500,1750),query.substring(1750,2000),query.substring(2000,2250),query.substring(2250,2500));
+			
+			Mojo.Log.error("Schedule execute response "+response1);
+			
+		} else {
+		
+			var requestUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webmythPythonFile;
+			requestUrl += "?op=executeSQL";				
+			requestUrl += "&query64=";		
+			requestUrl += Base64.encode(query);	
+		
+			var request = new Ajax.Request(requestUrl,{
+				method: 'get',
+				evalJSON: 'false',
+				requestHeaders: {Authorization: 'Basic ' + Base64.encode(WebMyth.prefsCookieObject.webserverUsername + ":" + WebMyth.prefsCookieObject.webserverPassword)},
+				onSuccess: this.executeSqlSuccess.bind(this),
+				onFailure: this.executeSqlFail.bind(this)  
+			});
+		}
+	
+	} catch(e) {
+	
+		Mojo.Log.error(e);
+
+	}
 	
 };
 
@@ -1385,32 +1466,38 @@ SetupRecordingAssistant.prototype.neverRecord = function() {
 	query += this.newRule.subtitle+'","'+this.newRule.description+'","'+this.newRule.category+'","'+this.newRule.seriesid+'","'+this.newRule.programid+'","';
 	query += this.newRule.recordid+'","'+this.newRule.station+'","'+this.newRule.type+'",11,1);';
 	
-	
-	//this.newRule.recordid = -1;				//so that we reschedule all
-	
-	
-	//Mojo.Log.error("query is "+query);
-	
-	var requestUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webmythPythonFile;
-	requestUrl += "?op=executeSQL";				
-	requestUrl += "&query64=";		
-	requestUrl += Base64.encode(query);	
+	Mojo.Log.error("Query is "+query);
 	
 	
+	try{
 	
-    try {
-        var request = new Ajax.Request(requestUrl,{
-            method: 'get',
-            evalJSON: 'false',
-			requestHeaders: {Authorization: 'Basic ' + Base64.encode(WebMyth.prefsCookieObject.webserverUsername + ":" + WebMyth.prefsCookieObject.webserverPassword)},
-            onSuccess: this.executeSqlSuccess.bind(this),
-            onFailure: this.executeSqlFail.bind(this)  
-        });
-    }
-    catch(e) {
-        Mojo.Log.error(e);
-    }
+		if(WebMyth.usePlugin){
+		
+			var response1 = $('webmyth_service_id').mysqlExecute(WebMyth.prefsCookieObject.databaseHost,WebMyth.prefsCookieObject.databaseUsername,WebMyth.prefsCookieObject.databasePassword,WebMyth.prefsCookieObject.databaseName,WebMyth.prefsCookieObject.databasePort,"mysqlScheduleExecuteResponse",query.substring(0,250),query.substring(250,500),query.substring(500,750),query.substring(750,1000),query.substring(1000,1250),query.substring(1250,1500),query.substring(1500,1750),query.substring(1750,2000),query.substring(2000,2250),query.substring(2250,2500));
+			
+			Mojo.Log.error("Schedule execute response "+response1);
+			
+		} else {
+		
+			var requestUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webmythPythonFile;
+			requestUrl += "?op=executeSQL";				
+			requestUrl += "&query64=";		
+			requestUrl += Base64.encode(query);	
+		
+			var request = new Ajax.Request(requestUrl,{
+				method: 'get',
+				evalJSON: 'false',
+				requestHeaders: {Authorization: 'Basic ' + Base64.encode(WebMyth.prefsCookieObject.webserverUsername + ":" + WebMyth.prefsCookieObject.webserverPassword)},
+				onSuccess: this.executeSqlSuccess.bind(this),
+				onFailure: this.executeSqlFail.bind(this)  
+			});
+		}
+	
+	} catch(e) {
+	
+		Mojo.Log.error(e);
 
+	}
 	
 };
 
@@ -1422,32 +1509,38 @@ SetupRecordingAssistant.prototype.forgetOld = function() {
 	query += '" AND `description` = "'+this.newRule.description;
 	query += '"';
 	
-	
-	//this.newRule.recordid = -1;				//so that we reschedule all
-	
-	
-	//Mojo.Log.error("query is "+query);
-	
-	var requestUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webmythPythonFile;
-	requestUrl += "?op=executeSQL";				
-	requestUrl += "&query64=";		
-	requestUrl += Base64.encode(query);	
+	Mojo.Log.error("Query is "+query);
 	
 	
+	try{
 	
-    try {
-        var request = new Ajax.Request(requestUrl,{
-            method: 'get',
-            evalJSON: 'false',
-			requestHeaders: {Authorization: 'Basic ' + Base64.encode(WebMyth.prefsCookieObject.webserverUsername + ":" + WebMyth.prefsCookieObject.webserverPassword)},
-            onSuccess: this.executeSqlSuccess.bind(this),
-            onFailure: this.executeSqlFail.bind(this)  
-        });
-    }
-    catch(e) {
-        Mojo.Log.error(e);
-    }
+		if(WebMyth.usePlugin){
+		
+			var response1 = $('webmyth_service_id').mysqlExecute(WebMyth.prefsCookieObject.databaseHost,WebMyth.prefsCookieObject.databaseUsername,WebMyth.prefsCookieObject.databasePassword,WebMyth.prefsCookieObject.databaseName,WebMyth.prefsCookieObject.databasePort,"mysqlScheduleExecuteResponse",query.substring(0,250),query.substring(250,500),query.substring(500,750),query.substring(750,1000),query.substring(1000,1250),query.substring(1250,1500),query.substring(1500,1750),query.substring(1750,2000),query.substring(2000,2250),query.substring(2250,2500));
+			
+			Mojo.Log.error("Schedule execute response "+response1);
+			
+		} else {
+		
+			var requestUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webmythPythonFile;
+			requestUrl += "?op=executeSQL";				
+			requestUrl += "&query64=";		
+			requestUrl += Base64.encode(query);	
+		
+			var request = new Ajax.Request(requestUrl,{
+				method: 'get',
+				evalJSON: 'false',
+				requestHeaders: {Authorization: 'Basic ' + Base64.encode(WebMyth.prefsCookieObject.webserverUsername + ":" + WebMyth.prefsCookieObject.webserverPassword)},
+				onSuccess: this.executeSqlSuccess.bind(this),
+				onFailure: this.executeSqlFail.bind(this)  
+			});
+		}
+	
+	} catch(e) {
+	
+		Mojo.Log.error(e);
 
+	}
 	
 };
 
@@ -1464,27 +1557,38 @@ SetupRecordingAssistant.prototype.toggleOverride = function() {
 		var query = "";
 	}
 	
-	//Mojo.Log.error("query is "+query);
-	
-	var requestUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webmythPythonFile;
-	requestUrl += "?op=executeSQL";				
-	requestUrl += "&query64=";		
-	requestUrl += Base64.encode(query);	
+	Mojo.Log.error("Query is "+query);
 	
 	
+	try{
 	
-    try {
-        var request = new Ajax.Request(requestUrl,{
-            method: 'get',
-            evalJSON: 'false',
-			requestHeaders: {Authorization: 'Basic ' + Base64.encode(WebMyth.prefsCookieObject.webserverUsername + ":" + WebMyth.prefsCookieObject.webserverPassword)},
-            onSuccess: this.executeSqlSuccess.bind(this),
-            onFailure: this.executeSqlFail.bind(this)  
-        });
-    }
-    catch(e) {
-        Mojo.Log.error(e);
-    }
+		if(WebMyth.usePlugin){
+		
+			var response1 = $('webmyth_service_id').mysqlExecute(WebMyth.prefsCookieObject.databaseHost,WebMyth.prefsCookieObject.databaseUsername,WebMyth.prefsCookieObject.databasePassword,WebMyth.prefsCookieObject.databaseName,WebMyth.prefsCookieObject.databasePort,"mysqlScheduleExecuteResponse",query.substring(0,250),query.substring(250,500),query.substring(500,750),query.substring(750,1000),query.substring(1000,1250),query.substring(1250,1500),query.substring(1500,1750),query.substring(1750,2000),query.substring(2000,2250),query.substring(2250,2500));
+			
+			Mojo.Log.error("Schedule execute response "+response1);
+			
+		} else {
+		
+			var requestUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webmythPythonFile;
+			requestUrl += "?op=executeSQL";				
+			requestUrl += "&query64=";		
+			requestUrl += Base64.encode(query);	
+		
+			var request = new Ajax.Request(requestUrl,{
+				method: 'get',
+				evalJSON: 'false',
+				requestHeaders: {Authorization: 'Basic ' + Base64.encode(WebMyth.prefsCookieObject.webserverUsername + ":" + WebMyth.prefsCookieObject.webserverPassword)},
+				onSuccess: this.executeSqlSuccess.bind(this),
+				onFailure: this.executeSqlFail.bind(this)  
+			});
+		}
+	
+	} catch(e) {
+	
+		Mojo.Log.error(e);
+
+	}
 	
 };
 
@@ -1494,27 +1598,47 @@ SetupRecordingAssistant.prototype.cancelRecord = function() {
 	query += " WHERE `recordid` = "+this.newRule.recordid+" LIMIT 1;";
 	
 	
-	//Mojo.Log.info("query is "+query);
-	
-	var requestUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webmythPythonFile;
-	requestUrl += "?op=executeSQL";				
-	requestUrl += "&query64=";		
-	requestUrl += Base64.encode(query);	
+	Mojo.Log.error("Query is "+query);
 	
 	
+	try{
 	
-    try {
-        var request = new Ajax.Request(requestUrl,{
-            method: 'get',
-            evalJSON: 'false',
-			requestHeaders: {Authorization: 'Basic ' + Base64.encode(WebMyth.prefsCookieObject.webserverUsername + ":" + WebMyth.prefsCookieObject.webserverPassword)},
-            onSuccess: this.executeSqlSuccess.bind(this),
-            onFailure: this.executeSqlFail.bind(this)  
-        });
-    }
-    catch(e) {
-        Mojo.Log.error(e);
-    }
+		if(WebMyth.usePlugin){
+		
+			var response1 = $('webmyth_service_id').mysqlExecute(WebMyth.prefsCookieObject.databaseHost,WebMyth.prefsCookieObject.databaseUsername,WebMyth.prefsCookieObject.databasePassword,WebMyth.prefsCookieObject.databaseName,WebMyth.prefsCookieObject.databasePort,"mysqlScheduleExecuteResponse",query.substring(0,250),query.substring(250,500),query.substring(500,750),query.substring(750,1000),query.substring(1000,1250),query.substring(1250,1500),query.substring(1500,1750),query.substring(1750,2000),query.substring(2000,2250),query.substring(2250,2500));
+			
+			Mojo.Log.error("Schedule execute response "+response1);
+			
+		} else {
+		
+			var requestUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webmythPythonFile;
+			requestUrl += "?op=executeSQL";				
+			requestUrl += "&query64=";		
+			requestUrl += Base64.encode(query);	
+		
+			var request = new Ajax.Request(requestUrl,{
+				method: 'get',
+				evalJSON: 'false',
+				requestHeaders: {Authorization: 'Basic ' + Base64.encode(WebMyth.prefsCookieObject.webserverUsername + ":" + WebMyth.prefsCookieObject.webserverPassword)},
+				onSuccess: this.executeSqlSuccess.bind(this),
+				onFailure: this.executeSqlFail.bind(this)  
+			});
+		}
+	
+	} catch(e) {
+	
+		Mojo.Log.error(e);
+
+	}
+	
+};
+
+
+SetupRecordingAssistant.prototype.mysqlScheduleExecuteResponse = function(response) {
+
+	Mojo.Log.error("Got execute plugin response: "+response);
+
+	setTimeout(this.reschedule.bind(this), 50);
 	
 };
 
@@ -1555,6 +1679,14 @@ SetupRecordingAssistant.prototype.executeSqlFail = function(event) {
 
 };
 
+SetupRecordingAssistant.prototype.executeSqlSuccess = function(response) {
+
+    Mojo.Log.info('Got execute SQL response : ' + response.responseText);
+	
+	this.reschedule();
+	
+};
+
 SetupRecordingAssistant.prototype.openMythweb = function() {
 		
 	var dateJS = new Date(isoSpaceToJS($('starttime-title').innerHTML));
@@ -1588,14 +1720,6 @@ SetupRecordingAssistant.prototype.openMythweb = function() {
 	
 };
 
-SetupRecordingAssistant.prototype.executeSqlSuccess = function(response) {
-
-    Mojo.Log.info('Got execute SQL response : ' + response.responseText);
-	
-	this.reschedule();
-	
-};
-
 SetupRecordingAssistant.prototype.reschedule = function() {
 	
 	var requestUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webmythPythonFile;
@@ -1609,12 +1733,12 @@ SetupRecordingAssistant.prototype.reschedule = function() {
 		var response1 = $('webmyth_service_id').mythprotocolCommand(WebMyth.prefsCookieObject.masterBackendIp, WebMyth.prefsCookieObject.masterBackendPort, WebMyth.prefsCookieObject.protoVer, "RESCHEDULE_RECORDINGS "+this.newRule.recordid);
 		Mojo.Log.info("Plugin protocol response: "+response1);
 		
-		this.controller.window.setTimeout(this.closeScene.bind(this), 4000);
+		setTimeout(this.closeScene.bind(this), 4000);
 		
 	} else if(WebMyth.useService){
 		WebMyth.mythprotocolCommand(this, "RESCHEDULE_RECORDINGS "+this.newRule.recordid);
 		
-		this.controller.window.setTimeout(this.closeScene.bind(this), 4000);
+		setTimeout(this.closeScene.bind(this), 4000);
 		
 	} else { 
 	
@@ -1641,7 +1765,7 @@ SetupRecordingAssistant.prototype.rescheduleSuccess = function(response) {
     Mojo.Log.info('Got reschedule response: ' + response.responseText);
 	
 	//Delay 4 seconds to allow scheduler to run
-	this.controller.window.setTimeout(this.closeScene.bind(this), 4000);
+	setTimeout(this.closeScene.bind(this), 4000);
 	
 	
 };

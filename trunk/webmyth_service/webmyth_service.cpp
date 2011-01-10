@@ -38,9 +38,11 @@
 #include <string>
 
 
-//#include <my_global.h>
-//#include <mysql.h>
+#include <my_global.h>
+#include <mysql.h>
 
+
+#include <upnp.h>
 
 
 #include <syslog.h>
@@ -57,6 +59,10 @@ using namespace std;
 //Some flags that the main loop looks for
 bool doBackgroundFrontendSocket;
 bool doBackgroundProtocolCommand;
+bool doBackgroundMysqlQuery;
+bool doBackgroundMysqlExecute;
+
+bool activeMysql;
 
 
 //Frontend control variables
@@ -87,6 +93,15 @@ int mpRecvMsgSize;
 
 int protocol_sock;
 
+//MySQL variables
+const char * my_mysql_host;
+const char * my_mysql_username;
+const char * my_mysql_password;
+const char * my_mysql_db;
+int my_mysql_port;
+const char *my_mysql_response_function;
+char my_mysql_query_full[1024];
+
 
 
 void pluginStatus(const char *theData){
@@ -95,7 +110,7 @@ void pluginStatus(const char *theData){
     PDL_Err mjErr = PDL_CallJS("pluginStatus", params, 1);
     if ( mjErr != PDL_NOERROR )
     {
-        syslog(LOG_INFO, "error: %s\n", PDL_GetError());
+        syslog(LOG_INFO, "error: %s\0", PDL_GetError());
     }
 }
 
@@ -105,7 +120,7 @@ void didReceiveData(const char *theData){
     PDL_Err mjErr = PDL_CallJS("didReceiveData", params, 1);
     if ( mjErr != PDL_NOERROR )
     {
-        syslog(LOG_INFO, "error: %s\n", PDL_GetError());
+        syslog(LOG_INFO, "error: %s\0", PDL_GetError());
     }
 }
 
@@ -115,7 +130,17 @@ void pluginErrorMessage(const char *errorMessage){
     PDL_Err mjErr = PDL_CallJS("pluginErrorMessage", params, 1);
     if ( mjErr != PDL_NOERROR )
     {
-        syslog(LOG_INFO, "error: %s\n", PDL_GetError());
+        syslog(LOG_INFO, "error: %s\0", PDL_GetError());
+    }
+}
+
+void pluginErrorMessage(char errorMessage){
+    const char *params[1];
+    params[0] = (const char *)(errorMessage);
+    PDL_Err mjErr = PDL_CallJS("pluginErrorMessage", params, 1);
+    if ( mjErr != PDL_NOERROR )
+    {
+        syslog(LOG_INFO, "error: %s\0", PDL_GetError());
     }
 }
 
@@ -149,7 +174,7 @@ void backgroundFrontendSocketResponse(){
 
 	//Resolve IP with DNS
 	if ((rv = getaddrinfo(frontend_host_name, NULL, NULL, &servinfo)) != 0) {
-		syslog(LOG_INFO, "Frontend getaddrinfo: %s\n", gai_strerror(rv));
+		syslog(LOG_INFO, "Frontend getaddrinfo: %s\0", gai_strerror(rv));
 		params[1] = "Frontend getaddrinfo() failed";
 		PDL_Err mjErr = PDL_CallJS("backgroundFrontendSocketResponse", params, 2);
         return;
@@ -303,7 +328,7 @@ void backgroundProtocolCommandResponse(){
 
 	//Resolve IP with DNS
 	if ((rv = getaddrinfo(protocol_host_name, NULL, NULL, &servinfo)) != 0) {
-		syslog(LOG_INFO, "mp getaddrinfo: %s\n", gai_strerror(rv));
+		syslog(LOG_INFO, "mp getaddrinfo: %s\0", gai_strerror(rv));
 		//PDL_JSException(params, "mp getaddrinfo() failed - 1");
         return;
 	} else {
@@ -450,7 +475,7 @@ void backgroundProtocolCommandResponse(){
 	syslog(LOG_INFO, "Current length %d, total length %d", finalResponse.length(), finalResponseLength);
 	
 	while (finalResponse.length() < finalResponseLength) {
-		syslog(LOG_INFO, "Current length %d, total length %d", finalResponse.length(), finalResponseLength);
+		//syslog(LOG_INFO, "Current length %d, total length %d", finalResponse.length(), finalResponseLength);
 		
 		//Get more data
 		if ((mpRecvMsgSize = recv(protocol_sock, mpReceiveBuffer, MAX_BUFFER_LEN, 0)) > 0) {
@@ -496,12 +521,264 @@ void backgroundProtocolCommandResponse(){
     PDL_Err mjErr = PDL_CallJS("backgroundProtocolCommandResponse", params, 1);
     if ( mjErr != PDL_NOERROR )
     {
-        syslog(LOG_INFO, "error: %s\n", PDL_GetError());
+        syslog(LOG_INFO, "error: %s\0", PDL_GetError());
     }
 	
 	return;
 
 }	
+
+
+
+string stringReplace(string originalString, string sought, string replacement){
+
+	std::size_t foundIndex = originalString.find(sought);
+	
+	while(foundIndex != originalString.npos) {
+		originalString.replace(foundIndex, sought.size(), replacement);
+		
+		//syslog(LOG_INFO,"Found substring, replacing from %s",originalString.c_str());
+		
+		foundIndex = originalString.find(sought);
+	} 
+	
+	return originalString;
+
+}
+
+void backgroundMysqlResponse(){
+
+	activeMysql = true;
+	
+	MYSQL mysql;
+	MYSQL_RES *res;
+	MYSQL_ROW row;
+	MYSQL_FIELD *field;
+	
+	char output[1024];
+	int count_fields, i, j;
+	string tmpValue;
+	
+	string finalResponse;
+	
+	
+    syslog(LOG_INFO,"Starting background MySQL query");
+	
+	if(!mysql_init(&mysql)){
+		syslog(LOG_INFO,"Failed to initilaize MySQL");
+		pluginErrorMessage("Failed to initilaize MySQL");
+		
+		activeMysql = false;
+		return;
+	}
+    
+	syslog(LOG_INFO,"mysql connecting");
+	
+	//Should check for log times here for DNS problem   http://serverfault.com/questions/136954/4-7-second-delay-accessing-mysql-across-the-network
+		
+	if(!mysql_real_connect(&mysql,my_mysql_host,my_mysql_username,my_mysql_password,my_mysql_db,my_mysql_port,NULL,0)) {
+		//char errorMessageText;
+		//sprintf(errorMessageText,"Failed to connect to database: Error: %s\0",mysql_error(&mysql));
+		syslog(LOG_INFO,"Failed to connect to database: Error: %s\0",mysql_error(&mysql));
+		pluginErrorMessage(mysql_error(&mysql));
+		
+		activeMysql = false;
+		return;
+	}
+	
+	
+	syslog(LOG_INFO,"mysql query: %s",my_mysql_query_full);
+  
+	if(mysql_real_query(&mysql,my_mysql_query_full,(unsigned int)(strlen(my_mysql_query_full))) != 0){
+		//char errorMessageText;
+		//sprintf(errorMessageText,"Error in MySQL query: Error: %s\0",mysql_error(&mysql));
+		syslog(LOG_INFO,"Error in MySQL query: Error: %s\0",mysql_error(&mysql));
+		pluginErrorMessage(mysql_error(&mysql));
+		
+		activeMysql = false;
+		return;
+	
+	}
+   
+	
+
+	syslog(LOG_INFO,"mysql result");
+	
+	res = mysql_use_result(&mysql);
+	
+	if(!res) {
+		//char errorMessageText;
+		//sprintf(errorMessageText,"Error in MySQL result: Error: %s\0",mysql_error(&mysql));
+		syslog(LOG_INFO,"Error in MySQL result: Error: %s\0",mysql_error(&mysql));
+		pluginErrorMessage(mysql_error(&mysql));
+		
+		activeMysql = false;
+		return;
+	
+	}
+	
+	count_fields =  mysql_num_fields(res);
+	syslog(LOG_INFO,"Total fields: %d",count_fields);
+	
+	char * field_names[count_fields];
+	i = 0;
+	
+	while(field = mysql_fetch_field(res)) {
+		//syslog(LOG_INFO,"field name %s\0", field->name);
+		field_names[i] = field->name;
+		i++;
+	}
+
+	finalResponse = "[ ";
+	
+	while(row = mysql_fetch_row(res)){
+		//syslog(LOG_INFO,"%s",(const char*)finalResponse.c_str());
+		
+		finalResponse += " { \"";
+		
+		for(i = 0; i < count_fields; i++){
+		
+			if(i > 0){
+				finalResponse += "\" , \"";
+			}
+		
+			finalResponse += field_names[i];
+			finalResponse += "\" : \"";
+			if(row[i]){
+				tmpValue = "";
+				
+				tmpValue = stringReplace(stringReplace(row[i],"\"","'"),"\\","\\\\");
+				
+				finalResponse += tmpValue;
+				//syslog(LOG_INFO,"value is %s",row[i]);
+			} else {
+				//syslog(LOG_INFO,"value is null");
+			}
+			
+		}
+		
+		finalResponse += "\" }, ";
+		 
+	}
+	
+	finalResponse += " ]";
+	
+	//syslog(LOG_INFO,"Full JSON: %s",(const char*)finalResponse.c_str());
+	
+	syslog(LOG_INFO,"mysql after JSON");
+
+	mysql_free_result(res);	
+	mysql_close(&mysql);
+	
+	
+	
+	
+    const char *params[1];
+    params[0] = (const char*)finalResponse.c_str();
+    //PDL_Err mjErr = PDL_CallJS("backgroundMysqlResponse", params, 1);
+    PDL_Err mjErr = PDL_CallJS(my_mysql_response_function, params, 1);
+	
+    if ( mjErr != PDL_NOERROR ) {
+        syslog(LOG_INFO, "error: %s\0", PDL_GetError());
+    }
+	
+	
+	activeMysql = false;
+	
+	return;
+
+}	
+
+void backgroundMysqlExecute(){
+
+	activeMysql = true;
+	
+	MYSQL mysql;
+	MYSQL_RES *res;
+	MYSQL_ROW row;
+	MYSQL_FIELD *field;
+	
+	char output[1024];
+	int count_rows, i, j;
+	string tmpValue;
+	
+	string finalResponse;
+	
+	
+    syslog(LOG_INFO,"Starting background MySQL execute");
+	
+	if(!mysql_init(&mysql)){
+		syslog(LOG_INFO,"Failed to initilaize MySQL");
+		pluginErrorMessage("Failed to initilaize MySQL");
+		
+		activeMysql = false;
+		return;
+	}
+    
+	syslog(LOG_INFO,"mysql connecting");
+	
+	//Should check for log times here for DNS problem   http://serverfault.com/questions/136954/4-7-second-delay-accessing-mysql-across-the-network
+		
+	if(!mysql_real_connect(&mysql,my_mysql_host,my_mysql_username,my_mysql_password,my_mysql_db,my_mysql_port,NULL,0)) {
+		//char errorMessageText;
+		//sprintf(errorMessageText,"Failed to connect to database: Error: %s\0",mysql_error(&mysql));
+		syslog(LOG_INFO,"Failed to connect to database: Error: %s\0",mysql_error(&mysql));
+		pluginErrorMessage(mysql_error(&mysql));
+		
+		activeMysql = false;
+		return;
+	}
+	
+	
+	syslog(LOG_INFO,"mysql query execute: %s",my_mysql_query_full);
+  
+  
+	if(mysql_real_query(&mysql,my_mysql_query_full,(unsigned int)(strlen(my_mysql_query_full))) != 0){
+		//char errorMessageText;
+		//sprintf(errorMessageText,"Error in MySQL query: Error: %s\0",mysql_error(&mysql));
+		syslog(LOG_INFO,"Error in MySQL query: Error: %s\0",mysql_error(&mysql));
+		pluginErrorMessage(mysql_error(&mysql));
+		
+		activeMysql = false;
+		return;
+	
+	}
+   
+	
+
+	syslog(LOG_INFO,"mysql execute result");
+	
+	count_rows = mysql_affected_rows(&mysql);
+	
+	syslog(LOG_INFO,"Total rows affected: %d",count_rows);
+	
+	
+	
+	
+	syslog(LOG_INFO,"mysql after JSON");
+	
+	mysql_close(&mysql);
+	
+	
+	
+	
+    const char *params[1];
+    params[0] = "Done executing";
+    //PDL_Err mjErr = PDL_CallJS("backgroundMysqlResponse", params, 1);
+    PDL_Err mjErr = PDL_CallJS(my_mysql_response_function, params, 1);
+	
+    if ( mjErr != PDL_NOERROR ) {
+        syslog(LOG_INFO, "error: %s\0", PDL_GetError());
+    }
+	
+	
+	activeMysql = false;
+	
+	return;
+
+}	
+
+
 
 
 
@@ -555,7 +832,7 @@ PDL_bool openFrontendSocket(PDL_JSParameters *params) {
 
 	//Resolve IP with DNS
 	if ((rv = getaddrinfo(frontend_host_name, NULL, NULL, &servinfo)) != 0) {
-		syslog(LOG_INFO, "getaddrinfo: %s\n", gai_strerror(rv));
+		syslog(LOG_INFO, "getaddrinfo: %s\0", gai_strerror(rv));
 		PDL_JSException(params, "getaddrinfo() failed - 1");
         return PDL_FALSE;
 	} else {
@@ -629,12 +906,12 @@ PDL_bool sendData(PDL_JSParameters *params){
 	
 	const char * dataToSend = PDL_GetJSParamString(params, 0);
 	
-	syslog(LOG_INFO, "recieved sendData request: %s", dataToSend);
+	//syslog(LOG_INFO, "recieved sendData request: %s", dataToSend);
 	
 	sendMsgSize = sprintf(sendBuffer, "%s", dataToSend);
 	newlineMsgSize = sprintf(newlineBuffer, "\n\r");
 	
-	syslog(LOG_INFO, "About to sendto() with length %d", sendMsgSize);
+	//syslog(LOG_INFO, "About to sendto() with length %d", sendMsgSize);
 	
 	if(sendMsgSize == 0){
 		syslog(LOG_INFO, "Tried to send message of zero length");
@@ -742,7 +1019,7 @@ PDL_bool mythprotocolCommand(PDL_JSParameters *params){
 
 	//Resolve IP with DNS
 	if ((rv = getaddrinfo(host_name, NULL, NULL, &servinfo)) != 0) {
-		syslog(LOG_INFO, "mp getaddrinfo: %s\n", gai_strerror(rv));
+		syslog(LOG_INFO, "mp getaddrinfo: %s\0", gai_strerror(rv));
 		PDL_JSException(params, "mp getaddrinfo() failed - 1");
         return PDL_FALSE;
 	} else {
@@ -792,7 +1069,7 @@ PDL_bool mythprotocolCommand(PDL_JSParameters *params){
 	sendProtocolLength();
 	//syslog(LOG_INFO, "Done cleanProtocolVersion sendProtocolLength");
 	if(sendto(protocol_sock, mpSendBuffer, mpSendMsgSize, 0, NULL, 0) != mpSendMsgSize){
-		syslog(LOG_INFO, "protocol version  sendto() failed");
+		syslog(LOG_INFO, "protocol version sendto() failed");
 		PDL_JSReply(params, "protocol version sendto() failed");
 		return PDL_FALSE;
 	}
@@ -932,6 +1209,20 @@ PDL_bool mythprotocolCommand(PDL_JSParameters *params){
 }
 
 
+PDL_bool upnpInit(PDL_JSParameters *params){
+	
+	UpnpInit(NULL,0);
+	
+	syslog(LOG_INFO,"Initialized upnp port %d at %s",UpnpGetServerPort(),UpnpGetServerIpAddress());
+	
+	UpnpFinish();
+	
+	//Return to JS, will do protocol connection in background
+	PDL_JSReply(params, "Initialized Upnp");
+	
+    return PDL_TRUE;
+	
+}
 
 PDL_bool upnpCommand(PDL_JSParameters *params){
 	//function(ip_address, port, upnp_command)
@@ -956,7 +1247,7 @@ PDL_bool upnpCommand(PDL_JSParameters *params){
 	mjErr = PDL_SetFirewallPortStatus(1900, PDL_TRUE);
     if ( mjErr != PDL_NOERROR )
     {
-        syslog(LOG_INFO, "error upnp opening port: %s\n", PDL_GetError());
+        syslog(LOG_INFO, "error upnp opening port: %s\0", PDL_GetError());
 		PDL_JSException(params, "error upnp opening port");
         return PDL_FALSE;
     }
@@ -1030,13 +1321,102 @@ PDL_bool upnpCommand(PDL_JSParameters *params){
 
 
 PDL_bool mysqlCommand(PDL_JSParameters *params){
-	//function(host, port, db, username, password, query)
+	//function(host, username, password, db, port, response_function, query[10])
 	
-	//syslog(LOG_INFO, "MySQL client version: %s\n", mysql_get_client_info());
+	my_mysql_host = PDL_GetJSParamString(params, 0);
+    my_mysql_username = PDL_GetJSParamString(params, 1);
+	my_mysql_password = PDL_GetJSParamString(params, 2);
+	my_mysql_db = PDL_GetJSParamString(params, 3);
+    my_mysql_port = PDL_GetJSParamInt(params, 4);
+	my_mysql_response_function = PDL_GetJSParamString(params, 5);
+	
+	if(activeMysql) {
+		//We are in the middle of some other MySQL query/command
+		
+        PDL_JSException(params, "ERROR: Another query is still active");       
+        return PDL_FALSE; 
+	
+	} 
+	
+	const char * query_1 = PDL_GetJSParamString(params, 6);
+	const char * query_2 = PDL_GetJSParamString(params, 7);
+	const char * query_3 = PDL_GetJSParamString(params, 8);
+	const char * query_4 = PDL_GetJSParamString(params, 9);
+	const char * query_5 = PDL_GetJSParamString(params, 10);
+	const char * query_6 = PDL_GetJSParamString(params, 11);
+	const char * query_7 = PDL_GetJSParamString(params, 12);
+	const char * query_8 = PDL_GetJSParamString(params, 13);
+	const char * query_9 = PDL_GetJSParamString(params, 14);
+	const char * query_10 = PDL_GetJSParamString(params, 15);
+	
+	sprintf(my_mysql_query_full, "%s%s%s%s%s%s%s%s%s%s",query_1,query_2,query_3,query_4,query_5,query_6,query_7,query_8,query_9,query_10);
+	
+   
+	doBackgroundMysqlQuery = true;
+	
+	
+	
+	//Fake an event to trigger main loop
+	SDL_Event Event;
+	Event.active.type = SDL_ACTIVEEVENT;
+	Event.active.gain = 1;
+	Event.active.state = 0;  
+	SDL_PushEvent(&Event);
+	
+	
+	//Return to JS, will do protocol connection in background
+	PDL_JSReply(params, "Started mysql command");
+	
+    return PDL_TRUE;
+	
+}
+
+PDL_bool mysqlExecute(PDL_JSParameters *params){
+	//function(host, username, password, db, port, response_function, query[10])
+	
+	my_mysql_host = PDL_GetJSParamString(params, 0);
+    my_mysql_username = PDL_GetJSParamString(params, 1);
+	my_mysql_password = PDL_GetJSParamString(params, 2);
+	my_mysql_db = PDL_GetJSParamString(params, 3);
+    my_mysql_port = PDL_GetJSParamInt(params, 4);
+	my_mysql_response_function = PDL_GetJSParamString(params, 5);
+	
+	
+	if(activeMysql) {
+		//We are in the middle of some other MySQL query/command
+		
+        PDL_JSException(params, "ERROR: Another query is still active");       
+        return PDL_FALSE; 
+	
+	} 
+
+	const char * query_1 = PDL_GetJSParamString(params, 6);
+	const char * query_2 = PDL_GetJSParamString(params, 7);
+	const char * query_3 = PDL_GetJSParamString(params, 8);
+	const char * query_4 = PDL_GetJSParamString(params, 9);
+	const char * query_5 = PDL_GetJSParamString(params, 10);
+	const char * query_6 = PDL_GetJSParamString(params, 11);
+	const char * query_7 = PDL_GetJSParamString(params, 12);
+	const char * query_8 = PDL_GetJSParamString(params, 13);
+	const char * query_9 = PDL_GetJSParamString(params, 14);
+	const char * query_10 = PDL_GetJSParamString(params, 15);
+	
+	sprintf(my_mysql_query_full, "%s%s%s%s%s%s%s%s%s%s",query_1,query_2,query_3,query_4,query_5,query_6,query_7,query_8,query_9,query_10);
+	
+	doBackgroundMysqlExecute = true;
 
 	
-	//PDL_JSReply(params, mysql_get_client_info());
-
+	
+	//Fake an event to trigger main loop
+	SDL_Event Event;
+	Event.active.type = SDL_ACTIVEEVENT;
+	Event.active.gain = 1;
+	Event.active.state = 0;  
+	SDL_PushEvent(&Event);
+	
+	//Return to JS, will do protocol connection in background
+	PDL_JSReply(params, "Started mysql command");
+	
     return PDL_TRUE;
 	
 }
@@ -1050,7 +1430,7 @@ int main(int argc, char** argv) {
     int result = SDL_Init(SDL_INIT_VIDEO);
     if ( result != 0 )
     {
-        syslog(LOG_INFO, "Could not init SDL: %s\n", SDL_GetError());
+        syslog(LOG_INFO, "Could not init SDL: %s\0", SDL_GetError());
         exit(1);
     }
 
@@ -1066,8 +1446,10 @@ int main(int argc, char** argv) {
     PDL_RegisterJSHandler("mythprotocolBackgroundCommand", mythprotocolBackgroundCommand);
 	
     PDL_RegisterJSHandler("upnpCommand", upnpCommand);
+    PDL_RegisterJSHandler("upnpInit", upnpInit);
 	
     PDL_RegisterJSHandler("mysqlCommand", mysqlCommand);
+    PDL_RegisterJSHandler("mysqlExecute", mysqlExecute);
 
     PDL_JSRegistrationComplete();
 	
@@ -1076,6 +1458,9 @@ int main(int argc, char** argv) {
 	//Reset variables
 	doBackgroundFrontendSocket = false;
 	doBackgroundProtocolCommand = false;
+	doBackgroundMysqlQuery = false;
+	
+	activeMysql = false;
 
     // Event descriptor
     SDL_Event Event;
@@ -1097,6 +1482,21 @@ int main(int argc, char** argv) {
 					backgroundProtocolCommandResponse();
 					doBackgroundProtocolCommand = false;
 				}
+			
+				//Start the background mysql query
+				if(doBackgroundMysqlQuery) {
+					
+					backgroundMysqlResponse();
+					doBackgroundMysqlQuery = false;
+				}
+			
+				//Start the background mysql execute
+				if(doBackgroundMysqlExecute) {
+					
+					backgroundMysqlExecute();
+					doBackgroundMysqlExecute = false;
+				}
+				
 				
 			
                 switch (Event.type)
@@ -1114,7 +1514,7 @@ int main(int argc, char** argv) {
 
                     default:
 						
-						//syslog(LOG_INFO, "SDL_Event: %s\n", Event.type);		//crashes
+						//syslog(LOG_INFO, "SDL_Event: %s\0", Event.type);		//crashes
                         
 						break;
                 }

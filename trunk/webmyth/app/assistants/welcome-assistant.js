@@ -20,7 +20,8 @@
  
 function WelcomeAssistant() {
 	   
-	   this.backendsList = [];
+	this.backendsList = [];
+	
 }
 
 WelcomeAssistant.prototype.setup = function() {
@@ -179,6 +180,10 @@ WelcomeAssistant.prototype.setup = function() {
 		if (WebMyth.prefsCookieObject.showVideoDetailsImage == null) WebMyth.prefsCookieObject.showVideoDetailsImage = myDefaultCookie.showVideoDetailsImage;
 		if (WebMyth.prefsCookieObject.showLog == null) WebMyth.prefsCookieObject.showLog = myDefaultCookie.showLog;
 		if (WebMyth.prefsCookieObject.currentLogGroup == null) WebMyth.prefsCookieObject.currentLogGroup = myDefaultCookie.currentLogGroup;
+		if (WebMyth.prefsCookieObject.manualDatabase == null) WebMyth.prefsCookieObject.manualDatabase = myDefaultCookie.manualDatabase;
+		if (WebMyth.prefsCookieObject.databaseHost == null) WebMyth.prefsCookieObject.databaseHost = myDefaultCookie.databaseHost;
+		if (WebMyth.prefsCookieObject.usePlugin == null) WebMyth.prefsCookieObject.usePlugin = myDefaultCookie.usePlugin;
+		
 		
 		
 		//Check if scripts need an upgrade message
@@ -230,7 +235,7 @@ WelcomeAssistant.prototype.setup = function() {
 		//WebMyth.hostsCookie.put(WebMyth.hostsCookieObject);
 	} else {
 		//Mojo.Log.info("Missing hosts cookie.  Using default.");
-		WebMyth.hostsCookieObject = defaultHostsCookieCurrent(WebMyth.prefsCookieObject.currentFrontend);
+		WebMyth.hostsCookieObject = defaultHostsCookieCurrent(WebMyth.prefsCookieObject.currentFrontend,WebMyth.prefsCookieObject.currentFrontendAddress);
 		WebMyth.hostsCookie.put(WebMyth.hostsCookieObject);
 	}
 	//Mojo.Log.error("Hosts cookie is %j",WebMyth.hostsCookieObject);
@@ -266,11 +271,23 @@ WelcomeAssistant.prototype.setup = function() {
 	//Check for app updates
 	this.puchkDoUpdateCheck(24);
 	
-	//Get backend IPs
-	this.checkConnectionStatus();
+	//Check for network
+	this.checkNetworkConnectionStatus();
 	
 	//Get script veriosn
-	this.getScriptVersion();
+	//this.getScriptVersion();
+	
+	//Set plugin values from setting
+	if(WebMyth.prefsCookieObject.usePlugin == 2) {
+		WebMyth.usePlugin = true;
+		WebMyth.usePluginFrontend = true;
+	} else if(WebMyth.prefsCookieObject.usePlugin == 1) {
+		WebMyth.usePlugin = false;
+		WebMyth.usePluginFrontend = true;
+	} else {
+		WebMyth.usePlugin = false;
+		WebMyth.usePluginFrontend = false;
+	}
 	
 	//Start plugin
 	if((Mojo.Environment.DeviceInfo.modelNameAscii == "Device")||(Mojo.Environment.DeviceInfo.modelNameAscii == "Emulator")) {
@@ -278,7 +295,10 @@ WelcomeAssistant.prototype.setup = function() {
 		Mojo.Controller.getAppController().showBanner("On "+Mojo.Environment.DeviceInfo.modelNameAscii+" - no plugin", {source: 'notification'});
 	} else {
 		if(WebMyth.usePlugin){
-			WebMyth.newPluginSocket("query location");
+			//WebMyth.newPluginSocket("query location");
+			$('webmyth_service_id').mysqlWelcomeSettingsResponse = this.mysqlWelcomeSettingsResponse.bind(this);
+			$('webmyth_service_id').mysqlWelcomeResponse = this.mysqlWelcomeResponse.bind(this);
+			
 		}
 	}
 	
@@ -326,9 +346,14 @@ WelcomeAssistant.prototype.activate = function(event) {
 			$('masterIpAddress-title').innerHTML = WebMyth.prefsCookieObject.masterBackendIp;
 			
 			//Get backend IPs
-			//this.checkConnectionStatus();
+			//this.checkNetworkConnectionStatus();
 		}
 	
+	}
+	
+	
+	if(WebMyth.prefsCookieObject.databaseHost == '-') {
+		this.getConnectionInfo();
 	}
 	
 	
@@ -344,8 +369,6 @@ WelcomeAssistant.prototype.activate = function(event) {
 	
 	//Icon
 	Mojo.Event.listen(this.controller.get("welcome-header-icon"),Mojo.Event.tap, this.doWelcomeIcon.bind(this));
-	
-	
 	
 };
 
@@ -376,21 +399,37 @@ WelcomeAssistant.prototype.handleKey = function(event) {
 	
 	if(event.originalEvent.metaKey) {
 		switch(event.originalEvent.keyCode) {
-			case 71:
-				Mojo.Log.info("g - shortcut key to guide");
-				Mojo.Controller.stageController.pushScene("guide");	
+			case 72:
+				Mojo.Log.info("h - shortcut key to recorded");
+				Mojo.Controller.stageController.pushScene("hostSelector");
 				break;
 			case 82:
 				Mojo.Log.info("r - shortcut key to recorded");
 				Mojo.Controller.stageController.pushScene("recorded");
 				break;
+			case 85:
+				Mojo.Log.info("u - shortcut key to upcoming");
+				Mojo.Controller.stageController.pushScene("upcoming");
+				break;
+			case 71:
+				Mojo.Log.info("g - shortcut key to guide");
+				Mojo.Controller.stageController.pushScene("guide");	
+				break;
+			case 86:
+				Mojo.Log.info("v - shortcut key to videos");
+				Mojo.Controller.stageController.pushScene("videos");	
+				break;
+			case 77:
+				Mojo.Log.info("m - shortcut key to musicList");
+				Mojo.Controller.stageController.pushScene("musicList");	
+				break;
 			case 83:
 				Mojo.Log.info("s - shortcut key to status");
 				Mojo.Controller.stageController.pushScene("status");
 				break;
-			case 85:
-				Mojo.Log.info("u - shortcut key to upcoming");
-				Mojo.Controller.stageController.pushScene("upcoming");
+			case 76:
+				Mojo.Log.info("l - shortcut key to log");
+				Mojo.Controller.stageController.pushScene("log");	
 				break;
 			default:
 				Mojo.Log.info("No shortcut key");
@@ -545,91 +584,86 @@ WelcomeAssistant.prototype.alertNeedScript = function() {
 	
 };
 
+WelcomeAssistant.prototype.alertScriptUpdate = function(oldversion) {
+	
+	//Mojo.Log.error("Current version is " + WebMyth.currentScriptVersion + " but last version was " + oldversion);
+	
+	
+	if( (WebMyth.currentScriptVersion) > oldversion ) {
+	
+		//Mojo.Log.info("Inside remote alert if");
+	
+		var script_message = "This update to WebMyth includes a new script version that replaces the previous scripts.  ";
+		script_message += "While all of the existig functionality of the prvious version should still be intact, you will not be able to access music or setup recordings from the app.  <hr/>";
+		script_message += "The current script version is " + WebMyth.currentScriptVersion + ".";
+       
+		this.controller.showAlertDialog({
+			onChoose: function(value) {if (value==true) {
+					//Mojo.Log.error("appPath:" + Mojo.appPath);
+					this.controller.serviceRequest(
+						"palm://com.palm.applicationManager", {
+							method: 'open',
+							parameters: {
+								id: "com.palm.app.email",
+								params: {
+									summary: "WebMyth setup instructions",
+									text: WebMyth.helpEmailText
+								}
+							}
+						}
+					);
+					}
+				},
+			title: "WebMyth - v" + Mojo.Controller.appInfo.version,
+			message:  script_message, 
+			choices: [
+                    {label: $L("OK"), value: false},
+					{label: $L("Email Instructions"), value: true}
+					],
+			allowHTMLMessage: true
+		});
+	};
+	
+	//Mojo.Log.error("Leaving alert script update");
+	
+	
+};
+
 
 
 WelcomeAssistant.prototype.doWelcomeIcon = function(event) {	
 	
 	Event.stop(event); 
 	
-	Mojo.Log.info("Starting plugin test - query location")
+	Mojo.Log.info("Starting plugin test - upnp")
 	
 	try {
-		var response = $('webmyth_service_id').sendData("query location");
 		
-		if((response == "sendto() failed")||(response == "recvMsgSize == 0")){
-			$('debugText').innerText = "Failed to send, try again";
-			WebMyth.newPluginSocket();
-			
-		} else {
-			$('debugText').innerText = response;
-		}
+		//var response1 = $('webmyth_service_id').upnpInit();
+		
+		//$('debugText').innerText = response1;
+
 	}
 	catch(e) {
 		Mojo.Log.error("plug-in error %s",e);
 	}
-	
-	/*
-	Mojo.Log.info("Doing Upnp search")
-	
-	var request3 = this.controller.serviceRequest('palm://com.thewbman.webmyth.service', {
-		  method:"upnp",
-		  parameters:{
-			"text": "Hello world"
-			},
-		  onSuccess: function(response) {
-				Mojo.Log.error("Success upnp status of %j", response);
-				Mojo.Controller.getAppController().showBanner("Upnp success", {source: 'notification'});
-	
-			}.bind(this),
-		  onFailure: function(response) {
-		  
-					Mojo.Log.error("Failed upnp status of %j", response);
-					Mojo.Controller.getAppController().showBanner("Upnp FAIL", {source: 'notification'});
-					
-	
-			}.bind(this),
-		});
-	*/
-	
-	
-	
-	/*
-	
-	Mojo.Log.info("Starting MySQL communication");
 		
-	var request2 = this.controller.serviceRequest('palm://com.thewbman.webmyth.service', {
-		  method:"mysqlQuery",
-		  parameters:{
-			"host": WebMyth.prefsCookieObject.databaseHost, 
-			"port": 3306,
-			"database": WebMyth.prefsCookieObject.databaseName,
-			"username": WebMyth.prefsCookieObject.databaseUsername,
-			"password": WebMyth.prefsCookieObject.databasePassword,
-			"query":"SELECT * FROM `channel` ;"
-			},
-		  onSuccess: function(response) {
-				Mojo.Log.info("Success service connection status of %j", response);
-				Mojo.Controller.getAppController().showBanner("MySQL success", {source: 'notification'});
-	
-			}.bind(this),
-		  onFailure: function(response) {
-		  
-					Mojo.Log.info("Failed service connection status of %j", response);
-					Mojo.Controller.getAppController().showBanner("MySQL FAIL", {source: 'notification'});
-					
-				
-				//WebMyth.sendServiceCmd(sceneController, retryCommand, true);
-	
-			}.bind(this),
-		});
-	
-	*/
-	
 	
 };
 
+WelcomeAssistant.prototype.mysqlWelcomeResponse = function(response) {
 
-			
+	Mojo.Log.error("Mysql text %s",response);
+	$('debugText').innerText = response;
+	
+	var myObject = JSON.parse(response);
+	
+	Mojo.Log.error("Mysql JSON %j",myObject);
+
+}
+	
+
+	
 WelcomeAssistant.prototype.doHelpButton = function(event) {
 	
 		//Mojo.Log.info("Inside doHelpButton");
@@ -728,50 +762,7 @@ WelcomeAssistant.prototype.doHelpButton = function(event) {
 	
 }
 
-WelcomeAssistant.prototype.alertScriptUpdate = function(oldversion) {
-	
-	//Mojo.Log.error("Current version is " + WebMyth.currentScriptVersion + " but last version was " + oldversion);
-	
-	
-	if( (WebMyth.currentScriptVersion) > oldversion ) {
-	
-		//Mojo.Log.info("Inside remote alert if");
-	
-		var script_message = "This update to WebMyth includes a new script version that replaces the previous scripts.  ";
-		script_message += "While all of the existig functionality of the prvious version should still be intact, you will not be able to access music or setup recordings from the app.  <hr/>";
-		script_message += "The current script version is " + WebMyth.currentScriptVersion + ".";
-       
-		this.controller.showAlertDialog({
-			onChoose: function(value) {if (value==true) {
-					//Mojo.Log.error("appPath:" + Mojo.appPath);
-					this.controller.serviceRequest(
-						"palm://com.palm.applicationManager", {
-							method: 'open',
-							parameters: {
-								id: "com.palm.app.email",
-								params: {
-									summary: "WebMyth setup instructions",
-									text: WebMyth.helpEmailText
-								}
-							}
-						}
-					);
-					}
-				},
-			title: "WebMyth - v" + Mojo.Controller.appInfo.version,
-			message:  script_message, 
-			choices: [
-                    {label: $L("OK"), value: false},
-					{label: $L("Email Instructions"), value: true}
-					],
-			allowHTMLMessage: true
-		});
-	};
-	
-	//Mojo.Log.error("Leaving alert script update");
-	
-	
-};
+
 
 WelcomeAssistant.prototype.readMasterBackendFail = function(response) {
 	Mojo.Log.error("Failed to get backend setting information");
@@ -798,133 +789,82 @@ WelcomeAssistant.prototype.readMasterBackendSuccess = function(response) {
 	}
 	
 	
-	//Get backend IPs
-	this.checkConnectionStatus();
+	this.checkNetworkConnectionStatus();
 
 };
 
-WelcomeAssistant.prototype.getHostsList = function() {
-	
-	//This function has been depreciated and replaced with getSettings();
-	
-	//Mojo.Log.error("Starting to get hosts");
-		
-	var requestUrl = "http://"+WebMyth.prefsCookieObject.masterBackendIp+":6544/Myth/GetHosts";
 
-	//Mojo.Log.info("XML hosts URL is: "+requestUrl);
-			
-		try {
-				var request = new Ajax.Request(requestUrl,{
-				method: 'get',
-				evalJSON: false,
-				onSuccess: this.readHostsSuccess.bind(this),
-				onFailure: function() {
-						Mojo.Log.info("failed to get hosts from backend")	
-					}  
-			});
+
+WelcomeAssistant.prototype.checkNetworkConnectionStatus = function() {
+	
+	//Update backends from XML
+	//Mojo.Log.error('Starting to get connection status');
+	
+	
+	//Check we have a network before trying to get backends
+	this.controller.serviceRequest('palm://com.palm.connectionmanager/', {
+			method: 'getstatus',
+			parameters: {subscribe: false},
+			onSuccess: function(response) {
+				//Mojo.Log.info("Got connection status of %j", response);
+				
+				if((response.wifi.state == "connected")||(response.wan.state == "connected")) {
+					
+					//this.getSettings();
+					
+					//Get MySQL connection info first
+					this.getConnectionInfo();
+					
+				} else if(response.wan.state == "disconnected") {
+				
+					// show update dialog
+					this.controller.showAlertDialog({                            
+								onChoose: function(value) {} ,                                       
+								title: "WebMyth - v" + Mojo.Controller.appInfo.version,
+								message: "Could not find a network connection.  WebMyth requires a network connection to operate.",
+								choices: [                                                          
+									{ label: $L("OK"), value: "ok", type: "affirmative" }   
+								]                                                                   
+					}); 
+				
+				}
+	
+			}.bind(this),
+			onFailure: this.gotConnectionFailure
 		}
-		catch(e) {
-			Mojo.Log.error(e);
-		}
-	
-}
-
-WelcomeAssistant.prototype.getSettings = function() {
-	
-	//Mojo.Log.error("Starting to get settingss");
+	);
 		
-	//var query = "SELECT * FROM `settings`  WHERE `value` != 'MythWelcomeDateFormat' ;";
-	var query = "SELECT * FROM `settings`  WHERE ";
-	query += " `value` = 'AutoCommercialFlag'";
-	query += " OR `value` = 'AutoTranscode' ";
-	query += " OR `value` = 'AutoRunUserJob1' ";
-	query += " OR `value` = 'AutoRunUserJob2' ";
-	query += " OR `value` = 'AutoRunUserJob3' ";
-	query += " OR `value` = 'AutoRunUserJob4' ";
-	query += " OR `value` = 'DefaultStartOffset' ";
-	query += " OR `value` = 'DefaultEndOffset' ";
-	query += " OR `value` = 'UserJobDesc1' ";
-	query += " OR `value` = 'UserJobDesc2' ";
-	query += " OR `value` = 'UserJobDesc3' ";
-	query += " OR `value` = 'UserJobDesc4' ";
-	query += " OR `value` = 'MasterServerIP' ";
-	query += " OR `value` = 'MasterServerPort' ";
-	query += " OR `value` = 'BackendServerIP' ";
-	query += " OR `value` = 'NetworkControlPort' ";
-	query += " OR `value` = 'BackendServerPort' ";
-	query += " ;";
-	
-	
-	var requestUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webmythPythonFile;
-	requestUrl += "?op=executeSQLwithResponse";				
-	requestUrl += "&query64=";		
-	requestUrl += Base64.encode(query);	
-	
-	
-    try {
-        var request = new Ajax.Request(requestUrl,{
-            method: 'get',
-            evalJSON: 'true',
-			requestHeaders: {Authorization: 'Basic ' + Base64.encode(WebMyth.prefsCookieObject.webserverUsername + ":" + WebMyth.prefsCookieObject.webserverPassword)},
-			onSuccess: this.readSettingsSuccess.bind(this),
-            onFailure: function() {
-						Mojo.Log.info("failed to get settings table from backend")	
-					}   
-        });
-    }
-    catch(e) {
-        Mojo.Log.error(e);
-    }
-	
-}
-
-WelcomeAssistant.prototype.readSettingsSuccess = function(response) {
-
-	//Mojo.Log.error('Got settings table rule responseJSON: %j', response.responseJSON);
-	
-	this.settings = cleanSettings(response.responseJSON);
-	
-	Mojo.Log.info("Cleaned settings is %j",this.settings);
-	
-	WebMyth.prefsCookieObject.masterBackendPort = this.settings.MasterServerPort;
-	
-	WebMyth.settings.clear();
-	Object.extend(WebMyth.settings,this.settings);
-	
-	this.backendsList = this.settings.hosts;
-	
-	//Mojo.Log.info("Cleaned backends list is %j",this.backendsList);
-	
-	WebMyth.backendsCookieObject.clear();
-	Object.extend(WebMyth.backendsCookieObject,this.backendsList);
-	WebMyth.backendsCookie.put(WebMyth.backendsCookieObject);
-	
-	this.getConnectionInfo();
-	
-	
 };
 
 WelcomeAssistant.prototype.getConnectionInfo = function() {
 	
 	//Mojo.Log.error("Starting to get connection info");
 		
+	if(WebMyth.prefsCookieObject.manualDatabase){
+		//We have manual MySQL connection info, so we can get settings directly
+
+		this.getSettings();
+		
+	} else {
 	
-	var requestUrl = "http://"+WebMyth.prefsCookieObject.masterBackendIp+":6544/Myth/GetConnectionInfo";
-	
-	
-    try {
-        var request = new Ajax.Request(requestUrl,{
-            method: 'get',
-            evalJSON: 'false',
-			onSuccess: this.readConnectionInfoSuccess.bind(this),
-            onFailure: function() {
-						Mojo.Log.info("failed to get connection info")	
-					}   
-        });
-    }
-    catch(e) {
-        Mojo.Log.error(e);
-    }
+		var requestUrl = "http://"+WebMyth.prefsCookieObject.masterBackendIp+":6544/Myth/GetConnectionInfo";
+		
+		
+		try {
+			var request = new Ajax.Request(requestUrl,{
+				method: 'get',
+				evalJSON: 'false',
+				onSuccess: this.readConnectionInfoSuccess.bind(this),
+				onFailure: function() {
+							Mojo.Log.info("failed to get connection info")	
+						}   
+			});
+		}
+		catch(e) {
+			Mojo.Log.error(e);
+		}
+		
+	}
 	
 }
 
@@ -999,92 +939,286 @@ WelcomeAssistant.prototype.readConnectionInfoSuccess = function(response) {
 		
 	}
 	
-	Mojo.Log.info("Finished gettig SQL connection info");
+	Mojo.Log.info("Finished gettig DB connection info");
 	
 	
-	WebMyth.prefsCookie.put(WebMyth.prefsCookieObject);						
+	WebMyth.prefsCookie.put(WebMyth.prefsCookieObject);				
+
+	this.getSettings();
 			
 	
 };
 
-
-WelcomeAssistant.prototype.getScriptVersion = function() {
+WelcomeAssistant.prototype.getSettings = function() {
 	
-	//Mojo.Log.error("Starting to get script version");
+	//Mojo.Log.error("Starting to get settingss");
 		
-	
-	var requestUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webmythPythonFile;
-	requestUrl += "?op=getScriptVersion";	
-	
-	
-    try {
-        var request = new Ajax.Request(requestUrl,{
-            method: 'get',
-            evalJSON: 'false',
-			requestHeaders: {Authorization: 'Basic ' + Base64.encode(WebMyth.prefsCookieObject.webserverUsername + ":" + WebMyth.prefsCookieObject.webserverPassword)},
-			onSuccess: this.readScriptVersionSuccess.bind(this),
-            onFailure: function() {
-						Mojo.Log.info("failed to get script version")	
-					}   
-        });
-    }
-    catch(e) {
-        Mojo.Log.error(e);
-    }
-	
-}
-
-WelcomeAssistant.prototype.readScriptVersionSuccess = function(response) {
-
-	Mojo.Log.info('Got script version', response.responseText.trim());
-	
-	WebMyth.prefsCookieObject.liveScriptVersion = response.responseText.trim();
-	WebMyth.prefsCookie.put(WebMyth.prefsCookieObject);
-	
-};
-
-WelcomeAssistant.prototype.gotConnectionFailed = function(response) {
-	Mojo.Log.error("failed to get connection status");
-	
-}
-
-WelcomeAssistant.prototype.checkConnectionStatus = function() {
-	
-	//Update backends from XML
-	//Mojo.Log.error('Starting to get connection status');
+	//var query = "SELECT * FROM `settings`  WHERE `value` != 'MythWelcomeDateFormat' ;";
+	var query = "SELECT * FROM `settings`  WHERE ";
+	query += " `value` = 'AutoCommercialFlag'";
+	query += " OR `value` = 'AutoTranscode' ";
+	query += " OR `value` = 'AutoRunUserJob1' ";
+	query += " OR `value` = 'AutoRunUserJob2' ";
+	query += " OR `value` = 'AutoRunUserJob3' ";
+	query += " OR `value` = 'AutoRunUserJob4' ";
+	query += " OR `value` = 'DefaultStartOffset' ";
+	query += " OR `value` = 'DefaultEndOffset' ";
+	query += " OR `value` = 'UserJobDesc1' ";
+	query += " OR `value` = 'UserJobDesc2' ";
+	query += " OR `value` = 'UserJobDesc3' ";
+	query += " OR `value` = 'UserJobDesc4' ";
+	query += " OR `value` = 'MasterServerIP' ";
+	query += " OR `value` = 'MasterServerPort' ";
+	query += " OR `value` = 'BackendServerIP' ";
+	query += " OR `value` = 'NetworkControlPort' ";
+	query += " OR `value` = 'BackendServerPort' ";
+	query += " ;";
 	
 	
-	//Check we have a network before trying to get backends
-	this.controller.serviceRequest('palm://com.palm.connectionmanager/', {
-			method: 'getstatus',
-			parameters: {subscribe: false},
-			onSuccess: function(response) {
-				//Mojo.Log.info("Got connection status of %j", response);
-				
-				if((response.wifi.state == "connected")||(response.wan.state == "connected")) {
-					//this.getHostsList();
-					
-					this.getSettings();
-				} else if(response.wan.state == "disconnected") {
-				
-					// show update dialog
-					this.controller.showAlertDialog({                            
-								onChoose: function(value) {} ,                                       
-								title: "WebMyth - v" + Mojo.Controller.appInfo.version,
-								message: "Could not find a network connection.  WebMyth requires a network connection to operate.",
-								choices: [                                                          
-									{ label: $L("OK"), value: "ok", type: "affirmative" }   
-								]                                                                   
-					}); 
-				
-				}
 	
-			}.bind(this),
-			onFailure: this.gotConnectionFailure
+	if(WebMyth.usePlugin){
+	
+		var response1 = $('webmyth_service_id').mysqlCommand(WebMyth.prefsCookieObject.databaseHost,WebMyth.prefsCookieObject.databaseUsername,WebMyth.prefsCookieObject.databasePassword,WebMyth.prefsCookieObject.databaseName,WebMyth.prefsCookieObject.databasePort,"mysqlWelcomeSettingsResponse",query.substring(0,250),query.substring(250,500),query.substring(500,750),query.substring(750,1000),query.substring(1000,1250),query.substring(1250,1500),query.substring(1500,1750),query.substring(1750,2000),query.substring(2000,2250),query.substring(2250,2500));
+		
+		//Mojo.Log.error("Welcome settings plugin response "+response1);
+		
+	} else {
+	
+		var requestUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webmythPythonFile;
+		requestUrl += "?op=executeSQLwithResponse";				
+		requestUrl += "&query64=";		
+		requestUrl += Base64.encode(query);	
+		
+		
+		try {
+			var request = new Ajax.Request(requestUrl,{
+				method: 'get',
+				evalJSON: 'true',
+				requestHeaders: {Authorization: 'Basic ' + Base64.encode(WebMyth.prefsCookieObject.webserverUsername + ":" + WebMyth.prefsCookieObject.webserverPassword)},
+				onSuccess: this.readSettingsSuccess.bind(this),
+				onFailure: function() {
+							Mojo.Log.info("failed to get settings table from backend")	
+						}   
+			});
 		}
-	);
-		
+		catch(e) {
+			Mojo.Log.error(e);
+		}
+	}
+	
 };
+
+WelcomeAssistant.prototype.mysqlWelcomeSettingsResponse = function(response) {
+
+	//Mojo.Log.error("Got welcome settings plugin response: "+response);
+	
+	var settingsJson = JSON.parse(response);
+	
+	Mojo.Log.info("Plugin welcome settings JSON %j",settingsJson);
+	
+	this.settings = cleanSettings(settingsJson);
+	
+	//Mojo.Log.info("Cleaned settings is %j",this.settings);
+	
+	WebMyth.prefsCookieObject.masterBackendPort = this.settings.MasterServerPort;
+	
+	WebMyth.settings.clear();
+	Object.extend(WebMyth.settings,this.settings);
+	
+	this.backendsList = this.settings.hosts;
+	
+	//Mojo.Log.info("Cleaned backends list is %j",this.backendsList);
+	
+	WebMyth.backendsCookieObject.clear();
+	Object.extend(WebMyth.backendsCookieObject,this.backendsList);
+	WebMyth.backendsCookie.put(WebMyth.backendsCookieObject);
+	
+	//this.getConnectionInfo();
+	
+};
+
+WelcomeAssistant.prototype.readSettingsSuccess = function(response) {
+
+	//Mojo.Log.error('Got settings table rule responseJSON: %j', response.responseJSON);
+	
+	this.settings = cleanSettings(response.responseJSON);
+	
+	Mojo.Log.info("Cleaned settings is %j",this.settings);
+	
+	WebMyth.prefsCookieObject.masterBackendPort = this.settings.MasterServerPort;
+	
+	WebMyth.settings.clear();
+	Object.extend(WebMyth.settings,this.settings);
+	
+	this.backendsList = this.settings.hosts;
+	
+	//Mojo.Log.info("Cleaned backends list is %j",this.backendsList);
+	
+	WebMyth.backendsCookieObject.clear();
+	Object.extend(WebMyth.backendsCookieObject,this.backendsList);
+	WebMyth.backendsCookie.put(WebMyth.backendsCookieObject);
+	
+};
+
+
+
+//Check for app updates
+WelcomeAssistant.prototype.puchkDoUpdateCheck = function(interval) {
+
+	this.puchkInterval = interval;
+
+	// reference to the cookie, if it exists
+	this.puchkCookieRef = new Mojo.Model.Cookie(Mojo.Controller.appInfo.title + "_puchk");
+
+	// get the cookie
+	this.puchkCookie = this.puchkCookieRef.get();
+
+	// if there's no cookie, then this is the first run, or the interval has expired
+	// because the cookie expires after the given amount of time
+	if (!this.puchkCookie) {
+	
+		// URL to your app details page on Palm's web site
+		var url = "http://developer.palm.com/webChannel/index.php?packageid=" + Mojo.Controller.appInfo.id;
+	
+		// do AJAX request
+		var request = new Ajax.Request(url, {
+			method: 'get',
+			evalJSON: 'false',
+			onSuccess: this.puchkGotResults.bind(this), // if you get results, check to see if there's an update
+			// we're only concerned with success
+		});
+	}
+
+	// else if the cookie exists, do nothing since the interval hasn't expired
+	
+}
+
+WelcomeAssistant.prototype.puchkGotResults = function(transport) {
+
+	// if we have success in the AJAX request, then we have an actual check occurring and we can
+	// set a cookie
+
+	// expire is now + (interval(hours) * 3600000 milliseconds per hour)
+	var expire = new Date();
+	expire.setTime(expire.getTime()+(this.puchkInterval*3600000));
+
+	// set a new cookie to expire at interval hours from now
+	this.puchkCookieRef.put({},expire);
+	
+	// the entire HTML source of the Palm app details web page into a string	
+	var HTMLStr = transport.responseText;
+	
+	// regular expression that looks for a string of the form "Version: #.#.#<br/>" in the web page
+	// and returns only the "Version: #.#.#" part (JavaScript supports lookaheads but not lookbehinds)
+	var patt = /Version:\s[0-9\.]+(?=<br\/>)/;
+
+	// use the pattern to get the match from the web page
+	var toSlice = HTMLStr.match(patt).toString();
+
+	// JavaScript doesn't support lookbehinds, so we need to slice "Version: " (9 chars) from the beginning of the string
+	// leaving us with a nice "#.#.#"
+	var version = toSlice.slice(9);
+		
+	// if the returned version is greater than the current version
+	if (this.puchkVerComp(version)) {
+
+		var appData = {
+				title: $L(Mojo.Controller.appInfo.title),
+				version: version
+				};
+				
+		// show update dialog
+		this.controller.showAlertDialog({                            
+            		onChoose: function(value) {                                         
+                		if (value === "update") {                                      
+                			this.puchkLaunchUpdate();
+					window.close();                            
+                		}                                                           
+            		},                                                                  
+            		title: $L({value: "Update Available", key: "puchk_dialog_title"}),                                 
+			message: $L({value: "#{title} v#{version} is available. Would you like to update?", key: "puchk_dialog_message"}).interpolate(appData),
+            		choices: [                                                          
+            			{ label: $L({value: "Download Update", key: "puchk_download_label"}), value: "update", type: "affirmative" },
+            			{ label: $L({value: "Cancel", key: "puchk_cancel_label"}), value: "cancel", type: "negative" }      
+            		]                                                                   
+        	});          	
+	}
+			
+	// if there's no update, do nothing
+}
+
+WelcomeAssistant.prototype.puchkLaunchUpdate = function() {
+	// when the update button is tapped, send the user to the App Catalog for your app	
+	var url = "http://developer.palm.com/appredirect/?packageid=" + Mojo.Controller.appInfo.id;
+
+	this.controller.serviceRequest('palm://com.palm.applicationManager',
+		{
+		method:'open',
+		parameters:{target: url}
+		});
+}
+
+WelcomeAssistant.prototype.puchkVerComp = function(v) {
+	
+	var upd = this.puchkSplitVer(v); // most up-to-date version, from the Palm app details page
+	var cur = this.puchkSplitVer(Mojo.Controller.appInfo.version); // get current app version from appinfo.js
+	
+	Mojo.Log.info("Current version is "+Mojo.Controller.appInfo.version+", new version is "+v);
+	
+	// upd can't be lower than cur or it wouldn't be published
+	if (	(upd.major > cur.major) // this is a new major version
+			|| ( (upd.major == cur.major) && (upd.minor > cur.minor) ) // this is a new minor version
+			|| ( (upd.major == cur.major) && (upd.minor == cur.minor) && (upd.build > cur.build) ) // this is a new build version
+		) { return true;}
+	
+	// otherwise, return false, that there isn't an update
+	else { return false; }
+}
+
+WelcomeAssistant.prototype.puchkSplitVer = function(v) {
+	
+	var x = v.split('.');
+	
+    // get the integers of the version parts, or 0 if it can't parse (i.e. 1.4.0 = 1, 4, 0) 
+    var major = parseInt(x[0]) || 0;
+    var minor = parseInt(x[1]) || 0;
+    var build = parseInt(x[2]) || 0;
+    return {
+        major: major,
+        minor: minor,
+        build: build
+    };
+    	
+}
+
+
+
+//Depreciated
+WelcomeAssistant.prototype.getHostsList = function() {
+	
+	//This function has been depreciated and replaced with getSettings();
+	
+	//Mojo.Log.error("Starting to get hosts");
+		
+	var requestUrl = "http://"+WebMyth.prefsCookieObject.masterBackendIp+":6544/Myth/GetHosts";
+
+	//Mojo.Log.info("XML hosts URL is: "+requestUrl);
+			
+		try {
+				var request = new Ajax.Request(requestUrl,{
+				method: 'get',
+				evalJSON: false,
+				onSuccess: this.readHostsSuccess.bind(this),
+				onFailure: function() {
+						Mojo.Log.info("failed to get hosts from backend")	
+					}  
+			});
+		}
+		catch(e) {
+			Mojo.Log.error(e);
+		}
+	
+}
 
 WelcomeAssistant.prototype.readHostsSuccess = function(response) {
 	
@@ -1146,6 +1280,41 @@ WelcomeAssistant.prototype.readHostsSuccess = function(response) {
 	//Mojo.Log.info("Exited XML host parsing");
 	
 	this.getBackendIPs();
+	
+};
+
+WelcomeAssistant.prototype.getScriptVersion = function() {
+	
+	//Mojo.Log.error("Starting to get script version");
+		
+	
+	var requestUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webmythPythonFile;
+	requestUrl += "?op=getScriptVersion";	
+	
+	
+    try {
+        var request = new Ajax.Request(requestUrl,{
+            method: 'get',
+            evalJSON: 'false',
+			requestHeaders: {Authorization: 'Basic ' + Base64.encode(WebMyth.prefsCookieObject.webserverUsername + ":" + WebMyth.prefsCookieObject.webserverPassword)},
+			onSuccess: this.readScriptVersionSuccess.bind(this),
+            onFailure: function() {
+						Mojo.Log.info("failed to get script version")	
+					}   
+        });
+    }
+    catch(e) {
+        Mojo.Log.error(e);
+    }
+	
+}
+
+WelcomeAssistant.prototype.readScriptVersionSuccess = function(response) {
+
+	Mojo.Log.info('Got script version', response.responseText.trim());
+	
+	WebMyth.prefsCookieObject.liveScriptVersion = response.responseText.trim();
+	WebMyth.prefsCookie.put(WebMyth.prefsCookieObject);
 	
 };
 
@@ -1324,133 +1493,4 @@ WelcomeAssistant.prototype.readMasterBackendIPSuccess = function(response) {
 	
 };
 
-
-
-WelcomeAssistant.prototype.puchkDoUpdateCheck = function(interval) {
-
-	this.puchkInterval = interval;
-
-	// reference to the cookie, if it exists
-	this.puchkCookieRef = new Mojo.Model.Cookie(Mojo.Controller.appInfo.title + "_puchk");
-
-	// get the cookie
-	this.puchkCookie = this.puchkCookieRef.get();
-
-	// if there's no cookie, then this is the first run, or the interval has expired
-	// because the cookie expires after the given amount of time
-	if (!this.puchkCookie) {
-	
-		// URL to your app details page on Palm's web site
-		var url = "http://developer.palm.com/webChannel/index.php?packageid=" + Mojo.Controller.appInfo.id;
-	
-		// do AJAX request
-		var request = new Ajax.Request(url, {
-			method: 'get',
-			evalJSON: 'false',
-			onSuccess: this.puchkGotResults.bind(this), // if you get results, check to see if there's an update
-			// we're only concerned with success
-		});
-	}
-
-	// else if the cookie exists, do nothing since the interval hasn't expired
-	
-}
-
-WelcomeAssistant.prototype.puchkGotResults = function(transport) {
-
-	// if we have success in the AJAX request, then we have an actual check occurring and we can
-	// set a cookie
-
-	// expire is now + (interval(hours) * 3600000 milliseconds per hour)
-	var expire = new Date();
-	expire.setTime(expire.getTime()+(this.puchkInterval*3600000));
-
-	// set a new cookie to expire at interval hours from now
-	this.puchkCookieRef.put({},expire);
-	
-	// the entire HTML source of the Palm app details web page into a string	
-	var HTMLStr = transport.responseText;
-	
-	// regular expression that looks for a string of the form "Version: #.#.#<br/>" in the web page
-	// and returns only the "Version: #.#.#" part (JavaScript supports lookaheads but not lookbehinds)
-	var patt = /Version:\s[0-9\.]+(?=<br\/>)/;
-
-	// use the pattern to get the match from the web page
-	var toSlice = HTMLStr.match(patt).toString();
-
-	// JavaScript doesn't support lookbehinds, so we need to slice "Version: " (9 chars) from the beginning of the string
-	// leaving us with a nice "#.#.#"
-	var version = toSlice.slice(9);
-		
-	// if the returned version is greater than the current version
-	if (this.puchkVerComp(version)) {
-
-		var appData = {
-				title: $L(Mojo.Controller.appInfo.title),
-				version: version
-				};
-				
-		// show update dialog
-		this.controller.showAlertDialog({                            
-            		onChoose: function(value) {                                         
-                		if (value === "update") {                                      
-                			this.puchkLaunchUpdate();
-					window.close();                            
-                		}                                                           
-            		},                                                                  
-            		title: $L({value: "Update Available", key: "puchk_dialog_title"}),                                 
-			message: $L({value: "#{title} v#{version} is available. Would you like to update?", key: "puchk_dialog_message"}).interpolate(appData),
-            		choices: [                                                          
-            			{ label: $L({value: "Download Update", key: "puchk_download_label"}), value: "update", type: "affirmative" },
-            			{ label: $L({value: "Cancel", key: "puchk_cancel_label"}), value: "cancel", type: "negative" }      
-            		]                                                                   
-        	});          	
-	}
-			
-	// if there's no update, do nothing
-}
-
-WelcomeAssistant.prototype.puchkLaunchUpdate = function() {
-	// when the update button is tapped, send the user to the App Catalog for your app	
-	var url = "http://developer.palm.com/appredirect/?packageid=" + Mojo.Controller.appInfo.id;
-
-	this.controller.serviceRequest('palm://com.palm.applicationManager',
-		{
-		method:'open',
-		parameters:{target: url}
-		});
-}
-
-WelcomeAssistant.prototype.puchkVerComp = function(v) {
-	
-	var upd = this.puchkSplitVer(v); // most up-to-date version, from the Palm app details page
-	var cur = this.puchkSplitVer(Mojo.Controller.appInfo.version); // get current app version from appinfo.js
-	
-	Mojo.Log.info("Current version is "+Mojo.Controller.appInfo.version+", new version is "+v);
-	
-	// upd can't be lower than cur or it wouldn't be published
-	if (	(upd.major > cur.major) // this is a new major version
-			|| ( (upd.major == cur.major) && (upd.minor > cur.minor) ) // this is a new minor version
-			|| ( (upd.major == cur.major) && (upd.minor == cur.minor) && (upd.build > cur.build) ) // this is a new build version
-		) { return true;}
-	
-	// otherwise, return false, that there isn't an update
-	else { return false; }
-}
-
-WelcomeAssistant.prototype.puchkSplitVer = function(v) {
-	
-	var x = v.split('.');
-	
-    // get the integers of the version parts, or 0 if it can't parse (i.e. 1.4.0 = 1, 4, 0) 
-    var major = parseInt(x[0]) || 0;
-    var minor = parseInt(x[1]) || 0;
-    var build = parseInt(x[2]) || 0;
-    return {
-        major: major,
-        minor: minor,
-        build: build
-    };
-    	
-}
 

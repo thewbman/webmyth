@@ -144,11 +144,14 @@ RecordedDetailsAssistant.prototype.setup = function() {
 		$('currently-recording-title').innerText = $L("Currently Recording");
 	}
 	
-	
-	
 	this.controller.listen(this.controller.get( "header-menu" ), Mojo.Event.tap, function(){this.controller.sceneScroller.mojo.revealTop();}.bind(this));
 	
 
+	if(WebMyth.usePlugin){
+		$('webmyth_service_id').mysqlRecordedUndeleteResponse = this.mysqlRecordedUndeleteResponse.bind(this);
+		$('webmyth_service_id').mysqlRecordedJobqueueResponse = this.mysqlRecordedJobqueueResponse.bind(this);
+		$('webmyth_service_id').mysqlRecordedNewjobResponse = this.mysqlRecordedNewjobResponse.bind(this);
+	}
 	
 	this.getJobqueue();
 	
@@ -289,21 +292,37 @@ RecordedDetailsAssistant.prototype.handleKey = function(event) {
 	
 	if(event.originalEvent.metaKey) {
 		switch(event.originalEvent.keyCode) {
-			case 71:
-				Mojo.Log.info("g - shortcut key to guide");
-				Mojo.Controller.stageController.swapScene("guide");	
+			case 72:
+				Mojo.Log.info("h - shortcut key to hostSelector");
+				Mojo.Controller.stageController.swapScene("hostSelector");
 				break;
 			case 82:
 				Mojo.Log.info("r - shortcut key to recorded");
 				Mojo.Controller.stageController.swapScene("recorded");
 				break;
+			case 85:
+				Mojo.Log.info("u - shortcut key to upcoming");
+				Mojo.Controller.stageController.swapScene("upcoming");
+				break;
+			case 71:
+				Mojo.Log.info("g - shortcut key to guide");
+				Mojo.Controller.stageController.swapScene("guide");	
+				break;
+			case 86:
+				Mojo.Log.info("v - shortcut key to videos");
+				Mojo.Controller.stageController.swapScene("videos");	
+				break;
+			case 77:
+				Mojo.Log.info("m - shortcut key to musicList");
+				Mojo.Controller.stageController.swapScene("musicList");	
+				break;
 			case 83:
 				Mojo.Log.info("s - shortcut key to status");
 				Mojo.Controller.stageController.swapScene("status");
 				break;
-			case 85:
-				Mojo.Log.info("u - shortcut key to upcoming");
-				Mojo.Controller.stageController.swapScene("upcoming");
+			case 76:
+				Mojo.Log.info("l - shortcut key to log");
+				Mojo.Controller.stageController.swapScene("log");	
 				break;
 			default:
 				Mojo.Log.info("No shortcut key");
@@ -444,7 +463,7 @@ RecordedDetailsAssistant.prototype.handleDownload = function(downloadOrStream_in
 				mime: "video/mp4",
 				targetFilename: myFilename,
 				subscribe: true,	
-				targetDir: "/media/internal/mythtv/"
+				targetDir: "/media/internal/video/"
 			};
 		
 		//WebMyth.downloadToPhone(parameters);
@@ -457,7 +476,7 @@ RecordedDetailsAssistant.prototype.handleDownload = function(downloadOrStream_in
 				mime: "video/mp4",
 				targetFilename: myFilename,
 				subscribe: true,	
-				targetDir: "/media/internal/mythtv/"
+				targetDir: "/media/internal/video/"
 			},
 			onSuccess: function(response) {
 				if(response.completed) {
@@ -608,17 +627,23 @@ RecordedDetailsAssistant.prototype.handleUndelete = function() {
 	query += this.recordedObject.recStartTs.replace("T"," ");
 	query += '" LIMIT 1; ';
 	
-	
-	Mojo.Log.error("query is "+query);
-	
-	
-	var requestUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webmythPythonFile;
-	requestUrl += "?op=executeSQL";				
-	requestUrl += "&query64=";		
-	requestUrl += Base64.encode(query);	
+	Mojo.Log.error("Undelete query is "+query);
 	
 	
 	
+	if(WebMyth.usePlugin){
+	
+		var response1 = $('webmyth_service_id').mysqlExecute(WebMyth.prefsCookieObject.databaseHost,WebMyth.prefsCookieObject.databaseUsername,WebMyth.prefsCookieObject.databasePassword,WebMyth.prefsCookieObject.databaseName,WebMyth.prefsCookieObject.databasePort,"mysqlRecordedUndeleteResponse",query.substring(0,250),query.substring(250,500),query.substring(500,750),query.substring(750,1000),query.substring(1000,1250),query.substring(1250,1500),query.substring(1500,1750),query.substring(1750,2000),query.substring(2000,2250),query.substring(2250,2500));
+		
+		Mojo.Log.error("Recorded undelete plugin response "+response1);
+		
+	} else {
+	
+		var requestUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webmythPythonFile;
+		requestUrl += "?op=executeSQL";				
+		requestUrl += "&query64=";		
+		requestUrl += Base64.encode(query);	
+		
         var request = new Ajax.Request(requestUrl,{
             method: 'get',
             evalJSON: 'false',
@@ -632,7 +657,16 @@ RecordedDetailsAssistant.prototype.handleUndelete = function() {
 				Mojo.Controller.getAppController().showBanner("Error undeleting recording", {source: 'notification'});
 			}  
         });
+		
+	}
 	
+};
+
+RecordedDetailsAssistant.prototype.mysqlRecordedUndeleteResponse = function(response) {
+
+	Mojo.Log.error("Got undetele plugin response: "+response);
+	
+	Mojo.Controller.getAppController().showBanner("Successfully undeleted", {source: 'notification'});
 	
 };
 
@@ -643,27 +677,60 @@ RecordedDetailsAssistant.prototype.getJobqueue = function() {
 	
 	var query = 'SELECT * FROM `jobqueue` WHERE `chanid` = "'+this.recordedObject.chanId+'" AND `starttime` = "'+this.recordedObject.recStartTs+'" ;';
 	
-	var requestUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webmythPythonFile;
-	requestUrl += "?op=executeSQLwithResponse";				
-	requestUrl += "&query64=";		
-	requestUrl += Base64.encode(query);	
 	
 	
+	if(WebMyth.usePlugin){
 	
-    try {
-        var request = new Ajax.Request(requestUrl,{
-            method: 'get',
-            evalJSON: 'true',
-			requestHeaders: {Authorization: 'Basic ' + Base64.encode(WebMyth.prefsCookieObject.webserverUsername + ":" + WebMyth.prefsCookieObject.webserverPassword)},
-            onSuccess: this.successJobqueue.bind(this),
-            onFailure: this.failJobqueue.bind(this)
-        });
-    }
-    catch(e) {
-        Mojo.Log.error(e);
-    }
+		var response1 = $('webmyth_service_id').mysqlCommand(WebMyth.prefsCookieObject.databaseHost,WebMyth.prefsCookieObject.databaseUsername,WebMyth.prefsCookieObject.databasePassword,WebMyth.prefsCookieObject.databaseName,WebMyth.prefsCookieObject.databasePort,"mysqlRecordedJobqueueResponse",query.substring(0,250),query.substring(250,500),query.substring(500,750),query.substring(750,1000),query.substring(1000,1250),query.substring(1250,1500),query.substring(1500,1750),query.substring(1750,2000),query.substring(2000,2250),query.substring(2250,2500));
+		
+		Mojo.Log.error("Recorded jobqueue plugin response "+response1);
+		
+	} else {
+	
+		try {
+		
+			var requestUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webmythPythonFile;
+			requestUrl += "?op=executeSQLwithResponse";				
+			requestUrl += "&query64=";		
+			requestUrl += Base64.encode(query);	
+			
+			var request = new Ajax.Request(requestUrl,{
+				method: 'get',
+				evalJSON: 'true',
+				requestHeaders: {Authorization: 'Basic ' + Base64.encode(WebMyth.prefsCookieObject.webserverUsername + ":" + WebMyth.prefsCookieObject.webserverPassword)},
+				onSuccess: this.successJobqueue.bind(this),
+				onFailure: this.failJobqueue.bind(this)
+			});
+		}
+		catch(e) {
+			Mojo.Log.error(e);
+		}
+	
+	}
 	
 };
+
+RecordedDetailsAssistant.prototype.mysqlRecordedJobqueueResponse = function(response) {
+
+	Mojo.Log.error("Got jobqueue plugin response: "+response);
+	
+	var jobqueueJson = JSON.parse(response);
+	
+	if(jobqueueJson.length>0) {
+		//Got some recent jobqueues
+		this.jobqueueList.clear();
+		Object.extend(this.jobqueueList, cleanJobqueue(jobqueueJson));
+		
+	} else {
+		//Got empty response
+		this.jobqueueList.clear();
+		this.jobqueueList.push({"hostname": "N/A", "comment": "", "jobType": "N/A", "statusText": "No recent or queued jobs" });
+		
+	}
+	
+	this.controller.modelChanged(this.jobqueueListModel);
+	
+}
 
 RecordedDetailsAssistant.prototype.failJobqueue = function() {
 
@@ -684,21 +751,16 @@ RecordedDetailsAssistant.prototype.successJobqueue = function(response) {
 	if(response.responseJSON) {
 		//Got some recent jobqueues
 		this.jobqueueList.clear();
-		
 		Object.extend(this.jobqueueList, cleanJobqueue(response.responseJSON));
-		
-		this.controller.modelChanged(this.jobqueueListModel);
-	
 		
 	} else {
 		//Got empty response
 		this.jobqueueList.clear();
-		
 		this.jobqueueList.push({"hostname": "N/A", "comment": "", "jobType": "N/A", "statusText": "No recent or queued jobs" });
 		
-		this.controller.modelChanged(this.jobqueueListModel);
-	
 	}
+	
+	this.controller.modelChanged(this.jobqueueListModel);
 
 }
 
@@ -721,38 +783,61 @@ RecordedDetailsAssistant.prototype.queueJob = function(jobTypeNum) {
 	query += '", statustime = "'+nowDateISO.replace("T"," ");
 	query += '", schedruntime = "'+nowDateISO.replace("T"," ");
 	query += '", comment = "Queued by WebMyth app';
-	query += '", flags = "0"';
+	query += '", flags = "0" ;';
 		
-	
 	Mojo.Log.error("query is "+query);
 	
 	
-	var requestUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webmythPythonFile;
-	requestUrl += "?op=executeSQL";				
-	requestUrl += "&query64=";		
-	requestUrl += Base64.encode(query);	
 	
-	try {
-        var request = new Ajax.Request(requestUrl,{
-            method: 'get',
-            evalJSON: 'false',
-			requestHeaders: {Authorization: 'Basic ' + Base64.encode(WebMyth.prefsCookieObject.webserverUsername + ":" + WebMyth.prefsCookieObject.webserverPassword)},
-            onSuccess: function() {
-				Mojo.Log.info("Success in queueing job");
-				Mojo.Controller.getAppController().showBanner("Successfully queued", {source: 'notification'});
-				
-				//Update job queue list
-				this.getJobqueue();
-				
-			}.bind(this),
-            onFailure: function() {
-				Mojo.Log.error("Error in queueing job");
-				Mojo.Controller.getAppController().showBanner("Error queueing", {source: 'notification'});
-			}  
-        });
-    }
-    catch(e) {
-        Mojo.Log.error(e);
-    }
+	if(WebMyth.usePlugin){
+	
+		var response1 = $('webmyth_service_id').mysqlExecute(WebMyth.prefsCookieObject.databaseHost,WebMyth.prefsCookieObject.databaseUsername,WebMyth.prefsCookieObject.databasePassword,WebMyth.prefsCookieObject.databaseName,WebMyth.prefsCookieObject.databasePort,"mysqlRecordedNewjobResponse",query.substring(0,250),query.substring(250,500),query.substring(500,750),query.substring(750,1000),query.substring(1000,1250),query.substring(1250,1500),query.substring(1500,1750),query.substring(1750,2000),query.substring(2000,2250),query.substring(2250,2500));
+		
+		Mojo.Log.error("Recorded queue a newjob response "+response1);
+		
+	} else {
+	
+		var requestUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webmythPythonFile;
+		requestUrl += "?op=executeSQL";				
+		requestUrl += "&query64=";		
+		requestUrl += Base64.encode(query);	
+		
+		try {
+			var request = new Ajax.Request(requestUrl,{
+				method: 'get',
+				evalJSON: 'false',
+				requestHeaders: {Authorization: 'Basic ' + Base64.encode(WebMyth.prefsCookieObject.webserverUsername + ":" + WebMyth.prefsCookieObject.webserverPassword)},
+				onSuccess: function() {
+					Mojo.Log.info("Success in queueing job");
+					Mojo.Controller.getAppController().showBanner("Successfully queued", {source: 'notification'});
+					
+					//Update job queue list
+					this.getJobqueue();
+					
+				}.bind(this),
+				onFailure: function() {
+					Mojo.Log.error("Error in queueing job");
+					Mojo.Controller.getAppController().showBanner("Error queueing", {source: 'notification'});
+				}  
+			});
+		}
+		catch(e) {
+			Mojo.Log.error(e);
+		}
+	
+	}
+	
+};
 
+RecordedDetailsAssistant.prototype.mysqlRecordedNewjobResponse = function(response) {
+
+	Mojo.Log.error("Got recorded new job plugin response: "+response);
+	
+	Mojo.Controller.getAppController().showBanner("Successfully queued", {source: 'notification'});
+	
+	
+	
+	//Update job queue list
+	setTimeout(this.getJobqueue.bind(this), 50);
+	
 };

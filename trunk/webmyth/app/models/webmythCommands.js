@@ -119,7 +119,10 @@ function defaultCookie() {
 		showVideoDetailsImage: true,
 		currentSearchSort: 'date-asc',
 		showLog: true,
-		currentLogGroup: 'all'
+		currentLogGroup: 'all',
+		manualDatabase: false,
+		databaseHost: '',
+		usePlugin: 2
 		
 	};
 	
@@ -139,13 +142,13 @@ function defaultHostsCookie() {
 	return newCookieObject;
 };
 
-function defaultHostsCookieCurrent(newName) {
+function defaultHostsCookieCurrent(newName,newAddress) {
 
 	//These values are initiated in 'welcome' scene if not set
 
 	var newCookieObject = [{
 		"hostname": newName,
-		"address": newName,							
+		"address": newAddress,							
 		"port": "6546"
 	}];
 	
@@ -2574,8 +2577,12 @@ var cleanSettings = function(fullList) {
 			settingsObject.AutoRunUserJob4 = s.data;
 		} else if(s.value == "DefaultStartOffset") {
 			settingsObject.DefaultStartOffset = s.data;
+			if(settingsObject.DefaultStartOffset == "")
+				settingsObject.DefaultStartOffset = 0;
 		} else if(s.value == "DefaultEndOffset") {
 			settingsObject.DefaultEndOffset = s.data;
+			if(settingsObject.DefaultEndOffset == "")
+				settingsObject.DefaultEndOffset = 0;
 		} else if(s.value == "UserJobDesc1") {
 			settingsObject.UserJobDesc1 = s.data;
 		} else if(s.value == "UserJobDesc2") {

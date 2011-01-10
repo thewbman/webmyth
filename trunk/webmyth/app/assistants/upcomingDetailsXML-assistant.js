@@ -21,10 +21,10 @@
 
 function UpcomingDetailsXMLAssistant(upcoming_chanid, upcoming_starttime) {
 	   
-	   this.chanid = upcoming_chanid;
-	   this.starttime = upcoming_starttime;
+	this.chanid = upcoming_chanid;
+	this.starttime = upcoming_starttime;
 	   
-	   this.upcomingObject = {};
+	this.upcomingObject = {};
 	   
 }
 
@@ -147,6 +147,54 @@ UpcomingDetailsXMLAssistant.prototype.handleCommand = function(event) {
   }
   
 };
+
+UpcomingDetailsXMLAssistant.prototype.handleKey = function(event) {
+
+	//Mojo.Log.info("FAQs handleKey %o, %o", event.originalEvent.metaKey, event.originalEvent.keyCode);
+	
+	if(event.originalEvent.metaKey) {
+		switch(event.originalEvent.keyCode) {
+			case 72:
+				Mojo.Log.info("h - shortcut key to hostSelector");
+				Mojo.Controller.stageController.swapScene("hostSelector");
+				break;
+			case 82:
+				Mojo.Log.info("r - shortcut key to recorded");
+				Mojo.Controller.stageController.swapScene("recorded");
+				break;
+			case 85:
+				Mojo.Log.info("u - shortcut key to upcoming");
+				Mojo.Controller.stageController.swapScene("upcoming");
+				break;
+			case 71:
+				Mojo.Log.info("g - shortcut key to guide");
+				Mojo.Controller.stageController.swapScene("guide");	
+				break;
+			case 86:
+				Mojo.Log.info("v - shortcut key to videos");
+				Mojo.Controller.stageController.swapScene("videos");	
+				break;
+			case 77:
+				Mojo.Log.info("m - shortcut key to musicList");
+				Mojo.Controller.stageController.swapScene("musicList");	
+				break;
+			case 83:
+				Mojo.Log.info("s - shortcut key to status");
+				Mojo.Controller.stageController.swapScene("status");
+				break;
+			case 76:
+				Mojo.Log.info("l - shortcut key to log");
+				Mojo.Controller.stageController.swapScene("log");	
+				break;
+			default:
+				Mojo.Log.info("No shortcut key");
+				break;
+		}
+	}
+	Event.stop(event); 
+};
+
+
 
 
 

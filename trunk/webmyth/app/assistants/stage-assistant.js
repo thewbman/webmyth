@@ -27,6 +27,7 @@ WebMyth = {};
 
 
 WebMyth.usePlugin = true;
+WebMyth.usePluginFrontend = true;
 WebMyth.nextFrontendCommand = "";
 
 WebMyth.useService = false;
@@ -45,10 +46,14 @@ WebMyth.appMenuModel = {
 		{label: $L("Preferences"), command: 'do-prefsApp'},
 		{label: $L("Shortcuts"), items: [
 			{label: $L("Remote"), command: 'do-shortcutRemote', iconPath: 'images/palm/flat-button-next.png'},
+			{label: $L("Select Host"), command: 'do-shortcutHostselector', shortcut: 'H'},
 			{label: $L("Recorded"), command: 'do-shortcutRecorded', shortcut: 'R'},
 			{label: $L("Upcoming"), command: 'do-shortcutUpcoming', shortcut: 'U'},
 			{label: $L("Guide"), command: 'do-shortcutGuide', shortcut: 'G'},
-			{label: $L("Status"), command: 'do-shortcutStatus', shortcut: 'S'}
+			{label: $L("Videos"), command: 'do-shortcutVideo', shortcut: 'V'},
+			{label: $L("Music"), command: 'do-shortcutMusic', shortcut: 'M'},
+			{label: $L("Status"), command: 'do-shortcutStatus', shortcut: 'S'},
+			{label: $L("Log"), command: 'do-shortcutLog', shortcut: 'L'}
 			]
 		},
 		{label: $L("Help"), items: [
@@ -235,6 +240,9 @@ StageAssistant.prototype.handleCommand = function(event) {
 	  case 'do-shortcutRemote':
 			this.controller.pushScene(WebMyth.prefsCookieObject.currentRemoteScene);
        break;
+	  case 'do-shortcutHostselector':
+			this.controller.pushScene("hostSelector");
+       break;
 	   
 	  case 'do-shortcutRecorded':
 			this.controller.pushScene("recorded");
@@ -248,8 +256,20 @@ StageAssistant.prototype.handleCommand = function(event) {
 			this.controller.pushScene("guide");
        break;
 	   
+	  case 'do-shortcutVideo':
+			this.controller.pushScene("videos");
+       break;
+	   
+	  case 'do-shortcutMusic':
+			this.controller.pushScene("musicList");
+       break;
+	   
 	  case 'do-shortcutStatus':
 			this.controller.pushScene("status");
+       break;
+	   
+	  case 'do-shortcutLog':
+			this.controller.pushScene("log");
        break;
 	   
 	   //Help
@@ -567,7 +587,7 @@ StageAssistant.prototype.pluginStatus = function(a) {
 	
 	if(a == "Initialized") {
 		setTimeout(function() {
-			WebMyth.newPluginSocket();
+			//WebMyth.newPluginSocket();
 		}, 250);
 	}
 	
@@ -605,8 +625,8 @@ StageAssistant.prototype.didReceiveData = function(a) {
 
 StageAssistant.prototype.pluginErrorMessage = function(a) {
 
-        Mojo.Log.info("Plugin ERROR of '%s'", a);
-        Mojo.Controller.getAppController().showBanner("ERROR: "+a, {source: 'notification'});
+	Mojo.Log.error("Plugin ERROR of '%s'", a);
+	Mojo.Controller.errorDialog(a);
 
 };
 
@@ -633,7 +653,7 @@ WebMyth.sendCommand = function(fullCmd){
 			
 	var response = "";
 	
-	if(WebMyth.usePlugin){
+	if(WebMyth.usePluginFrontend){
 	
 		try{
 			response = $('webmyth_service_id').sendData(fullCmd);
@@ -663,7 +683,7 @@ WebMyth.sendKey = function(value){
 	var fullCmd = "key "+value;
 	var response = "";
 	
-	if(WebMyth.usePlugin){
+	if(WebMyth.usePluginFrontend){
 		response = $('webmyth_service_id').sendData(fullCmd);
 		
         Mojo.Log.info("Plugin key response of '%s'", response);
@@ -709,7 +729,7 @@ WebMyth.sendJump = function(value) {
 	var fullCmd = "jump "+value;
 	var response = "";
 	
-	if(WebMyth.usePlugin){
+	if(WebMyth.usePluginFrontend){
 	
 		response = $('webmyth_service_id').sendData("jump "+value);
 		
@@ -756,7 +776,7 @@ WebMyth.sendPlay = function(value) {
 	var fullCmd = "play "+value;
 	var response = "";
 	
-	if(WebMyth.usePlugin){
+	if(WebMyth.usePluginFrontend){
 	
 		response = $('webmyth_service_id').sendData("play "+value);
 		
@@ -824,7 +844,7 @@ WebMyth.downloadToPhone = function(input_parameters) {
 						parameters: {
 							id:"com.palm.app.videoplayer",
 							params:{
-								target: "file: ///media/internal/mythtv/"+input_parameters.myFilename,
+								target: "file: ///media/internal/video/"+input_parameters.myFilename,
 								videoTitle: input_parameters.myFilename
 							}
 						}

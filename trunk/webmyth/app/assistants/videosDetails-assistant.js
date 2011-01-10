@@ -50,6 +50,9 @@ VideosDetailsAssistant.prototype.setup = function() {
 	this.controller.setupWidget('web-menu', '', this.webMenuModel);
 
 	
+	if(WebMyth.usePlugin){
+		$('webmyth_service_id').mysqlVideosDetailsResponse = this.mysqlVideosDetailsResponse.bind(this);
+	}
 
 	
 	//Fill in data values
@@ -152,8 +155,7 @@ VideosDetailsAssistant.prototype.deactivate = function(event) {
 };
 
 VideosDetailsAssistant.prototype.cleanup = function(event) {
-	/* this function should do any cleanup needed before the scene is destroyed as 
-	   a result of being popped off the scene stack */
+
 };
 
 VideosDetailsAssistant.prototype.handleCommand = function(event) {
@@ -187,21 +189,37 @@ VideosDetailsAssistant.prototype.handleKey = function(event) {
 	
 	if(event.originalEvent.metaKey) {
 		switch(event.originalEvent.keyCode) {
-			case 71:
-				Mojo.Log.info("g - shortcut key to guide");
-				Mojo.Controller.stageController.swapScene("guide");	
+			case 72:
+				Mojo.Log.info("h - shortcut key to hostSelector");
+				Mojo.Controller.stageController.swapScene("hostSelector");
 				break;
 			case 82:
 				Mojo.Log.info("r - shortcut key to recorded");
 				Mojo.Controller.stageController.swapScene("recorded");
 				break;
+			case 85:
+				Mojo.Log.info("u - shortcut key to upcoming");
+				Mojo.Controller.stageController.swapScene("upcoming");
+				break;
+			case 71:
+				Mojo.Log.info("g - shortcut key to guide");
+				Mojo.Controller.stageController.swapScene("guide");	
+				break;
+			case 86:
+				Mojo.Log.info("v - shortcut key to videos");
+				Mojo.Controller.stageController.swapScene("videos");	
+				break;
+			case 77:
+				Mojo.Log.info("m - shortcut key to musicList");
+				Mojo.Controller.stageController.swapScene("musicList");	
+				break;
 			case 83:
 				Mojo.Log.info("s - shortcut key to status");
 				Mojo.Controller.stageController.swapScene("status");
 				break;
-			case 85:
-				Mojo.Log.info("u - shortcut key to upcoming");
-				Mojo.Controller.stageController.swapScene("upcoming");
+			case 76:
+				Mojo.Log.info("l - shortcut key to log");
+				Mojo.Controller.stageController.swapScene("log");	
 				break;
 			default:
 				Mojo.Log.info("No shortcut key");
@@ -286,7 +304,7 @@ VideosDetailsAssistant.prototype.handleDownload = function(downloadOrStream_in) 
 				mime: "video/mp4",
 				targetFilename: myFilename,
 				subscribe: true,	
-				targetDir: "/media/internal/mythtv/"
+				targetDir: "/media/internal/video/"
 			};
 		
 		//WebMyth.downloadToPhone(parameters);
@@ -299,7 +317,7 @@ VideosDetailsAssistant.prototype.handleDownload = function(downloadOrStream_in) 
 				mime: "video/mp4",
 				targetFilename: myFilename,
 				subscribe: true,	
-				targetDir: "/media/internal/mythtv/"
+				targetDir: "/media/internal/video/"
 			},
 			onSuccess: function(response) {
 				if(response.completed) {
@@ -398,28 +416,38 @@ VideosDetailsAssistant.prototype.getUpnpmedia = function() {
 
 	var query = 'SELECT * FROM `upnpmedia` WHERE `filename` = "'+this.videosObject.onlyFilename+'" LIMIT 1;' ;
 	
-	
-	Mojo.Log.error("query is "+query);
-	
-	var requestUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webmythPythonFile;
-	requestUrl += "?op=executeSQLwithResponse";				
-	requestUrl += "&query64=";		
-	requestUrl += Base64.encode(query);	
+	//Mojo.Log.error("UPNP query is "+query);
 	
 	
 	
-    try {
-        var request = new Ajax.Request(requestUrl,{
-            method: 'get',
-            evalJSON: 'true',
-			requestHeaders: {Authorization: 'Basic ' + Base64.encode(WebMyth.prefsCookieObject.webserverUsername + ":" + WebMyth.prefsCookieObject.webserverPassword)},
-            onSuccess: this.getUpnpSuccess.bind(this),
-            onFailure: this.getUpnpFail.bind(this)  
-        });
-    }
-    catch(e) {
-        Mojo.Log.error(e);
-    }
+	if(WebMyth.usePlugin){
+	
+		var response1 = $('webmyth_service_id').mysqlCommand(WebMyth.prefsCookieObject.databaseHost,WebMyth.prefsCookieObject.databaseUsername,WebMyth.prefsCookieObject.databasePassword,WebMyth.prefsCookieObject.databaseName,WebMyth.prefsCookieObject.databasePort,"mysqlVideosDetailsResponse",query.substring(0,250),query.substring(250,500),query.substring(500,750),query.substring(750,1000),query.substring(1000,1250),query.substring(1250,1500),query.substring(1500,1750),query.substring(1750,2000),query.substring(2000,2250),query.substring(2250,2500));
+		
+		Mojo.Log.error("VideosDetails UPNP plugin response "+response1);
+		
+	} else {
+	
+		var requestUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webmythPythonFile;
+		requestUrl += "?op=executeSQLwithResponse";				
+		requestUrl += "&query64=";		
+		requestUrl += Base64.encode(query);	
+		
+		
+		try {
+			var request = new Ajax.Request(requestUrl,{
+				method: 'get',
+				evalJSON: 'true',
+				requestHeaders: {Authorization: 'Basic ' + Base64.encode(WebMyth.prefsCookieObject.webserverUsername + ":" + WebMyth.prefsCookieObject.webserverPassword)},
+				onSuccess: this.getUpnpSuccess.bind(this),
+				onFailure: this.getUpnpFail.bind(this)  
+			});
+		}
+		catch(e) {
+			Mojo.Log.error(e);
+		}
+		
+	}
 
 }
 
@@ -456,7 +484,35 @@ VideosDetailsAssistant.prototype.getUpnpSuccess = function(response) {
 	this.updateHostsList();
 	
 }
+
+VideosDetailsAssistant.prototype.mysqlVideosDetailsResponse = function(response) {
+
+	Mojo.Log.error("Got storagegroup plugin response: "+response);
 	
+	var upnpJson = JSON.parse(response);
+	
+	var myResponse = upnpJson[0];
+	
+	
+	//If nothing is returned this will crash, leaving default hosts for playback.
+	this.upnpId = myResponse.intid;
+	
+	
+	//Reset play menu so we can add download/stream
+	this.hostsMenuModel.items = [];
+	
+	if(WebMyth.prefsCookieObject.allowRecordedDownloads) {
+		var downloadCmd = { "label": $L("Download to Phone"), "command": "go-down-download" }
+		var streamCmd = { "label": $L("Stream to Phone"), "command": "go-down-stream" }
+		
+		this.hostsMenuModel.items.push(downloadCmd);
+		this.hostsMenuModel.items.push(streamCmd);
+	}	
+	
+	
+	this.updateHostsList();
+
+}	
 
 VideosDetailsAssistant.prototype.updateHostsList = function() {
 	
