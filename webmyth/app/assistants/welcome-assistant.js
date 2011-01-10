@@ -765,8 +765,8 @@ WelcomeAssistant.prototype.doHelpButton = function(event) {
 
 
 WelcomeAssistant.prototype.readMasterBackendFail = function(response) {
-	Mojo.Log.error("Failed to get backend setting information");
 	
+	Mojo.Log.error("Failed to get backend setting information");
 	
 };
 
@@ -939,73 +939,85 @@ WelcomeAssistant.prototype.readConnectionInfoSuccess = function(response) {
 		
 	}
 	
-	Mojo.Log.info("Finished gettig DB connection info");
+	Mojo.Log.info("Finished getting DB connection info");
+	
+	WebMyth.prefsCookie.put(WebMyth.prefsCookieObject);		
 	
 	
-	WebMyth.prefsCookie.put(WebMyth.prefsCookieObject);				
-
 	this.getSettings();
-			
 	
 };
 
 WelcomeAssistant.prototype.getSettings = function() {
 	
-	//Mojo.Log.error("Starting to get settingss");
+	
+	//Show error messages for local IP addresses
+	if((WebMyth.prefsCookieObject.masterBackendIp == "127.0.0.1")) {
 		
-	//var query = "SELECT * FROM `settings`  WHERE `value` != 'MythWelcomeDateFormat' ;";
-	var query = "SELECT * FROM `settings`  WHERE ";
-	query += " `value` = 'AutoCommercialFlag'";
-	query += " OR `value` = 'AutoTranscode' ";
-	query += " OR `value` = 'AutoRunUserJob1' ";
-	query += " OR `value` = 'AutoRunUserJob2' ";
-	query += " OR `value` = 'AutoRunUserJob3' ";
-	query += " OR `value` = 'AutoRunUserJob4' ";
-	query += " OR `value` = 'DefaultStartOffset' ";
-	query += " OR `value` = 'DefaultEndOffset' ";
-	query += " OR `value` = 'UserJobDesc1' ";
-	query += " OR `value` = 'UserJobDesc2' ";
-	query += " OR `value` = 'UserJobDesc3' ";
-	query += " OR `value` = 'UserJobDesc4' ";
-	query += " OR `value` = 'MasterServerIP' ";
-	query += " OR `value` = 'MasterServerPort' ";
-	query += " OR `value` = 'BackendServerIP' ";
-	query += " OR `value` = 'NetworkControlPort' ";
-	query += " OR `value` = 'BackendServerPort' ";
-	query += " ;";
-	
-	
-	
-	if(WebMyth.usePlugin){
-	
-		var response1 = $('webmyth_service_id').mysqlCommand(WebMyth.prefsCookieObject.databaseHost,WebMyth.prefsCookieObject.databaseUsername,WebMyth.prefsCookieObject.databasePassword,WebMyth.prefsCookieObject.databaseName,WebMyth.prefsCookieObject.databasePort,"mysqlWelcomeSettingsResponse",query.substring(0,250),query.substring(250,500),query.substring(500,750),query.substring(750,1000),query.substring(1000,1250),query.substring(1250,1500),query.substring(1500,1750),query.substring(1750,2000),query.substring(2000,2250),query.substring(2250,2500));
+		Mojo.Controller.errorDialog("You must manually set your backend IP address. In your MythTV settings it is saved as 127.0.0.1 which is just the local MythTV backend computer. Most likely it will be an IP address starting with 192.168.x.x");
+
+	} else if((WebMyth.usePlugin == true)&&(WebMyth.prefsCookieObject.databaseHost == "127.0.0.1")) {
 		
-		//Mojo.Log.error("Welcome settings plugin response "+response1);
-		
+		Mojo.Controller.errorDialog("You must manually set your MySQL server IP address. In your MythTV settings it is saved as 127.0.0.1 which is just the local MythTV backend computer. Most likely it will be an IP address starting with 192.168.x.x");
+	
 	} else {
-	
-		var requestUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webmythPythonFile;
-		requestUrl += "?op=executeSQLwithResponse";				
-		requestUrl += "&query64=";		
-		requestUrl += Base64.encode(query);	
+			
+		Mojo.Log.error("Starting to get settingss");
+			
+		//var query = "SELECT * FROM `settings`  WHERE `value` != 'MythWelcomeDateFormat' ;";
+		var query = "SELECT * FROM `settings`  WHERE ";
+		query += " `value` = 'AutoCommercialFlag'";
+		query += " OR `value` = 'AutoTranscode' ";
+		query += " OR `value` = 'AutoRunUserJob1' ";
+		query += " OR `value` = 'AutoRunUserJob2' ";
+		query += " OR `value` = 'AutoRunUserJob3' ";
+		query += " OR `value` = 'AutoRunUserJob4' ";
+		query += " OR `value` = 'DefaultStartOffset' ";
+		query += " OR `value` = 'DefaultEndOffset' ";
+		query += " OR `value` = 'UserJobDesc1' ";
+		query += " OR `value` = 'UserJobDesc2' ";
+		query += " OR `value` = 'UserJobDesc3' ";
+		query += " OR `value` = 'UserJobDesc4' ";
+		query += " OR `value` = 'MasterServerIP' ";
+		query += " OR `value` = 'MasterServerPort' ";
+		query += " OR `value` = 'BackendServerIP' ";
+		query += " OR `value` = 'NetworkControlPort' ";
+		query += " OR `value` = 'BackendServerPort' ";
+		query += " ;";
 		
 		
-		try {
-			var request = new Ajax.Request(requestUrl,{
-				method: 'get',
-				evalJSON: 'true',
-				requestHeaders: {Authorization: 'Basic ' + Base64.encode(WebMyth.prefsCookieObject.webserverUsername + ":" + WebMyth.prefsCookieObject.webserverPassword)},
-				onSuccess: this.readSettingsSuccess.bind(this),
-				onFailure: function() {
-							Mojo.Log.info("failed to get settings table from backend")	
-						}   
-			});
+		
+		if(WebMyth.usePlugin){
+		
+			var response1 = $('webmyth_service_id').mysqlCommand(WebMyth.prefsCookieObject.databaseHost,WebMyth.prefsCookieObject.databaseUsername,WebMyth.prefsCookieObject.databasePassword,WebMyth.prefsCookieObject.databaseName,WebMyth.prefsCookieObject.databasePort,"mysqlWelcomeSettingsResponse",query.substring(0,250),query.substring(250,500),query.substring(500,750),query.substring(750,1000),query.substring(1000,1250),query.substring(1250,1500),query.substring(1500,1750),query.substring(1750,2000),query.substring(2000,2250),query.substring(2250,2500));
+			
+			//Mojo.Log.error("Welcome settings plugin response "+response1);
+			
+		} else {
+		
+			var requestUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webmythPythonFile;
+			requestUrl += "?op=executeSQLwithResponse";				
+			requestUrl += "&query64=";		
+			requestUrl += Base64.encode(query);	
+			
+			
+			try {
+				var request = new Ajax.Request(requestUrl,{
+					method: 'get',
+					evalJSON: 'true',
+					requestHeaders: {Authorization: 'Basic ' + Base64.encode(WebMyth.prefsCookieObject.webserverUsername + ":" + WebMyth.prefsCookieObject.webserverPassword)},
+					onSuccess: this.readSettingsSuccess.bind(this),
+					onFailure: function() {
+								Mojo.Log.info("failed to get settings table from backend")	
+							}   
+				});
+			}
+			catch(e) {
+				Mojo.Log.error(e);
+			}
 		}
-		catch(e) {
-			Mojo.Log.error(e);
-		}
-	}
 	
+	}		
 };
 
 WelcomeAssistant.prototype.mysqlWelcomeSettingsResponse = function(response) {
