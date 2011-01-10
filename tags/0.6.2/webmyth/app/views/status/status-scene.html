@@ -1,0 +1,122 @@
+<div class="status">
+
+<div id="header-menu" class="palm-header">
+	<div id="scene-title" class="truncating-text">Backend Status</div>
+</div>
+<div class="palm-header-spacer"></div>
+
+
+<table id="encodersGroup" class="palm-divider labeled collapsible right" x-mojo-touch-feedback="delayed">
+	<tr>
+		<td class="left"></td>
+		<td class="label" id="encodersDivider-label">Encoders</td>
+		<td class="right"></td>
+		<td><div id="encodersArrow" class="palm-arrow-closed"></div></td>
+	</tr>
+</table>
+<div  x-mojo-element="Drawer" id="encodersDrawer" class="encodersDrawer">
+  <div class="palm-list">
+		<div class="palm-row-wrapper">
+			<div x-mojo-element="List" id="encodersList"></div>
+		</div>
+  </div>
+</div>
+
+
+<table id="scheduledGroup" class="palm-divider labeled collapsible right" x-mojo-touch-feedback="delayed">
+	<tr>
+		<td class="left"></td>
+		<td class="label" id="scheduledDivider-label">Scheduled</td>
+		<td class="right"></td>
+		<td><div id="scheduledArrow" class="palm-arrow-closed"></div></td>
+	</tr>
+</table>      
+<div  x-mojo-element="Drawer" id="scheduledDrawer">
+  <div class="palm-list scheduled-list">
+		<div x-mojo-element="List" id="scheduledList"></div>
+  </div>
+</div>
+
+
+<table id="jobqueueGroup" class="palm-divider labeled collapsible right" x-mojo-touch-feedback="delayed">
+	<tr>
+		<td class="left"></td>
+		<td class="label" id="jobqueueDivider-label">job Queue</td>
+		<td class="right"></td>
+		<td><div id="jobqueueArrow" class="palm-arrow-closed"></div></td>
+	</tr>
+</table> 
+<div  x-mojo-element="Drawer" id="jobqueueDrawer" class="jobqueueDrawer">
+  <div class="palm-list">
+		<div class="palm-row-wrapper jobqueue-list">
+			<div x-mojo-element="List" id="jobqueueList"></div>
+		</div>
+  </div>
+</div>
+
+
+<table id="storageGroup" class="palm-divider labeled collapsible right" x-mojo-touch-feedback="delayed">
+	<tr>
+		<td class="left"></td>
+		<td class="label" id="storageLocationsDivider-label">storage locations</td>
+		<td class="right"></td>
+		<td><div id="storageArrow" class="palm-arrow-closed"></div></td>
+	</tr>
+</table> 
+<div  x-mojo-element="Drawer" id="storageDrawer">
+  <div class="palm-list">
+		<div class="palm-row-wrapper storage-list">
+			<div x-mojo-element="List" id="storageList"></div>
+		</div>
+  </div>
+</div>
+
+
+<table id="guideGroup" class="palm-divider labeled collapsible right" x-mojo-touch-feedback="delayed">
+	<tr>
+		<td class="left"></td>
+		<td class="label" id="guideInformationDivider-label">guide information</td>
+		<td class="right"></td>
+		<td><div id="guideArrow" class="palm-arrow-closed"></div></td>
+	</tr>
+</table> 
+<div  x-mojo-element="Drawer" id="guideDrawer">
+   <div class="palm-list">
+	
+	<div id="guideContent"></div>
+	
+  </div>
+</div>
+
+
+<table id="generalStatusGroup" class="palm-divider labeled collapsible right" x-mojo-touch-feedback="delayed">
+	<tr>
+		<td class="left"></td>
+		<td class="label" id="otherInfoDivider-label">OTHER INFO</td>
+		<td class="right"></td>
+		<td><div id="generalStatusArrow" class="palm-arrow-closed"></div></td>
+	</tr>
+</table>
+<div  x-mojo-element="Drawer" id="generalStatusDrawer">
+   <div class="palm-list">
+	
+	<div id="generalStatusContent"></div>
+	
+   </div>
+</div>
+
+
+
+
+
+<div class="palm-scrim" id="myScrim">
+	<div x-mojo-element="Spinner" id="spinner" class="center"></div>
+	<div id="spinner-text"></div> 
+</div>
+
+
+
+
+
+
+</div>
