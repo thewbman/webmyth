@@ -8,7 +8,13 @@ set DEBUG=0
 set SRC=webmyth_service.cpp
 
 @rem List the libraries needed
-set LIBS=-lSDL -lpdl
+set LIBS=-lSDL -lpdl -lpthread
+
+@rem static libs
+set STATIC_LIBS=libmysqlclient.a libupnp.a libixml.a libthreadutil.a
+
+@rem itermediate object file
+set MIDFILE=webmyth_service.o
 
 @rem Name your output executable
 set OUTFILE=webmyth_service
@@ -31,9 +37,11 @@ if %PIXI% equ 1 (
 
 echo %DEVICEOPTS%
 
-arm-none-linux-gnueabi-g++ %DEVICEOPTS% -o %OUTFILE% %SRC% "-I%PALMPDK%\include" "-I%PALMPDK%\include\SDL" "-L%PALMPDK%\device\lib" -Wl,--allow-shlib-undefined %LIBS%
+arm-none-linux-gnueabi-g++ %DEVICEOPTS% -o %OUTFILE% %SRC% %STATIC_LIBS% "-I%PALMPDK%\include" "-I%PALMPDK%\include\SDL" "-L%PALMPDK%\device\lib" -Wl,--allow-shlib-undefined %LIBS%
 
-copy /Y %OUTFILE% ..\2.0\WebMyth
+@rem arm-none-linux-gnueabi-g++ -o %OUTFILE% %MIDFILE% 
+
+copy /Y %OUTFILE% ..\WebMyth
 
 goto :EOF
 

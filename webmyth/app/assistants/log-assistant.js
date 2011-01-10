@@ -76,6 +76,10 @@ LogAssistant.prototype.setup = function() {
 	Mojo.Event.listen(this.controller.get( "header-menu" ), Mojo.Event.tap, function(){this.controller.sceneScroller.mojo.revealTop();}.bind(this));
 	
 	
+	if(WebMyth.usePlugin){
+		$('webmyth_service_id').mysqlLogResponse = this.mysqlLogResponse.bind(this);
+	}
+	
 	//List of log
 	this.getLog();
 	
@@ -144,21 +148,37 @@ LogAssistant.prototype.handleKey = function(event) {
 	
 	if(event.originalEvent.metaKey) {
 		switch(event.originalEvent.keyCode) {
-			case 71:
-				Mojo.Log.info("g - shortcut key to guide");
-				Mojo.Controller.stageController.swapScene("guide");	
+			case 72:
+				Mojo.Log.info("h - shortcut key to hostSelector");
+				Mojo.Controller.stageController.swapScene("hostSelector");
 				break;
 			case 82:
 				Mojo.Log.info("r - shortcut key to recorded");
 				Mojo.Controller.stageController.swapScene("recorded");
 				break;
+			case 85:
+				Mojo.Log.info("u - shortcut key to upcoming");
+				Mojo.Controller.stageController.swapScene("upcoming");
+				break;
+			case 71:
+				Mojo.Log.info("g - shortcut key to guide");
+				Mojo.Controller.stageController.swapScene("guide");	
+				break;
+			case 86:
+				Mojo.Log.info("v - shortcut key to videos");
+				Mojo.Controller.stageController.swapScene("videos");	
+				break;
+			case 77:
+				Mojo.Log.info("m - shortcut key to musicList");
+				Mojo.Controller.stageController.swapScene("musicList");	
+				break;
 			case 83:
 				Mojo.Log.info("s - shortcut key to status");
 				Mojo.Controller.stageController.swapScene("status");
 				break;
-			case 85:
-				Mojo.Log.info("u - shortcut key to upcoming");
-				Mojo.Controller.stageController.swapScene("upcoming");
+			case 76:
+				Mojo.Log.info("l - shortcut key to log");
+				Mojo.Controller.stageController.swapScene("log");	
 				break;
 			default:
 				Mojo.Log.info("No shortcut key");
@@ -202,25 +222,34 @@ LogAssistant.prototype.getLog = function(event) {
 	Mojo.Log.info("Log SQL query is "+query);
 	
 	
-	var requestUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webmythPythonFile;
-	requestUrl += "?op=executeSQLwithResponse";				
-	requestUrl += "&query64=";		
-	requestUrl += Base64.encode(query);	
+	if(WebMyth.usePlugin){
 	
+		var response1 = $('webmyth_service_id').mysqlCommand(WebMyth.prefsCookieObject.databaseHost,WebMyth.prefsCookieObject.databaseUsername,WebMyth.prefsCookieObject.databasePassword,WebMyth.prefsCookieObject.databaseName,WebMyth.prefsCookieObject.databasePort,"mysqlLogResponse",query.substring(0,250),query.substring(250,500),query.substring(500,750),query.substring(750,1000),query.substring(1000,1250),query.substring(1250,1500),query.substring(1500,1750),query.substring(1750,2000),query.substring(2000,2250),query.substring(2250,2500));
+		
+		Mojo.Log.error("Log plugin response "+response1);
+		
+	} else {
+	
+		var requestUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webmythPythonFile;
+		requestUrl += "?op=executeSQLwithResponse";				
+		requestUrl += "&query64=";		
+		requestUrl += Base64.encode(query);	
 
-	
-    try {
-        var request = new Ajax.Request(requestUrl,{
-            method: 'get',
-            evalJSON: 'true',
-			requestHeaders: {Authorization: 'Basic ' + Base64.encode(WebMyth.prefsCookieObject.webserverUsername + ":" + WebMyth.prefsCookieObject.webserverPassword)},
-            onSuccess: this.readRemoteLogSuccess.bind(this),
-            onFailure: this.readRemoteLogFail.bind(this)  
-        });
-    }
-    catch(e) {
-        Mojo.Log.error(e);
-    }
+		
+		try {
+			var request = new Ajax.Request(requestUrl,{
+				method: 'get',
+				evalJSON: 'true',
+				requestHeaders: {Authorization: 'Basic ' + Base64.encode(WebMyth.prefsCookieObject.webserverUsername + ":" + WebMyth.prefsCookieObject.webserverPassword)},
+				onSuccess: this.readRemoteLogSuccess.bind(this),
+				onFailure: this.readRemoteLogFail.bind(this)  
+			});
+		}
+		catch(e) {
+			Mojo.Log.error(e);
+		}
+		
+	}
 	
 };
 
@@ -243,14 +272,31 @@ LogAssistant.prototype.readRemoteLogFail = function(event) {
 };
 
 LogAssistant.prototype.readRemoteLogSuccess = function(response) {
-	//return true;  //can escape this function for testing purposes
-    
-	Mojo.Log.info('Got Ajax response: %j',response.responseJSON);
+	
+	Mojo.Log.info('Got Log response: %j',response.responseJSON);
 	
 		
 	//Update the list widget
 	this.fullResultList.clear();
 	Object.extend(this.fullResultList,response.responseJSON);
+
+	
+	this.finishedReadingLog();
+	
+};
+
+LogAssistant.prototype.mysqlLogResponse = function(response) {
+
+	Mojo.Log.error("Got log plugin response: "+response);
+	
+	var logJson = JSON.parse(response);
+	
+	Mojo.Log.error("Plugin log JSON %j",logJson);
+	
+		
+	//Update the list widget
+	this.fullResultList.clear();
+	Object.extend(this.fullResultList,logJson);
 
 	
 	this.finishedReadingLog();

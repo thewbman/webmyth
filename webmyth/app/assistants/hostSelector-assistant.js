@@ -90,11 +90,18 @@ HostSelectorAssistant.prototype.activate = function(event) {
 		this.startCommunication();
 	}
 	
+
+	//Keypress event
+	Mojo.Event.listen(this.controller.sceneElement, Mojo.Event.keyup, this.handleKey.bind(this));
+	
 };
 
 HostSelectorAssistant.prototype.deactivate = function(event) {
 	   
 	WebMyth.hostsCookie.put(WebMyth.hostsCookieObject);
+
+	//Keypress event
+	Mojo.Event.stopListening(this.controller.sceneElement, Mojo.Event.keyup, this.handleKey.bind(this));
 	  	  
 };
 
@@ -115,15 +122,66 @@ HostSelectorAssistant.prototype.handleCommand = function(event) {
        break;
       case 'go-editHost':
         this.pickType = "edit";
+		this.updateCommandMenu();
 		$('scene-title').innerText = $L("Edit Host");
        break;
       case 'go-searchHost':
 		Mojo.Controller.stageController.pushScene("searchHosts");
        break;
+      case 'go-cancelEdit':
+        this.pickType = "start";
+		this.updateCommandMenu();
+		$('scene-title').innerText = $L("Select Host");
+       break;
     }
   };
 };
 
+HostSelectorAssistant.prototype.handleKey = function(event) {
+
+	//Mojo.Log.info("FAQs handleKey %o, %o", event.originalEvent.metaKey, event.originalEvent.keyCode);
+	
+	if(event.originalEvent.metaKey) {
+		switch(event.originalEvent.keyCode) {
+			case 72:
+				Mojo.Log.info("h - shortcut key to hostSelector");
+				Mojo.Controller.stageController.swapScene("hostSelector");
+				break;
+			case 82:
+				Mojo.Log.info("r - shortcut key to recorded");
+				Mojo.Controller.stageController.swapScene("recorded");
+				break;
+			case 85:
+				Mojo.Log.info("u - shortcut key to upcoming");
+				Mojo.Controller.stageController.swapScene("upcoming");
+				break;
+			case 71:
+				Mojo.Log.info("g - shortcut key to guide");
+				Mojo.Controller.stageController.swapScene("guide");	
+				break;
+			case 86:
+				Mojo.Log.info("v - shortcut key to videos");
+				Mojo.Controller.stageController.swapScene("videos");	
+				break;
+			case 77:
+				Mojo.Log.info("m - shortcut key to musicList");
+				Mojo.Controller.stageController.swapScene("musicList");	
+				break;
+			case 83:
+				Mojo.Log.info("s - shortcut key to status");
+				Mojo.Controller.stageController.swapScene("status");
+				break;
+			case 76:
+				Mojo.Log.info("l - shortcut key to log");
+				Mojo.Controller.stageController.swapScene("log");	
+				break;
+			default:
+				Mojo.Log.info("No shortcut key");
+				break;
+		}
+	}
+	Event.stop(event); 
+};
 
 
 
@@ -183,3 +241,22 @@ HostSelectorAssistant.prototype.startCommunication = function(event) {
 	
 };
 
+HostSelectorAssistant.prototype.updateCommandMenu = function() {
+	
+	this.hostsCommandMenuModel.items.clear();
+
+	if(this.pickType == "edit") {
+		this.hostsCommandMenuModel.items.push({});
+		this.hostsCommandMenuModel.items.push({ label: $L("Cancel"), command: 'go-cancelEdit', width: 90 });
+		this.hostsCommandMenuModel.items.push({});
+		
+	} else {
+		this.hostsCommandMenuModel.items.push({ label: $L("Add"), command: 'go-addHost', width: 90 });
+		this.hostsCommandMenuModel.items.push({ label: $L("Edit"), command: 'go-editHost', width: 90 });
+		this.hostsCommandMenuModel.items.push({ label: $L("Search"), command: 'go-searchHost', width: 90 });
+
+	};
+	
+	this.controller.modelChanged(this.hostsCommandMenuModel);
+	
+};

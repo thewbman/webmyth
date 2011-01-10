@@ -30,6 +30,22 @@ PreferencesAssistant.prototype.setup = function() {
 		
 	//Widgets
 	
+	//Use C++ plugin selector
+	this.usePluginSelectorModel = {
+			value: 2,
+            disabled: false
+	};
+	this.controller.setupWidget('usePluginSelector',
+		{
+			label: $L("Use Script"),
+			choices:[
+				{label:$L("All"),      value:0},
+				{label:$L("Non-remote"),         value:1},
+				{label:$L("Never"),         value:2}
+			]
+		},
+		this.usePluginSelectorModel
+	);
 	//Server address
 	this.webserverTextModel = {
              value: "",
@@ -195,28 +211,100 @@ PreferencesAssistant.prototype.setup = function() {
          },
          this.masterBackendTextModel
     ); 
-	
-	
-/*	
-	//Theme
-	this.themeModel = {
-			value: WebMyth.prefsCookieObject.theme,
-            disabled: false
-	};
-	this.controller.setupWidget('theme',
-		{
-			label: $L("Theme"),
-			choices:[
-				{label:$L("Palm Default"),      value:'palm-default'},
-				{label:$L("Palm Dark"),         value:'palm-dark'}
-			]//,
-			//modelProperty: 'theme'
-		},
-		this.themeModel
-	);
-	this.controller.listen('theme', Mojo.Event.propertyChange, this.themeChanged.bindAsEventListener(this));
-*/
 
+
+	
+	
+	
+	//Manual database
+	this.manualDatabaseToggleModel = {
+             value: false
+    };
+	this.controller.setupWidget("manualDatabaseToggleId",
+        {
+			label: $L("Manual Database"),
+            modelProperty: "value"
+         },
+         this.manualDatabaseToggleModel
+    );
+	this.controller.listen('manualDatabaseToggleId', Mojo.Event.propertyChange, this.manualDatabaseChanged.bindAsEventListener(this));
+	//Database host IP - display or edit
+	this.databaseHostTextModel = {
+             value: "",
+             disabled: true
+    };
+	this.controller.setupWidget("databaseHostTextFieldId",
+        {
+            hintText: $L(""),
+            multiline: true,
+            enterSubmits: false,
+            focus: false,
+			textCase: Mojo.Widget.steModeLowerCase
+         },
+         this.databaseHostTextModel
+    ); 	
+	//Database port
+	this.databasePortTextModel = {
+             value: "",
+             disabled: true
+    };
+	this.controller.setupWidget("databasePortTextFieldId",
+        {
+            hintText: $L(""),
+            multiline: true,
+            enterSubmits: false,
+            focus: false,
+			textCase: Mojo.Widget.steModeLowerCase
+         },
+         this.databasePortTextModel
+    );
+	//Database username
+	this.databaseUsernameTextModel = {
+             value: "",
+             disabled: true
+    };
+	this.controller.setupWidget("databaseUsernameTextFieldId",
+        {
+            hintText: $L(""),
+            multiline: true,
+            enterSubmits: false,
+            focus: false,
+			textCase: Mojo.Widget.steModeLowerCase
+         },
+         this.databaseUsernameTextModel
+    );
+	//Database password
+	this.databasePasswordTextModel = {
+             value: "",
+             disabled: true
+    };
+	this.controller.setupWidget("databasePasswordTextFieldId",
+        {
+            hintText: $L(""),
+            enterSubmits: false,
+            focus: false,
+			textCase: Mojo.Widget.steModeLowerCase
+         },
+         this.databasePasswordTextModel
+    );
+	//Database name
+	this.databaseNameTextModel = {
+             value: "",
+             disabled: true
+    };
+	this.controller.setupWidget("databaseNameTextFieldId",
+        {
+            hintText: $L(""),
+            multiline: true,
+            enterSubmits: false,
+            focus: false,
+			textCase: Mojo.Widget.steModeLowerCase
+         },
+         this.databaseNameTextModel
+    );
+	
+	
+	
 
 	//Channel Icons in upcoming
 	this.upcomingChannelIconsToggleModel = {
@@ -431,6 +519,13 @@ PreferencesAssistant.prototype.activate = function(event) {
 	$('backend-group-title').innerText = $L('Master Backend');
 		$('manualBackend-label').innerText = $L('Manual Backend IP');
 		$('backendAddress-label').innerText = $L('Address');
+	$('database-group-title').innerText = $L('MySQL Database');
+		$('manualDatabase-label').innerText = $L('Manual Settings');
+		$('databaseHost-label').innerText = $L('Address');
+		$('databasePort-label').innerText = $L('Port');
+		$('databaseUsername-label').innerText = $L('Username');
+		$('databasePassword-label').innerText = $L('Password');
+		$('databaseName-label').innerText = $L('Database');
 	$('images-group-title').innerText = $L('Images');
 		$('showChannelIcons-label').innerText = $L('Show Channel Icons');
 		$('showVideoImagesList-label').innerText = $L('Show Video Images (List)');
@@ -456,6 +551,9 @@ PreferencesAssistant.prototype.activate = function(event) {
 			//Mojo.Log.error("initial cookie is %j", WebMyth.prefsCookieObject);
 			
 			//Update settings from cookie
+			this.usePluginSelectorModel.value = WebMyth.prefsCookieObject.usePlugin;
+			this.controller.modelChanged(this.usePluginSelectorModel);
+			
 			this.webserverTextModel.value = WebMyth.prefsCookieObject.webserverName;
 			this.controller.modelChanged(this.webserverTextModel);
 			
@@ -494,6 +592,31 @@ PreferencesAssistant.prototype.activate = function(event) {
 			this.masterBackendTextModel.value = WebMyth.prefsCookieObject.masterBackendIp;
 			this.masterBackendTextModel.disabled = !WebMyth.prefsCookieObject.manualMasterBackend;
 			this.controller.modelChanged(this.masterBackendTextModel);
+			
+			
+			
+			this.manualDatabaseToggleModel.value = WebMyth.prefsCookieObject.manualDatabase;
+			this.controller.modelChanged(this.manualDatabaseToggleModel);
+			
+			this.databaseHostTextModel.value = WebMyth.prefsCookieObject.databaseHost;
+			this.databaseHostTextModel.disabled = !WebMyth.prefsCookieObject.manualDatabase;
+			this.controller.modelChanged(this.databaseHostTextModel);
+			
+			this.databasePortTextModel.value = WebMyth.prefsCookieObject.databasePort;
+			this.databasePortTextModel.disabled = !WebMyth.prefsCookieObject.manualDatabase;
+			this.controller.modelChanged(this.databasePortTextModel);
+			
+			this.databaseUsernameTextModel.value = WebMyth.prefsCookieObject.databaseUsername;
+			this.databaseUsernameTextModel.disabled = !WebMyth.prefsCookieObject.manualDatabase;
+			this.controller.modelChanged(this.databaseUsernameTextModel);
+			
+			this.databasePasswordTextModel.value = WebMyth.prefsCookieObject.databasePassword;
+			this.databasePasswordTextModel.disabled = !WebMyth.prefsCookieObject.manualDatabase;
+			this.controller.modelChanged(this.databasePasswordTextModel);
+			
+			this.databaseNameTextModel.value = WebMyth.prefsCookieObject.databaseName;
+			this.databaseNameTextModel.disabled = !WebMyth.prefsCookieObject.manualDatabase;
+			this.controller.modelChanged(this.databaseNameTextModel);
 			
 			
 			
@@ -556,25 +679,25 @@ PreferencesAssistant.prototype.activate = function(event) {
 			this.controller.modelChanged(this.remoteNumberpadToggleModel);
 			
 		}
-		
+	
+	this.controller.sceneScroller.mojo.revealTop();
+	
 };
 
 PreferencesAssistant.prototype.deactivate = function(event) {
-	/* remove any event handlers you added in activate and do any other cleanup that should happen before
-	   this scene is popped or another scene is pushed on top */
+
 };
 
 PreferencesAssistant.prototype.cleanup = function(event) {
-	/* this function should do any cleanup needed before the scene is destroyed as 
-	   a result of being popped off the scene stack */
+
 };
 
 PreferencesAssistant.prototype.handleCommand = function(event) {
 
-  if(event.type == Mojo.Event.back) {
+	if(event.type == Mojo.Event.back) {
 		this.checkSettings();
 		Event.stop(event);
-  }
+	} 
   
 };
 
@@ -592,6 +715,30 @@ PreferencesAssistant.prototype.manualMasterBackendChanged = function(event) {
 	}
 	
 	this.controller.modelChanged(this.masterBackendTextModel);
+	
+};
+
+PreferencesAssistant.prototype.manualDatabaseChanged = function(event) {
+
+	Mojo.Log.error("Manual database settings changed to "+this.manualDatabaseToggleModel.value);
+	
+	
+	this.databaseHostTextModel.disabled = !this.manualDatabaseToggleModel.value;
+	this.databasePortTextModel.disabled = !this.manualDatabaseToggleModel.value;
+	this.databaseUsernameTextModel.disabled = !this.manualDatabaseToggleModel.value;
+	this.databasePasswordTextModel.disabled = !this.manualDatabaseToggleModel.value;
+	this.databaseNameTextModel.disabled = !this.manualDatabaseToggleModel.value;
+	
+	if(!this.manualDatabaseToggleModel.value) {
+		this.databaseHostTextModel.value = "-";
+	}
+	
+	
+	this.controller.modelChanged(this.databaseHostTextModel);
+	this.controller.modelChanged(this.databasePortTextModel);
+	this.controller.modelChanged(this.databaseUsernameTextModel);
+	this.controller.modelChanged(this.databasePasswordTextModel);
+	this.controller.modelChanged(this.databaseNameTextModel);
 	
 };
 
@@ -619,6 +766,7 @@ PreferencesAssistant.prototype.useWebmythScriptChanged = function(event) {
 };
 
 PreferencesAssistant.prototype.streamChanged = function(event) {
+
 	Mojo.Log.info("Stream/download settings changed to "+this.allowDownloadStreamToggleModel.value);
 	
 	var streamMessage = 'The ability to download and/or stream a recording to your phone is still a work in progress and will take some extra work to setup. <hr />';
@@ -642,12 +790,6 @@ PreferencesAssistant.prototype.streamChanged = function(event) {
 			});	
 			
 	};	
-	
-};
-
-PreferencesAssistant.prototype.themeChanged = function(event) {
-
-	this.controller.document.body.className = event.value;
 	
 };
 
@@ -741,6 +883,7 @@ PreferencesAssistant.prototype.checkSettings = function() {
 			WebMyth.prefsCookieObject = newPrefsCookieObject;
 		}
 	
+		WebMyth.prefsCookieObject.usePlugin = this.usePluginSelectorModel.value;
 		WebMyth.prefsCookieObject.webserverName = this.webserverTextModel.value;
 		WebMyth.prefsCookieObject.webserverUsername = this.usernameTextModel.value;
 		WebMyth.prefsCookieObject.webserverPassword = this.passwordTextModel.value;
@@ -755,6 +898,14 @@ PreferencesAssistant.prototype.checkSettings = function() {
 		
 		WebMyth.prefsCookieObject.manualMasterBackend = this.manualMasterBackendToggleModel.value;
 		WebMyth.prefsCookieObject.masterBackendIp = this.masterBackendTextModel.value;
+		
+		
+		WebMyth.prefsCookieObject.manualDatabase = this.manualDatabaseToggleModel.value;
+		WebMyth.prefsCookieObject.databaseHost = this.databaseHostTextModel.value;
+		WebMyth.prefsCookieObject.databasePort = this.databasePortTextModel.value;
+		WebMyth.prefsCookieObject.databaseUsername = this.databaseUsernameTextModel.value;
+		WebMyth.prefsCookieObject.databasePassword = this.databasePasswordTextModel.value;
+		WebMyth.prefsCookieObject.databaseName = this.databaseNameTextModel.value;
 		
 		
 		//WebMyth.prefsCookieObject.theme = this.themeModel.value;
@@ -793,6 +944,18 @@ PreferencesAssistant.prototype.checkSettings = function() {
 		WebMyth.remoteCookie.put(WebMyth.remoteCookieObject);
 		
 		//Mojo.Log.error("new cookie is %j", WebMyth.prefsCookieObject);
+		
+		//Set plugin values from setting
+		if(WebMyth.prefsCookieObject.usePlugin == 2) {
+			WebMyth.usePlugin = true;
+			WebMyth.usePluginFrontend = true;
+		} else if(WebMyth.prefsCookieObject.usePlugin == 1) {
+			WebMyth.usePlugin = false;
+			WebMyth.usePluginFrontend = true;
+		} else {
+			WebMyth.usePlugin = false;
+			WebMyth.usePluginFrontend = false;
+		}
 
 		Mojo.Controller.stageController.popScene();
 	

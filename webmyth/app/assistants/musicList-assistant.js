@@ -119,23 +119,25 @@ MusicListAssistant.prototype.setup = function() {
 	Mojo.Event.listen(this.controller.get( "header-menu" ), Mojo.Event.tap, function(){this.controller.sceneScroller.mojo.revealTop();}.bind(this));
 	
 	
+	
+	if(WebMyth.usePlugin){
+		$('webmyth_service_id').mysqlMusicListResponse = this.mysqlMusicListResponse.bind(this);
+		$('webmyth_service_id').mysqlMusicPlaylistResponse = this.mysqlMusicPlaylistResponse.bind(this);
+	}
+	
+	
 	//List of music
 	if(this.fullResultList.length == 0){
+		//Will gather music if first opened
 		this.getMusic();
 	} else {
+		//If returned from music playlist, can go straight to getting playlists and showing
 		this.controller.window.setTimeout(this.finishedReadingMusic.bind(this), 50);
 	}
 	
 };
 
 MusicListAssistant.prototype.activate = function(event) {
-
-	$('playlistsDivider-label').innerText = $L('Playlists');
-	
-	//Playlist
-	this.playlistsList.clear();
-	this.controller.modelChanged(this.musicPlaylistsListModel);
-	this.getMusicPlaylists();
 
 	//Keypress event
 	Mojo.Event.listen(this.controller.sceneElement, Mojo.Event.keyup, this.handleKey.bind(this));
@@ -200,21 +202,37 @@ MusicListAssistant.prototype.handleKey = function(event) {
 	
 	if(event.originalEvent.metaKey) {
 		switch(event.originalEvent.keyCode) {
-			case 71:
-				Mojo.Log.info("g - shortcut key to guide");
-				Mojo.Controller.stageController.swapScene("guide");	
+			case 72:
+				Mojo.Log.info("h - shortcut key to hostSelector");
+				Mojo.Controller.stageController.swapScene("hostSelector");
 				break;
 			case 82:
 				Mojo.Log.info("r - shortcut key to recorded");
 				Mojo.Controller.stageController.swapScene("recorded");
 				break;
+			case 85:
+				Mojo.Log.info("u - shortcut key to upcoming");
+				Mojo.Controller.stageController.swapScene("upcoming");
+				break;
+			case 71:
+				Mojo.Log.info("g - shortcut key to guide");
+				Mojo.Controller.stageController.swapScene("guide");	
+				break;
+			case 86:
+				Mojo.Log.info("v - shortcut key to videos");
+				Mojo.Controller.stageController.swapScene("videos");	
+				break;
+			case 77:
+				Mojo.Log.info("m - shortcut key to musicList");
+				Mojo.Controller.stageController.swapScene("musicList");	
+				break;
 			case 83:
 				Mojo.Log.info("s - shortcut key to status");
 				Mojo.Controller.stageController.swapScene("status");
 				break;
-			case 85:
-				Mojo.Log.info("u - shortcut key to upcoming");
-				Mojo.Controller.stageController.swapScene("upcoming");
+			case 76:
+				Mojo.Log.info("l - shortcut key to log");
+				Mojo.Controller.stageController.swapScene("log");	
 				break;
 			default:
 				Mojo.Log.info("No shortcut key");
@@ -241,57 +259,6 @@ MusicListAssistant.prototype.togglePlaylistsDrawer = function() {
 	
 };
 
-MusicListAssistant.prototype.getMusicPlaylists = function(event) {
-
-	//Update list from webmyth python script
-	//Mojo.Log.error('Starting music playlists gathering');
-	
-	var query = "SELECT * ";
-	query += " FROM music_playlists ";
-	
-	
-	var requestUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webmythPythonFile;
-	requestUrl += "?op=executeSQLwithResponse";				
-	requestUrl += "&query64=";		
-	requestUrl += Base64.encode(query);	
-	
-
-	
-    try {
-        var request = new Ajax.Request(requestUrl,{
-            method: 'get',
-            evalJSON: 'true',
-			requestHeaders: {Authorization: 'Basic ' + Base64.encode(WebMyth.prefsCookieObject.webserverUsername + ":" + WebMyth.prefsCookieObject.webserverPassword)},
-            onSuccess: this.readMusicPlaylistsSuccess.bind(this),
-            onFailure: this.readMusicPlaylistsFail.bind(this)  
-        });
-    }
-    catch(e) {
-        Mojo.Log.error(e);
-    }
-	
-};
-
-MusicListAssistant.prototype.readMusicPlaylistsFail = function(event) {
-
-	Mojo.Log.error('Failed to get music playlists');
-	
-};
-
-MusicListAssistant.prototype.readMusicPlaylistsSuccess = function(response) {
-	//return true;  //can escape this function for testing purposes
-    
-	//Mojo.Log.info('Got playlists response: %j',response.responseJSON);
-	
-	this.playlistsList.clear();
-	Object.extend(this.playlistsList,cleanMusicPlaylists(response.responseJSON));
-	
-	//Mojo.Log.info("Cleaned music playlists if %j",this.playlistsList);
-	
-	this.controller.modelChanged(this.musicPlaylistsListModel);
-	
-};
-
 MusicListAssistant.prototype.getMusic = function(event) {
 
 	//Update list from webmyth python script
@@ -311,25 +278,38 @@ MusicListAssistant.prototype.getMusic = function(event) {
 	query += " LEFT JOIN music_albums ON music_songs.album_id = music_albums.album_id ";
 	
 	
-	var requestUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webmythPythonFile;
-	requestUrl += "?op=executeSQLwithResponse";				
-	requestUrl += "&query64=";		
-	requestUrl += Base64.encode(query);	
 	
+	
+	
+	if(WebMyth.usePlugin){
+	
+		var response1 = $('webmyth_service_id').mysqlCommand(WebMyth.prefsCookieObject.databaseHost,WebMyth.prefsCookieObject.databaseUsername,WebMyth.prefsCookieObject.databasePassword,WebMyth.prefsCookieObject.databaseName,WebMyth.prefsCookieObject.databasePort,"mysqlMusicListResponse",query.substring(0,250),query.substring(250,500),query.substring(500,750),query.substring(750,1000),query.substring(1000,1250),query.substring(1250,1500),query.substring(1500,1750),query.substring(1750,2000),query.substring(2000,2250),query.substring(2250,2500));
+		
+		Mojo.Log.error("MusicList plugin response "+response1);
+		
+	} else {
+	
+		var requestUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webmythPythonFile;
+		requestUrl += "?op=executeSQLwithResponse";				
+		requestUrl += "&query64=";		
+		requestUrl += Base64.encode(query);	
+		
 
-	
-    try {
-        var request = new Ajax.Request(requestUrl,{
-            method: 'get',
-            evalJSON: 'true',
-			requestHeaders: {Authorization: 'Basic ' + Base64.encode(WebMyth.prefsCookieObject.webserverUsername + ":" + WebMyth.prefsCookieObject.webserverPassword)},
-            onSuccess: this.readMusicSuccess.bind(this),
-            onFailure: this.readMusicFail.bind(this)  
-        });
-    }
-    catch(e) {
-        Mojo.Log.error(e);
-    }
+		
+		try {
+			var request = new Ajax.Request(requestUrl,{
+				method: 'get',
+				evalJSON: 'true',
+				requestHeaders: {Authorization: 'Basic ' + Base64.encode(WebMyth.prefsCookieObject.webserverUsername + ":" + WebMyth.prefsCookieObject.webserverPassword)},
+				onSuccess: this.readMusicSuccess.bind(this),
+				onFailure: this.readMusicFail.bind(this)  
+			});
+		}
+		catch(e) {
+			Mojo.Log.error(e);
+		}
+		
+	}
 	
 };
 
@@ -352,7 +332,6 @@ MusicListAssistant.prototype.readMusicFail = function(event) {
 };
 
 MusicListAssistant.prototype.readMusicSuccess = function(response) {
-	//return true;  //can escape this function for testing purposes
     
 	//Mojo.Log.info('Got Ajax response: %j',response.responseJSON);
 	
@@ -366,9 +345,108 @@ MusicListAssistant.prototype.readMusicSuccess = function(response) {
 	
 };
 
+MusicListAssistant.prototype.mysqlMusicListResponse = function(response) {
+
+	Mojo.Log.error("Got musicList plugin response: "+response);
+	
+		
+	//Update the list widget
+	this.fullResultList.clear();
+	Object.extend(this.fullResultList,cleanMusic(JSON.parse(response)));
+
+	
+	this.finishedReadingMusic();
+	
+};
+
 MusicListAssistant.prototype.finishedReadingMusic = function() {
 
+	$('playlistsDivider-label').innerText = $L('Playlists');
+	
+	//Playlists
+	this.playlistsList.clear();
+	this.controller.modelChanged(this.musicPlaylistsListModel);
+	
+	this.controller.window.setTimeout(this.getMusicPlaylists.bind(this), 50);
+	
+	
 	this.sortChanged(WebMyth.prefsCookieObject.currentMusicSort);
+	
+};
+
+MusicListAssistant.prototype.getMusicPlaylists = function(event) {
+
+	//Update list from webmyth python script
+	//Mojo.Log.error('Starting music playlists gathering');
+	
+	var query = "SELECT * ";
+	query += " FROM music_playlists ;";
+	
+	
+	
+	
+	if(WebMyth.usePlugin){
+	
+		var response1 = $('webmyth_service_id').mysqlCommand(WebMyth.prefsCookieObject.databaseHost,WebMyth.prefsCookieObject.databaseUsername,WebMyth.prefsCookieObject.databasePassword,WebMyth.prefsCookieObject.databaseName,WebMyth.prefsCookieObject.databasePort,"mysqlMusicPlaylistResponse",query.substring(0,250),query.substring(250,500),query.substring(500,750),query.substring(750,1000),query.substring(1000,1250),query.substring(1250,1500),query.substring(1500,1750),query.substring(1750,2000),query.substring(2000,2250),query.substring(2250,2500));
+		
+		Mojo.Log.error("MusicList playlists plugin response "+response1);
+		
+	} else {
+	
+		var requestUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webmythPythonFile;
+		requestUrl += "?op=executeSQLwithResponse";				
+		requestUrl += "&query64=";		
+		requestUrl += Base64.encode(query);	
+		
+
+		
+		try {
+			var request = new Ajax.Request(requestUrl,{
+				method: 'get',
+				evalJSON: 'true',
+				requestHeaders: {Authorization: 'Basic ' + Base64.encode(WebMyth.prefsCookieObject.webserverUsername + ":" + WebMyth.prefsCookieObject.webserverPassword)},
+				onSuccess: this.readMusicPlaylistsSuccess.bind(this),
+				onFailure: this.readMusicPlaylistsFail.bind(this)  
+			});
+		}
+		catch(e) {
+			Mojo.Log.error(e);
+		}
+		
+	}
+	
+};
+
+MusicListAssistant.prototype.readMusicPlaylistsFail = function(event) {
+
+	Mojo.Log.error('Failed to get music playlists');
+	
+};
+
+MusicListAssistant.prototype.readMusicPlaylistsSuccess = function(response) {
+    
+	//Mojo.Log.info('Got playlists response: %j',response.responseJSON);
+	
+	this.playlistsList.clear();
+	Object.extend(this.playlistsList,cleanMusicPlaylists(response.responseJSON));
+	
+	//Mojo.Log.info("Cleaned music playlists if %j",this.playlistsList);
+	
+	this.controller.modelChanged(this.musicPlaylistsListModel);
+	
+};
+
+MusicListAssistant.prototype.mysqlMusicPlaylistResponse = function(response) {
+    
+	Mojo.Log.error("Got musicList playlists plugin response: "+response);
+	
+	
+	this.playlistsList.clear();
+	Object.extend(this.playlistsList,cleanMusicPlaylists(JSON.parse(response)));
+	
+	//Mojo.Log.info("Cleaned music playlists if %j",this.playlistsList);
+	
+	this.controller.modelChanged(this.musicPlaylistsListModel);
 	
 };
 

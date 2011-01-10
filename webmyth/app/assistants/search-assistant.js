@@ -89,6 +89,11 @@ SearchAssistant.prototype.setup = function() {
 	Mojo.Event.listen(this.controller.get( "header-menu" ), Mojo.Event.tap, function(){this.controller.sceneScroller.mojo.revealTop();}.bind(this));
 	
 	
+	if(WebMyth.usePlugin){
+		$('webmyth_service_id').mysqlSearchResponse = this.mysqlSearchResponse.bind(this);
+	}
+	
+	
 	if(this.searchString == "") {
 		this.newSearch();
 	} else {
@@ -259,28 +264,40 @@ SearchAssistant.prototype.newSearchCallback = function(value) {
 	query += " ORDER BY startTime, chanNum ";
 	query += " LIMIT 1000 ";
 	
-	
 	//Mojo.Log.error("query is "+query);
 	
-	var requestUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webmythPythonFile;
-	requestUrl += "?op=executeSQLwithResponse";				
-	requestUrl += "&query64=";		
-	requestUrl += Base64.encode(query);	
 	
+	
+	
+	if(WebMyth.usePlugin){
+	
+		var response1 = $('webmyth_service_id').mysqlCommand(WebMyth.prefsCookieObject.databaseHost,WebMyth.prefsCookieObject.databaseUsername,WebMyth.prefsCookieObject.databasePassword,WebMyth.prefsCookieObject.databaseName,WebMyth.prefsCookieObject.databasePort,"mysqlSearchResponse",query.substring(0,250),query.substring(250,500),query.substring(500,750),query.substring(750,1000),query.substring(1000,1250),query.substring(1250,1500),query.substring(1500,1750),query.substring(1750,2000),query.substring(2000,2250),query.substring(2250,2500));
+		
+		Mojo.Log.error("Search plugin response "+response1);
+		
+	} else {
+	
+		var requestUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webmythPythonFile;
+		requestUrl += "?op=executeSQLwithResponse";				
+		requestUrl += "&query64=";		
+		requestUrl += Base64.encode(query);	
+		
 
-	
-    try {
-        var request = new Ajax.Request(requestUrl,{
-            method: 'get',
-            evalJSON: 'true',
-			requestHeaders: {Authorization: 'Basic ' + Base64.encode(WebMyth.prefsCookieObject.webserverUsername + ":" + WebMyth.prefsCookieObject.webserverPassword)},
-            onSuccess: this.readSearchSuccess.bind(this),
-            onFailure: this.readSearchFail.bind(this)  
-        });
-    }
-    catch(e) {
-        Mojo.Log.error(e);
-    }
+		
+		try {
+			var request = new Ajax.Request(requestUrl,{
+				method: 'get',
+				evalJSON: 'true',
+				requestHeaders: {Authorization: 'Basic ' + Base64.encode(WebMyth.prefsCookieObject.webserverUsername + ":" + WebMyth.prefsCookieObject.webserverPassword)},
+				onSuccess: this.readSearchSuccess.bind(this),
+				onFailure: this.readSearchFail.bind(this)  
+			});
+		}
+		catch(e) {
+			Mojo.Log.error(e);
+		}
+		
+	}
 	
 };
 
@@ -347,6 +364,44 @@ SearchAssistant.prototype.readSearchSuccess = function(response) {
 
 	
 };
+
+SearchAssistant.prototype.mysqlSearchResponse = function(response) {
+
+	Mojo.Log.error("Got search plugin response: "+response);
+	
+	var searchJson = JSON.parse(response);
+	
+	
+	if(searchJson.length > 0) {
+		//We got back some rows
+		
+		var nowDate = new Date();
+		var nowDateISO = dateJSToISO(nowDate).replace("T"," ");
+		
+		//Update the list widget
+		this.resultList.clear();
+		Object.extend(this.resultList,cleanSearchResults(searchJson, nowDateISO));
+		
+		
+		//Mojo.Log.error('Cleaned search results: %j',this.resultList);
+		
+		
+		$('scene-title').innerHTML += " ("+this.resultList.length+" "+$L("items")+")";
+		$('scene-title').innerHTML = $('scene-title').innerHTML.substring(0,40);
+		
+	} else {
+		//No matching results from guide
+	
+		this.resultList.clear();
+		this.resultList.push({ 'title':$L('No matches'), 'subTitle':$L('Sorry')+' :(', 'startTime':'1900-01-01 00:00:00', 'channelName':'', 'category':'', 'chanNum':''});
+	
+		Mojo.Log.error("no response results %j",this.resultList);
+	
+	}
+	
+	this.sortChanged(WebMyth.prefsCookieObject.currentSearchSort);
+	
+}
 
 SearchAssistant.prototype.sortChanged = function(newSort) {
 	//Save selection back to cookie

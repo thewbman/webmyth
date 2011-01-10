@@ -9,7 +9,14 @@
    <div class="palm-group-title" id="webserver-group-title">Webserver</div>
   <div class="palm-list">
 	
-	<div class="palm-row first">
+	<div class="palm-row first"> 
+		<div class="palm-row-wrapper">
+			<div id="usePluginSelector" x-mojo-element="ListSelector">
+			</div>
+        </div>
+    </div>
+		
+	<div class="palm-row">
 		<div class="palm-row-wrapper textfield-group" x-mojo-focus-highlight="true">
 			<div class="title">                            
 				<div class="label" id="webserver-label">Address</div>
@@ -42,14 +49,7 @@
 			<div x-mojo-element="ToggleButton" id="allowDownloadStreamToggleId" class="left"></div>
 		</div>
 	</div>
-<!--
-	<div class="palm-row">
-		<div class="palm-row-wrapper" x-mojo-focus-highlight="true">         
-			<div class="label right">Use script file</div>
-			<div x-mojo-element="ToggleButton" id="useWebmythScriptToggleId" class="left"></div>
-		</div>
-	</div>
--->
+	
 	<div class="palm-row">
 		<div class="palm-row-wrapper textfield-group" x-mojo-focus-highlight="true">
 			<div class="title">                            
@@ -117,6 +117,66 @@
 
 
 <div class="palm-group">        
+   <div class="palm-group-title" id="database-group-title">MySQL Database</div>
+  <div class="palm-list">
+	
+	<div class="palm-row first">
+		<div class="palm-row-wrapper" x-mojo-focus-highlight="true">         
+			<div class="label right" id="manualDatabase-label">Manual Settings</div>
+			<div x-mojo-element="ToggleButton" id="manualDatabaseToggleId" class="left"></div>
+		</div>
+	</div>
+	
+	<div class="palm-row">
+		<div class="palm-row-wrapper textfield-group" x-mojo-focus-highlight="true">
+			<div class="title">                            
+				<div class="label" id="databaseHost-label">Address</div>
+				<div x-mojo-element="TextField" id="databaseHostTextFieldId" class="textFieldClass"></div>
+			</div>
+		</div>
+	</div>
+	
+	<div class="palm-row">
+		<div class="palm-row-wrapper textfield-group" x-mojo-focus-highlight="true">
+			<div class="title">                            
+				<div class="label" id="databasePort-label">Port</div>
+				<div x-mojo-element="TextField" id="databasePortTextFieldId" class="textFieldClass"></div>
+			</div>
+		</div>
+	</div>
+	
+	<div class="palm-row">
+		<div class="palm-row-wrapper textfield-group" x-mojo-focus-highlight="true">
+			<div class="title">                            
+				<div class="label" id="databaseUsername-label">Username</div>
+				<div x-mojo-element="TextField" id="databaseUsernameTextFieldId" class="textFieldClass"></div>
+			</div>
+		</div>
+	</div>
+	
+	<div class="palm-row">
+		<div class="palm-row-wrapper textfield-group" x-mojo-focus-highlight="true">
+			<div class="title">                            
+				<div class="label" id="databasePassword-label">Password</div>
+				<div x-mojo-element="PasswordField" id="databasePasswordTextFieldId" class="passwordClass"></div>
+			</div>
+		</div>
+	</div>
+	
+	<div class="palm-row last">
+		<div class="palm-row-wrapper textfield-group" x-mojo-focus-highlight="true">
+			<div class="title">                            
+				<div class="label" id="databaseName-label">Database</div>
+				<div x-mojo-element="TextField" id="databaseNameTextFieldId" class="textFieldClass"></div>
+			</div>
+		</div>
+	</div>
+
+  </div>
+</div>
+
+
+<div class="palm-group">        
    <div class="palm-group-title" id="images-group-title">Images</div>
   <div class="palm-list">
 	
@@ -155,14 +215,6 @@
 <div class="palm-group">
 	<div class="palm-group-title" id="remotePreferences-group-title">Remote preferences</div>
 	<div class="palm-list">
-   
-<!--   
-		<div class="palm-row first"> 
-			<div class="palm-row-wrapper">
-				<div id="theme" x-mojo-element="ListSelector"></div>
-            </div>
-        </div>
--->
 		
 		<div class="palm-row first"> 
 			<div class="palm-row-wrapper">
