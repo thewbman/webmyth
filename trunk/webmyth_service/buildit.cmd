@@ -11,7 +11,7 @@ set SRC=webmyth_service.cpp
 set LIBS=-lSDL -lpdl -lpthread
 
 @rem static libs
-set STATIC_LIBS=libmysqlclient.a libupnp.a libixml.a libthreadutil.a
+set STATIC_LIBS=libmysqlclient.a
 
 @rem itermediate object file
 set MIDFILE=webmyth_service.o

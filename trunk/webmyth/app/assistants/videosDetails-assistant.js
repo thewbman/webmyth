@@ -292,6 +292,7 @@ VideosDetailsAssistant.prototype.handleDownload = function(downloadOrStream_in) 
 	Mojo.Log.info("Download/stream URL is "+filenameRequestUrl);
 	
 	var myFilename = this.videosObject.title + "-" + this.videosObject.subtitle + ".mp4";
+	myFilename.replace(":","-");
 	
 	Mojo.Log.info("Filename is "+myFilename);
  

@@ -1247,6 +1247,10 @@ SetupRecordingAssistant.prototype.updateRule = function() {
 			
 			Mojo.Log.error("Schedule execute response "+response1);
 			
+			if(response1 == null){
+				this.executeSqlFail();
+			}
+			
 		} else {
 		
 			var requestUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webmythPythonFile;
@@ -1321,6 +1325,10 @@ SetupRecordingAssistant.prototype.createRule = function() {
 				
 				Mojo.Log.error("Schedule execute response "+response1);
 				
+				if(response1 == null){
+					this.executeSqlFail();
+				}
+				
 			} else {
 			
 				var requestUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webmythPythonFile;
@@ -1378,6 +1386,10 @@ SetupRecordingAssistant.prototype.overrideRecord = function() {
 			
 			Mojo.Log.error("Schedule execute response "+response1);
 			
+			if(response1 == null){
+				this.executeSqlFail();
+			}
+			
 		} else {
 		
 			var requestUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webmythPythonFile;
@@ -1433,6 +1445,10 @@ SetupRecordingAssistant.prototype.overrideDontRecord = function() {
 			
 			Mojo.Log.error("Schedule execute response "+response1);
 			
+			if(response1 == null){
+				this.executeSqlFail();
+			}
+			
 		} else {
 		
 			var requestUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webmythPythonFile;
@@ -1477,6 +1493,10 @@ SetupRecordingAssistant.prototype.neverRecord = function() {
 			
 			Mojo.Log.error("Schedule execute response "+response1);
 			
+			if(response1 == null){
+				this.executeSqlFail();
+			}
+			
 		} else {
 		
 			var requestUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webmythPythonFile;
@@ -1519,6 +1539,10 @@ SetupRecordingAssistant.prototype.forgetOld = function() {
 			var response1 = $('webmyth_service_id').mysqlExecute(WebMyth.prefsCookieObject.databaseHost,WebMyth.prefsCookieObject.databaseUsername,WebMyth.prefsCookieObject.databasePassword,WebMyth.prefsCookieObject.databaseName,WebMyth.prefsCookieObject.databasePort,"mysqlScheduleExecuteResponse",query.substring(0,250),query.substring(250,500),query.substring(500,750),query.substring(750,1000),query.substring(1000,1250),query.substring(1250,1500),query.substring(1500,1750),query.substring(1750,2000),query.substring(2000,2250),query.substring(2250,2500));
 			
 			Mojo.Log.error("Schedule execute response "+response1);
+			
+			if(response1 == null){
+				this.executeSqlFail();
+			}
 			
 		} else {
 		
@@ -1568,6 +1592,10 @@ SetupRecordingAssistant.prototype.toggleOverride = function() {
 			
 			Mojo.Log.error("Schedule execute response "+response1);
 			
+			if(response1 == null){
+				this.executeSqlFail();
+			}
+			
 		} else {
 		
 			var requestUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webmythPythonFile;
@@ -1608,6 +1636,10 @@ SetupRecordingAssistant.prototype.cancelRecord = function() {
 			var response1 = $('webmyth_service_id').mysqlExecute(WebMyth.prefsCookieObject.databaseHost,WebMyth.prefsCookieObject.databaseUsername,WebMyth.prefsCookieObject.databasePassword,WebMyth.prefsCookieObject.databaseName,WebMyth.prefsCookieObject.databasePort,"mysqlScheduleExecuteResponse",query.substring(0,250),query.substring(250,500),query.substring(500,750),query.substring(750,1000),query.substring(1000,1250),query.substring(1250,1500),query.substring(1500,1750),query.substring(1750,2000),query.substring(2000,2250),query.substring(2250,2500));
 			
 			Mojo.Log.error("Schedule execute response "+response1);
+			
+			if(response1 == null){
+				this.executeSqlFail();
+			}
 			
 		} else {
 		

@@ -23,34 +23,29 @@
 #include <stdio.h>
 #include <math.h>
 
-#include <signal.h>
-#include <unistd.h>
-#include <fcntl.h>
-#include <errno.h>
+//#include <signal.h>
+//#include <unistd.h>
+//#include <fcntl.h>
+//#include <errno.h>
 #include <arpa/inet.h>
-#include <sys/socket.h>
-#include <sys/types.h>
+//#include <sys/socket.h>
+//#include <sys/types.h>
 #include <netdb.h>
+#include <string>
+#include <syslog.h>
+
 
 #include "SDL.h"
 #include "PDL.h"
 
-#include <string>
+#include "my_global.h"
+#include "mysql.h"
 
 
-#include <my_global.h>
-#include <mysql.h>
 
-
-#include <upnp.h>
-
-
-#include <syslog.h>
 #define PACKAGEID "com.thewbman.webmyth.plugin"
-
 #define MAX_BUFFER_LEN 1024
 #define MAX_PROTOCOL_BUFFER_LEN 4048
-
 #define concat(a, b)  a ## b
 
 using namespace std;
@@ -264,7 +259,7 @@ void cleanProtocolVersion(int protoVer){
 			mpSendMsgSize = sprintf(mpSendBuffer, "%s", "MYTH_PROTO_VERSION 62 78B5631E");
 		  break;
 		default: 
-			mpSendMsgSize = sprintf(mpSendBuffer, "%s %s", "MYTH_PROTO_VERSION", protoVer);
+			mpSendMsgSize = sprintf(mpSendBuffer, "%s %d", "MYTH_PROTO_VERSION", protoVer);
 		  break;
 	}
 	
@@ -562,7 +557,7 @@ void backgroundMysqlResponse(){
 	string finalResponse;
 	
 	
-    syslog(LOG_INFO,"Starting background MySQL query");
+    //syslog(LOG_INFO,"Starting background MySQL query");
 	
 	if(!mysql_init(&mysql)){
 		syslog(LOG_INFO,"Failed to initilaize MySQL");
@@ -572,7 +567,7 @@ void backgroundMysqlResponse(){
 		return;
 	}
     
-	syslog(LOG_INFO,"mysql connecting");
+	//syslog(LOG_INFO,"mysql connecting");
 	
 	//Should check for log times here for DNS problem   http://serverfault.com/questions/136954/4-7-second-delay-accessing-mysql-across-the-network
 		
@@ -587,7 +582,7 @@ void backgroundMysqlResponse(){
 	}
 	
 	
-	syslog(LOG_INFO,"mysql query: %s",my_mysql_query_full);
+	//syslog(LOG_INFO,"mysql query: %s",my_mysql_query_full);
   
 	if(mysql_real_query(&mysql,my_mysql_query_full,(unsigned int)(strlen(my_mysql_query_full))) != 0){
 		//char errorMessageText;
@@ -602,7 +597,7 @@ void backgroundMysqlResponse(){
    
 	
 
-	syslog(LOG_INFO,"mysql result");
+	//syslog(LOG_INFO,"mysql result");
 	
 	res = mysql_use_result(&mysql);
 	
@@ -665,7 +660,7 @@ void backgroundMysqlResponse(){
 	
 	//syslog(LOG_INFO,"Full JSON: %s",(const char*)finalResponse.c_str());
 	
-	syslog(LOG_INFO,"mysql after JSON");
+	//syslog(LOG_INFO,"mysql after JSON");
 
 	mysql_free_result(res);	
 	mysql_close(&mysql);
@@ -777,8 +772,6 @@ void backgroundMysqlExecute(){
 	return;
 
 }	
-
-
 
 
 
@@ -906,7 +899,7 @@ PDL_bool sendData(PDL_JSParameters *params){
 	
 	const char * dataToSend = PDL_GetJSParamString(params, 0);
 	
-	//syslog(LOG_INFO, "recieved sendData request: %s", dataToSend);
+	//syslog(LOG_INFO, "Received sendData request: %s", dataToSend);
 	
 	sendMsgSize = sprintf(sendBuffer, "%s", dataToSend);
 	newlineMsgSize = sprintf(newlineBuffer, "\n\r");
@@ -1209,116 +1202,6 @@ PDL_bool mythprotocolCommand(PDL_JSParameters *params){
 }
 
 
-PDL_bool upnpInit(PDL_JSParameters *params){
-	
-	UpnpInit(NULL,0);
-	
-	syslog(LOG_INFO,"Initialized upnp port %d at %s",UpnpGetServerPort(),UpnpGetServerIpAddress());
-	
-	UpnpFinish();
-	
-	//Return to JS, will do protocol connection in background
-	PDL_JSReply(params, "Initialized Upnp");
-	
-    return PDL_TRUE;
-	
-}
-
-PDL_bool upnpCommand(PDL_JSParameters *params){
-	//function(ip_address, port, upnp_command)
-	
-	//asdf - this isnt working, figure it out later
-	
-	const char *ip_address = PDL_GetJSParamString(params, 0);
-    int port = PDL_GetJSParamInt(params, 1);
-	const char *upnp_command = PDL_GetJSParamString(params, 2);
-		
-	struct sockaddr_in my_sockaddr; 
-		
-	char upnpSendBuffer[MAX_BUFFER_LEN]; 
-	int upnpSendMsgSize; 
-	char upnpReceiveBuffer[MAX_BUFFER_LEN]; 
-	int upnpRecvMsgSize; 
-	
-	int upnp_sock;
-	
-	//Open port to listen on 
-	PDL_Err mjErr;
-	mjErr = PDL_SetFirewallPortStatus(1900, PDL_TRUE);
-    if ( mjErr != PDL_NOERROR )
-    {
-        syslog(LOG_INFO, "error upnp opening port: %s\0", PDL_GetError());
-		PDL_JSException(params, "error upnp opening port");
-        return PDL_FALSE;
-    }
-	
-	// Create socket for sending/receiving data
-    if ((upnp_sock = socket(AF_INET, SOCK_DGRAM, 0)) < 0){
-        syslog(LOG_INFO, "upnp socket() failed");
-		PDL_JSException(params, "upnp socket() failed - 1");
-        return PDL_FALSE;
-    } else {
-        syslog(LOG_INFO, "upnp socket() success");
-	}
-
-	
-	//Setup IP and port for connection
-    my_sockaddr.sin_family = AF_INET; 
-    my_sockaddr.sin_port = htons(port); 
-    //my_sockaddr.sin_addr.s_addr = inet_addr(ip_address); 
-    my_sockaddr.sin_addr.s_addr = INADDR_ANY;
-	bzero(&(my_sockaddr.sin_zero), 8); 
-	
-    my_sockaddr.sin_addr.s_addr = inet_addr(ip_address); 
-	
-
-    // Bind to the local address 
-    if (connect(upnp_sock, (struct sockaddr *) &my_sockaddr, sizeof(my_sockaddr)) < 0){
-        syslog(LOG_INFO, "upnp connect() failed");
-		PDL_JSException(params, "upnp connect() failed - 1");
-        return PDL_FALSE;
-    } else {
-        syslog(LOG_INFO, "upnp connect() success");
-	}
-
-	
-	//Send upnp request
-	upnpSendMsgSize = sprintf(upnpSendBuffer, upnp_command);
-	if(sendto(upnp_sock, upnpSendBuffer, upnpSendMsgSize, 0, NULL, 0) != upnpSendMsgSize){
-		syslog(LOG_INFO, "upnp sendto() failed");
-		PDL_JSReply(params, "upnp sendto() failed");
-		return PDL_FALSE;
-	} else {
-        syslog(LOG_INFO, "upnp sendto() success");
-	}
-	
-	
-	//Now just get actual response
-	if ((upnpRecvMsgSize = recv(upnp_sock, upnpReceiveBuffer, MAX_BUFFER_LEN, 0)) > 0) {
-		upnpReceiveBuffer[upnpRecvMsgSize] = '\0';
-		syslog(LOG_INFO, upnpReceiveBuffer);
-		
-	} else if (upnpRecvMsgSize == 0) {
-		PDL_JSException(params, "upnp command recvMsgSize == 0");
-		return PDL_FALSE;
-    } else {
-        if (errno != EWOULDBLOCK){
-            syslog(LOG_INFO, "upnp command recvfrom() failed");
-            return PDL_FALSE;
-        }
-    }
-	
-	
-	close(upnp_sock);
-	
-	
-	PDL_JSReply(params, upnpReceiveBuffer);
-
-    return PDL_TRUE;
-	
-}
-
-
 
 PDL_bool mysqlCommand(PDL_JSParameters *params){
 	//function(host, username, password, db, port, response_function, query[10])
@@ -1445,9 +1328,6 @@ int main(int argc, char** argv) {
     PDL_RegisterJSHandler("mythprotocolCommand", mythprotocolCommand);
     PDL_RegisterJSHandler("mythprotocolBackgroundCommand", mythprotocolBackgroundCommand);
 	
-    PDL_RegisterJSHandler("upnpCommand", upnpCommand);
-    PDL_RegisterJSHandler("upnpInit", upnpInit);
-	
     PDL_RegisterJSHandler("mysqlCommand", mysqlCommand);
     PDL_RegisterJSHandler("mysqlExecute", mysqlExecute);
 
@@ -1461,6 +1341,8 @@ int main(int argc, char** argv) {
 	doBackgroundMysqlQuery = false;
 	
 	activeMysql = false;
+	
+	//PDL_SetFirewallPortStatus(1900, PDL_TRUE);
 
     // Event descriptor
     SDL_Event Event;

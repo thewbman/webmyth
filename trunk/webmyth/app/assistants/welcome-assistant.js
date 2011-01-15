@@ -154,7 +154,6 @@ WelcomeAssistant.prototype.setup = function() {
 		if (WebMyth.prefsCookieObject.currentRemoteScene == null) WebMyth.prefsCookieObject.currentRemoteScene = myDefaultCookie.currentRemoteScene;
 		if (WebMyth.prefsCookieObject.allowRecordedDownloads == null) WebMyth.prefsCookieObject.allowRecordedDownloads = myDefaultCookie.allowRecordedDownloads;
 		if (WebMyth.prefsCookieObject.recordedDownloadsUrl == null) WebMyth.prefsCookieObject.recordedDownloadsUrl = myDefaultCookie.recordedDownloadsUrl;
-		//if (WebMyth.prefsCookieObject.theme == null) WebMyth.prefsCookieObject.theme = myDefaultCookie.theme;
 		if (WebMyth.prefsCookieObject.remoteVibrate == null) WebMyth.prefsCookieObject.remoteVibrate = myDefaultCookie.remoteVibrate;
 		if (WebMyth.prefsCookieObject.remoteFullscreen == null) WebMyth.prefsCookieObject.remoteFullscreen = myDefaultCookie.remoteFullscreen;
 		if (WebMyth.prefsCookieObject.masterBackendIp == null) WebMyth.prefsCookieObject.masterBackendIp = myDefaultCookie.masterBackendIp;
@@ -292,12 +291,14 @@ WelcomeAssistant.prototype.setup = function() {
 	//Start plugin
 	if((Mojo.Environment.DeviceInfo.modelNameAscii == "Device")||(Mojo.Environment.DeviceInfo.modelNameAscii == "Emulator")) {
 		WebMyth.usePlugin = false;
+		WebMyth.usePluginFrontend = false;
 		Mojo.Controller.getAppController().showBanner("On "+Mojo.Environment.DeviceInfo.modelNameAscii+" - no plugin", {source: 'notification'});
 	} else {
 		if(WebMyth.usePlugin){
 			//WebMyth.newPluginSocket("query location");
 			$('webmyth_service_id').mysqlWelcomeSettingsResponse = this.mysqlWelcomeSettingsResponse.bind(this);
 			$('webmyth_service_id').mysqlWelcomeResponse = this.mysqlWelcomeResponse.bind(this);
+			$('webmyth_service_id').backgroundUpnpResponse = this.backgroundUpnpResponse.bind(this);
 			
 		}
 	}
@@ -633,22 +634,35 @@ WelcomeAssistant.prototype.alertScriptUpdate = function(oldversion) {
 
 WelcomeAssistant.prototype.doWelcomeIcon = function(event) {	
 	
-	Event.stop(event); 
+	//Event.stop(event); 
+	
+	//Mojo.Controller.stageController.pushScene("backendSearch");
 	
 	Mojo.Log.info("Starting plugin test - upnp")
 	
 	try {
+	
+		$('debugText').innerText = "Debug text";
 		
-		//var response1 = $('webmyth_service_id').upnpInit();
+		//var response1 = $('webmyth_service_id').upnpSearch("239.255.255.250",1900,"M-SEARCH * HTTP/1.1\r\nHOST: 239.255.255.250:1900\r\nMAN: \"ssdp:discover\"\r\nMX: 2\r\nST: urn:schemas-mythtv-org:device:MasterMediaServer:1\r\n\r\n");
 		
-		//$('debugText').innerText = response1;
-
+		$('debugText').innerText = response1;
+	
+	
 	}
 	catch(e) {
 		Mojo.Log.error("plug-in error %s",e);
 	}
 		
 	
+};
+
+WelcomeAssistant.prototype.backgroundUpnpResponse = function(response) {	
+
+	Mojo.Log.error("backgroundUpnpResponse: "+response);
+	
+	$('debugText').innerText += response;
+
 };
 
 WelcomeAssistant.prototype.mysqlWelcomeResponse = function(response) {
@@ -808,6 +822,8 @@ WelcomeAssistant.prototype.checkNetworkConnectionStatus = function() {
 			onSuccess: function(response) {
 				//Mojo.Log.info("Got connection status of %j", response);
 				
+				this.ipAddress = response.wifi.ipAddress;
+				
 				if((response.wifi.state == "connected")||(response.wan.state == "connected")) {
 					
 					//this.getSettings();
@@ -962,7 +978,7 @@ WelcomeAssistant.prototype.getSettings = function() {
 	
 	} else {
 			
-		Mojo.Log.error("Starting to get settingss");
+		//Mojo.Log.error("Starting to get settingss");
 			
 		//var query = "SELECT * FROM `settings`  WHERE `value` != 'MythWelcomeDateFormat' ;";
 		var query = "SELECT * FROM `settings`  WHERE ";

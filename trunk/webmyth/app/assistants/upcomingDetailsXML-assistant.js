@@ -564,10 +564,12 @@ UpcomingDetailsXMLAssistant.prototype.finishedReadingDetails = function() {
 		
 		
 		this.hostsMenuModel = { label: $L('Hosts'), items: hostsList};
-		
 		this.controller.modelChanged(this.cmdMenuModel);
-		
 		this.controller.setupWidget('hosts-menu', '', this.hostsMenuModel);
+		
+		
+		this.webMenuModel.items.push({ label: $L('Setup'), command: 'go-setup' });
+		this.controller.modelChanged(this.webMenuModel);
 		
 	};
 	

@@ -356,7 +356,7 @@ StageAssistant.prototype.handleCommand = function(event) {
                     parameters: {
 						id: "com.palm.app.email",
                         params: {
-							summary: "Help with WebMyth v"+ Mojo.Controller.appInfo.version+", script version "+WebMyth.prefsCookieObject.liveScriptVersion,
+							summary: "Help with WebMyth v"+ Mojo.Controller.appInfo.version,
                             recipients: [{
 								type:"email",
                                 value:"webmyth.help@gmail.com",

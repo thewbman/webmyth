@@ -327,7 +327,7 @@ StatusAssistant.prototype.getCardinputs = function() {
 	
 		var response1 = $('webmyth_service_id').mysqlCommand(WebMyth.prefsCookieObject.databaseHost,WebMyth.prefsCookieObject.databaseUsername,WebMyth.prefsCookieObject.databasePassword,WebMyth.prefsCookieObject.databaseName,WebMyth.prefsCookieObject.databasePort,"mysqlStatusEncodersResponse",query.substring(0,250),query.substring(250,500),query.substring(500,750),query.substring(750,1000),query.substring(1000,1250),query.substring(1250,1500),query.substring(1500,1750),query.substring(1750,2000),query.substring(2000,2250),query.substring(2250,2500));
 		
-		Mojo.Log.error("Status plugin response "+response1);
+		//Mojo.Log.error("Status plugin response "+response1);
 		
 	} else {
 	
@@ -357,7 +357,7 @@ StatusAssistant.prototype.getCardinputs = function() {
 
 StatusAssistant.prototype.readCardinputsSuccess = function(response) {
 
-	Mojo.Log.error("Got encoders SQL response: %j",response.responseJSON);
+	//Mojo.Log.error("Got encoders SQL response: %j",response.responseJSON);
 	
 	this.cardinputsList.clear();
 	
@@ -375,11 +375,11 @@ StatusAssistant.prototype.readCardinputsSuccess = function(response) {
 
 StatusAssistant.prototype.mysqlStatusEncodersResponse = function(response) {
 
-	Mojo.Log.error("Got status encoders plugin response: "+response);
+	//Mojo.Log.error("Got status encoders plugin response: "+response);
 	
 	var statusEncodersJson = JSON.parse(response);
 	
-	Mojo.Log.error("Plugin status encoders JSON %j",statusEncodersJson);
+	//Mojo.Log.error("Plugin status encoders JSON %j",statusEncodersJson);
 
 	
 	this.cardinputsList.clear();
@@ -509,7 +509,8 @@ StatusAssistant.prototype.readStatusSuccess = function(response) {
 									"id" : singleEncoderNode.getAttributeNode("id").nodeValue,
 									"local" : singleEncoderNode.getAttributeNode("local").nodeValue,
 									"sleepstatus" : singleEncoderNode.getAttributeNode("sleepstatus").nodeValue,
-									"connected" : singleEncoderNode.getAttributeNode("connected").nodeValue
+									"connected" : singleEncoderNode.getAttributeNode("connected").nodeValue,
+									"encoderName" : ""
 								};
 			for(var j = 0; j < singleEncoderNode.childNodes.length; j++) {
 				singleEncoderChildNode = singleEncoderNode.childNodes[j];
@@ -526,13 +527,6 @@ StatusAssistant.prototype.readStatusSuccess = function(response) {
 	} 
 	//Mojo.Log.info("Full encoder list is %j", this.encodersList);
 	this.controller.modelChanged(this.encodersListModel);
-	
-	//Show encoders names only after we get both XML status and SQL response
-	this.doneStatusXML = true;
-	
-	if(this.doneCardinputs) {
-		this.combineEncoders();
-	}
 		
 	
 	//Scheduled
@@ -554,7 +548,8 @@ StatusAssistant.prototype.readStatusSuccess = function(response) {
 									"description" : singleScheduledNode.childNodes[0].nodeValue,
 									"chanid" : singleScheduledNode.getElementsByTagName("Channel")[0].getAttributeNode("chanId").nodeValue,
 									"encoderId" : singleScheduledRecordingNode.getAttributeNode("encoderId").nodeValue,
-									"recStartTs" : singleScheduledRecordingNode.getAttributeNode("recStartTs").nodeValue.replace("T"," ")
+									"recStartTs" : singleScheduledRecordingNode.getAttributeNode("recStartTs").nodeValue.replace("T"," "),
+									"encoderName" : ""
 								};
 			//Mojo.Log.info("Added scheduled %j to list", singleScheduledJson);
 			this.scheduledList.push(singleScheduledJson);
@@ -612,14 +607,18 @@ StatusAssistant.prototype.readStatusSuccess = function(response) {
 			singleStorageJson = { 
 				"dir" : singleStorageNode.getAttributeNode("dir").nodeValue,
 				"id" : singleStorageNode.getAttributeNode("id").nodeValue,
-				"free" : Mojo.Format.formatNumber(parseInt(singleStorageNode.getAttributeNode("free").nodeValue)),
+				"free" : parseInt(singleStorageNode.getAttributeNode("free").nodeValue),
 				"freeText": $L("Free")+": "+Mojo.Format.formatNumber(parseInt(singleStorageNode.getAttributeNode("free").nodeValue))+" MB",
-				"total" : Mojo.Format.formatNumber(parseInt(singleStorageNode.getAttributeNode("total").nodeValue)),
+				"total" : parseInt(singleStorageNode.getAttributeNode("total").nodeValue),
 				"totalText": $L("Total")+": "+Mojo.Format.formatNumber(parseInt(singleStorageNode.getAttributeNode("total").nodeValue))+" MB",
-				"used" : Mojo.Format.formatNumber(parseInt(singleStorageNode.getAttributeNode("used").nodeValue)),
+				"used" : parseInt(singleStorageNode.getAttributeNode("used").nodeValue),
 				"usedText": $L("Used")+": "+Mojo.Format.formatNumber(parseInt(singleStorageNode.getAttributeNode("used").nodeValue))+" MB"
 			};
-			//Mojo.Log.info("Added storage group %j to list", singleStorageJson);
+			
+			singleStorageJson.freePercentage = parseInt(100*singleStorageJson.free/singleStorageJson.total)+"%";
+			singleStorageJson.usedPercentage = parseInt(100*singleStorageJson.used/singleStorageJson.total)+"%";
+			
+			Mojo.Log.info("Added storage group %j to list", singleStorageJson);
 			this.storageList.push(singleStorageJson);
 		}
 	} 
@@ -716,6 +715,18 @@ StatusAssistant.prototype.readStatusSuccess = function(response) {
 	$('generalStatusContent').innerHTML = generalStatusContent;
 	
 	
+	
+	
+	//Show encoders names only after we get both XML status and SQL response
+	this.doneStatusXML = true;
+	
+	if(this.doneCardinputs) {
+		this.combineEncoders();
+	}
+	
+	
+	
+	
 	//Stop spinner and hide
 	this.spinnerModel.spinning = false;
 	this.controller.modelChanged(this.spinnerModel, this);
@@ -727,15 +738,14 @@ StatusAssistant.prototype.combineEncoders = function() {
 
 	Mojo.Log.info("Combining encoders data from XML and SQL");
 	
-	var i, j, s = {};
+	var i, j;
 	
 	for(i = 0; i < this.encodersList.length; i++){
-		//s = this.encodersList[i];
 	
 		for(j = 0; j < this.cardinputsList.length; j++){
 			
 			if(this.cardinputsList[j].cardid == this.encodersList[i].id){
-				this.encodersList[i].displayname = this.cardinputsList[j].displayname;
+				this.encodersList[i].encoderName = "("+this.cardinputsList[j].displayname+") ";
 			}
 			
 		}
@@ -743,6 +753,22 @@ StatusAssistant.prototype.combineEncoders = function() {
 	}
 	
 	this.controller.modelChanged(this.encodersListModel);
+	
+	
+	
+	for(i = 0; i < this.scheduledList.length; i++){
+	
+		for(j = 0; j < this.cardinputsList.length; j++){
+			
+			if(this.cardinputsList[j].cardid == this.scheduledList[i].encoderId){
+				this.scheduledList[i].encoderName = "("+this.cardinputsList[j].displayname+") ";
+			}
+			
+		}
+	
+	}
+	
+	this.controller.modelChanged(this.scheduledListModel);
 	
 }
 
@@ -794,17 +820,7 @@ StatusAssistant.prototype.setEncodersData = function(propertyValue, model)  {
 	
 	var myDataModel = '<div class="palm-row-wrapper">';
 	//myDataModel += '<div class="title"> ';
-    myDataModel += '<div class="title">'+$L('Encoder')+' #'+model.id;
-	
-	if(model.displayname){
-		if(model.displayname == ""){
-			//don't diplay name if blank
-		} else {
-			myDataModel += ' ('+model.displayname+')';
-		}
-	}	
-	
-	myDataModel += ' on '+model.hostname+' is '+state+'</div>';
+    myDataModel += '<div class="title">'+$L('Encoder')+' #'+model.id+' '+model.encoderName+'on '+model.hostname+' is '+state+'</div>';
     //myDataModel += '</div>';
 	
 	if(model.title) {

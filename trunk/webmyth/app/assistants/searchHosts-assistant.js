@@ -21,9 +21,10 @@
 
 function SearchHostsAssistant() {
 	   
-	  this.resultList = [];
-	  this.enabledResultList = [];
-	  this.disabledResultList = [];
+	this.resultList = [];
+	this.enabledResultList = [];
+	this.disabledResultList = [];
+	  
 }
 
 SearchHostsAssistant.prototype.setup = function() {
