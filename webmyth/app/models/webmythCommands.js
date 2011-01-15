@@ -2557,6 +2557,20 @@ var cleanSettings = function(fullList) {
 	
 	var i, j, k, l, s = {}, t = {};
 	
+	//Set defaults
+	settingsObject.AutoCommercialFlag = 1;
+	settingsObject.AutoTranscode = 0;
+	settingsObject.AutoRunUserJob1 = 0;
+	settingsObject.AutoRunUserJob2 = 0;
+	settingsObject.AutoRunUserJob3 = 0;
+	settingsObject.AutoRunUserJob4 = 0;
+	settingsObject.DefaultStartOffset = 0;
+	settingsObject.DefaultEndOffset = 0;
+	settingsObject.UserJobDesc1 = "User Job 1";
+	settingsObject.UserJobDesc2 = "User Job 2";
+	settingsObject.UserJobDesc3 = "User Job 3";
+	settingsObject.UserJobDesc4 = "User Job 4";
+	
 	
 	for(i = 0; i < fullList.length; i++) {
 		s = fullList[i];
@@ -2576,13 +2590,9 @@ var cleanSettings = function(fullList) {
 		} else if(s.value == "AutoRunUserJob4") {
 			settingsObject.AutoRunUserJob4 = s.data;
 		} else if(s.value == "DefaultStartOffset") {
-			settingsObject.DefaultStartOffset = s.data;
-			if(settingsObject.DefaultStartOffset == "")
-				settingsObject.DefaultStartOffset = 0;
+			settingsObject.DefaultStartOffset = parseInt(s.data);
 		} else if(s.value == "DefaultEndOffset") {
-			settingsObject.DefaultEndOffset = s.data;
-			if(settingsObject.DefaultEndOffset == "")
-				settingsObject.DefaultEndOffset = 0;
+			settingsObject.DefaultEndOffset = parseInt(s.data);
 		} else if(s.value == "UserJobDesc1") {
 			settingsObject.UserJobDesc1 = s.data;
 		} else if(s.value == "UserJobDesc2") {

@@ -39,13 +39,14 @@ PreferencesAssistant.prototype.setup = function() {
 		{
 			label: $L("Use Script"),
 			choices:[
-				{label:$L("All"),      value:0},
+				{label:$L("Always"),      value:0},
 				{label:$L("Non-remote"),         value:1},
 				{label:$L("Never"),         value:2}
 			]
 		},
 		this.usePluginSelectorModel
 	);
+	//this.controller.listen("usePluginSelector", Mojo.Event.propertyChange, this.usePluginSelectorChanged.bindAsEventListener(this));
 	//Server address
 	this.webserverTextModel = {
              value: "",
@@ -103,20 +104,6 @@ PreferencesAssistant.prototype.setup = function() {
          this.allowDownloadStreamToggleModel
     );	
 	this.controller.listen("allowDownloadStreamToggleId", Mojo.Event.propertyChange, this.streamChanged.bindAsEventListener(this));
-/*	
-	//Use script file
-	this.useWebmythScriptToggleModel = {
-             value: false
-    };
-	this.controller.setupWidget("useWebmythScriptToggleId",
-        {
-			label: $L("Use script file"),
-            modelProperty: "value"
-         },
-         this.useWebmythScriptToggleModel
-    );
-	this.controller.listen('useWebmythScriptToggleId', Mojo.Event.propertyChange, this.useWebmythScriptChanged.bindAsEventListener(this));
-*/
 	//Script filename
 	this.webmythPythonFileTextModel = {
              value: "/cgi-bin/webmyth.py",
@@ -742,28 +729,45 @@ PreferencesAssistant.prototype.manualDatabaseChanged = function(event) {
 	
 };
 
-PreferencesAssistant.prototype.useWebmythScriptChanged = function(event) {
-
-	var scriptMessage = 'Currently the app requires the webmyth.py script available on the app homepage.';
+PreferencesAssistant.prototype.usePluginSelectorChanged = function(event) {
 	
-	if(this.allowDownloadStreamToggleModel.value) {
-		
-			this.controller.showAlertDialog({
-				onChoose: function(value) {if (value=="instructions") {
-					//Mojo.Log.error("appPath:" + Mojo.appPath);
-					} 
-				},
-				title: "Script",
-				message:  scriptMessage, 
-				choices: [
-                    {label: "OK", value: "ok"}
-					],
-				allowHTMLMessage: true
-			});	
+	this.usePluginSelectorModel.value = 0;
+	this.controller.modelChanged(this.usePluginSelectorModel);
 			
-	};
+	var scriptMessage = "The version of WebMyth available in the Palm App Catalog requires the server-side script."
+	scriptMessage += " You can get a beta version of the app by downloading it from the app homepage.";
 	
-};
+	
+	this.controller.showAlertDialog({
+		onChoose: function(value) {
+			if (value=="ok") {
+				//do nothing
+			} else if  (value=="download") {
+				
+				var url = "http://code.google.com/p/webmyth/downloads/list";
+							
+				this.controller.serviceRequest("palm://com.palm.applicationManager", {
+					method: "open",
+					parameters:  {
+						id: 'com.palm.app.browser',
+						params: {
+							target: url
+						}
+					}
+				}); 
+				
+			}
+		},
+		title: "WebMyth Script",
+		message:  scriptMessage, 
+		choices: [
+                  {label: "OK", value: "ok"},
+                  {label: "Download Site", value: "download"}
+			],
+		allowHTMLMessage: true
+	});	
+	
+}
 
 PreferencesAssistant.prototype.streamChanged = function(event) {
 

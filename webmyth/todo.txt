@@ -10,18 +10,11 @@ Todo - planned new features and updates:
  - look into menu panel (style matters)
  - make dialogs palm-dark
  - cleanup schedule recording scene
- - use dark backround color
+ - use dark background color
  - push link to mythtv
  - fix background image
- - fix download with : in title
- - hide welcome icon debug
  - script to start frontend via web
  - autofind backends
- - check autoexpire checkmark on setup
- - encoder names on status
- - filesize in video detail
- - error message when backend is 127.0.0.1 or localhost
- - allow no SQL queries
  
  - had to add phone to /etc/hosts for mysql delay  http://efreedom.com/Question/2-15073/Remote-Connection-MySQL-Server-Takes-Long
  

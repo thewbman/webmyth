@@ -243,7 +243,7 @@ VideosAssistant.prototype.getStorageGroups = function(event) {
 	
 		var response1 = $('webmyth_service_id').mysqlCommand(WebMyth.prefsCookieObject.databaseHost,WebMyth.prefsCookieObject.databaseUsername,WebMyth.prefsCookieObject.databasePassword,WebMyth.prefsCookieObject.databaseName,WebMyth.prefsCookieObject.databasePort,"mysqlVideosStoragegroupResponse",query.substring(0,250),query.substring(250,500),query.substring(500,750),query.substring(750,1000),query.substring(1000,1250),query.substring(1250,1500),query.substring(1500,1750),query.substring(1750,2000),query.substring(2000,2250),query.substring(2250,2500));
 		
-		Mojo.Log.error("Videos plugin response "+response1);
+		//Mojo.Log.error("Videos plugin response "+response1);
 		
 	} else {
 	
@@ -290,11 +290,11 @@ VideosAssistant.prototype.readStorageGroupsSuccess = function(response) {
 
 VideosAssistant.prototype.mysqlVideosStoragegroupResponse = function(response) {
 
-	Mojo.Log.error("Got storagegroup plugin response: "+response);
+	//Mojo.Log.error("Got storagegroup plugin response: "+response);
 	
 	var storagegroupJson = JSON.parse(response);
 	
-	Mojo.Log.error("Plugin videos JSON %j",storagegroupJson);
+	//Mojo.Log.error("Plugin videos JSON %j",storagegroupJson);
 	
 	//Update the storage group list
 	this.storageGroups.clear();
@@ -322,7 +322,7 @@ VideosAssistant.prototype.getVideos = function(event) {
 	
 		var response1 = $('webmyth_service_id').mysqlCommand(WebMyth.prefsCookieObject.databaseHost,WebMyth.prefsCookieObject.databaseUsername,WebMyth.prefsCookieObject.databasePassword,WebMyth.prefsCookieObject.databaseName,WebMyth.prefsCookieObject.databasePort,"mysqlVideosResponse",query.substring(0,250),query.substring(250,500),query.substring(500,750),query.substring(750,1000),query.substring(1000,1250),query.substring(1250,1500),query.substring(1500,1750),query.substring(1750,2000),query.substring(2000,2250),query.substring(2250,2500));
 		
-		Mojo.Log.error("Videos plugin response "+response1);
+		//Mojo.Log.error("Videos plugin response "+response1);
 		
 	} else {
 	
@@ -351,7 +351,7 @@ VideosAssistant.prototype.getVideos = function(event) {
 
 VideosAssistant.prototype.mysqlVideosResponse = function(response) {
 
-	Mojo.Log.error("Got Videos plugin response: "+response);
+	//Mojo.Log.error("Got Videos plugin response: "+response);
 	
 	//var videosJson = JSON.parse(response);
 	
@@ -707,7 +707,7 @@ VideosAssistant.prototype.goVideosDetails = function(event) {
 	
 	var detailsStorageGroup = trimByHostnameGroupname(this.storageGroups, videosObject.host, "Videos");
 	
-	Mojo.Log.error("Hostname: "+videosObject.host+" has Videos directory: "+detailsStorageGroup.dirname);
+	//Mojo.Log.error("Hostname: "+videosObject.host+" has Videos directory: "+detailsStorageGroup.dirname);
 	
 	//Open upcomingDetails communication scene
 	Mojo.Controller.stageController.pushScene("videosDetails", videosObject, detailsStorageGroup.dirname);

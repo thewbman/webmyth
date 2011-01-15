@@ -111,7 +111,7 @@ LogAssistant.prototype.handleCommand = function(event) {
 	 if(event.type == Mojo.Event.command) {
 		myCommand = event.command.substring(0,7);
 		mySelection = event.command.substring(8);
-		Mojo.Log.error("command: "+myCommand+" host: "+mySelection);
+		//Mojo.Log.error("command: "+myCommand+" host: "+mySelection);
 
 		switch(myCommand) {
 		  case 'go-sort':		//sort
@@ -196,7 +196,7 @@ LogAssistant.prototype.handleKey = function(event) {
 LogAssistant.prototype.getLog = function(event) {
 
 	//Update list from webmyth python script
-	Mojo.Log.error('Starting log data gathering');
+	//Mojo.Log.error('Starting log data gathering');
 	
 	this.controller.sceneScroller.mojo.revealTop();
 	
@@ -226,7 +226,7 @@ LogAssistant.prototype.getLog = function(event) {
 	
 		var response1 = $('webmyth_service_id').mysqlCommand(WebMyth.prefsCookieObject.databaseHost,WebMyth.prefsCookieObject.databaseUsername,WebMyth.prefsCookieObject.databasePassword,WebMyth.prefsCookieObject.databaseName,WebMyth.prefsCookieObject.databasePort,"mysqlLogResponse",query.substring(0,250),query.substring(250,500),query.substring(500,750),query.substring(750,1000),query.substring(1000,1250),query.substring(1250,1500),query.substring(1500,1750),query.substring(1750,2000),query.substring(2000,2250),query.substring(2250,2500));
 		
-		Mojo.Log.error("Log plugin response "+response1);
+		//Mojo.Log.error("Log plugin response "+response1);
 		
 	} else {
 	
@@ -287,11 +287,11 @@ LogAssistant.prototype.readRemoteLogSuccess = function(response) {
 
 LogAssistant.prototype.mysqlLogResponse = function(response) {
 
-	Mojo.Log.error("Got log plugin response: "+response);
+	//Mojo.Log.error("Got log plugin response: "+response);
 	
 	var logJson = JSON.parse(response);
 	
-	Mojo.Log.error("Plugin log JSON %j",logJson);
+	//Mojo.Log.error("Plugin log JSON %j",logJson);
 	
 		
 	//Update the list widget

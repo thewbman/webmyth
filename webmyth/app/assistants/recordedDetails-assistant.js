@@ -346,7 +346,7 @@ RecordedDetailsAssistant.prototype.openSetup = function() {
 
 RecordedDetailsAssistant.prototype.openGuide = function(guideType) {
 
-	Mojo.Log.error("Opening in guide "+guideType);
+	//Mojo.Log.error("Opening in guide "+guideType);
 	
 	if(guideType == "time"){
 		Mojo.Controller.stageController.pushScene("guide", this.recordedObject.startTime.replace(" ","T").substring(0,18)+01);
@@ -358,7 +358,7 @@ RecordedDetailsAssistant.prototype.openGuide = function(guideType) {
 
 RecordedDetailsAssistant.prototype.openMythweb = function() {
 
-	Mojo.Log.error("opening mythweb");
+	//Mojo.Log.error("opening mythweb");
 			
 			
 	var dateJS = new Date(isoToJS(this.recordedObject.recStartTs));
@@ -451,6 +451,7 @@ RecordedDetailsAssistant.prototype.handleDownload = function(downloadOrStream_in
 	Mojo.Log.info("Download/stream URL is "+filenameRequestUrl);
 	
 	var myFilename = this.recordedObject.title + "-" + this.recordedObject.subTitle + ".mp4";
+	myFilename.replace(":","-");
 	
 	Mojo.Log.info("Filename is "+myFilename);
  
@@ -627,7 +628,7 @@ RecordedDetailsAssistant.prototype.handleUndelete = function() {
 	query += this.recordedObject.recStartTs.replace("T"," ");
 	query += '" LIMIT 1; ';
 	
-	Mojo.Log.error("Undelete query is "+query);
+	//Mojo.Log.error("Undelete query is "+query);
 	
 	
 	
@@ -635,7 +636,7 @@ RecordedDetailsAssistant.prototype.handleUndelete = function() {
 	
 		var response1 = $('webmyth_service_id').mysqlExecute(WebMyth.prefsCookieObject.databaseHost,WebMyth.prefsCookieObject.databaseUsername,WebMyth.prefsCookieObject.databasePassword,WebMyth.prefsCookieObject.databaseName,WebMyth.prefsCookieObject.databasePort,"mysqlRecordedUndeleteResponse",query.substring(0,250),query.substring(250,500),query.substring(500,750),query.substring(750,1000),query.substring(1000,1250),query.substring(1250,1500),query.substring(1500,1750),query.substring(1750,2000),query.substring(2000,2250),query.substring(2250,2500));
 		
-		Mojo.Log.error("Recorded undelete plugin response "+response1);
+		//Mojo.Log.error("Recorded undelete plugin response "+response1);
 		
 	} else {
 	
@@ -664,7 +665,7 @@ RecordedDetailsAssistant.prototype.handleUndelete = function() {
 
 RecordedDetailsAssistant.prototype.mysqlRecordedUndeleteResponse = function(response) {
 
-	Mojo.Log.error("Got undetele plugin response: "+response);
+	//Mojo.Log.error("Got undelete plugin response: "+response);
 	
 	Mojo.Controller.getAppController().showBanner("Successfully undeleted", {source: 'notification'});
 	
@@ -683,7 +684,7 @@ RecordedDetailsAssistant.prototype.getJobqueue = function() {
 	
 		var response1 = $('webmyth_service_id').mysqlCommand(WebMyth.prefsCookieObject.databaseHost,WebMyth.prefsCookieObject.databaseUsername,WebMyth.prefsCookieObject.databasePassword,WebMyth.prefsCookieObject.databaseName,WebMyth.prefsCookieObject.databasePort,"mysqlRecordedJobqueueResponse",query.substring(0,250),query.substring(250,500),query.substring(500,750),query.substring(750,1000),query.substring(1000,1250),query.substring(1250,1500),query.substring(1500,1750),query.substring(1750,2000),query.substring(2000,2250),query.substring(2250,2500));
 		
-		Mojo.Log.error("Recorded jobqueue plugin response "+response1);
+		//Mojo.Log.error("Recorded jobqueue plugin response "+response1);
 		
 	} else {
 	
@@ -712,7 +713,7 @@ RecordedDetailsAssistant.prototype.getJobqueue = function() {
 
 RecordedDetailsAssistant.prototype.mysqlRecordedJobqueueResponse = function(response) {
 
-	Mojo.Log.error("Got jobqueue plugin response: "+response);
+	//Mojo.Log.error("Got jobqueue plugin response: "+response);
 	
 	var jobqueueJson = JSON.parse(response);
 	
@@ -785,7 +786,7 @@ RecordedDetailsAssistant.prototype.queueJob = function(jobTypeNum) {
 	query += '", comment = "Queued by WebMyth app';
 	query += '", flags = "0" ;';
 		
-	Mojo.Log.error("query is "+query);
+	//Mojo.Log.error("query is "+query);
 	
 	
 	
@@ -793,7 +794,7 @@ RecordedDetailsAssistant.prototype.queueJob = function(jobTypeNum) {
 	
 		var response1 = $('webmyth_service_id').mysqlExecute(WebMyth.prefsCookieObject.databaseHost,WebMyth.prefsCookieObject.databaseUsername,WebMyth.prefsCookieObject.databasePassword,WebMyth.prefsCookieObject.databaseName,WebMyth.prefsCookieObject.databasePort,"mysqlRecordedNewjobResponse",query.substring(0,250),query.substring(250,500),query.substring(500,750),query.substring(750,1000),query.substring(1000,1250),query.substring(1250,1500),query.substring(1500,1750),query.substring(1750,2000),query.substring(2000,2250),query.substring(2250,2500));
 		
-		Mojo.Log.error("Recorded queue a newjob response "+response1);
+		//Mojo.Log.error("Recorded queue a newjob response "+response1);
 		
 	} else {
 	
@@ -831,7 +832,7 @@ RecordedDetailsAssistant.prototype.queueJob = function(jobTypeNum) {
 
 RecordedDetailsAssistant.prototype.mysqlRecordedNewjobResponse = function(response) {
 
-	Mojo.Log.error("Got recorded new job plugin response: "+response);
+	//Mojo.Log.error("Got recorded new job plugin response: "+response);
 	
 	Mojo.Controller.getAppController().showBanner("Successfully queued", {source: 'notification'});
 	
