@@ -21,9 +21,11 @@
 
 function GuideDetailsAssistant(detailsObject, forceRefresh) {
 	   
-	   this.guideObject = detailsObject;
+	this.guideObject = detailsObject;
 	   
-	   this.forceRefresh = forceRefresh;
+	this.forceRefresh = forceRefresh;
+	   
+	this.peopleList = [ ];
 	   
 }
 
@@ -71,9 +73,32 @@ GuideDetailsAssistant.prototype.setup = function() {
 		]}
 	]};
 
- 
 	this.controller.setupWidget(Mojo.Menu.commandMenu, {menuClass: 'no-fade'}, this.cmdMenuModel);
 	this.controller.setupWidget('more-menu', '', this.moreMenuModel);
+	
+	
+	//List of people
+	this.peopleListAttribs = {
+		itemTemplate: "guideDetails/peopleListItem",
+		swipeToDelete: false
+	};
+	
+    this.peopleListModel = {            
+        items: this.peopleList
+    };
+	this.controller.setupWidget( "peopleList" , this.peopleListAttribs, this.peopleListModel);
+	
+	Mojo.Event.listen(this.controller.get( "peopleList" ), Mojo.Event.listTap, this.goPeopleDetails.bind(this));
+	
+	if(WebMyth.usePlugin){
+		$('webmyth_service_id').mysqlGuideDetailsPeopleResponse = this.mysqlGuideDetailsPeopleResponse.bind(this);
+	}
+	
+	
+	
+	Mojo.Event.listen(this.controller.get( "header-menu" ), Mojo.Event.tap, function(){this.controller.sceneScroller.mojo.revealTop();}.bind(this));
+	
+	
 	
 	
 	var channelIconUrl = "http://"+WebMyth.prefsCookieObject.masterBackendIp+":6544/Myth/GetChannelIcon?ChanId=";
@@ -104,10 +129,7 @@ GuideDetailsAssistant.prototype.setup = function() {
 	//$('recstartts-title').innerText = this.guideObject.recStartTs;
 	
 	
-	
-	this.controller.listen(this.controller.get( "header-menu" ), Mojo.Event.tap, function(){this.controller.sceneScroller.mojo.revealTop();}.bind(this));
-	
-	
+	this.getPeople();
 
 };
 
@@ -190,19 +212,21 @@ GuideDetailsAssistant.prototype.activate = function(event) {
 	}
 	
 	
+	
 	//Keypress event
 	Mojo.Event.listen(this.controller.sceneElement, Mojo.Event.keyup, this.handleKey.bind(this));
 	
 };
 
 GuideDetailsAssistant.prototype.deactivate = function(event) {
+
 	//Keypress event
 	Mojo.Event.stopListening(this.controller.sceneElement, Mojo.Event.keyup, this.handleKey.bind(this));
+	
 };
 
 GuideDetailsAssistant.prototype.cleanup = function(event) {
-	/* this function should do any cleanup needed before the scene is destroyed as 
-	   a result of being popped off the scene stack */
+
 };
 
 GuideDetailsAssistant.prototype.handleCommand = function(event) {
@@ -337,7 +361,6 @@ GuideDetailsAssistant.prototype.openMythweb = function() {
 	
 };
 
-
 GuideDetailsAssistant.prototype.openWeb = function(website) {
 
   //Mojo.Log.error('got to openWeb with : '+website);
@@ -375,8 +398,6 @@ GuideDetailsAssistant.prototype.openWeb = function(website) {
  });  
  
 };
-
-
 
 GuideDetailsAssistant.prototype.checkLocation = function(frontend) {
 
@@ -447,8 +468,6 @@ GuideDetailsAssistant.prototype.checkLocation = function(frontend) {
 	
 };
 
-
-
 GuideDetailsAssistant.prototype.jumpLive = function() {
 	//Attempting to play livetv - have to start livetv then change channel
 	Mojo.Log.info("jumping to live tv");
@@ -473,8 +492,6 @@ GuideDetailsAssistant.prototype.jumpLive = function() {
 	
 };
 
-
-
 GuideDetailsAssistant.prototype.startChannelPlay = function(host) {
 	//Attempting to play livetv - have to start livetv then change channel
 	Mojo.Log.info("Playing channel "+this.guideObject.chanId);
@@ -489,14 +506,14 @@ GuideDetailsAssistant.prototype.startChannelPlay = function(host) {
 	
 };
 
-
 GuideDetailsAssistant.prototype.refreshData = function() {
 
-		//Stop spinner and hide
-		this.spinnerModel.spinning = true;
-		this.controller.modelChanged(this.spinnerModel, this);
-		$('myScrim').show();
-		
+	//Stop spinner and hide
+	this.spinnerModel.spinning = true;
+	this.controller.modelChanged(this.spinnerModel, this);
+	$('myScrim').show();
+	
+	
 	//Update details from XML backend
 	Mojo.Log.info('Starting details data gathering from XML backend');
 		
@@ -521,8 +538,6 @@ GuideDetailsAssistant.prototype.refreshData = function() {
 	
 };
 
-
-
 GuideDetailsAssistant.prototype.readDetailsXMLFailure = function(response) {
 
 	//Stop spinner and hide
@@ -537,7 +552,6 @@ GuideDetailsAssistant.prototype.readDetailsXMLFailure = function(response) {
 
 GuideDetailsAssistant.prototype.readDetailsXMLSuccess = function(response) {
 
-	
 	Mojo.Log.info("About to start parsing recorded from XML");
 	
 	var xmlstring = response.responseText.trim();
@@ -669,7 +683,6 @@ GuideDetailsAssistant.prototype.readDetailsXMLSuccess = function(response) {
 
 }
 
-
 GuideDetailsAssistant.prototype.finishedReadingDetails = function() {
 	
 		//Stop spinner and hide
@@ -699,3 +712,92 @@ GuideDetailsAssistant.prototype.finishedReadingDetails = function() {
 	//$('recstartts-title').innerText = this.guideObject.recStartTs;
 	
 }
+
+GuideDetailsAssistant.prototype.getPeople = function(event) {
+
+	Mojo.Log.error("Searching for people for program");
+	
+	
+	var query = 'SELECT UPPER(`credits`.`role`) AS `role`, ';
+	query += ' `people`.`name`, `people`.`person` ';
+	query += ' FROM `credits` ';
+	query += ' LEFT OUTER JOIN `people` ON `credits`.`person` = `people`.`person` ';
+	query += ' WHERE (`credits`.`chanid` = '+this.guideObject.chanId+' AND `credits`.`starttime` = "'+this.guideObject.startTime.replace("T"," ")+'" ) ';
+	query += ' ORDER BY `role` ';
+	
+	Mojo.Log.error("Query is "+query);
+	
+	
+	
+	if(WebMyth.usePlugin){
+	
+		var response1 = $('webmyth_service_id').mysqlCommand(WebMyth.prefsCookieObject.databaseHost,WebMyth.prefsCookieObject.databaseUsername,WebMyth.prefsCookieObject.databasePassword,WebMyth.prefsCookieObject.databaseName,WebMyth.prefsCookieObject.databasePort,"mysqlGuideDetailsPeopleResponse",query.substring(0,250),query.substring(250,500),query.substring(500,750),query.substring(750,1000),query.substring(1000,1250),query.substring(1250,1500),query.substring(1500,1750),query.substring(1750,2000),query.substring(2000,2250),query.substring(2250,2500));
+		
+		Mojo.Log.error("Search plugin response "+response1);
+		
+	} else {
+	
+		var requestUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webmythPythonFile;
+		requestUrl += "?op=executeSQLwithResponse";				
+		requestUrl += "&query64=";		
+		requestUrl += Base64.encode(query);	
+		
+
+		
+		try {
+			var request = new Ajax.Request(requestUrl,{
+				method: 'get',
+				evalJSON: 'true',
+				requestHeaders: {Authorization: 'Basic ' + Base64.encode(WebMyth.prefsCookieObject.webserverUsername + ":" + WebMyth.prefsCookieObject.webserverPassword)},
+				onSuccess: this.peopleSearchSuccess.bind(this),
+				onFailure: this.peopleSearchFail.bind(this)  
+			});
+		}
+		catch(e) {
+			Mojo.Log.error(e);
+		}
+		
+	}
+	
+
+}
+
+GuideDetailsAssistant.prototype.peopleSearchFail = function(event) {
+
+	Mojo.Log.error('Failed to get guide details people response');	
+	
+};
+
+GuideDetailsAssistant.prototype.peopleSearchSuccess = function(response) {
+    
+	Mojo.Log.error('Got Ajax response: %s,%j',response.responseJSON.length, response.responseJSON);
+		
+	//Update the list widget
+	this.peopleList.clear();
+	Object.extend(this.peopleList,response.responseJSON);
+	
+	this.controller.modelChanged(this.peopleListModel);
+
+};
+
+GuideDetailsAssistant.prototype.mysqlGuideDetailsPeopleResponse = function(response) {
+
+	Mojo.Log.error("Got guide details people plugin response: "+response);
+	
+	var guideDetailsPeopleJson = JSON.parse(response);
+	
+	//Update the list widget
+	this.peopleList.clear();
+	Object.extend(this.peopleList,guideDetailsPeopleJson);
+	
+	this.controller.modelChanged(this.peopleListModel);
+
+}
+
+GuideDetailsAssistant.prototype.goPeopleDetails = function(event) {
+
+	Mojo.Log.info("Selected people details %j",event.item);
+	
+	Mojo.Controller.stageController.pushScene("searchPeople", event.item.person);
+
+};

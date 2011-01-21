@@ -69,11 +69,22 @@ WelcomeAssistant.prototype.setup = function() {
 	this.controller.setupWidget("goGuideButtonId",
          {},
          {
-             label : $L("Program Guide"),
+             label : $L("Guide"),
              disabled: false
          }
      );
 	Mojo.Event.listen(this.controller.get("goGuideButtonId"),Mojo.Event.tap, this.goGuide.bind(this));
+	
+	
+	//Search button
+	this.controller.setupWidget("goSearchButtonId",
+         {},
+         {
+             label : $L("Search"),
+             disabled: false
+         }
+     );
+	Mojo.Event.listen(this.controller.get("goSearchButtonId"),Mojo.Event.tap, this.goSearch.bind(this));
 	
 	
 	//Videos button
@@ -268,7 +279,7 @@ WelcomeAssistant.prototype.setup = function() {
 	}
 
 	//Check for app updates
-	this.puchkDoUpdateCheck(24);
+	//this.puchkDoUpdateCheck(24);
 	
 	//Check for network
 	this.checkNetworkConnectionStatus();
@@ -472,6 +483,8 @@ WelcomeAssistant.prototype.showButtons = function() {
 	
 	
 	
+	$('guideButtonWrapper').className = 'column1of2';
+	$('searchButtonWrapper').className = 'column2of2';
 	
 	if((WebMyth.prefsCookieObject.showMusic)&&(WebMyth.prefsCookieObject.showVideos)&&(WebMyth.prefsCookieObject.showUpcoming)) {
 		$('videoButtonWrapper').className = 'column1of2';
@@ -521,47 +534,54 @@ WelcomeAssistant.prototype.goRemote = function(event) {
 };
 
 WelcomeAssistant.prototype.goRecorded = function(event) {
-	//Start recorded scene
 	Mojo.Controller.stageController.pushScene("recorded");
 };
 
 WelcomeAssistant.prototype.goUpcoming = function(event) {
-	//Start upcoming scene
 	Mojo.Controller.stageController.pushScene("upcoming");
 };
 
-WelcomeAssistant.prototype.goUpcomingXML = function(event) {
-	//Start upcoming scene
-	Mojo.Controller.stageController.pushScene("upcomingXML");
-};
-
 WelcomeAssistant.prototype.goGuide = function(event) {
-	//Start upcoming scene
 	Mojo.Controller.stageController.pushScene("guide");
 };
 
 WelcomeAssistant.prototype.goSearch = function(event) {
-	//Start upcoming scene
-	Mojo.Controller.stageController.pushScene("search");
+
+	this.controller.showAlertDialog({
+        onChoose: function(value) {
+			switch(value) {
+				case "Program":
+					Mojo.Controller.stageController.pushScene("search");
+				  break;
+				case "People":
+					Mojo.Controller.stageController.pushScene("searchPeople");
+				  break;
+			}	
+		},
+        title: "Search",
+        message:  "", 
+		choices: [
+			{ label: $L("Program Title"), value: "Program"},
+			{ label: $L("People"), value: "People"}
+			],
+		allowHTMLMessage: true
+    });
+	
 };
 
 WelcomeAssistant.prototype.goVideos = function(event) {
-	//Start upcoming scene
 	Mojo.Controller.stageController.pushScene("videos");
 };
 
 WelcomeAssistant.prototype.goMusic = function(event) {
-	//Start upcoming scene
 	Mojo.Controller.stageController.pushScene("musicList");
 };
 
 WelcomeAssistant.prototype.goStatus = function(event) {
-	//Start upcoming scene
 	Mojo.Controller.stageController.pushScene("status");
 };
 
 WelcomeAssistant.prototype.goLog = function(event) {
-	//Start upcoming scene
 	Mojo.Controller.stageController.pushScene("log");
 };
 
@@ -646,8 +666,7 @@ WelcomeAssistant.prototype.doWelcomeIcon = function(event) {
 		
 		//var response1 = $('webmyth_service_id').upnpSearch("239.255.255.250",1900,"M-SEARCH * HTTP/1.1\r\nHOST: 239.255.255.250:1900\r\nMAN: \"ssdp:discover\"\r\nMX: 2\r\nST: urn:schemas-mythtv-org:device:MasterMediaServer:1\r\n\r\n");
 		
-		$('debugText').innerText = response1;
-	
+		//$('debugText').innerText = response1;
 	
 	}
 	catch(e) {

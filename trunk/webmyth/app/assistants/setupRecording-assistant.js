@@ -743,7 +743,33 @@ SetupRecordingAssistant.prototype.mysqlScheduleRecordidResponse = function(respo
 	
 	this.recordRule = recordidJson[0];
 	
-	this.displayRuleValues();
+	if(this.recordRule){
+	
+		//If we got a valid rule back
+		this.displayRuleValues();
+		
+	} else {
+	
+		this.controller.showAlertDialog({
+			onChoose: function(value) {
+				switch(value) {
+					case 'ok':
+									
+						//Cancel and close
+						this.closeScene();
+									
+					break;
+					}
+				},
+			title: "WebMyth - v" + Mojo.Controller.appInfo.version,
+			message:  "Error - could not find recording schedule", 
+			choices: [
+                    {label: $L("OK"), value: 'ok'}
+					],
+			allowHTMLMessage: true
+		});
+	
+	}
 	
 }
 
@@ -766,7 +792,33 @@ SetupRecordingAssistant.prototype.readRecordingRuleSuccess = function(response) 
 	
 	this.recordRule = response.responseJSON[0];
 	
-	this.displayRuleValues();
+	if(this.recordRule.recordid){
+	
+		//If we got a valid rule back
+		this.displayRuleValues();
+		
+	} else {
+	
+		this.controller.showAlertDialog({
+			onChoose: function(value) {
+				switch(value) {
+					case 'ok':
+									
+						//Cancel and close
+						this.closeScene();
+									
+					break;
+					}
+				},
+			title: "WebMyth - v" + Mojo.Controller.appInfo.version,
+			message:  "Error - could not find recording schedule", 
+			choices: [
+                    {label: $L("OK"), value: 'ok'}
+					],
+			allowHTMLMessage: true
+		});
+	
+	}
 
 }
 
@@ -1176,7 +1228,7 @@ SetupRecordingAssistant.prototype.buildRecordingRule = function(saveType) {
 	
 	this.newRule.findtime = this.newRule.starttime;
 	this.newRule.findday = dateDayAdjust(myDate.getDay());
-	this.newRule.findid = myDate.getTime()/86400000+719464;		//(UNIX_TIMESTAMP(program.starttime)/60/60/24)+719528 - off by 74?
+	this.newRule.findid = parseInt(myDate.getTime()/86400000+719464);		//(UNIX_TIMESTAMP(program.starttime)/60/60/24)+719528 - off by 74?
 	
 	
 	
@@ -1357,7 +1409,7 @@ SetupRecordingAssistant.prototype.createRule = function() {
 
 SetupRecordingAssistant.prototype.overrideRecord = function() {
 	
-	var query = 'INSERT INTO `record` SET `type` = "7", `title` = "'+this.newRule.title+'", `subtitle` = "'+this.newRule.subtitle;
+	var query = 'INSERT IGNORE INTO `record` SET `type` = "7", `title` = "'+this.newRule.title+'", `subtitle` = "'+this.newRule.subtitle;
 	query += '", startdate = "'+this.newRule.startdate+'", starttime = "'+this.newRule.starttime+'", station = "'+this.newRule.station;
 	query += '", description = "'+this.newRule.description+'", category = "'+this.newRule.category+'", seriesid = "'+this.newRule.seriesid;
 	query += '", programid = "'+this.newRule.programid+'", chanid = "'+this.newRule.chanid+'", endtime = "'+this.newRule.endtime;
@@ -1416,7 +1468,7 @@ SetupRecordingAssistant.prototype.overrideRecord = function() {
 
 SetupRecordingAssistant.prototype.overrideDontRecord = function() {
 	
-	var query = 'INSERT INTO `record` SET `type` = "8", `title` = "'+this.newRule.title+'", `subtitle` = "'+this.newRule.subtitle;
+	var query = 'INSERT IGNORE INTO `record` SET `type` = "8", `title` = "'+this.newRule.title+'", `subtitle` = "'+this.newRule.subtitle;
 	query += '", startdate = "'+this.newRule.startdate+'", starttime = "'+this.newRule.starttime+'", station = "'+this.newRule.station;
 	query += '", description = "'+this.newRule.description+'", category = "'+this.newRule.category+'", seriesid = "'+this.newRule.seriesid;
 	query += '", programid = "'+this.newRule.programid+'", chanid = "'+this.newRule.chanid+'", endtime = "'+this.newRule.endtime;

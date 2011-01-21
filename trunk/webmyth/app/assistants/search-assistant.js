@@ -68,7 +68,7 @@ SearchAssistant.prototype.setup = function() {
 
 	
 	
-	// Music filter list
+	// Search list
 	this.searchListAttribs = {
 		itemTemplate: "search/searchListItem",
 		dividerTemplate: "search/searchDivider",
@@ -90,7 +90,7 @@ SearchAssistant.prototype.setup = function() {
 	
 	
 	if(WebMyth.usePlugin){
-		$('webmyth_service_id').mysqlSearchResponse = this.mysqlSearchResponse.bind(this);
+		$('webmyth_service_id').mysqlProgramSearchResponse = this.mysqlProgramSearchResponse.bind(this);
 	}
 	
 	
@@ -220,7 +220,7 @@ SearchAssistant.prototype.handleKey = function(event) {
 
 SearchAssistant.prototype.newSearch = function() {
 
-	Mojo.Log.error("starting new search");
+	Mojo.Log.info("Starting new search");
 
 	//Use dialog for getting search query
 	
@@ -228,7 +228,6 @@ SearchAssistant.prototype.newSearch = function() {
 		template: 'dialogs/searchDialog',
 		assistant: new SearchDialogAssistant(this, this.newSearchCallback.bind(this))
 	});
-	
 
 };
 
@@ -271,7 +270,7 @@ SearchAssistant.prototype.newSearchCallback = function(value) {
 	
 	if(WebMyth.usePlugin){
 	
-		var response1 = $('webmyth_service_id').mysqlCommand(WebMyth.prefsCookieObject.databaseHost,WebMyth.prefsCookieObject.databaseUsername,WebMyth.prefsCookieObject.databasePassword,WebMyth.prefsCookieObject.databaseName,WebMyth.prefsCookieObject.databasePort,"mysqlSearchResponse",query.substring(0,250),query.substring(250,500),query.substring(500,750),query.substring(750,1000),query.substring(1000,1250),query.substring(1250,1500),query.substring(1500,1750),query.substring(1750,2000),query.substring(2000,2250),query.substring(2250,2500));
+		var response1 = $('webmyth_service_id').mysqlCommand(WebMyth.prefsCookieObject.databaseHost,WebMyth.prefsCookieObject.databaseUsername,WebMyth.prefsCookieObject.databasePassword,WebMyth.prefsCookieObject.databaseName,WebMyth.prefsCookieObject.databasePort,"mysqlProgramSearchResponse",query.substring(0,250),query.substring(250,500),query.substring(500,750),query.substring(750,1000),query.substring(1000,1250),query.substring(1250,1500),query.substring(1500,1750),query.substring(1750,2000),query.substring(2000,2250),query.substring(2250,2500));
 		
 		Mojo.Log.error("Search plugin response "+response1);
 		
@@ -365,7 +364,7 @@ SearchAssistant.prototype.readSearchSuccess = function(response) {
 	
 };
 
-SearchAssistant.prototype.mysqlSearchResponse = function(response) {
+SearchAssistant.prototype.mysqlProgramSearchResponse = function(response) {
 
 	Mojo.Log.error("Got search plugin response: "+response);
 	

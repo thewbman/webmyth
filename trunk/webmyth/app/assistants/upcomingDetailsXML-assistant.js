@@ -25,6 +25,8 @@ function UpcomingDetailsXMLAssistant(upcoming_chanid, upcoming_starttime) {
 	this.starttime = upcoming_starttime;
 	   
 	this.upcomingObject = {};
+	
+	this.peopleList = [];
 	   
 }
 
@@ -69,12 +71,31 @@ UpcomingDetailsXMLAssistant.prototype.setup = function() {
 	this.controller.setupWidget('web-menu', '', this.webMenuModel);
 	
 	
+	//List of people
+	this.peopleListAttribs = {
+		itemTemplate: "upcomingDetailsXML/peopleListItem",
+		swipeToDelete: false
+	};
 	
-	this.controller.listen(this.controller.get( "header-menu" ), Mojo.Event.tap, function(){this.controller.sceneScroller.mojo.revealTop();}.bind(this));
+    this.peopleListModel = {            
+        items: this.peopleList
+    };
+	this.controller.setupWidget( "peopleList" , this.peopleListAttribs, this.peopleListModel);
+	
+	Mojo.Event.listen(this.controller.get( "peopleList" ), Mojo.Event.listTap, this.goPeopleDetails.bind(this));
+	
+	if(WebMyth.usePlugin){
+		$('webmyth_service_id').mysqlUpcomingDetailsPeopleResponse = this.mysqlUpcomingDetailsPeopleResponse.bind(this);
+	}
+	
+	
+	
+	Mojo.Event.listen(this.controller.get( "header-menu" ), Mojo.Event.tap, function(){this.controller.sceneScroller.mojo.revealTop();}.bind(this));
 	
 	
 	this.getDetailsXML();
 	
+	this.getPeople();
 	
 };
 
@@ -581,3 +602,92 @@ UpcomingDetailsXMLAssistant.prototype.finishedReadingDetails = function() {
 	
 	
 }
+
+UpcomingDetailsXMLAssistant.prototype.getPeople = function(event) {
+
+	Mojo.Log.error("Searching for people for program");
+	
+	
+	var query = 'SELECT UPPER(`credits`.`role`) AS `role`, ';
+	query += ' `people`.`name`, `people`.`person` ';
+	query += ' FROM `credits` ';
+	query += ' LEFT OUTER JOIN `people` ON `credits`.`person` = `people`.`person` ';
+	query += ' WHERE (`credits`.`chanid` = '+this.chanid+' AND `credits`.`starttime` = "'+this.starttime.replace("T"," ")+'" ) ';
+	query += ' ORDER BY `role` ';
+	
+	Mojo.Log.error("Query is "+query);
+	
+	
+	
+	if(WebMyth.usePlugin){
+	
+		var response1 = $('webmyth_service_id').mysqlCommand(WebMyth.prefsCookieObject.databaseHost,WebMyth.prefsCookieObject.databaseUsername,WebMyth.prefsCookieObject.databasePassword,WebMyth.prefsCookieObject.databaseName,WebMyth.prefsCookieObject.databasePort,"mysqlUpcomingDetailsPeopleResponse",query.substring(0,250),query.substring(250,500),query.substring(500,750),query.substring(750,1000),query.substring(1000,1250),query.substring(1250,1500),query.substring(1500,1750),query.substring(1750,2000),query.substring(2000,2250),query.substring(2250,2500));
+		
+		Mojo.Log.error("Search plugin response "+response1);
+		
+	} else {
+	
+		var requestUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webmythPythonFile;
+		requestUrl += "?op=executeSQLwithResponse";				
+		requestUrl += "&query64=";		
+		requestUrl += Base64.encode(query);	
+		
+
+		
+		try {
+			var request = new Ajax.Request(requestUrl,{
+				method: 'get',
+				evalJSON: 'true',
+				requestHeaders: {Authorization: 'Basic ' + Base64.encode(WebMyth.prefsCookieObject.webserverUsername + ":" + WebMyth.prefsCookieObject.webserverPassword)},
+				onSuccess: this.peopleSearchSuccess.bind(this),
+				onFailure: this.peopleSearchFail.bind(this)  
+			});
+		}
+		catch(e) {
+			Mojo.Log.error(e);
+		}
+		
+	}
+	
+
+}
+
+UpcomingDetailsXMLAssistant.prototype.peopleSearchFail = function(event) {
+
+	Mojo.Log.error('Failed to get guide details people response');	
+	
+};
+
+UpcomingDetailsXMLAssistant.prototype.peopleSearchSuccess = function(response) {
+    
+	Mojo.Log.error('Got Ajax response: %s,%j',response.responseJSON.length, response.responseJSON);
+		
+	//Update the list widget
+	this.peopleList.clear();
+	Object.extend(this.peopleList,response.responseJSON);
+	
+	this.controller.modelChanged(this.peopleListModel);
+
+};
+
+UpcomingDetailsXMLAssistant.prototype.mysqlUpcomingDetailsPeopleResponse = function(response) {
+
+	Mojo.Log.error("Got guide details people plugin response: "+response);
+	
+	var guideDetailsPeopleJson = JSON.parse(response);
+	
+	//Update the list widget
+	this.peopleList.clear();
+	Object.extend(this.peopleList,guideDetailsPeopleJson);
+	
+	this.controller.modelChanged(this.peopleListModel);
+
+}
+
+UpcomingDetailsXMLAssistant.prototype.goPeopleDetails = function(event) {
+
+	Mojo.Log.info("Selected people details %j",event.item);
+	
+	Mojo.Controller.stageController.pushScene("searchPeople", event.item.person);
+
+};
