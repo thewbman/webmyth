@@ -1,4 +1,4 @@
-/*
+f/*
  *   WebMyth - An open source webOS app for controlling a MythTV frontend. 
  *   http://code.google.com/p/WebMyth/
  *   Copyright (C) 2010  Wes Brown

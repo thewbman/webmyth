@@ -188,6 +188,7 @@ StageAssistant.prototype.setup = function() {
 	
 	//Start first scene
 	this.controller.pushScene("welcome");
+	this.controller.setWindowOrientation("up");
 	
 };
 

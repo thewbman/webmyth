@@ -151,5 +151,9 @@
     {
         "scenes": "musicPlaylist",
         "source": "app/assistants/musicPlaylist-assistant.js"
+    },
+    {
+        "scenes": "searchPeople",
+        "source": "app/assistants/searchPeople-assistant.js"
     }
 ]

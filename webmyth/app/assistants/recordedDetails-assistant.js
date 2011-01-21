@@ -31,6 +31,8 @@ function RecordedDetailsAssistant(detailsObject) {
   
 	this.jobqueueList = [{"hostname": "N/A", "comment": "", "jobType": "N/A", "statusText": "Attempting to get queue data ..." }];
 	   
+	this.peopleList = [ ];
+	   
 }
 
 RecordedDetailsAssistant.prototype.setup = function() {
@@ -89,6 +91,20 @@ RecordedDetailsAssistant.prototype.setup = function() {
         items: this.jobqueueList
     };
 	this.controller.setupWidget( "jobqueueList" , this.jobqueueListAttribs, this.jobqueueListModel);
+	
+	
+	//List of people
+	this.peopleListAttribs = {
+		itemTemplate: "guideDetails/peopleListItem",
+		swipeToDelete: false
+	};
+	
+    this.peopleListModel = {            
+        items: this.peopleList
+    };
+	this.controller.setupWidget( "peopleList" , this.peopleListAttribs, this.peopleListModel);
+	
+	Mojo.Event.listen(this.controller.get( "peopleList" ), Mojo.Event.listTap, this.goPeopleDetails.bind(this));
 
 	
 		
@@ -148,12 +164,15 @@ RecordedDetailsAssistant.prototype.setup = function() {
 	
 
 	if(WebMyth.usePlugin){
+		$('webmyth_service_id').mysqlRecordedDetailsPeopleResponse = this.mysqlRecordedDetailsPeopleResponse.bind(this);
 		$('webmyth_service_id').mysqlRecordedUndeleteResponse = this.mysqlRecordedUndeleteResponse.bind(this);
 		$('webmyth_service_id').mysqlRecordedJobqueueResponse = this.mysqlRecordedJobqueueResponse.bind(this);
 		$('webmyth_service_id').mysqlRecordedNewjobResponse = this.mysqlRecordedNewjobResponse.bind(this);
+		
 	}
 	
-	this.getJobqueue();
+	//this.getJobqueue();
+	this.getPeople();
 	
 };
 
@@ -671,6 +690,97 @@ RecordedDetailsAssistant.prototype.mysqlRecordedUndeleteResponse = function(resp
 	
 };
 
+RecordedDetailsAssistant.prototype.getPeople = function(event) {
+
+	Mojo.Log.error("Searching for people for program");
+	
+	
+	var query = 'SELECT UPPER(`credits`.`role`) AS `role`, ';
+	query += ' `people`.`name`, `people`.`person` ';
+	query += ' FROM `credits` ';
+	query += ' LEFT OUTER JOIN `people` ON `credits`.`person` = `people`.`person` ';
+	query += ' WHERE (`credits`.`chanid` = '+this.recordedObject.chanId+' AND `credits`.`starttime` = "'+this.recordedObject.startTime.replace("T"," ")+'" ) ';
+	query += ' ORDER BY `role` ';
+	
+	//Mojo.Log.error("Query is "+query);
+	
+	
+	
+	if(WebMyth.usePlugin){
+	
+		var response1 = $('webmyth_service_id').mysqlCommand(WebMyth.prefsCookieObject.databaseHost,WebMyth.prefsCookieObject.databaseUsername,WebMyth.prefsCookieObject.databasePassword,WebMyth.prefsCookieObject.databaseName,WebMyth.prefsCookieObject.databasePort,"mysqlRecordedDetailsPeopleResponse",query.substring(0,250),query.substring(250,500),query.substring(500,750),query.substring(750,1000),query.substring(1000,1250),query.substring(1250,1500),query.substring(1500,1750),query.substring(1750,2000),query.substring(2000,2250),query.substring(2250,2500));
+		
+		Mojo.Log.error("Search plugin response "+response1);
+		
+	} else {
+	
+		var requestUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webmythPythonFile;
+		requestUrl += "?op=executeSQLwithResponse";				
+		requestUrl += "&query64=";		
+		requestUrl += Base64.encode(query);	
+		
+
+		
+		try {
+			var request = new Ajax.Request(requestUrl,{
+				method: 'get',
+				evalJSON: 'true',
+				requestHeaders: {Authorization: 'Basic ' + Base64.encode(WebMyth.prefsCookieObject.webserverUsername + ":" + WebMyth.prefsCookieObject.webserverPassword)},
+				onSuccess: this.peopleSearchSuccess.bind(this),
+				onFailure: this.peopleSearchFail.bind(this)  
+			});
+		}
+		catch(e) {
+			Mojo.Log.error(e);
+		}
+		
+	}
+	
+
+}
+
+RecordedDetailsAssistant.prototype.peopleSearchFail = function(response) {
+
+	Mojo.Log.error('Failed to get guide details people response');
+	
+	this.getJobqueue();	
+	
+};
+
+RecordedDetailsAssistant.prototype.peopleSearchSuccess = function(response) {
+    
+	Mojo.Log.error('Got Ajax response: %j', response.responseJSON);
+		
+	//Update the list widget only if had data
+	if(response.responseJSON) {
+	
+		this.peopleList.clear();
+		Object.extend(this.peopleList,response.responseJSON);
+		
+		this.controller.modelChanged(this.peopleListModel);
+		
+	}
+	
+	this.getJobqueue();
+
+};
+
+RecordedDetailsAssistant.prototype.mysqlRecordedDetailsPeopleResponse = function(response) {
+
+	Mojo.Log.error("Got guide details people plugin response: "+response);
+	
+	var guideDetailsPeopleJson = JSON.parse(response);
+	
+	//Update the list widget
+	this.peopleList.clear();
+	Object.extend(this.peopleList,guideDetailsPeopleJson);
+	
+	this.controller.modelChanged(this.peopleListModel);
+	
+	setTimeout(this.getJobqueue.bind(this), 50);
+
+}
+
 RecordedDetailsAssistant.prototype.getJobqueue = function() {
 	
 	Mojo.Log.info("Getting jobqueue");
@@ -841,4 +951,12 @@ RecordedDetailsAssistant.prototype.mysqlRecordedNewjobResponse = function(respon
 	//Update job queue list
 	setTimeout(this.getJobqueue.bind(this), 50);
 	
+};
+
+RecordedDetailsAssistant.prototype.goPeopleDetails = function(event) {
+
+	Mojo.Log.info("Selected people details %j",event.item);
+	
+	Mojo.Controller.stageController.pushScene("searchPeople", event.item.person);
+
 };

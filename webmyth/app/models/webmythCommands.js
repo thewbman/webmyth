@@ -2506,7 +2506,7 @@ var cleanRecordedGroup = function(fullList) {
 		
 		if(s.label == currentLabel) {
 			//Same recgroup as last, don't add to list
-			Mojo.Log.info("not adding to recgroup %j",s);
+			//Mojo.Log.info("not adding to recgroup %j",s);
 		} else {
 			currentLabel = s.label;
 			s.id = i+1;
@@ -2532,9 +2532,14 @@ var cleanInputs = function(fullList) {
 		s = fullList[i];
 		t = {};
 		
-		t.label = s.displayname;
 		t.value = s.cardinputid;
-
+		
+		if(s.displayname.length > 0){
+			t.label = s.displayname;
+		} else {
+			t.label = "Input "+s.cardinputid;
+		}
+			
 		
 		finalList.push(t);
 		

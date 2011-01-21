@@ -888,13 +888,6 @@ body.palm-dark {
 	text-align: center;
 }
 
-.guide-left-program-earlier {
-	height: 100px;
-	width: 2%;
-	float: left;
-	text-align: center;
-}
-
 .search-scene .search-left-list-image {
 	height: 100px;
 	width: 23%;
@@ -916,6 +909,60 @@ body.palm-dark {
 }
 
 .search-scene .search-list-item .chanNum {
+	font-size: 16px;
+}
+
+
+/*
+ * searchPeople
+ */
+
+.searchPeople-scene #scene-title {
+	margin: 0px -20px;
+}
+ 
+.searchPeople-scene .searchPeople-right-list-text .searchPeople-list-title  {
+  padding: 8px 14px 0px 0px;
+  margin: 0px;
+}
+
+.searchPeople-scene .searchPeople-right-list-text .palm-info-text.left {
+  padding: 0px;
+  margin: 0px 8px;
+  line-height: 16px;
+}
+
+.searchPeople-scene .searchPeople-list-item {
+	height: 100px
+}
+
+.searchPeople-scene .chanNum.chanNum-no-icon {
+	padding: 40px 0px 0px 0px;
+	height: 45px;
+	text-align: center;
+}
+
+.searchPeople-scene .searchPeople-left-list-image {
+	height: 100px;
+	width: 23%;
+	float: left;
+	text-align: center;
+}
+
+.searchPeople-scene .searchPeople-right-list-text {
+	height: 100px;
+	width: 77%;
+	float: left;
+}
+
+.searchPeople-scene .searchPeople-channelicon-small {
+	padding: 10px 5px 0px 10px;
+	width: 48px;
+	height: 36px;
+	border: 0px; 
+}
+
+.searchPeople-scene .searchPeople-list-item .channum {
 	font-size: 16px;
 }
 

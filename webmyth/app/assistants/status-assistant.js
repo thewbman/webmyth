@@ -618,7 +618,7 @@ StatusAssistant.prototype.readStatusSuccess = function(response) {
 			singleStorageJson.freePercentage = parseInt(100*singleStorageJson.free/singleStorageJson.total)+"%";
 			singleStorageJson.usedPercentage = parseInt(100*singleStorageJson.used/singleStorageJson.total)+"%";
 			
-			Mojo.Log.info("Added storage group %j to list", singleStorageJson);
+			//Mojo.Log.info("Added storage group %j to list", singleStorageJson);
 			this.storageList.push(singleStorageJson);
 		}
 	} 
@@ -744,7 +744,7 @@ StatusAssistant.prototype.combineEncoders = function() {
 	
 		for(j = 0; j < this.cardinputsList.length; j++){
 			
-			if(this.cardinputsList[j].cardid == this.encodersList[i].id){
+			if((this.cardinputsList[j].cardid == this.encodersList[i].id)&&(this.cardinputsList[j].displayname.length > 0)){
 				this.encodersList[i].encoderName = "("+this.cardinputsList[j].displayname+") ";
 			}
 			
@@ -760,7 +760,7 @@ StatusAssistant.prototype.combineEncoders = function() {
 	
 		for(j = 0; j < this.cardinputsList.length; j++){
 			
-			if(this.cardinputsList[j].cardid == this.scheduledList[i].encoderId){
+			if((this.cardinputsList[j].cardid == this.scheduledList[i].encoderId)&&(this.cardinputsList[j].displayname.length > 0)){
 				this.scheduledList[i].encoderName = "("+this.cardinputsList[j].displayname+") ";
 			}
 			
