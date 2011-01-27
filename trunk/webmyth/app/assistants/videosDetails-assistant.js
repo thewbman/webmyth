@@ -291,7 +291,7 @@ VideosDetailsAssistant.prototype.handleDownload = function(downloadOrStream_in) 
 	
 	Mojo.Log.info("Download/stream URL is "+filenameRequestUrl);
 	
-	var myFilename = this.videosObject.title + "-" + this.videosObject.subtitle + ".mp4";
+	var myFilename = this.videosObject.title.replace(":","-") + "-" + this.videosObject.subtitle.replace(":","-") + ".mp4";
 	myFilename.replace(":","-");
 	
 	Mojo.Log.info("Filename is "+myFilename);
@@ -371,9 +371,12 @@ VideosDetailsAssistant.prototype.playOnHost = function(frontend) {
 
 	var frontendDecoder = frontend.split("[]:[]");
 
-	var cmd = "file ";
+	var cmd = "file '";
 	
-	if((this.videosObject.filename == this.videosObject.level1) && false) {
+	if(WebMyth.prefsCookieObject.protoVer >= 64) {
+		//Fixed this playback at https://github.com/MythTV/mythtv/blob/7422f241a9c62216da5a3cfc698c3f22431cd084/mythtv/programs/mythfrontend/networkcontrol.cpp
+		cmd += "myth://Videos@"+this.videosObject.host+"/"+this.videoBase+"/"+this.videosObject.filename+"'";
+	} else if((this.videosObject.filename == this.videosObject.level1) && (true)) {
 		//Try using a myth:// URL when not using subdirectories - FAILING IN 0.24 - using full filename for all
 		cmd += "myth://"+this.videosObject.host+"/"+this.videosObject.filename+"'";
 	} else {

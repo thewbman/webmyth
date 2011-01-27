@@ -180,8 +180,7 @@ StageAssistant.prototype.setup = function() {
 		$('webmyth_service_id').didReceiveData = this.didReceiveData.bind(this);
 		$('webmyth_service_id').pluginErrorMessage = this.pluginErrorMessage.bind(this);
 		$('webmyth_service_id').didQueryLocation = this.didQueryLocation.bind(this);
-		$('webmyth_service_id').socketIsClosed = this.socketIsClosed.bind(this);
-		
+		$('webmyth_service_id').socketIsClosed = this.socketIsClosed.bind(this);	
 	}
 	
 	Mojo.Log.info("About to start first scene - welcome");

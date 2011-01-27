@@ -404,10 +404,10 @@ UpcomingDetailsXMLAssistant.prototype.readDetailsXMLSuccess = function(response)
 	var topNode, topNodesCount, topSingleNode, programDetailsNode;
 	var programNode, programChildNode;
 	
-	var StartTime, ChanId, Count, AsOf, Version, ProtoVer;
+	//var StartTime, ChanId, Count, AsOf, Version, ProtoVer;
 	
 	
-	var s = {};
+	//var s = {};
 	
 	
 	//Start parsing
@@ -417,22 +417,22 @@ UpcomingDetailsXMLAssistant.prototype.readDetailsXMLSuccess = function(response)
 		topSingleNode = topNode.childNodes[i];
 		switch(topSingleNode.nodeName) {
 			case 'StartTime':
-				StartTime = topSingleNode.childNodes[0].nodeValue;
+				//StartTime = topSingleNode.childNodes[0].nodeValue;
 				break;
 			case 'ChanId':
-				ChanId = topSingleNode.childNodes[0].nodeValue;
+				//ChanId = topSingleNode.childNodes[0].nodeValue;
 				break;
 			case 'Count':
-				Count = topSingleNode.childNodes[0].nodeValue;
+				//Count = topSingleNode.childNodes[0].nodeValue;
 				break;
 			case 'AsOf':
-				AsOf = topSingleNode.childNodes[0].nodeValue;
+				//AsOf = topSingleNode.childNodes[0].nodeValue;
 				break;
 			case 'Version':
-				Version = topSingleNode.childNodes[0].nodeValue;
+				//Version = topSingleNode.childNodes[0].nodeValue;
 				break;
 			case 'ProtoVer':
-				ProtoVer = topSingleNode.childNodes[0].nodeValue;
+				WebMyth.prefsCookieObject.protoVer = topSingleNode.childNodes[0].nodeValue;
 				break;
 			case 'ProgramDetails':
 				//Mojo.Log.info('Starting to parse ProgramDetails');
@@ -605,7 +605,7 @@ UpcomingDetailsXMLAssistant.prototype.finishedReadingDetails = function() {
 
 UpcomingDetailsXMLAssistant.prototype.getPeople = function(event) {
 
-	Mojo.Log.error("Searching for people for program");
+	//Mojo.Log.error("Searching for people for program");
 	
 	
 	var query = 'SELECT UPPER(`credits`.`role`) AS `role`, ';
@@ -615,7 +615,7 @@ UpcomingDetailsXMLAssistant.prototype.getPeople = function(event) {
 	query += ' WHERE (`credits`.`chanid` = '+this.chanid+' AND `credits`.`starttime` = "'+this.starttime.replace("T"," ")+'" ) ';
 	query += ' ORDER BY `role` ';
 	
-	Mojo.Log.error("Query is "+query);
+	//Mojo.Log.error("Query is "+query);
 	
 	
 	
@@ -660,7 +660,7 @@ UpcomingDetailsXMLAssistant.prototype.peopleSearchFail = function(event) {
 
 UpcomingDetailsXMLAssistant.prototype.peopleSearchSuccess = function(response) {
     
-	Mojo.Log.error('Got Ajax response: %s,%j',response.responseJSON.length, response.responseJSON);
+	//Mojo.Log.error('Got AJAX people response: %s,%j',response.responseJSON.length, response.responseJSON);
 		
 	//Update the list widget
 	this.peopleList.clear();
@@ -672,7 +672,7 @@ UpcomingDetailsXMLAssistant.prototype.peopleSearchSuccess = function(response) {
 
 UpcomingDetailsXMLAssistant.prototype.mysqlUpcomingDetailsPeopleResponse = function(response) {
 
-	Mojo.Log.error("Got guide details people plugin response: "+response);
+	//Mojo.Log.error("Got guide details people plugin response: "+response);
 	
 	var guideDetailsPeopleJson = JSON.parse(response);
 	

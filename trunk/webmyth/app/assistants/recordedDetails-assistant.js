@@ -45,7 +45,9 @@ RecordedDetailsAssistant.prototype.setup = function() {
 	
 	// Menu grouping at bottom of scene
     this.cmdMenuModel = { label: $L('Play Menu'),
-                            items: [{label: $L('Play'), submenu:'hosts-menu', width: 90},{},{label: $L('More'), submenu:'more-menu', width: 90}]};
+                            items: [{label: $L('Play'), submenu:'hosts-menu', width: 90},
+									{ icon: 'refresh', command: 'go-refresh' },
+									{label: $L('More'), submenu:'more-menu', width: 90}]};
  
 	this.hostsMenuModel = { label: $L('Hosts'), items: []};
 	this.moreMenuModel = { label: $L('MoreMenu'), items: [
@@ -158,6 +160,8 @@ RecordedDetailsAssistant.prototype.setup = function() {
 	
 	if((this.recordedObject.recStatus == -2)) {
 		$('currently-recording-title').innerText = $L("Currently Recording");
+	} else {
+		$('currently-recording-title').innerText = "";
 	}
 	
 	this.controller.listen(this.controller.get( "header-menu" ), Mojo.Event.tap, function(){this.controller.sceneScroller.mojo.revealTop();}.bind(this));
@@ -296,6 +300,9 @@ RecordedDetailsAssistant.prototype.handleCommand = function(event) {
        break;
       case 'go-setu':
 		this.openSetup();
+       break;
+      case 'go-refr':
+		this.getJobqueue();
        break;
     }
   } else if(event.type == Mojo.Event.forward) {
@@ -469,12 +476,11 @@ RecordedDetailsAssistant.prototype.handleDownload = function(downloadOrStream_in
 	
 	Mojo.Log.info("Download/stream URL is "+filenameRequestUrl);
 	
-	var myFilename = this.recordedObject.title + "-" + this.recordedObject.subTitle + ".mp4";
-	myFilename.replace(":","-");
+	var myFilename = this.recordedObject.title.replace(":","-") + "-" + this.recordedObject.subTitle.replace(":","-") + ".mp4";
+	myFilename.replace(/:/g,"-");
 	
 	Mojo.Log.info("Filename is "+myFilename);
- 
- 
+
 	if( this.downloadOrStream == 'download' ) {
 		Mojo.Log.info("starting download");
 		
@@ -524,8 +530,6 @@ RecordedDetailsAssistant.prototype.handleDownload = function(downloadOrStream_in
 				}
 			}.bind(this)
 		});	
-		
-		
 		
 	} else if( this.downloadOrStream == 'stream' ) {
 		
@@ -579,7 +583,9 @@ RecordedDetailsAssistant.prototype.playOnHost = function(frontend) {
 	}
 	
 	
-	if(WebMyth.prefsCookieObject.playJumpRemote)  Mojo.Controller.stageController.pushScene({name: WebMyth.prefsCookieObject.currentRemoteScene, disableSceneScroller: true});
+	if(WebMyth.prefsCookieObject.playJumpRemote) {
+		Mojo.Controller.stageController.pushScene({name: WebMyth.prefsCookieObject.currentRemoteScene, disableSceneScroller: true});
+	}
 	
 };
 
@@ -821,28 +827,6 @@ RecordedDetailsAssistant.prototype.getJobqueue = function() {
 	
 };
 
-RecordedDetailsAssistant.prototype.mysqlRecordedJobqueueResponse = function(response) {
-
-	//Mojo.Log.error("Got jobqueue plugin response: "+response);
-	
-	var jobqueueJson = JSON.parse(response);
-	
-	if(jobqueueJson.length>0) {
-		//Got some recent jobqueues
-		this.jobqueueList.clear();
-		Object.extend(this.jobqueueList, cleanJobqueue(jobqueueJson));
-		
-	} else {
-		//Got empty response
-		this.jobqueueList.clear();
-		this.jobqueueList.push({"hostname": "N/A", "comment": "", "jobType": "N/A", "statusText": "No recent or queued jobs" });
-		
-	}
-	
-	this.controller.modelChanged(this.jobqueueListModel);
-	
-}
-
 RecordedDetailsAssistant.prototype.failJobqueue = function() {
 
 	Mojo.Log.info("Failed to get jobqueue data ");
@@ -852,6 +836,8 @@ RecordedDetailsAssistant.prototype.failJobqueue = function() {
 	this.jobqueueList.push({"hostname": "N/A", "comment": "", "jobType": "ERROR", "statusText": "Failed to get jobqueue data" });	
 	
 	this.controller.modelChanged(this.jobqueueListModel);
+	
+	this.getDetailsXML();
 
 }
 
@@ -872,6 +858,129 @@ RecordedDetailsAssistant.prototype.successJobqueue = function(response) {
 	}
 	
 	this.controller.modelChanged(this.jobqueueListModel);
+	
+	this.getDetailsXML();
+
+}
+
+RecordedDetailsAssistant.prototype.mysqlRecordedJobqueueResponse = function(response) {
+
+	//Mojo.Log.error("Got jobqueue plugin response: "+response);
+	
+	var jobqueueJson = JSON.parse(response);
+	
+	if(jobqueueJson.length>0) {
+		//Got some recent jobqueues
+		this.jobqueueList.clear();
+		Object.extend(this.jobqueueList, cleanJobqueue(jobqueueJson));
+		
+	} else {
+		//Got empty response
+		this.jobqueueList.clear();
+		this.jobqueueList.push({"hostname": "N/A", "comment": "", "jobType": "N/A", "statusText": "No recent or queued jobs" });
+		
+	}
+	
+	this.controller.modelChanged(this.jobqueueListModel);
+	
+	this.getDetailsXML();
+	
+}
+
+RecordedDetailsAssistant.prototype.getDetailsXML = function() {
+
+	//Update details from XML backend
+	Mojo.Log.info('Starting details data gathering from XML backend');
+	
+		
+	this.requestUrl = "http://"+WebMyth.prefsCookieObject.masterBackendIp+":6544/Myth/GetProgramDetails?StartTime=";
+	this.requestUrl += this.recordedObject.startTime.replace(" ","T");
+	this.requestUrl += "&ChanId=";
+	this.requestUrl += this.recordedObject.chanId;
+
+	Mojo.Log.info("XML details URL is: "+this.requestUrl);
+			
+	try {
+		var request = new Ajax.Request(this.requestUrl,{
+			method: 'get',
+			evalJSON: false,
+			onSuccess: this.readDetailsXMLSuccess.bind(this),
+			onFailure: this.readDetailsXMLFailure.bind(this)  
+		});
+	}
+	catch(e) {
+		Mojo.Log.error(e);
+	}
+ 
+};
+
+RecordedDetailsAssistant.prototype.readDetailsXMLFailure = function(response) {
+	
+	//If program is too old and program guide is gone cannot get update data
+	Mojo.Log.error('Failed to get Ajax response for program details because %j', response.responseText);
+	
+}
+
+RecordedDetailsAssistant.prototype.readDetailsXMLSuccess = function(response) {
+
+	//We really only need to get the recStatus here
+	Mojo.Log.info("About to start parsing recorded from XML");
+	
+	var xmlstring = response.responseText.trim();
+	var xmlobject = (new DOMParser()).parseFromString(xmlstring, "text/xml");
+	
+	
+	//Local variables
+	var topNode, topNodesCount, topSingleNode;
+	var programNode, programChildNode;
+	
+	
+	//Start parsing
+	topNode = xmlobject.getElementsByTagName("GetProgramDetailsResponse")[0];
+	var topNodesCount = topNode.childNodes.length;
+	for(var i = 0; i < topNodesCount; i++) {
+		topSingleNode = topNode.childNodes[i];
+		switch(topSingleNode.nodeName) {
+			case 'ProtoVer':
+				WebMyth.prefsCookieObject.protoVer = topSingleNode.childNodes[0].nodeValue;
+				break;
+			case 'ProgramDetails':
+				//Mojo.Log.info('Starting to parse ProgramDetails');
+				programNode = topSingleNode.childNodes[0];
+				
+				for(var j = 0; j < programNode.childNodes.length; j++) {
+				
+					programChildNode = programNode.childNodes[j];
+									
+					if(programChildNode.nodeName == "Recording") {
+						
+						this.recordedObject.recStatus = programChildNode.getAttributeNode("recStatus").nodeValue;
+						this.recordedObject.recStatusText = recStatusDecode(this.recordedObject.recStatus);
+						
+						this.recordedObject.recGroup = programChildNode.getAttributeNode("recGroup").nodeValue;
+								
+					}
+						
+				}
+				
+				Mojo.Log.info('Done parsing programDetails');
+				
+			break;
+				
+			default:
+				//Mojo.Log.error("node name is "+topSingleNode.nodeName);
+				break;
+		}
+	}
+	
+	
+	if((this.recordedObject.recStatus == -2)) {
+		$('currently-recording-title').innerText = $L("Currently Recording");
+	} else {
+		$('currently-recording-title').innerText = "";
+	}
+	
+	$('recgroup-title').innerText = this.recordedObject.recGroup;
 
 }
 

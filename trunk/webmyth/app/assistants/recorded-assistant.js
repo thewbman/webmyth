@@ -512,6 +512,7 @@ RecordedAssistant.prototype.readRecordedXMLSuccess = function(response) {
 	var topNode, topNodesCount, topSingleNode, programsNode, programsNode;
 	var singleProgramNode, singleProgramJson, singleRecordedGroupJson = {};
 	var singleProgramChildNode;
+	var protoVer;
 	
 	
 	
@@ -525,7 +526,12 @@ RecordedAssistant.prototype.readRecordedXMLSuccess = function(response) {
 		topSingleNode = topNode.childNodes[i];
 		switch(topSingleNode.nodeName) {
 			case 'ProtoVer':
-				WebMyth.prefsCookieObject.protoVer = topSingleNode.childNodes[0].nodeValue;
+				protoVer = topSingleNode.childNodes[0].nodeValue;
+				
+				if(WebMyth.prefsCookieObject.protoVer != protoVer) WebMyth.prefsCookieObject.protoVerSumitted = false;
+				
+				WebMyth.prefsCookieObject.protoVer = protoVer;
+				
 				break;
 			case 'Recorded':
 				//Mojo.Log.info('Starting to parse Recorded');
