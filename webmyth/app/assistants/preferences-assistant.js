@@ -32,7 +32,7 @@ PreferencesAssistant.prototype.setup = function() {
 	
 	//Use C++ plugin selector
 	this.usePluginSelectorModel = {
-			value: 2,
+			value: 0,
             disabled: false
 	};
 	this.controller.setupWidget('usePluginSelector',

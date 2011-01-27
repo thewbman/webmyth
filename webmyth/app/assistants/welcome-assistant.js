@@ -146,8 +146,9 @@ WelcomeAssistant.prototype.setup = function() {
 			WebMyth.Metrix.checkBulletinBoard(this.controller, 10);
 			
 			//Send proto version
-			if(WebMyth.prefsCookieObject.protoVer) {
-				WebMyth.Metrix.customCounts("MythTV Stats", "ProtoVer", WebMyth.prefsCookieObject.protoVer);
+			if((WebMyth.prefsCookieObject.protoVer)&&(WebMyth.prefsCookieObject.protoVerSubmitted == false)) {
+				WebMyth.Metrix.customCounts("ProtoVer", WebMyth.prefsCookieObject.protoVer, 1);
+				WebMyth.prefsCookieObject.protoVerSubmitted = true;
 			}
 			
 		};
@@ -193,6 +194,8 @@ WelcomeAssistant.prototype.setup = function() {
 		if (WebMyth.prefsCookieObject.manualDatabase == null) WebMyth.prefsCookieObject.manualDatabase = myDefaultCookie.manualDatabase;
 		if (WebMyth.prefsCookieObject.databaseHost == null) WebMyth.prefsCookieObject.databaseHost = myDefaultCookie.databaseHost;
 		if (WebMyth.prefsCookieObject.usePlugin == null) WebMyth.prefsCookieObject.usePlugin = myDefaultCookie.usePlugin;
+		if (WebMyth.prefsCookieObject.protoVerSubmitted == null) WebMyth.prefsCookieObject.protoVerSubmitted = myDefaultCookie.protoVerSubmitted;
+		
 		
 		
 		
@@ -303,7 +306,7 @@ WelcomeAssistant.prototype.setup = function() {
 	if((Mojo.Environment.DeviceInfo.modelNameAscii == "Device")||(Mojo.Environment.DeviceInfo.modelNameAscii == "Emulator")) {
 		WebMyth.usePlugin = false;
 		WebMyth.usePluginFrontend = false;
-		Mojo.Controller.getAppController().showBanner("On "+Mojo.Environment.DeviceInfo.modelNameAscii+" - no plugin", {source: 'notification'});
+		//Mojo.Controller.getAppController().showBanner("On "+Mojo.Environment.DeviceInfo.modelNameAscii+" - no plugin", {source: 'notification'});
 	} else {
 		if(WebMyth.usePlugin){
 			//WebMyth.newPluginSocket("query location");
@@ -991,9 +994,22 @@ WelcomeAssistant.prototype.getSettings = function() {
 		
 		Mojo.Controller.errorDialog("You must manually set your backend IP address. In your MythTV settings it is saved as 127.0.0.1 which is just the local MythTV backend computer. Most likely it will be an IP address starting with 192.168.x.x");
 
+	} else if((WebMyth.prefsCookieObject.masterBackendIp == "localhost")) {
+		
+		Mojo.Controller.errorDialog("You must manually set your backend IP address. In your MythTV settings it is saved as 'localhost' which is just the local MythTV backend computer. Most likely it will be an IP address starting with 192.168.x.x");
+
 	} else if((WebMyth.usePlugin == true)&&(WebMyth.prefsCookieObject.databaseHost == "127.0.0.1")) {
 		
 		Mojo.Controller.errorDialog("You must manually set your MySQL server IP address. In your MythTV settings it is saved as 127.0.0.1 which is just the local MythTV backend computer. Most likely it will be an IP address starting with 192.168.x.x");
+	
+	} else if((WebMyth.usePlugin == true)&&(WebMyth.prefsCookieObject.databaseHost == "localhost")) {
+		
+		Mojo.Controller.errorDialog("You must manually set your MySQL server IP address. In your MythTV settings it is saved as 'localhost' which is just the local MythTV backend computer. Most likely it will be an IP address starting with 192.168.x.x");
+	
+	} else if((WebMyth.usePlugin == true)&&(WebMyth.prefsCookieObject.databaseHost.toUpperCase().indexOf("SOCK")>=0)) {
+		
+		//Matches /tmp/mysql.sock or similar
+		Mojo.Controller.errorDialog("You must manually set your MySQL server IP address. In your MythTV settings it is saved as "+WebMyth.prefsCookieObject.databaseHost+" which is just the local MythTV backend computer. Most likely it will be an IP address starting with 192.168.x.x");
 	
 	} else {
 			

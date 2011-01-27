@@ -73,8 +73,9 @@ SearchPeopleAssistant.prototype.setup = function() {
 	this.webMenuModel = { label: $L('Web'), items: [
 			{"label": $L('Wikipedia'), "command": "go-web-wikipedia"},
 			{"label": $L('IMDB'), "command": "go-web-imdb"},
-			{"label": $L('Google'), "command": "go-web-google"}
-			]};
+			{"label": $L('Google'), "command": "go-web-google"},
+			{"label": $L('Google Images'), "command": "go-web-images"}
+		]};
 			
 	this.controller.setupWidget(Mojo.Menu.commandMenu, {menuClass: 'no-fade'}, this.cmdMenuModel);
 	this.controller.setupWidget('sort-menu', '', this.sortMenuModel);
@@ -192,6 +193,10 @@ SearchPeopleAssistant.prototype.handleCommand = function(event) {
 			  break;
 			case 'go-web-google':
 				this.openWeb('google');
+
+			  break;
+			case 'go-web-images':
+				this.openWeb('images');
 
 			  break;
 			  
@@ -1066,6 +1071,9 @@ SearchPeopleAssistant.prototype.openWeb = function(value) {
 		  break;
 		case 'google':
 			url = "http://www.google.com/m/search?client=ms-palm-webOS&channel=iss&q="+this.personName;
+		  break;
+		case 'images':
+			url = "http://www.google.com/m/search?client=ms-palm-webOS&site=images&channel=iss&q="+this.personName;
 		  break;
 		  
 	}

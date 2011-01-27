@@ -122,7 +122,8 @@ function defaultCookie() {
 		currentLogGroup: 'all',
 		manualDatabase: false,
 		databaseHost: '',
-		usePlugin: 2
+		usePlugin: 2,
+		protoVerSubmitted: false
 		
 	};
 	
@@ -1271,45 +1272,49 @@ var parseUpcomingPlugin = function(fullData) {
 	// http://www.mythtv.org/wiki/ProgramInfo_%28Myth_Protocol%29
 	
 	var finalList = [];
+	var type = "upcoming";
 	
 	//Mojo.Log.error("about to start parsing upcoming plugin "+fullData);
 	
 	if(WebMyth.prefsCookieObject.protoVer >= 57){
-		finalList = parseUpcoming57(fullData);
+		finalList = parsePrograms57(fullData, type);
 	} else if(WebMyth.prefsCookieObject.protoVer >= 41){
-		finalList = parseUpcoming41(fullData);
+		finalList = parsePrograms41(fullData, type);
 	} else if(WebMyth.prefsCookieObject.protoVer >= 35){
-		finalList = parseUpcoming35(fullData);
+		finalList = parsePrograms35(fullData, type);
 	} else if(WebMyth.prefsCookieObject.protoVer >= 32){
-		finalList = parseUpcoming32(fullData);
+		finalList = parsePrograms32(fullData, type);
 	} else if(WebMyth.prefsCookieObject.protoVer >= 31){
-		finalList = parseUpcoming31(fullData);
+		finalList = parsePrograms31(fullData, type);
 	} else if(WebMyth.prefsCookieObject.protoVer >= 25){
-		finalList = parseUpcoming25(fullData);
+		finalList = parsePrograms25(fullData, type);
 	} 
 	
 	return finalList;
 
 };
 
-var parseUpcoming57 = function(fullResponse) {	
+var parsePrograms57 = function(fullResponse, type) {	
 
 	//Protocol verion 57 and up - 41 fields
 
 	var finalList = [];
 	var fullArray = fullResponse.split("[]:[]");
+	var offset = 1;
 	
 	//Mojo.Log.error("Parsing upcoming total programs is "+fullArray[1]+", length is "+fullArray.length);
 	
-	WebMyth.expectedLength = fullArray[1];
-	WebMyth.hasConflicts = fullArray[0].substring(8,9);
-	
+	if(type == "upcoming") {
+		WebMyth.hasConflicts = fullArray[0].substring(8,9);
+		WebMyth.expectedLength = fullArray[1];
+		offset = 2;
+	}
 	
 	var i, programNum = 0, fieldNum = 0;
 	var singleProgramJson = {};
 	var newDate = new Date();
 	
-	for(i = 2; i < fullArray.length; i++){
+	for(i = offset; i < fullArray.length; i++){
 		switch(fieldNum){
 			case 0:
 				singleProgramJson.title = fullArray[i];
@@ -1477,24 +1482,28 @@ var parseUpcoming57 = function(fullResponse) {
 	
 }
 
-var parseUpcoming41 = function(fullResponse) {	
+var parsePrograms41 = function(fullResponse, type) {	
 
 	//Protocol verion 41 and up - 47 fields
 
 	var finalList = [];
 	var fullArray = fullResponse.split("[]:[]");
+	var offset = 1;
 	
-	//Mojo.Log.info("Parsing upcoming total programs is "+fullArray[1]+", length is "+fullArray.length);
+	//Mojo.Log.error("Parsing upcoming total programs is "+fullArray[1]+", length is "+fullArray.length);
 	
-	WebMyth.expectedLength = fullArray[1];
-	WebMyth.hasConflicts = fullArray[0].substring(8,9);
+	if(type == "upcoming") {
+		WebMyth.hasConflicts = fullArray[0].substring(8,9);
+		WebMyth.expectedLength = fullArray[1];
+		offset = 2;
+	}
 	
 	
 	var i, programNum = 0, fieldNum = 0;
 	var singleProgramJson = {};
 	var newDate = new Date();
 	
-	for(i = 2; i < fullArray.length; i++){
+	for(i = offset; i < fullArray.length; i++){
 		switch(fieldNum){
 			case 0:
 				singleProgramJson.title = fullArray[i];
@@ -1679,24 +1688,28 @@ var parseUpcoming41 = function(fullResponse) {
 	
 }
 
-var parseUpcoming35 = function(fullResponse) {	
+var parsePrograms35 = function(fullResponse, type) {	
 
 	//Protocol verion 35 and up - 46 fields
 
 	var finalList = [];
 	var fullArray = fullResponse.split("[]:[]");
+	var offset = 1;
 	
-	//Mojo.Log.info("Parsing upcoming total programs is "+fullArray[1]+", length is "+fullArray.length);
+	//Mojo.Log.error("Parsing upcoming total programs is "+fullArray[1]+", length is "+fullArray.length);
 	
-	WebMyth.expectedLength = fullArray[1];
-	WebMyth.hasConflicts = fullArray[0].substring(8,9);
+	if(type == "upcoming") {
+		WebMyth.hasConflicts = fullArray[0].substring(8,9);
+		WebMyth.expectedLength = fullArray[1];
+		offset = 2;
+	}
 	
 	
 	var i, programNum = 0, fieldNum = 0;
 	var singleProgramJson = {};
 	var newDate = new Date();
 	
-	for(i = 2; i < fullArray.length; i++){
+	for(i = offset; i < fullArray.length; i++){
 		switch(fieldNum){
 			case 0:
 				singleProgramJson.title = fullArray[i];
@@ -1878,24 +1891,28 @@ var parseUpcoming35 = function(fullResponse) {
 	
 }
 
-var parseUpcoming32 = function(fullResponse) {	
+var parsePrograms32 = function(fullResponse, type) {	
 
 	//Protocol verion 32 and up - 43 fields
 
 	var finalList = [];
 	var fullArray = fullResponse.split("[]:[]");
+	var offset = 1;
 	
-	//Mojo.Log.info("Parsing upcoming total programs is "+fullArray[1]+", length is "+fullArray.length);
+	//Mojo.Log.error("Parsing upcoming total programs is "+fullArray[1]+", length is "+fullArray.length);
 	
-	WebMyth.expectedLength = fullArray[1];
-	WebMyth.hasConflicts = fullArray[0].substring(8,9);
+	if(type == "upcoming") {
+		WebMyth.hasConflicts = fullArray[0].substring(8,9);
+		WebMyth.expectedLength = fullArray[1];
+		offset = 2;
+	}
 	
 	
 	var i, programNum = 0, fieldNum = 0;
 	var singleProgramJson = {};
 	var newDate = new Date();
 	
-	for(i = 2; i < fullArray.length; i++){
+	for(i = offset; i < fullArray.length; i++){
 		switch(fieldNum){
 			case 0:
 				singleProgramJson.title = fullArray[i];
@@ -2068,24 +2085,28 @@ var parseUpcoming32 = function(fullResponse) {
 	
 }
 
-var parseUpcoming31 = function(fullResponse) {	
+var parsePrograms31 = function(fullResponse, type) {	
 
 	//Protocol verion 31 and up - 42 fields
 
 	var finalList = [];
 	var fullArray = fullResponse.split("[]:[]");
+	var offset = 1;
 	
-	//Mojo.Log.info("Parsing upcoming total programs is "+fullArray[1]+", length is "+fullArray.length);
+	//Mojo.Log.error("Parsing upcoming total programs is "+fullArray[1]+", length is "+fullArray.length);
 	
-	WebMyth.expectedLength = fullArray[1];
-	WebMyth.hasConflicts = fullArray[0].substring(8,9);
+	if(type == "upcoming") {
+		WebMyth.hasConflicts = fullArray[0].substring(8,9);
+		WebMyth.expectedLength = fullArray[1];
+		offset = 2;
+	}
 	
 	
 	var i, programNum = 0, fieldNum = 0;
 	var singleProgramJson = {};
 	var newDate = new Date();
 	
-	for(i = 2; i < fullArray.length; i++){
+	for(i = offset; i < fullArray.length; i++){
 		switch(fieldNum){
 			case 0:
 				singleProgramJson.title = fullArray[i];
@@ -2255,25 +2276,29 @@ var parseUpcoming31 = function(fullResponse) {
 	
 }
 
-var parseUpcoming25 = function(fullResponse) {	
+var parsePrograms25 = function(fullResponse, type) {	
 
 	//Protocol verion 25 and up - 41 fields
 	//MythTV version 0.19 - won't support any older versions
 
 	var finalList = [];
 	var fullArray = fullResponse.split("[]:[]");
+	var offset = 1;
 	
-	//Mojo.Log.info("Parsing upcoming total programs is "+fullArray[1]+", length is "+fullArray.length);
+	//Mojo.Log.error("Parsing upcoming total programs is "+fullArray[1]+", length is "+fullArray.length);
 	
-	WebMyth.expectedLength = fullArray[1];
-	WebMyth.hasConflicts = fullArray[0].substring(8,9);
+	if(type == "upcoming") {
+		WebMyth.hasConflicts = fullArray[0].substring(8,9);
+		WebMyth.expectedLength = fullArray[1];
+		offset = 2;
+	}
 	
 	
 	var i, programNum = 0, fieldNum = 0;
 	var singleProgramJson = {};
 	var newDate = new Date();
 	
-	for(i = 2; i < fullArray.length; i++){
+	for(i = offset; i < fullArray.length; i++){
 		switch(fieldNum){
 			case 0:
 				singleProgramJson.title = fullArray[i];

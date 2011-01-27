@@ -615,8 +615,8 @@ StatusAssistant.prototype.readStatusSuccess = function(response) {
 				"usedText": $L("Used")+": "+Mojo.Format.formatNumber(parseInt(singleStorageNode.getAttributeNode("used").nodeValue))+" MB"
 			};
 			
-			singleStorageJson.freePercentage = parseInt(100*singleStorageJson.free/singleStorageJson.total)+"%";
-			singleStorageJson.usedPercentage = parseInt(100*singleStorageJson.used/singleStorageJson.total)+"%";
+			singleStorageJson.freePercentage = Mojo.Format.formatNumber(100*singleStorageJson.free/singleStorageJson.total, {fractionDigits: 1})+"%";
+			singleStorageJson.usedPercentage = Mojo.Format.formatNumber(100*singleStorageJson.used/singleStorageJson.total, {fractionDigits: 1})+"%";
 			
 			//Mojo.Log.info("Added storage group %j to list", singleStorageJson);
 			this.storageList.push(singleStorageJson);
