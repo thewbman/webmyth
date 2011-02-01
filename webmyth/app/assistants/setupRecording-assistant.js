@@ -651,7 +651,8 @@ SetupRecordingAssistant.prototype.mysqlScheduleCardinputResponse = function(resp
 	
     //Mojo.Log.info('Cleaned inputs is: %j', this.inputs);
 	
-		
+	
+	this.controller.sceneScroller.mojo.revealTop();
 	
 	//Get data
 	if(this.programObject.recordId){

@@ -893,7 +893,7 @@ RecordedAssistant.prototype.updateRecgroupListJSON = function()  {
 
 RecordedAssistant.prototype.setMyData = function(propertyValue, model)  { 
 
-	if(((this.onWan == true)&&(WebMyth.prefsCookieObject.useWebmythScript))||(WebMyth.prefsCookieObject.forceScriptScreenshots)) {
+	if(((this.onWan == true)&&(WebMyth.prefsCookieObject.usePlugin < 2))||(WebMyth.prefsCookieObject.forceScriptScreenshots)) {
 		var screenshotUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webmythPythonFile+"?op=getPremadeImage&chanid=";
 		screenshotUrl += model.chanId + "&starttime=" + model.recStartTsSpace;
 		

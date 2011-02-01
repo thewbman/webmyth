@@ -15,4 +15,4 @@ http://metrix.webosroundup.com/MetrixInterface.asmx/GetWebOsBuildNumberBreakDown
 
 http://metrix.webosroundup.com/MetrixInterface.asmx/GetWebOsVersionBreakDown?packageId=com.thewbman.webmyth
 
-http://metrix.webosroundup.com/MetrixInterface.asmx/getCustomCounterAsBar?packageId=com.thewbman.webmyth&valueGroup=MythTV%20Stats
+http://metrix.webosroundup.com/MetrixInterface.asmx/getCustomCounterAsBar?packageId=com.thewbman.webmyth&valueGroup=ProtoVer

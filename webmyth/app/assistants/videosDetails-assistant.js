@@ -21,13 +21,15 @@
  
 function VideosDetailsAssistant(detailsObject, videoBase) {
 
-	   this.videosObject = detailsObject;
-	   this.videoBase = videoBase;
+	this.videosObject = detailsObject;
+	this.videoBase = videoBase;
 	   
-	   this.standardFilename = '';
-	   this.downloadOrStream = '';
+	this.standardFilename = '';
+	this.downloadOrStream = '';
 	   
-	   this.timeOffsetSeconds = 0;
+	this.timeOffsetSeconds = 0;
+	
+	this.peopleList = [];
 }
 
 VideosDetailsAssistant.prototype.setup = function() {
@@ -49,8 +51,22 @@ VideosDetailsAssistant.prototype.setup = function() {
 	this.controller.setupWidget('hosts-menu', '', this.hostsMenuModel);
 	this.controller.setupWidget('web-menu', '', this.webMenuModel);
 
+	//List of people
+	this.peopleListAttribs = {
+		itemTemplate: "videosDetails/peopleListItem",
+		swipeToDelete: false
+	};
+	
+    this.peopleListModel = {            
+        items: this.peopleList
+    };
+	this.controller.setupWidget( "peopleList" , this.peopleListAttribs, this.peopleListModel);
+	
+	Mojo.Event.listen(this.controller.get( "peopleList" ), Mojo.Event.listTap, this.goPeopleDetails.bind(this));
+	
 	
 	if(WebMyth.usePlugin){
+		$('webmyth_service_id').mysqlVideosDetailsPeopleResponse = this.mysqlVideosDetailsPeopleResponse.bind(this);
 		$('webmyth_service_id').mysqlVideosDetailsResponse = this.mysqlVideosDetailsResponse.bind(this);
 	}
 
@@ -127,7 +143,7 @@ VideosDetailsAssistant.prototype.activate = function(event) {
 	
 	var webList = [];
 	
-	if(this.videosObject.homepage != "None") {
+	if((this.videosObject.homepage != "None")&&(this.videosObject.homepage != "")) {
 		webList.push({"label": $L("Homepage"), "command": "go-web--Homepage"});
 	}
 	
@@ -416,6 +432,27 @@ VideosDetailsAssistant.prototype.playOnHost = function(frontend) {
 	
 };
 
+VideosDetailsAssistant.prototype.updateHostsList = function() {
+	
+	var i, s;
+	
+	
+	for (i = 0; i < WebMyth.hostsCookieObject.length; i++) {
+
+		s = { 
+			"label": $L(WebMyth.hostsCookieObject[i].hostname),
+			"command": "go-play-"+WebMyth.hostsCookieObject[i].hostname+"[]:[]"+WebMyth.hostsCookieObject[i].address+"[]:[]"+WebMyth.hostsCookieObject[i].port,
+			"hostname": WebMyth.hostsCookieObject[i].hostname,
+			"port": WebMyth.hostsCookieObject[i].port 
+		};
+		this.hostsMenuModel.items.push(s);
+		
+	};
+		
+	this.controller.modelChanged(this.hostsMenuModel);
+
+}
+
 VideosDetailsAssistant.prototype.getUpnpmedia = function() {
 
 	var query = 'SELECT * FROM `upnpmedia` WHERE `filename` = "'+this.videosObject.onlyFilename+'" LIMIT 1;' ;
@@ -459,7 +496,8 @@ VideosDetailsAssistant.prototype.getUpnpFail = function() {
 
 	Mojo.Log.error("Failed to get UPNP value from SQL");
 	
-
+	this.getPeople();
+	
 }
 
 VideosDetailsAssistant.prototype.getUpnpSuccess = function(response) {
@@ -486,6 +524,8 @@ VideosDetailsAssistant.prototype.getUpnpSuccess = function(response) {
 	
 	
 	this.updateHostsList();
+	
+	this.getPeople()
 	
 }
 
@@ -515,26 +555,101 @@ VideosDetailsAssistant.prototype.mysqlVideosDetailsResponse = function(response)
 	
 	
 	this.updateHostsList();
+	
+	this.controller.window.setTimeout(this.getPeople.bind(this), 50);
 
 }	
 
-VideosDetailsAssistant.prototype.updateHostsList = function() {
-	
-	var i, s;
-	
-	
-	for (i = 0; i < WebMyth.hostsCookieObject.length; i++) {
 
-		s = { 
-			"label": $L(WebMyth.hostsCookieObject[i].hostname),
-			"command": "go-play-"+WebMyth.hostsCookieObject[i].hostname+"[]:[]"+WebMyth.hostsCookieObject[i].address+"[]:[]"+WebMyth.hostsCookieObject[i].port,
-			"hostname": WebMyth.hostsCookieObject[i].hostname,
-			"port": WebMyth.hostsCookieObject[i].port 
-		};
-		this.hostsMenuModel.items.push(s);
+
+
+VideosDetailsAssistant.prototype.getPeople = function(event) {
+
+	//Mojo.Log.error("Searching for people for video");
+	
+	
+	var query = 'SELECT `videometadatacast`.`idcast`, `videometadatacast`.`idvideo`, ';
+	query += ' `videocast`.`intid` AS videoPersonId, `videocast`.`cast` AS name, ';
+	query += ' `people`.`person` ';
+	query += ' FROM `videometadatacast` ';
+	query += ' LEFT OUTER JOIN `videocast` ON `videometadatacast`.`idcast` = `videocast`.`intid` ';
+	query += ' LEFT OUTER JOIN `people` ON `videocast`.`cast` = `people`.`name` ';
+	query += ' WHERE `videometadatacast`.`idvideo` = '+this.videosObject.intid+' ';
+	query += ' ORDER BY `name` ';
+	
+	Mojo.Log.error("Query is "+query);
+	
+	
+	
+	if(WebMyth.usePlugin){
+	
+		var response1 = $('webmyth_service_id').mysqlCommand(WebMyth.prefsCookieObject.databaseHost,WebMyth.prefsCookieObject.databaseUsername,WebMyth.prefsCookieObject.databasePassword,WebMyth.prefsCookieObject.databaseName,WebMyth.prefsCookieObject.databasePort,"mysqlVideosDetailsPeopleResponse",query.substring(0,250),query.substring(250,500),query.substring(500,750),query.substring(750,1000),query.substring(1000,1250),query.substring(1250,1500),query.substring(1500,1750),query.substring(1750,2000),query.substring(2000,2250),query.substring(2250,2500));
 		
-	};
+		Mojo.Log.error("Search plugin response "+response1);
 		
-	this.controller.modelChanged(this.hostsMenuModel);
+	} else {
+	
+		var requestUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webmythPythonFile;
+		requestUrl += "?op=executeSQLwithResponse";				
+		requestUrl += "&query64=";		
+		requestUrl += Base64.encode(query);	
+		
+
+		
+		try {
+			var request = new Ajax.Request(requestUrl,{
+				method: 'get',
+				evalJSON: 'true',
+				requestHeaders: {Authorization: 'Basic ' + Base64.encode(WebMyth.prefsCookieObject.webserverUsername + ":" + WebMyth.prefsCookieObject.webserverPassword)},
+				onSuccess: this.peopleSearchSuccess.bind(this),
+				onFailure: this.peopleSearchFail.bind(this)  
+			});
+		}
+		catch(e) {
+			Mojo.Log.error(e);
+		}
+		
+	}
+	
 
 }
+
+VideosDetailsAssistant.prototype.peopleSearchFail = function(event) {
+
+	Mojo.Log.error('Failed to get video details people response');	
+	
+};
+
+VideosDetailsAssistant.prototype.peopleSearchSuccess = function(response) {
+    
+	Mojo.Log.error('Got AJAX videos people response: %s,%j',response.responseJSON.length, response.responseJSON);
+		
+	//Update the list widget
+	this.peopleList.clear();
+	Object.extend(this.peopleList,response.responseJSON);
+	
+	this.controller.modelChanged(this.peopleListModel);
+
+};
+
+VideosDetailsAssistant.prototype.mysqlVideosDetailsPeopleResponse = function(response) {
+
+	//Mojo.Log.error("Got guide details people plugin response: "+response);
+	
+	var videosDetailsPeopleJson = JSON.parse(response);
+	
+	//Update the list widget
+	this.peopleList.clear();
+	Object.extend(this.peopleList,videosDetailsPeopleJson);
+	
+	this.controller.modelChanged(this.peopleListModel);
+
+}
+
+VideosDetailsAssistant.prototype.goPeopleDetails = function(event) {
+
+	Mojo.Log.info("Selected people details %j",event.item);
+	
+	Mojo.Controller.stageController.pushScene("searchPeople", event.item);
+
+};

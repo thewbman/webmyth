@@ -18,23 +18,24 @@
  *   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
  
-function SearchPeopleAssistant(personId_in) {
+function SearchPeopleAssistant(personObject_in) {
 
 	//this.fullResultList = [];		//Full raw data 
+	this.programPeopleList = [];
+	this.videoCastList = [];
 	this.resultList = [];			//Filtered down list
 	
 	this.searchString = "";
-	this.currentSearchPeopleSort = "date-asc";
 
-	if(personId_in) {
-		this.personId = personId_in;
-		this.currentMode = "program";
+	if(personObject_in) {
+		this.personObject = personObject_in;
+		this.currentMode = "program";	
 	} else {
-		this.personId = "";
+		this.personObject = {"name":"","videoPersonId":"","person":""};
 		this.currentMode = "person";
 	}
 	
-	this.personName = "";
+	//this.personName = "";
 	
 }
 
@@ -106,13 +107,23 @@ SearchPeopleAssistant.prototype.setup = function() {
 	
 	if(WebMyth.usePlugin){
 		$('webmyth_service_id').mysqlPeopleSearchResponse = this.mysqlPeopleSearchResponse.bind(this);
+		$('webmyth_service_id').mysqlVideoCastSearchResponse = this.mysqlVideoCastSearchResponse.bind(this);
+		
 		$('webmyth_service_id').mysqlPeopleProgramsResponse = this.mysqlPeopleProgramsResponse.bind(this);
+		$('webmyth_service_id').mysqlPeopleVideosResponse = this.mysqlPeopleVideosResponse.bind(this);
 	}
 	
 	
-	if(this.personId == "") {
+	if(this.personObject.name == "") {
 		this.newSearch();
 	} else {
+		if((isNaN(this.personObject.videoPersonId))||(this.personObject.videoPersonId == "")){
+			this.personObject.videoPersonId = -1;
+		}
+		if((isNaN(this.personObject.person))||(this.personObject.person == "")){
+			this.personObject.person = -1;
+		}
+		
 		this.getPrograms();
 	}
 								
@@ -298,7 +309,7 @@ SearchPeopleAssistant.prototype.newSearchCallback = function(value) {
 	$('myScrim').show();
 
 
-	
+	//Programs people search
 	var query = "SELECT `person`, `name` ";
 	query += " FROM `people` "
 	query += ' WHERE UPPER(`name`) LIKE "%'+this.searchString.toUpperCase()+'%" ';
@@ -373,34 +384,20 @@ SearchPeopleAssistant.prototype.peopleSearchSuccess = function(response) {
     
 	Mojo.Log.error('Got Ajax response: %j',response.responseJSON);
 	
+	this.programPeopleList.clear();
+	
 	if(response.responseJSON) {
 		//We got back some rows
-		
-		//var nowDate = new Date();
-		//var nowDateISO = dateJSToISO(nowDate).replace("T"," ");
-		
-		//Update the list widget
-		this.resultList.clear();
-		Object.extend(this.resultList,response.responseJSON);
-		
-		
-		//Mojo.Log.error('Cleaned search results: %j',this.resultList);
-		
-		
-		$('scene-title').innerHTML += " ("+this.resultList.length+" "+$L("people")+")";
-		$('scene-title').innerHTML = $('scene-title').innerHTML.substring(0,40);
+		Object.extend(this.programPeopleList,response.responseJSON);
 		
 	} else {
-		//No matching results from guide
+		//No matching results from program people
 	
-		this.resultList.clear();
-		this.resultList.push({ 'person': -1, 'name':'No people found' });
-	
-		Mojo.Log.error("No response results %j",this.resultList);
+		Mojo.Log.error("No program people response results");
 	
 	}
 	
-	this.sortChanged(this.currentSearchPeopleSort);
+	this.searchVideoCast();
 
 };
 
@@ -410,61 +407,30 @@ SearchPeopleAssistant.prototype.mysqlPeopleSearchResponse = function(response) {
 	
 	var searchPeopleJson = JSON.parse(response);
 	
+	this.programPeopleList.clear();
 	
 	if(searchPeopleJson.length > 0) {
 		//We got back some rows
-		
-		//Update the list widget
-		this.resultList.clear();
-		Object.extend(this.resultList,searchPeopleJson);
-		
-		
-		//Mojo.Log.error('Cleaned search results: %j',this.resultList);
-		
-		
-		$('scene-title').innerHTML += " ("+this.resultList.length+" "+$L("people")+")";
-		$('scene-title').innerHTML = $('scene-title').innerHTML.substring(0,40);
+		Object.extend(this.programPeopleList,searchPeopleJson);
 		
 	} else {
-		//No matching results from guide
+		//No matching results from program people search
 	
-		this.resultList.clear();
-		this.resultList.push({ 'person': -1, 'name':'No people found' });
-	
-		Mojo.Log.error("No response results %j",this.resultList);
+		Mojo.Log.error("No program people response results");
 	
 	}
 	
-	this.sortChanged(this.currentSearchPeopleSort);
+	this.controller.window.setTimeout(this.searchVideoCast.bind(this), 50);
 	
 }
 
-SearchPeopleAssistant.prototype.getPrograms = function() {
+SearchPeopleAssistant.prototype.searchVideoCast = function() {
 
-	Mojo.Log.error("Searching for programs with personId : "+this.personId);
-	
-	
-	this.currentMode = "program";
-	this.resultList.clear();
-
-	
-	//Restart spinner and show
-	this.spinnerModel.spinning = true;
-	this.controller.modelChanged(this.spinnerModel, this);
-	$('spinner-text').innerHTML = $L("Loading")+"...";
-	$('myScrim').show();
-
-
-	
-	var query = "SELECT `people`.`person`, `people`.`name`,  ";
-	query += " `credits`.`chanid`, `credits`.`starttime`, UPPER(`credits`.`role`) AS `role`,  ";
-	query += " `program`.`title`, `program`.`subtitle`, `program`.`category`, `program`.`endtime` AS `endTime`, ";
-	query += " `channel`.`name` AS channelName, `channel`.`channum` ";
-	query += " FROM `people` ";
-	query += " LEFT OUTER JOIN `credits` ON `credits`.`person` = `people`.`person` ";
-	query += " LEFT OUTER JOIN `program` ON (`program`.`chanid` = `credits`.`chanid` AND `program`.`starttime` = `credits`.`starttime`)";
-	query += " LEFT OUTER JOIN `channel` ON `channel`.`chanid` = `program`.`chanid` ";
-	query += ' WHERE `people`.`person` = '+parseInt(this.personId)+' ';
+	//Video cast search
+	var query = "SELECT `intid` AS videoPersonId, `cast` AS name ";
+	query += " FROM `videocast` "
+	query += ' WHERE UPPER(`cast`) LIKE "%'+this.searchString.toUpperCase()+'%" ';
+	query += " ORDER BY cast ";
 	query += " LIMIT 1000 ";
 	
 	//Mojo.Log.error("query is "+query);
@@ -473,9 +439,9 @@ SearchPeopleAssistant.prototype.getPrograms = function() {
 	
 	if(WebMyth.usePlugin){
 	
-		var response1 = $('webmyth_service_id').mysqlCommand(WebMyth.prefsCookieObject.databaseHost,WebMyth.prefsCookieObject.databaseUsername,WebMyth.prefsCookieObject.databasePassword,WebMyth.prefsCookieObject.databaseName,WebMyth.prefsCookieObject.databasePort,"mysqlPeopleProgramsResponse",query.substring(0,250),query.substring(250,500),query.substring(500,750),query.substring(750,1000),query.substring(1000,1250),query.substring(1250,1500),query.substring(1500,1750),query.substring(1750,2000),query.substring(2000,2250),query.substring(2250,2500));
+		var response1 = $('webmyth_service_id').mysqlCommand(WebMyth.prefsCookieObject.databaseHost,WebMyth.prefsCookieObject.databaseUsername,WebMyth.prefsCookieObject.databasePassword,WebMyth.prefsCookieObject.databaseName,WebMyth.prefsCookieObject.databasePort,"mysqlVideoCastSearchResponse",query.substring(0,250),query.substring(250,500),query.substring(500,750),query.substring(750,1000),query.substring(1000,1250),query.substring(1250,1500),query.substring(1500,1750),query.substring(1750,2000),query.substring(2000,2250),query.substring(2250,2500));
 		
-		Mojo.Log.error("Search plugin response "+response1);
+		Mojo.Log.error("Search video cast plugin response "+response1);
 		
 	} else {
 	
@@ -491,14 +457,250 @@ SearchPeopleAssistant.prototype.getPrograms = function() {
 				method: 'get',
 				evalJSON: 'true',
 				requestHeaders: {Authorization: 'Basic ' + Base64.encode(WebMyth.prefsCookieObject.webserverUsername + ":" + WebMyth.prefsCookieObject.webserverPassword)},
-				onSuccess: this.programsSearchSuccess.bind(this),
-				onFailure: this.programsSearchFail.bind(this)  
+				onSuccess: this.videoCastSearchSuccess.bind(this),
+				onFailure: this.videoCastSearchFail.bind(this)  
 			});
 		}
 		catch(e) {
 			Mojo.Log.error(e);
 		}
 		
+	}
+	
+
+};
+
+SearchPeopleAssistant.prototype.videoCastSearchFail = function(event) {
+
+	Mojo.Log.error('Failed to get video cast search response');
+	
+	
+	$('scene-title').innerHTML = $L("Error in searching")+"!!!";
+	
+	
+	this.resultList.clear();
+	this.resultList.push({ 'person': -1, 'name':'Error in searching' });
+	
+	
+	
+	this.controller.sceneScroller.mojo.revealTop();
+	
+	//Initial display
+	var listWidget = this.controller.get('searchPeopleList');
+	this.filterListFunction('', listWidget, 0, this.resultList.length);
+	listWidget.mojo.close();
+	
+	
+	//Stop spinner and hide
+	this.spinnerModel.spinning = false;
+	this.controller.modelChanged(this.spinnerModel, this);
+	$('myScrim').hide();	
+	
+};
+
+SearchPeopleAssistant.prototype.videoCastSearchSuccess = function(response) {
+    
+	Mojo.Log.error('Got video cast response: %j',response.responseJSON);
+	
+	this.videoCastList.clear();
+	
+	if(response.responseJSON) {
+		//We got back some rows
+		Object.extend(this.videoCastList,response.responseJSON);
+		
+	} else {
+		//No matching results from program people
+	
+		Mojo.Log.error("No video cast response results");
+	
+	}
+	
+	this.combinePeople();
+
+};
+
+SearchPeopleAssistant.prototype.mysqlVideoCastSearchResponse = function(response) {
+
+	Mojo.Log.error("Got video cast plugin response: "+response);
+	
+	var searchPeopleJson = JSON.parse(response);
+	
+	this.videoCastList.clear();
+	
+	if(searchPeopleJson.length > 0) {
+		//We got back some rows
+		Object.extend(this.videoCastList,searchPeopleJson);
+		
+	} else {
+		//No matching results from program people search
+	
+		Mojo.Log.error("No program people response results");
+	
+	}
+	
+	this.combinePeople();
+	
+}
+
+SearchPeopleAssistant.prototype.combinePeople = function() {
+
+	//Combine program people and video cast list
+	this.resultList.clear();
+	var s = {};
+	
+	if((this.videoCastList.length == 0)&&(this.programPeopleList.length == 0)) {
+		Mojo.Log.info("No matching people in programs or video cast");
+		
+		this.resultList.push({ 'person': -1, 'name':'No people found', "videoPersonId": -1 });
+		
+	} else if(this.videoCastList.length == 0) {
+		Mojo.Log.info("Only found matching program people");
+		
+		for(var i = 0; i < this.programPeopleList.length; i++){
+			s = {};
+			s = this.programPeopleList[i];
+			
+			s.videoPersonId = -1;
+			
+			this.resultList.push(s);
+		
+		}
+	
+	} else if(this.programPeopleList.length == 0) {
+		Mojo.Log.info("Only found matching video cast");
+		
+		for(var i = 0; i < this.videoCastList.length; i++){
+			s = {};
+			s = this.videoCastList[i];
+			
+			s.person = -1;
+			
+			this.resultList.push(s);
+		
+		}
+		
+	} else {
+		Mojo.Log.info("Found both program people and video cast");
+
+		//Process the programs people list first
+		for(var i = 0; i < this.programPeopleList.length; i++){
+			s = {};
+			s = this.programPeopleList[i];
+			
+			s.videoPersonId = -1;
+			
+			for(var j = 0; j < this.videoCastList.length; j++){
+				
+				if(this.videoCastList[j].name == s.name){
+					s.videoPersonId = this.videoCastList[j].videoPersonId;
+					
+					this.videoCastList[j].matched = true;
+				}
+			
+			}
+			
+			this.resultList.push(s);
+			
+		}
+		
+		//Add in any video cast-only people
+		for(var i = 0; i < this.videoCastList.length; i++){
+			s = {};
+			s = this.videoCastList[i];
+			
+			s.person = -1;
+			
+			if(s.matched) {
+				//We already added this using program people
+			} else {
+				this.resultList.push(s);
+			}
+			
+		}
+		
+	}
+	
+	this.resultList.sort(sort_by('name'));
+	
+	Mojo.Log.info("Final resultList = %j",this.resultList);
+	
+	$('scene-title').innerHTML += " ("+this.resultList.length+" "+$L("people")+")";
+	$('scene-title').innerHTML = $('scene-title').innerHTML.substring(0,40);
+	
+	this.sortChanged(WebMyth.prefsCookieObject.currentSearchPeopleSort);
+
+}
+
+SearchPeopleAssistant.prototype.getPrograms = function() {
+
+	//Mojo.Log.error("Searching for programs with personId : "+this.personId);
+	
+	
+	this.currentMode = "program";
+	this.resultList.clear();
+	
+	$('scene-title').innerHTML = this.personObject.name;
+
+	
+	//Restart spinner and show
+	this.spinnerModel.spinning = true;
+	this.controller.modelChanged(this.spinnerModel, this);
+	$('spinner-text').innerHTML = $L("Loading")+"...";
+	$('myScrim').show();
+
+
+	
+	var query = "SELECT `people`.`person`, `people`.`name`,  ";
+	query += " `credits`.`chanid`, `credits`.`starttime`, UPPER(`credits`.`role`) AS `role`,  ";
+	query += " `program`.`title`, `program`.`subtitle`, `program`.`category`, `program`.`endtime` AS `endTime`, ";
+	query += " `channel`.`name` AS channelName, `channel`.`channum`, ";
+	query += " 'program' AS type ";
+	query += " FROM `people` ";
+	query += " LEFT OUTER JOIN `credits` ON `credits`.`person` = `people`.`person` ";
+	query += " LEFT OUTER JOIN `program` ON (`program`.`chanid` = `credits`.`chanid` AND `program`.`starttime` = `credits`.`starttime`)";
+	query += " LEFT OUTER JOIN `channel` ON `channel`.`chanid` = `program`.`chanid` ";
+	query += ' WHERE `people`.`person` = '+parseInt(this.personObject.person)+' ';
+	query += " LIMIT 1000 ";
+	
+	//Mojo.Log.error("query is "+query);
+	
+	
+	if(this.personObject.person > -1){
+		if(WebMyth.usePlugin){
+		
+			var response1 = $('webmyth_service_id').mysqlCommand(WebMyth.prefsCookieObject.databaseHost,WebMyth.prefsCookieObject.databaseUsername,WebMyth.prefsCookieObject.databasePassword,WebMyth.prefsCookieObject.databaseName,WebMyth.prefsCookieObject.databasePort,"mysqlPeopleProgramsResponse",query.substring(0,250),query.substring(250,500),query.substring(500,750),query.substring(750,1000),query.substring(1000,1250),query.substring(1250,1500),query.substring(1500,1750),query.substring(1750,2000),query.substring(2000,2250),query.substring(2250,2500));
+			
+			Mojo.Log.error("Search plugin response "+response1);
+			
+		} else {
+		
+			var requestUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webmythPythonFile;
+			requestUrl += "?op=executeSQLwithResponse";				
+			requestUrl += "&query64=";		
+			requestUrl += Base64.encode(query);	
+			
+
+			
+			try {
+				var request = new Ajax.Request(requestUrl,{
+					method: 'get',
+					evalJSON: 'true',
+					requestHeaders: {Authorization: 'Basic ' + Base64.encode(WebMyth.prefsCookieObject.webserverUsername + ":" + WebMyth.prefsCookieObject.webserverPassword)},
+					onSuccess: this.programsSearchSuccess.bind(this),
+					onFailure: this.programsSearchFail.bind(this)  
+				});
+			}
+			catch(e) {
+				Mojo.Log.error(e);
+			}
+			
+		}
+		
+	} else {
+	
+		//Wasn't a matching a program person
+		this.getVideos();
+	
 	}
 	
 };
@@ -533,7 +735,7 @@ SearchPeopleAssistant.prototype.programsSearchFail = function(event) {
 
 SearchPeopleAssistant.prototype.programsSearchSuccess = function(response) {
     
-	Mojo.Log.error('Got Ajax response: %s,%j',response.responseJSON.length, response.responseJSON);
+	Mojo.Log.error('Got programs search response: %j', response.responseJSON);
 	
 	if(response.responseJSON.length > 1) {
 		//We got back some rows
@@ -541,8 +743,8 @@ SearchPeopleAssistant.prototype.programsSearchSuccess = function(response) {
 		var nowDate = new Date();
 		var nowDateISO = dateJSToISO(nowDate).replace("T"," ");
 		
-		this.personName = response.responseJSON[0].name
-		$('scene-title').innerHTML = this.personName;
+		//this.personName = response.responseJSON[0].name
+		//$('scene-title').innerHTML = this.personName;
 		
 		//Update the list widget
 		this.resultList.clear();
@@ -551,25 +753,25 @@ SearchPeopleAssistant.prototype.programsSearchSuccess = function(response) {
 		//Mojo.Log.error('Cleaned search results: %j',this.resultList);
 		
 		if(this.resultList.length == 0) {
-			this.resultList.clear();
-			this.resultList.push({ 'person': -1, 'name':'No programs found', 'title':'No programs found', 'subtitle':'No programs found','role':'','starttime':'1900-01-01 00:00:00', 'channum':'', 'channelName':'' } );
+			//this.resultList.clear();
+			//this.resultList.push({ 'person': -1, 'name':'No programs found', 'title':'No programs found', 'subtitle':'No programs found','role':'','starttime':'1900-01-01 00:00:00', 'channum':'', 'channelName':'', 'type':'program' } );
 	
 			Mojo.Log.error("Had results but are old");
 			
 		} else {
 		
-			$('scene-title').innerHTML += " ("+this.resultList.length+" "+$L("items")+")";
-			$('scene-title').innerHTML = $('scene-title').innerHTML.substring(0,40);
+			//$('scene-title').innerHTML += " ("+this.resultList.length+" "+$L("items")+")";
+			//$('scene-title').innerHTML = $('scene-title').innerHTML.substring(0,40);
 		}
 		
 	} else if((response.responseJSON.length == 1)&&((response.responseJSON[0].title == "") || (response.responseJSON[0].title == "None"))){
 		//No matching results from guide
 		
-		this.personName = response.responseJSON[0].name
-		$('scene-title').innerHTML = this.personName;
+		//this.personName = response.responseJSON[0].name
+		//$('scene-title').innerHTML = this.personName;
 	
-		this.resultList.clear();
-		this.resultList.push({ 'person': -1, 'name':'No programs found', 'title':'No programs found', 'subtitle':'No programs found','role':'','starttime':'1900-01-01 00:00:00', 'channum':'', 'channelName':'' } );
+		//this.resultList.clear();
+		//this.resultList.push({ 'person': -1, 'name':'No programs found', 'title':'No programs found', 'subtitle':'No programs found','role':'','starttime':'1900-01-01 00:00:00', 'channum':'', 'channelName':'', 'type':'program' } );
 	
 		Mojo.Log.error("No response results %j",this.resultList);
 		
@@ -579,8 +781,8 @@ SearchPeopleAssistant.prototype.programsSearchSuccess = function(response) {
 		var nowDate = new Date();
 		var nowDateISO = dateJSToISO(nowDate).replace("T"," ");
 		
-		this.personName = response.responseJSON[0].name
-		$('scene-title').innerHTML = this.personName;
+		//this.personName = response.responseJSON[0].name
+		//$('scene-title').innerHTML = this.personName;
 		
 		//Update the list widget
 		this.resultList.clear();
@@ -588,29 +790,29 @@ SearchPeopleAssistant.prototype.programsSearchSuccess = function(response) {
 		
 		
 		if(this.resultList.length == 0) {
-			this.resultList.clear();
-			this.resultList.push({ 'person': -1, 'name':'No programs found', 'title':'No programs found', 'subtitle':'No programs found','role':'','starttime':'1900-01-01 00:00:00', 'channum':'', 'channelName':'' } );
+			//this.resultList.clear();
+			//this.resultList.push({ 'person': -1, 'name':'No programs found', 'title':'No programs found', 'subtitle':'No programs found','role':'','starttime':'1900-01-01 00:00:00', 'channum':'', 'channelName':'', 'type':'program' } );
 	
 			Mojo.Log.error("Had results but are old");
 			
 		} else {
 		
-			$('scene-title').innerHTML += " ("+this.resultList.length+" "+$L("items")+")";
-			$('scene-title').innerHTML = $('scene-title').innerHTML.substring(0,40);
+			//$('scene-title').innerHTML += " ("+this.resultList.length+" "+$L("items")+")";
+			//$('scene-title').innerHTML = $('scene-title').innerHTML.substring(0,40);
 			
 		}
 	
 	} else {
 		//No matching results from guide
 	
-		this.resultList.clear();
-		this.resultList.push({ 'person': -1, 'name':'No programs found', 'title':'No programs found', 'subtitle':'No programs found','role':'','starttime':'1900-01-01 00:00:00', 'channum':'', 'channelName':'' } );
+		//this.resultList.clear();
+		//this.resultList.push({ 'person': -1, 'name':'No programs found', 'title':'No programs found', 'subtitle':'No programs found','role':'','starttime':'1900-01-01 00:00:00', 'channum':'', 'channelName':'', 'type':'program' } );
 	
 		Mojo.Log.error("No response results %j",this.resultList);
 	
 	}
 	
-	this.sortChanged(this.currentSearchPeopleSort);
+	this.getVideos();
 
 };
 
@@ -627,8 +829,8 @@ SearchPeopleAssistant.prototype.mysqlPeopleProgramsResponse = function(response)
 		var nowDate = new Date();
 		var nowDateISO = dateJSToISO(nowDate).replace("T"," ");
 		
-		this.personName = searchProgramsJson[0].name
-		$('scene-title').innerHTML = this.personName;
+		//this.personName = searchProgramsJson[0].name
+		//$('scene-title').innerHTML = this.personName;
 		
 		//Update the list widget
 		this.resultList.clear();
@@ -636,26 +838,26 @@ SearchPeopleAssistant.prototype.mysqlPeopleProgramsResponse = function(response)
 		
 		
 		if(this.resultList.length == 0) {
-			this.resultList.clear();
-			this.resultList.push({ 'person': -1, 'name':'No programs found', 'title':'No programs found', 'subtitle':'No programs found','role':'','starttime':'1900-01-01 00:00:00', 'channum':'', 'channelName':'' } );
+			//this.resultList.clear();
+			//this.resultList.push({ 'person': -1, 'name':'No programs found', 'title':'No programs found', 'subtitle':'No programs found','role':'','starttime':'1900-01-01 00:00:00', 'channum':'', 'channelName':'', 'type':'program' } );
 	
 			Mojo.Log.error("Had results but are old");
 			
 		} else {
 		
-			$('scene-title').innerHTML += " ("+this.resultList.length+" "+$L("items")+")";
-			$('scene-title').innerHTML = $('scene-title').innerHTML.substring(0,40);
+			//$('scene-title').innerHTML += " ("+this.resultList.length+" "+$L("items")+")";
+			//$('scene-title').innerHTML = $('scene-title').innerHTML.substring(0,40);
 			
 		}
 		
 	} else if((searchProgramsJson.length == 1)&&((searchProgramsJson[0].title == "") || (searchProgramsJson[0].title == "None"))){
 		//No matching results from guide
 		
-		this.personName = searchProgramsJson[0].name;
-		$('scene-title').innerHTML = this.personName;
+		//this.personName = searchProgramsJson[0].name;
+		//$('scene-title').innerHTML = this.personName;
 	
-		this.resultList.clear();
-		this.resultList.push({ 'person': -1, 'name':'No programs found', 'title':'No programs found', 'subtitle':'No programs found','role':'','starttime':'1900-01-01 00:00:00', 'channum':'', 'channelName':'' } );
+		//this.resultList.clear();
+		//this.resultList.push({ 'person': -1, 'name':'No programs found', 'title':'No programs found', 'subtitle':'No programs found','role':'','starttime':'1900-01-01 00:00:00', 'channum':'', 'channelName':'', 'type':'program' } );
 	
 		Mojo.Log.error("No response results %j",this.resultList);
 	
@@ -665,8 +867,8 @@ SearchPeopleAssistant.prototype.mysqlPeopleProgramsResponse = function(response)
 		var nowDate = new Date();
 		var nowDateISO = dateJSToISO(nowDate).replace("T"," ");
 		
-		this.personName = searchProgramsJson[0].name;
-		$('scene-title').innerHTML = this.personName;
+		//this.personName = searchProgramsJson[0].name;
+		//$('scene-title').innerHTML = this.personName;
 		
 		//Update the list widget
 		this.resultList.clear();
@@ -674,42 +876,225 @@ SearchPeopleAssistant.prototype.mysqlPeopleProgramsResponse = function(response)
 		
 		
 		if(this.resultList.length == 0) {
-			this.resultList.clear();
-			this.resultList.push({ 'person': -1, 'name':'No programs found', 'title':'No programs found', 'subtitle':'No programs found','role':'','starttime':'1900-01-01 00:00:00', 'channum':'', 'channelName':'' } );
+			//this.resultList.clear();
+			//this.resultList.push({ 'person': -1, 'name':'No programs found', 'title':'No programs found', 'subtitle':'No programs found','role':'','starttime':'1900-01-01 00:00:00', 'channum':'', 'channelName':'', 'type':'program' } );
 	
 			Mojo.Log.error("Had results but are old");
 			
 		} else {
 		
-			$('scene-title').innerHTML += " ("+this.resultList.length+" "+$L("items")+")";
-			$('scene-title').innerHTML = $('scene-title').innerHTML.substring(0,40);
+			//$('scene-title').innerHTML += " ("+this.resultList.length+" "+$L("items")+")";
+			//$('scene-title').innerHTML = $('scene-title').innerHTML.substring(0,40);
 			
 		}
 		
 	} else {
 		//No matching results from guide
 	
-		this.resultList.clear();
-		this.resultList.push({ 'person': -1, 'name':'No programs found', 'title':'No programs found', 'subtitle':'No programs found','role':'','starttime':'1900-01-01 00:00:00', 'channum':'', 'channelName':'' } );
+		//this.resultList.clear();
+		//this.resultList.push({ 'person': -1, 'name':'No programs found', 'title':'No programs found', 'subtitle':'No programs found','role':'','starttime':'1900-01-01 00:00:00', 'channum':'', 'channelName':'', 'type':'program' } );
 	
 		Mojo.Log.error("No response results %j",this.resultList);
 	
 	}
 	
-	this.sortChanged(this.currentSearchPeopleSort);
+	this.controller.window.setTimeout(this.getVideos.bind(this), 50);
+	
+}
+
+SearchPeopleAssistant.prototype.getVideos = function(){
+
+	Mojo.Log.info("Starting to get videos for %j",this.personObject);
+
+
+	
+	var query = "SELECT `videocast`.`cast` AS name, `videocast`.`intid` AS videoPersonId,  ";
+	query += " videometadata.intid, videometadata.title, videometadata.subtitle, videometadata.plot, videometadata.inetref,  "; 
+	query += " videometadata.homepage, videometadata.releasedate, videometadata.season, videometadata.episode, videometadata.filename, ";
+	query += " videometadata.director, videometadata.year, videometadata.rating, videometadata.length, videocategory.category, ";
+	query += " videometadata.hash, videometadata.coverfile, videometadata.host, videometadata.insertdate, ";
+	query += " 'video' AS type ";
+	query += " FROM `videocast` ";
+	query += " LEFT OUTER JOIN `videometadatacast` ON `videometadatacast`.`idcast` = `videocast`.`intid` ";
+	query += " LEFT OUTER JOIN `videometadata` ON `videometadata`.`intid` = `videometadatacast`.`idvideo` ";
+	query += " LEFT OUTER JOIN videocategory ON videocategory.intid = videometadata.category ";
+	query += ' WHERE `videocast`.`intid` = '+parseInt(this.personObject.videoPersonId)+' ';
+	query += " LIMIT 1000 ";
+	
+	//Mojo.Log.error("query is "+query);
+	
+	
+	if(this.personObject.videoPersonId > -1){
+		if(WebMyth.usePlugin){
+		
+			var response1 = $('webmyth_service_id').mysqlCommand(WebMyth.prefsCookieObject.databaseHost,WebMyth.prefsCookieObject.databaseUsername,WebMyth.prefsCookieObject.databasePassword,WebMyth.prefsCookieObject.databaseName,WebMyth.prefsCookieObject.databasePort,"mysqlPeopleVideosResponse",query.substring(0,250),query.substring(250,500),query.substring(500,750),query.substring(750,1000),query.substring(1000,1250),query.substring(1250,1500),query.substring(1500,1750),query.substring(1750,2000),query.substring(2000,2250),query.substring(2250,2500));
+			
+			Mojo.Log.error("Search videos from cast plugin response "+response1);
+			
+		} else {
+		
+			var requestUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webmythPythonFile;
+			requestUrl += "?op=executeSQLwithResponse";				
+			requestUrl += "&query64=";		
+			requestUrl += Base64.encode(query);	
+			
+
+			
+			try {
+				var request = new Ajax.Request(requestUrl,{
+					method: 'get',
+					evalJSON: 'true',
+					requestHeaders: {Authorization: 'Basic ' + Base64.encode(WebMyth.prefsCookieObject.webserverUsername + ":" + WebMyth.prefsCookieObject.webserverPassword)},
+					onSuccess: this.videosSearchSuccess.bind(this),
+					onFailure: this.videosSearchFail.bind(this)  
+				});
+			}
+			catch(e) {
+				Mojo.Log.error(e);
+			}
+			
+		}
+		
+	} else {
+	
+		//Wasn't a matching a video cast
+		this.sortChanged(WebMyth.prefsCookieObject.currentSearchPeopleSort);
+	
+	}
+	
+	
+
+}
+
+SearchPeopleAssistant.prototype.videosSearchFail = function(event) {
+
+	Mojo.Log.error('Failed to get videos response');
+	
+	
+	$('scene-title').innerHTML = $L("Error in searching")+"!!!";
+	
+	
+	this.resultList.clear();
+	this.resultList.push({ 'person': -1, 'name':'Error in searching', 'title':'Error in searching', 'subtitle':'Error in searching','role':'','starttime':'1900-01-01 00:00:00' } );
+	
+	
+	
+	this.controller.sceneScroller.mojo.revealTop();
+	
+	//Initial display
+	var listWidget = this.controller.get('searchPeopleList');
+	this.filterListFunction('', listWidget, 0, this.resultList.length);
+	listWidget.mojo.close();
+	
+	
+	//Stop spinner and hide
+	this.spinnerModel.spinning = false;
+	this.controller.modelChanged(this.spinnerModel, this);
+	$('myScrim').hide();	
+	
+};
+
+SearchPeopleAssistant.prototype.videosSearchSuccess = function(response) {
+    
+	Mojo.Log.error('Got videos search response: %j', cleanVideos(response.responseJSON));
+	
+	if(response.responseJSON.length > 1) {
+		//We got back some rows
+		
+		for(var i = 0; i < response.responseJSON.length; i++) {
+			
+			if(((response.responseJSON[i].title != "None")&&(response.responseJSON[i].subtitle != "None"))||((response.responseJSON[i].title != "")&&(response.responseJSON[i].subtitle != ""))) {
+				this.resultList.push(response.responseJSON[i]);
+			}
+		
+		}
+		
+		
+	} else if((response.responseJSON.length == 1)&&((response.responseJSON[0].title == "") || (response.responseJSON[0].title == "None"))){
+		//No matching results from guide
+		
+		Mojo.Log.error("No valid videos results %j",response.responseJSON);
+		
+	} else if(response.responseJSON.length == 1) {
+		//We got back a single valid row
+		
+		for(var i = 0; i < response.responseJSON.length; i++) {
+			
+			this.resultList.push(response.responseJSON[i]);
+		
+		}
+	
+	} else {
+		//No matching results from guide
+	
+		Mojo.Log.error("No videos results %j",response.responseJSON);
+	
+	}
+	
+	
+	this.sortChanged(WebMyth.prefsCookieObject.currentSearchPeopleSort);
+
+};
+
+SearchPeopleAssistant.prototype.mysqlPeopleVideosResponse = function(response) {
+
+	Mojo.Log.error("Got search videos plugin response: "+response);
+	
+	var searchVideosJson = cleanVideos(JSON.parse(response));
+	
+	
+	if(searchVideosJson.length > 1) {
+		//We got back some rows
+		
+		for(var i = 0; i < searchVideosJson.length; i++) {
+			
+			this.resultList.push(searchVideosJson[i]);
+		
+		}
+		
+	} else if((searchVideosJson.length == 1)&&((searchVideosJson[0].title == "") || (searchVideosJson[0].title == "None"))){
+		//No matching results from guide
+		
+		Mojo.Log.error("No valid videos results %j",searchVideosJson);
+	
+	} else if(searchVideosJson.length == 1) {
+		//We got back a single valid row
+		
+		for(var i = 0; i < searchVideosJson.length; i++) {
+			
+			this.resultList.push(searchVideosJson[i]);
+		
+		}
+		
+	} else {
+		//No matching results from guide
+	
+		Mojo.Log.error("No response results %j",searchVideosJson);
+	
+	}
+	
+	
+	this.sortChanged(WebMyth.prefsCookieObject.currentSearchPeopleSort);
 	
 }
 
 SearchPeopleAssistant.prototype.sortChanged = function(newSort) {
 
-	this.currentSearchPeopleSort = newSort;
+	WebMyth.prefsCookieObject.currentSearchPeopleSort = newSort;
 	
-	Mojo.Log.error("The current search sorting has changed to "+this.currentSearchPeopleSort);
+	//Mojo.Log.error("The current search sorting has changed to "+WebMyth.prefsCookieObject.currentSearchPeopleSort);
 	
 	if(this.currentMode == "program") {
+		
+		$('scene-title').innerHTML = this.personObject.name+" ("+this.resultList.length+" "+$L("items")+")";
+		$('scene-title').innerHTML = $('scene-title').innerHTML.substring(0,40);
+	
+		if(this.resultList.length == 0) {
+			this.resultList.push({ 'person': -1, 'name':'No programs found', 'title':'No programs found', 'subtitle':'No programs found','role':'','starttime':'1900-01-01 00:00:00', 'channum':'', 'channelName':'', 'type':'program' } );
+		}
 
 		//Sort list by selection
-		switch(this.currentSearchPeopleSort) {
+		switch(WebMyth.prefsCookieObject.currentSearchPeopleSort) {
 			case 'category-asc':
 				this.resultList.sort(double_sort_by('category', 'title', false));
 			  break;
@@ -811,7 +1196,7 @@ SearchPeopleAssistant.prototype.updateSortMenu = function() {
 			{"label": $L('Title-Desc'), "command": "go-sort-title-desc"}
 	] ;
 	
-	switch(this.currentSearchPeopleSort) {
+	switch(WebMyth.prefsCookieObject.currentSearchPeopleSort) {
 		case 'category-asc':
 			this.sortMenuModel.items[0].label = '- '+this.sortMenuModel.items[0].label+' -';
 		  break;
@@ -868,7 +1253,7 @@ SearchPeopleAssistant.prototype.filterListFunction = function(filterString, list
 				if (s.name.toUpperCase().indexOf(filterString.toUpperCase()) >=0) {
 					someList.push(s);
 				}
-			} else {
+			} else if(s.type == "program"){
 				if (s.title.toUpperCase().indexOf(filterString.toUpperCase()) >=0) {
 					someList.push(s);
 				}	
@@ -884,6 +1269,13 @@ SearchPeopleAssistant.prototype.filterListFunction = function(filterString, list
 				else if (s.role.toUpperCase().indexOf(filterString.toUpperCase())>=0){
 					someList.push(s);
 				}
+			} else if(s.type == "video"){
+				if (s.title.toUpperCase().indexOf(filterString.toUpperCase()) >=0) {
+					someList.push(s);
+				}	
+				else if (s.subtitle.toUpperCase().indexOf(filterString.toUpperCase())>=0){
+					someList.push(s);
+				}	
 			}
 		}
 	}
@@ -934,14 +1326,19 @@ SearchPeopleAssistant.prototype.goSearchDetails = function(event) {
 	Mojo.Log.error("Selected details %j",event.item);
 	
 	if(this.currentMode == "person") {
-	
-		//Mojo.Controller.getAppController().showBanner("Selected: "+event.item.person+" - "+event.item.name, {source: 'notification'});
 		
-		this.personId = event.item.person;
+		this.personObject = event.item;
 		
-		this.getPrograms();
+		if(this.personObject.name == "No people found") {
+			//do nothing
 		
-	} else {
+		} else {
+		
+			this.getPrograms();
+			
+		}
+		
+	} else if(event.item.type == "program") {
 	
 		//Mojo.Controller.getAppController().showBanner("Selected: "+event.item.title+" - "+event.item.name, {source: 'notification'});
 		
@@ -953,7 +1350,17 @@ SearchPeopleAssistant.prototype.goSearchDetails = function(event) {
 		newItem.endTime = "";
 		newItem.description = "";
 		
-		Mojo.Controller.stageController.pushScene("guideDetails", event.item, true);
+		if(newItem.title == "No programs found"){
+			//do nothing
+			
+		} else {
+			Mojo.Controller.stageController.pushScene("guideDetails", newItem, true);
+			
+		}
+		
+	} else if(event.item.type == "video") {
+		
+		Mojo.Controller.stageController.pushScene("videosDetails", event.item);
 		
 	}
 	
@@ -968,12 +1375,12 @@ SearchPeopleAssistant.prototype.searchDividerFunction = function(itemModel) {
 	
 		divider = itemModel.name.substring(0,1);
 		
-	} else {
+	} else if(itemModel.type == "program") {
 	
 		divider = itemModel.title;				//as default
 		var date = new Date(isoSpaceToJS(itemModel.starttime));
 		
-		switch(this.currentSearchPeopleSort) {
+		switch(WebMyth.prefsCookieObject.currentSearchPeopleSort) {
 		  case 'date-asc':
 			//divider = itemModel.starttime.substring(0,10);
 			divider = date.toLocaleString().substring(0,15);
@@ -1002,6 +1409,37 @@ SearchPeopleAssistant.prototype.searchDividerFunction = function(itemModel) {
 		   break;
 		}
 
+	} else if(itemModel.type == "video") {
+	
+		divider = itemModel.title;				//as default
+		
+		switch(WebMyth.prefsCookieObject.currentSearchPeopleSort) {
+		  case 'date-asc':
+			divider = "MythVideo";
+		   break;
+		  case 'date-desc':
+			divider = "MythVideo";
+		   break;
+		  case 'title-asc':
+			divider = itemModel.title;
+		   break;
+		  case 'title-desc':
+			divider = itemModel.title;
+		   break;
+		  case 'category-asc':
+			divider = itemModel.category;
+		   break;
+		  case 'category-desc':
+			divider = itemModel.category;
+		   break;
+		  case 'channel-asc':
+			divider = "MythVideo";
+		   break;
+		  case 'channel-desc':
+			divider = "MythVideo";
+		   break;
+		}
+
 	}
 	 
 	return divider;
@@ -1019,7 +1457,7 @@ SearchPeopleAssistant.prototype.setMyData = function(propertyValue, model) {
 	
 		searchDetailsText += '<div id='+model.name+' class="palm-row-wrapper"><div class="title">'+model.name+'</div></div>';
 		
-	} else {
+	} else if(model.type == "program") {
 		
 		searchDetailsText += '<div id='+model.chanid+model.starttime+' class="palm-row multi-line searchPeople-list-item>';
 		searchDetailsText += '<div class="palm-row-wrapper searchPeople-list-item multi-line"><div class="searchPeople-list-item">';
@@ -1051,6 +1489,23 @@ SearchPeopleAssistant.prototype.setMyData = function(propertyValue, model) {
 		
 		searchDetailsText += '</div></div></div>';
 	
+	} else if(model.type == "video") {
+	
+		searchDetailsText += '<div class="palm-row multi-line searchPeople-list-item>';
+		searchDetailsText += '<div class="palm-row-wrapper searchPeople-list-item multi-line"><div class="searchPeople-list-item">';
+		
+		searchDetailsText += '<div class="title truncating-text left searchPeople-list-title">&nbsp;'+model.title+'</div>';
+		
+		searchDetailsText += '<div class="palm-row-wrapper">';
+		
+		searchDetailsText += '<div class="palm-info-text truncating-text left">&nbsp;'+model.subtitle+'&nbsp;</div>';
+		searchDetailsText += '<div class="palm-info-text truncating-text left">&nbsp;&nbsp;'+model.plot+'&nbsp;</div>';
+		searchDetailsText += '<div class="palm-info-text truncating-text left">&nbsp;&nbsp;&nbsp;'+$L('Episode')+': '+model.fullEpisode+'</div>';
+		searchDetailsText += '<div class="palm-info-text truncating-text left">&nbsp;&nbsp;&nbsp;&nbsp;'+$L('Released')+': '+model.releasedate+'</div>';
+		
+		
+		searchDetailsText += '</div></div></div></div>';
+	
 	}
 		
 	model.myData = searchDetailsText;
@@ -1064,16 +1519,16 @@ SearchPeopleAssistant.prototype.openWeb = function(value) {
 	
 	switch(value) {
 		case 'wikipedia':
-			url = "http://"+Mojo.Locale.getCurrentLocale().substring(0,2)+".m.wikipedia.org/wiki/Special:Search?search="+this.personName;
+			url = "http://"+Mojo.Locale.getCurrentLocale().substring(0,2)+".m.wikipedia.org/wiki/Special:Search?search="+this.personObject.name;
 		  break;
 		case 'imdb':
-			url = "http://m.imdb.com/find?realm=name&field=bio&q="+this.personName;
+			url = "http://m.imdb.com/find?realm=name&field=bio&q="+this.personObject.name;
 		  break;
 		case 'google':
-			url = "http://www.google.com/m/search?client=ms-palm-webOS&channel=iss&q="+this.personName;
+			url = "http://www.google.com/m/search?client=ms-palm-webOS&channel=iss&q="+this.personObject.name;
 		  break;
 		case 'images':
-			url = "http://www.google.com/m/search?client=ms-palm-webOS&site=images&channel=iss&q="+this.personName;
+			url = "http://www.google.com/m/search?client=ms-palm-webOS&site=images&channel=iss&q="+this.personObject.name;
 		  break;
 		  
 	}
@@ -1100,7 +1555,6 @@ SearchPeopleAssistant.prototype.openWeb = function(value) {
 */
 
 var SearchDialogAssistant = Class.create({
-	
 	
 	initialize: function(sceneAssistant, callbackFunc) {
 		this.sceneAssistant = sceneAssistant;
@@ -1146,3 +1600,5 @@ var SearchDialogAssistant = Class.create({
 	
 	
 });
+
+

@@ -117,7 +117,7 @@ RecordedDetailsAssistant.prototype.setup = function() {
 			onSuccess: function(response) {
 				//Mojo.Log.error("Got connection status of %j", response);
 				
-				if(((response.wifi.state != "connected")&&(WebMyth.prefsCookieObject.useWebmythScript))||(WebMyth.prefsCookieObject.forceScriptScreenshots)) {
+				if(((response.wifi.state != "connected")&&(WebMyth.prefsCookieObject.usePlugin < 2))||(WebMyth.prefsCookieObject.forceScriptScreenshots)) {
 					this.screenshotUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webmythPythonFile+"?op=getPremadeImage&chanid=";
 					this.screenshotUrl += this.recordedObject.chanId + "&starttime=" + this.recordedObject.recStartTs.replace("T"," ");
 				} else {
@@ -702,9 +702,11 @@ RecordedDetailsAssistant.prototype.getPeople = function(event) {
 	
 	
 	var query = 'SELECT UPPER(`credits`.`role`) AS `role`, ';
-	query += ' `people`.`name`, `people`.`person` ';
+	query += ' `people`.`name`, `people`.`person`, ';
+	query += ' `videocast`.`intid` AS videoPersonId ';
 	query += ' FROM `credits` ';
 	query += ' LEFT OUTER JOIN `people` ON `credits`.`person` = `people`.`person` ';
+	query += ' LEFT OUTER JOIN `videocast` ON `videocast`.`cast` = `people`.`name` ';
 	query += ' WHERE (`credits`.`chanid` = '+this.recordedObject.chanId+' AND `credits`.`starttime` = "'+this.recordedObject.startTime.replace("T"," ")+'" ) ';
 	query += ' ORDER BY `role` ';
 	
@@ -1066,6 +1068,6 @@ RecordedDetailsAssistant.prototype.goPeopleDetails = function(event) {
 
 	Mojo.Log.info("Selected people details %j",event.item);
 	
-	Mojo.Controller.stageController.pushScene("searchPeople", event.item.person);
+	Mojo.Controller.stageController.pushScene("searchPeople", event.item);
 
 };

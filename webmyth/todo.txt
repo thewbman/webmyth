@@ -16,6 +16,8 @@ Todo - planned new features and updates:
  - script to start frontend via web
  - autofind backends
  - support streaming (mplayer?)
+ - fix jump bottom new schedule create
+ - update mythmusic remote
  
  
  

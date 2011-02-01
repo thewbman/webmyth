@@ -122,8 +122,9 @@ function defaultCookie() {
 		currentLogGroup: 'all',
 		manualDatabase: false,
 		databaseHost: '',
-		usePlugin: 2,
-		protoVerSubmitted: false
+		usePlugin: 0,
+		protoVerSubmitted: false,
+		currentSearchPeopleSort: 'date-asc'
 		
 	};
 	

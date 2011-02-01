@@ -272,10 +272,14 @@ MusicListAssistant.prototype.getMusic = function(event) {
 	//SELECT music_songs.song_id, music_songs.name, music_songs.filename, music_songs.year, music_songs.track, music_artists.artist_name, music_albums.album_name, music_albums.year AS album_year, music_albums.compilation FROM music_songs, music_artists, music_albums WHERE music_songs.artist_id = music_artists.artist_id AND music_songs.album_id = music_albums.album_id
 	
 	var query = "SELECT music_songs.song_id, music_songs.name, music_songs.filename, music_songs.year, music_songs.track, music_songs.length, "; 
-	query += " music_songs.artist_id, music_artists.artist_name, music_songs.album_id, music_albums.album_name, music_albums.compilation ";
+	query += " music_songs.artist_id, music_songs.album_id, ";
+	query += " music_artists.artist_name, ";
+	query += " music_albums.album_name, music_albums.compilation, ";
+	query += " music_albumart.albumart_id ";
 	query += " FROM music_songs ";
 	query += " LEFT JOIN music_artists ON music_songs.artist_id = music_artists.artist_id "
 	query += " LEFT JOIN music_albums ON music_songs.album_id = music_albums.album_id ";
+	query += " LEFT JOIN music_albumart ON music_songs.directory_id = music_albumart.directory_id ";
 	
 	
 	
@@ -913,7 +917,7 @@ MusicListAssistant.prototype.musicDividerFunction = function(itemModel) {
 MusicListAssistant.prototype.setMyData = function(propertyValue, model) {
 
 	var albumArtUrl = "http://"+WebMyth.prefsCookieObject.masterBackendIp+":6544/Myth/GetAlbumArt?Id=";
-	albumArtUrl += model.album_id;
+	albumArtUrl += model.albumart_id;
 	
 	var musicDetailsText = '<div class="music-list-item">';
 	musicDetailsText += '<div class="title truncating-text left  music-list-title">&nbsp;'+model.name+'</div>';
