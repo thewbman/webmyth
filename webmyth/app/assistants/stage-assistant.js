@@ -26,8 +26,8 @@
 WebMyth = {};
 
 
-WebMyth.usePlugin = false;
-WebMyth.usePluginFrontend = false;
+WebMyth.usePlugin = true;
+WebMyth.usePluginFrontend = true;
 WebMyth.nextFrontendCommand = "";
 
 WebMyth.useService = false;
