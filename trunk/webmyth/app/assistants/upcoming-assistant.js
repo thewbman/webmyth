@@ -200,19 +200,6 @@ UpcomingAssistant.prototype.getUpcoming = function(event) {
 	
 		//adsf - Add back service command here
 		
-				this.controller.serviceRequest('palm://com.thewbman.webmyth.service', {
-			method:"mythprotocolCommand",
-				parameters:{
-					"port":"6543", 
-					"address":WebMyth.prefsCookieObject.masterBackendIp,
-					"protocolVersion": WebMyth.prefsCookieObject.protoVer,
-					"command": "QUERY_GETALLPENDING",
-					"timeout": 8000								//gives service 8 full seconds to get all data, will return earlier if done
-					},
-				onSuccess: this.readUpcomingServiceSuccess.bind(this),
-				onFailure: this.remoteDbTableFail.bind(this)
-			});
-		
 		//asdf
 		
 	} else { 

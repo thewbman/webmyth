@@ -204,7 +204,9 @@ MusicPlaylistAssistant.prototype.handleCommand = function(event) {
 		Mojo.Controller.stageController.pushScene({name: WebMyth.prefsCookieObject.currentRemoteScene, disableSceneScroller: true});
 		
 	} else if(event.type == Mojo.Event.back) {
-		Mojo.Controller.stageController.swapScene("musicList", this.allMusic);
+	
+		this.askExit();
+		Event.stop(event);
 		
 	}
   
@@ -246,6 +248,29 @@ MusicPlaylistAssistant.prototype.handleKey = function(event) {
 
 
 
+
+MusicPlaylistAssistant.prototype.askExit = function() {
+
+	this.controller.showAlertDialog({
+		onChoose: function(value) {
+			switch(value) {
+				case 'yes':
+					Mojo.Controller.stageController.swapScene("musicList", this.allMusic);
+				  break;
+				case 'no':
+				  break;
+				}
+			},
+		title: "WebMyth - v" + Mojo.Controller.appInfo.version,
+		message:  "You have not saved any changes to the playlist.  Are you sure you want to exit now?", 
+		choices: [
+				{label: $L("Yes"), value: 'yes', type: 'affirmative'},
+				{label: $L("No"), value: 'no', type: 'negative'}
+			],
+		allowHTMLMessage: true
+	});
+	
+};
 
 MusicPlaylistAssistant.prototype.togglePlaylistsDrawer = function() {
 
@@ -857,7 +882,7 @@ MusicPlaylistAssistant.prototype.setMyPlaylistData = function(propertyValue, mod
 MusicPlaylistAssistant.prototype.setMySongData = function(propertyValue, model) {
 
 	var albumArtUrl = "http://"+WebMyth.prefsCookieObject.masterBackendIp+":6544/Myth/GetAlbumArt?Id=";
-	albumArtUrl += model.album_id;
+	albumArtUrl += model.albumart_id;
 	
 	var musicDetailsText = '<div class="musicPlaylist-list-item">';
 	musicDetailsText += '<div class="title truncating-text left music-list-title">&nbsp;';

@@ -609,9 +609,11 @@ UpcomingDetailsXMLAssistant.prototype.getPeople = function(event) {
 	
 	
 	var query = 'SELECT UPPER(`credits`.`role`) AS `role`, ';
-	query += ' `people`.`name`, `people`.`person` ';
+	query += ' `people`.`name`, `people`.`person`, ';
+	query += ' `videocast`.`intid` AS videoPersonId ';
 	query += ' FROM `credits` ';
 	query += ' LEFT OUTER JOIN `people` ON `credits`.`person` = `people`.`person` ';
+	query += ' LEFT OUTER JOIN `videocast` ON `videocast`.`cast` = `people`.`name` ';
 	query += ' WHERE (`credits`.`chanid` = '+this.chanid+' AND `credits`.`starttime` = "'+this.starttime.replace("T"," ")+'" ) ';
 	query += ' ORDER BY `role` ';
 	
@@ -688,6 +690,6 @@ UpcomingDetailsXMLAssistant.prototype.goPeopleDetails = function(event) {
 
 	Mojo.Log.info("Selected people details %j",event.item);
 	
-	Mojo.Controller.stageController.pushScene("searchPeople", event.item.person);
+	Mojo.Controller.stageController.pushScene("searchPeople", event.item);
 
 };

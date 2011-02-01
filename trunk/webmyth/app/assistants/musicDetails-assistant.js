@@ -49,7 +49,7 @@ MusicDetailsAssistant.prototype.setup = function() {
 	
 	
 	var albumArtUrl = "http://"+WebMyth.prefsCookieObject.masterBackendIp+":6544/Myth/GetAlbumArt?Id=";
-	albumArtUrl += this.musicObject.album_id;
+	albumArtUrl += this.musicObject.albumart_id;
 	
 	//Fill in data values
 	$('albumart-image').src = albumArtUrl;

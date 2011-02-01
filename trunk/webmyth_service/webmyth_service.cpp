@@ -276,6 +276,7 @@ void sendProtocolLength(void){
 
 	//syslog(LOG_INFO, "Starting to send MP length %d", mpSendMsgSize);
 	
+	/*
 	if(mpSendMsgSize > 9999) {
 		mpLengthSendMsgSize = sprintf(mpLengthSendBuffer, "%d   ", mpSendMsgSize);
 	} else if(mpSendMsgSize > 999) {
@@ -287,6 +288,9 @@ void sendProtocolLength(void){
 	} else {
 		mpLengthSendMsgSize = sprintf(mpLengthSendBuffer, "%d       ", mpSendMsgSize);
 	} 
+	*/
+	
+	mpLengthSendMsgSize = sprintf(mpLengthSendBuffer, "%-8d", mpSendMsgSize);
 	
 	
 	if(sendto(protocol_sock, mpLengthSendBuffer, mpLengthSendMsgSize, 0, NULL, 0) != mpLengthSendMsgSize){

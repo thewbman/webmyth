@@ -921,12 +921,12 @@ body.palm-dark {
 	margin: 0px -20px;
 }
  
-.searchPeople-scene .searchPeople-right-list-text .searchPeople-list-title  {
+.searchPeople-scene .searchPeople-list-item .searchPeople-list-title  {
   padding: 8px 14px 0px 0px;
   margin: 0px;
 }
 
-.searchPeople-scene .searchPeople-right-list-text .palm-info-text.left {
+.searchPeople-scene .searchPeople-list-item .palm-info-text.left {
   padding: 0px;
   margin: 0px 8px;
   line-height: 16px;

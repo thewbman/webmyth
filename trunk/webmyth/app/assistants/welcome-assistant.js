@@ -195,6 +195,10 @@ WelcomeAssistant.prototype.setup = function() {
 		if (WebMyth.prefsCookieObject.databaseHost == null) WebMyth.prefsCookieObject.databaseHost = myDefaultCookie.databaseHost;
 		if (WebMyth.prefsCookieObject.usePlugin == null) WebMyth.prefsCookieObject.usePlugin = myDefaultCookie.usePlugin;
 		if (WebMyth.prefsCookieObject.protoVerSubmitted == null) WebMyth.prefsCookieObject.protoVerSubmitted = myDefaultCookie.protoVerSubmitted;
+		if (WebMyth.prefsCookieObject.currentSearchSort == null) WebMyth.prefsCookieObject.currentSearchSort = myDefaultCookie.currentSearchSort;
+		if (WebMyth.prefsCookieObject.currentSearchPeopleSort == null) WebMyth.prefsCookieObject.currentSearchPeopleSort = myDefaultCookie.currentSearchPeopleSort;
+		
+		
 		
 		
 		
@@ -282,7 +286,7 @@ WelcomeAssistant.prototype.setup = function() {
 	}
 
 	//Check for app updates
-	//this.puchkDoUpdateCheck(24);
+	this.puchkDoUpdateCheck(24);
 	
 	//Check for network
 	this.checkNetworkConnectionStatus();
@@ -665,7 +669,7 @@ WelcomeAssistant.prototype.doWelcomeIcon = function(event) {
 	
 	try {
 	
-		$('debugText').innerText = "Debug text";
+		//$('debugText').innerText = "Debug text";
 		
 		//var response1 = $('webmyth_service_id').upnpSearch("239.255.255.250",1900,"M-SEARCH * HTTP/1.1\r\nHOST: 239.255.255.250:1900\r\nMAN: \"ssdp:discover\"\r\nMX: 2\r\nST: urn:schemas-mythtv-org:device:MasterMediaServer:1\r\n\r\n");
 		
@@ -755,7 +759,7 @@ WelcomeAssistant.prototype.doHelpButton = function(event) {
 								parameters: {
 									id: "com.palm.app.email",
 									params: {
-										summary: "Help with WebMyth v"+ Mojo.Controller.appInfo.version+", script version "+WebMyth.prefsCookieObject.liveScriptVersion,
+										summary: "Help with WebMyth v"+ Mojo.Controller.appInfo.version,
 										recipients: [{
 											type:"email",
 											value:"webmyth.help@gmail.com",
