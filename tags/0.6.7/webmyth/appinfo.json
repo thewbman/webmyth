@@ -1,0 +1,10 @@
+{
+	"id": "com.thewbman.webmyth-beta",
+	"version": "0.6.7",
+	"vendor": "thewbman",
+	"type": "web",
+	"main": "index.html",
+	"title": "WebMyth Beta",
+	"icon": "icon2.png",
+	"plug-ins": true
+}
