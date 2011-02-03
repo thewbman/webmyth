@@ -107,12 +107,18 @@ SearchAssistant.prototype.activate = function(event) {
 	//Keypress event
 	Mojo.Event.listen(this.controller.sceneElement, Mojo.Event.keyup, this.handleKey.bind(this));
 	
+	Mojo.Event.listen(this.controller.stageController.document, "gesturestart", this.gestureStart.bindAsEventListener(this));
+	Mojo.Event.listen(this.controller.stageController.document, "gestureend", this.gestureEnd.bindAsEventListener(this));
+	
 };
 
 SearchAssistant.prototype.deactivate = function(event) {
 
 	//Keypress event
 	Mojo.Event.stopListening(this.controller.sceneElement, Mojo.Event.keyup, this.handleKey.bind(this));
+	
+	Mojo.Event.stopListening(this.controller.stageController.document, "gesturestart", this.gestureStart.bind(this));
+	Mojo.Event.stopListening(this.controller.stageController.document, "gestureend", this.gestureStart.bind(this));
 	
 	WebMyth.prefsCookie.put(WebMyth.prefsCookieObject);
 	
@@ -213,6 +219,24 @@ SearchAssistant.prototype.handleKey = function(event) {
 	
 };
 
+SearchAssistant.prototype.gestureStart = function(event) {
+	
+	this.gestureStartY = event.centerY;
+
+};
+
+SearchAssistant.prototype.gestureEnd = function(event) {
+
+	this.gestureEndY = event.centerY;
+	this.gestureDistance = this.gestureEndY - this.gestureStartY;
+	
+	if(this.gestureDistance>0) {
+		this.controller.getSceneScroller().mojo.revealTop();
+	} else if(this.gestureDistance<0) {
+		this.controller.getSceneScroller().mojo.revealBottom();
+	}
+
+};
 
 
 

@@ -135,12 +135,18 @@ SearchPeopleAssistant.prototype.activate = function(event) {
 	//Keypress event
 	Mojo.Event.listen(this.controller.sceneElement, Mojo.Event.keyup, this.handleKey.bind(this));
 	
+	Mojo.Event.listen(this.controller.stageController.document, "gesturestart", this.gestureStart.bindAsEventListener(this));
+	Mojo.Event.listen(this.controller.stageController.document, "gestureend", this.gestureEnd.bindAsEventListener(this));
+	
 };
 
 SearchPeopleAssistant.prototype.deactivate = function(event) {
 
 	//Keypress event
 	Mojo.Event.stopListening(this.controller.sceneElement, Mojo.Event.keyup, this.handleKey.bind(this));
+	
+	Mojo.Event.stopListening(this.controller.stageController.document, "gesturestart", this.gestureStart.bind(this));
+	Mojo.Event.stopListening(this.controller.stageController.document, "gestureend", this.gestureStart.bind(this));
 	
 	WebMyth.prefsCookie.put(WebMyth.prefsCookieObject);
 	
@@ -264,6 +270,24 @@ SearchPeopleAssistant.prototype.handleKey = function(event) {
 	
 };
 
+SearchPeopleAssistant.prototype.gestureStart = function(event) {
+	
+	this.gestureStartY = event.centerY;
+
+};
+
+SearchPeopleAssistant.prototype.gestureEnd = function(event) {
+
+	this.gestureEndY = event.centerY;
+	this.gestureDistance = this.gestureEndY - this.gestureStartY;
+	
+	if(this.gestureDistance>0) {
+		this.controller.getSceneScroller().mojo.revealTop();
+	} else if(this.gestureDistance<0) {
+		this.controller.getSceneScroller().mojo.revealBottom();
+	}
+
+};
 
 
 

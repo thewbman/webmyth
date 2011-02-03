@@ -1,3 +1,17 @@
+{
+	"id": "com.thewbman.webmyth",
+	"version": "0.6.7",
+	"vendor": "thewbman",
+	"type": "web",
+	"main": "index.html",
+	"title": "WebMyth",
+	"icon": "icon.png",
+	"plug-ins": true
+}
+
+
+
+
 
 WebMyth.telnetTimeout = 0;
 WebMyth.welcomeSceneController = 0;

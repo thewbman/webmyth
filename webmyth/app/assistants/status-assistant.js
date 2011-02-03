@@ -212,6 +212,8 @@ StatusAssistant.prototype.deactivate = function(event) {
 	//Keypress event
 	Mojo.Event.stopListening(this.controller.sceneElement, Mojo.Event.keyup, this.handleKey.bind(this));
 	
+	WebMyth.prefsCookie.put(WebMyth.prefsCookieObject);
+	
 };
 
 StatusAssistant.prototype.cleanup = function(event) {
@@ -673,6 +675,8 @@ StatusAssistant.prototype.readStatusSuccess = function(response) {
 	var statusNode=xmlobject.getElementsByTagName("Status")[0];
 	var loadNode=xmlobject.getElementsByTagName("Load")[0];
 	
+	WebMyth.prefsCookieObject.mythVer = statusNode.getAttributeNode("version").nodeValue;
+	
 	var generalStatusContent = '<div class="palm-row first">';
 	generalStatusContent +=	'	<div class="palm-row-wrapper">';
     generalStatusContent +=	'		<div class="label" id="masterBackendIP-label">'+$L('Master Backend')+'</div>';
@@ -681,7 +685,7 @@ StatusAssistant.prototype.readStatusSuccess = function(response) {
     generalStatusContent +=	'</div>';
 	generalStatusContent +=	'<div class="palm-row">';
 	generalStatusContent +=	'	<div class="palm-row-wrapper">';
-    generalStatusContent +=	'        <div class="label" id="version-label">'+$L('Status Version')+'</div>';
+    generalStatusContent +=	'        <div class="label" id="version-label">'+$L('Version')+'</div>';
 	generalStatusContent +=	'		<div class="title" id="version-title">'+statusNode.getAttributeNode("version").nodeValue+'</div>';
 	generalStatusContent +=	'	</div>';
     generalStatusContent +=	'</div>';
@@ -713,6 +717,7 @@ StatusAssistant.prototype.readStatusSuccess = function(response) {
 	generalStatusContent +=	' </div>';
 	
 	$('generalStatusContent').innerHTML = generalStatusContent;
+	
 	
 	
 	

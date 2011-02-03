@@ -151,6 +151,9 @@ WelcomeAssistant.prototype.setup = function() {
 				WebMyth.prefsCookieObject.protoVerSubmitted = true;
 			}
 			
+			//Updates to own server instead of Metrix, TDB
+			//this.postAppData();
+			
 		};
 		
 		myDefaultCookie = defaultCookie();
@@ -197,6 +200,7 @@ WelcomeAssistant.prototype.setup = function() {
 		if (WebMyth.prefsCookieObject.protoVerSubmitted == null) WebMyth.prefsCookieObject.protoVerSubmitted = myDefaultCookie.protoVerSubmitted;
 		if (WebMyth.prefsCookieObject.currentSearchSort == null) WebMyth.prefsCookieObject.currentSearchSort = myDefaultCookie.currentSearchSort;
 		if (WebMyth.prefsCookieObject.currentSearchPeopleSort == null) WebMyth.prefsCookieObject.currentSearchPeopleSort = myDefaultCookie.currentSearchPeopleSort;
+		if (WebMyth.prefsCookieObject.mythVer == null) WebMyth.prefsCookieObject.mythVer = myDefaultCookie.mythVer;
 		
 		
 		
@@ -536,7 +540,6 @@ WelcomeAssistant.prototype.showButtons = function() {
 };
 
 WelcomeAssistant.prototype.goRemote = function(event) {
-	//Start remote scene 
 	Mojo.Controller.stageController.pushScene("hostSelector", false);
 };
 
@@ -593,7 +596,6 @@ WelcomeAssistant.prototype.goLog = function(event) {
 };
 
 WelcomeAssistant.prototype.goWebview = function(event) {
-	//Start upcoming scene
 	Mojo.Controller.stageController.pushScene("webview");
 };
 
@@ -615,7 +617,6 @@ WelcomeAssistant.prototype.alertNeedScript = function() {
 WelcomeAssistant.prototype.alertScriptUpdate = function(oldversion) {
 	
 	//Mojo.Log.error("Current version is " + WebMyth.currentScriptVersion + " but last version was " + oldversion);
-	
 	
 	if( (WebMyth.currentScriptVersion) > oldversion ) {
 	
@@ -1256,6 +1257,73 @@ WelcomeAssistant.prototype.puchkSplitVer = function(v) {
         build: build
     };
     	
+}
+
+
+
+//Analytics to Google App Engine
+WelcomeAssistant.prototype.postAppData = function() {
+
+	this.controller.serviceRequest('palm://com.palm.preferences/systemProperties', {
+		method:"Get",
+		parameters:{"key": "com.palm.properties.nduid" },
+		onSuccess: this.deviceIdSuccess.bind(this),
+		onFailure: this.deviceIdFail.bind(this),
+	});
+
+}
+
+WelcomeAssistant.prototype.deviceIdFail = function() {
+
+	Mojo.Log.error("Failed to get deviceId");
+	
+}
+
+WelcomeAssistant.prototype.deviceIdSuccess = function(response) {
+
+	Mojo.Log.info("Got deviceId: %s",response["com.palm.properties.nduid"]);
+	
+	var deviceId = Base64.encode(Mojo.appInfo.id+response["com.palm.properties.nduid"]);
+	var appId = Mojo.appInfo.id;
+	var appVersion = Mojo.appInfo.version;
+	var webOsBuildNumber = Mojo.Environment.build;
+	var resolution = Mojo.Environment.DeviceInfo.screenWidth + "x" + Mojo.Environment.DeviceInfo.screenHeight;
+	var deviceName = Mojo.Environment.DeviceInfo.modelNameAscii;
+	var carrierName = Mojo.Environment.DeviceInfo.carrierName;
+	var webOsVersion = Mojo.Environment.DeviceInfo.platformVersion;
+	var locale = Mojo.Locale.getCurrentLocale();
+	var protoVer = parseInt(WebMyth.prefsCookieObject.protoVer);
+	var mythVer = WebMyth.prefsCookieObject.mythVer;
+	
+	var url = "http://webmythtracking.appspot.com/rpc";
+	//var url = "http://192.168.1.100:8080/rpc";
+	
+	if(WebMyth.prefsCookieObject.protoVer){
+		//Only request if we have protoVer
+		
+		var request = new Ajax.Request(url, {
+			method: "get",
+			evalJSON: "false",
+			parameters: {deviceId: deviceId, appId: appId, appVersion: appVersion, resolution: resolution, webOsBuildNumber: webOsBuildNumber, webOsVersion: webOsVersion, carrierName: carrierName, deviceName: deviceName, locale: locale, protoVer: protoVer, mythVer: mythVer},
+			onSuccess: this.postDeviceDataSuccess.bind(this),
+			onFailure: this.postDeviceDataFailure.bind(this),
+			on0: this.postDeviceDataFailure.bind(this)
+		});
+		
+	}
+	
+}
+
+WelcomeAssistant.prototype.postDeviceDataFailure = function() {
+
+	Mojo.Log.error("Failed to postDeviceDataFailure");
+	
+}
+
+WelcomeAssistant.prototype.postDeviceDataSuccess = function(response) {
+
+	Mojo.Log.info("Success postDeviceDataSuccess: "+response.responseText.trim());
+
 }
 
 
