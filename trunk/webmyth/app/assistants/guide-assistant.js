@@ -135,7 +135,7 @@ GuideAssistant.prototype.setup = function() {
 	this.controller.listen(this.controller.get( "guideList" ), Mojo.Event.listTap, this.goGuideDetails.bind(this));
 	
 	
-	//Get system time, not passed anything	
+	//Get system time	
 	this.controller.serviceRequest('palm://com.palm.systemservice/time', {
 		method:"getSystemTime",
 		parameters:{},
@@ -204,8 +204,12 @@ GuideAssistant.prototype.setup = function() {
 };
 
 GuideAssistant.prototype.activate = function(event) {
+
 	//Keypress event
 	Mojo.Event.listen(this.controller.sceneElement, Mojo.Event.keyup, this.handleKey.bind(this));
+	
+	Mojo.Event.listen(this.controller.stageController.document, "gesturestart", this.gestureStart.bindAsEventListener(this));
+	Mojo.Event.listen(this.controller.stageController.document, "gestureend", this.gestureEnd.bindAsEventListener(this));
 	
 	if(WebMyth.channelObject.channelName) {
 		//Channel is set from channelPicker
@@ -237,20 +241,23 @@ GuideAssistant.prototype.activate = function(event) {
 };
 
 GuideAssistant.prototype.deactivate = function(event) {
+
 	//Keypress event
 	Mojo.Event.stopListening(this.controller.sceneElement, Mojo.Event.keyup, this.handleKey.bind(this));
+	
+	Mojo.Event.stopListening(this.controller.stageController.document, "gesturestart", this.gestureStart.bind(this));
+	Mojo.Event.stopListening(this.controller.stageController.document, "gestureend", this.gestureStart.bind(this));
 	
 };
 
 GuideAssistant.prototype.cleanup = function(event) {
-	/* this function should do any cleanup needed before the scene is destroyed as 
-	   a result of being popped off the scene stack */
 	   
 	WebMyth.guideCookie.put(WebMyth.guideCookieObject); 
 
 };
 
 GuideAssistant.prototype.handleCommand = function(event) {
+
 	if(event.type == Mojo.Event.command) {
 		switch(event.command) {
 			case 'do-sortDefault':
@@ -446,6 +453,24 @@ GuideAssistant.prototype.handleKey = function(event) {
 	
 };
 
+GuideAssistant.prototype.gestureStart = function(event) {
+	
+	this.gestureStartY = event.centerY;
+
+};
+
+GuideAssistant.prototype.gestureEnd = function(event) {
+
+	this.gestureEndY = event.centerY;
+	this.gestureDistance = this.gestureEndY - this.gestureStartY;
+	
+	if(this.gestureDistance>0) {
+		this.controller.getSceneScroller().mojo.revealTop();
+	} else if(this.gestureDistance<0) {
+		this.controller.getSceneScroller().mojo.revealBottom();
+	}
+
+};
 
 
 

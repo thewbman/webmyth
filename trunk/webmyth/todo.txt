@@ -19,6 +19,8 @@ Todo - planned new features and updates:
  - fix jump bottom new schedule create
  - update mythmusic remote
  
+ - try google app engine analytics?
+ 
  
  
  
