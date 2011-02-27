@@ -46,7 +46,7 @@ PreferencesAssistant.prototype.setup = function() {
 		},
 		this.usePluginSelectorModel
 	);
-	this.controller.listen("usePluginSelector", Mojo.Event.propertyChange, this.usePluginSelectorChanged.bindAsEventListener(this));
+	//this.controller.listen("usePluginSelector", Mojo.Event.propertyChange, this.usePluginSelectorChanged.bindAsEventListener(this));
 	//Server address
 	this.webserverTextModel = {
              value: "",
