@@ -156,7 +156,7 @@ WelcomeAssistant.prototype.setup = function() {
 			
 		};
 		
-		myDefaultCookie = defaultCookie();
+		var myDefaultCookie = defaultCookie();
 		
 		//Setup default settings if missing due to old cookie versions
 		//if (WebMyth.prefsCookieObject.webserverRemoteFile == null) WebMyth.prefsCookieObject.webserverRemoteFile = myDefaultCookie.webserverRemoteFile;
