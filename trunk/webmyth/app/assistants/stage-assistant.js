@@ -183,7 +183,7 @@ StageAssistant.prototype.setup = function() {
 		$('webmyth_service_id').socketIsClosed = this.socketIsClosed.bind(this);	
 	}
 	
-	Mojo.Log.info("About to start first scene - welcome");
+	//Mojo.Log.info("About to start first scene - welcome");
 	
 	//Start first scene
 	this.controller.pushScene("welcome");
