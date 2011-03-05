@@ -44,7 +44,11 @@ function GuideAssistant(starttime_in) {
 }
 
 GuideAssistant.prototype.setup = function() {
-
+	
+	if(WebMyth.prefsCookieObject.debug){
+		Mojo.Log.info("GuideAssistant setup");
+	}
+	
 	//Show and start the animated spinner
 	this.spinnerAttr= {
 		spinnerSize: "large"
@@ -214,7 +218,9 @@ GuideAssistant.prototype.activate = function(event) {
 	if(WebMyth.channelObject.channelName) {
 		//Channel is set from channelPicker
 		
-		Mojo.Log.info("found matching channel object %j",WebMyth.channelObject);
+		if(WebMyth.prefsCookieObject.debug){
+			Mojo.Log.info("found matching channel object %j",WebMyth.channelObject);
+		}
 		
 		//Restart spinner and show
 		this.spinnerModel.spinning = true;
@@ -408,7 +414,9 @@ GuideAssistant.prototype.handleCommand = function(event) {
 
 GuideAssistant.prototype.handleKey = function(event) {
 
-	//Mojo.Log.info("handleKey %o, %o", event.originalEvent.metaKey, event.originalEvent.keyCode);
+	if(WebMyth.prefsCookieObject.debug){
+		Mojo.Log.info("handleKey %o, %o", event.originalEvent.metaKey, event.originalEvent.keyCode);
+	}
 	
 	if(event.originalEvent.metaKey) {
 		switch(event.originalEvent.keyCode) {
@@ -449,6 +457,7 @@ GuideAssistant.prototype.handleKey = function(event) {
 				break;
 		}
 	}
+	
 	Event.stop(event); 
 	
 };
@@ -478,7 +487,9 @@ GuideAssistant.prototype.gestureEnd = function(event) {
 GuideAssistant.prototype.filterListFunction = function(filterString, listWidget, offset, count) {
 	 
 	//Filtering function
-	//Mojo.Log.info("Filter string is "+filterString);
+	if(WebMyth.prefsCookieObject.debug){
+		Mojo.Log.info("Filter string is "+filterString);
+	}
 	
 	var totalSubsetSize = 0;
  
@@ -552,7 +563,9 @@ GuideAssistant.prototype.filterListFunction = function(filterString, listWidget,
 		this.controller.sceneScroller.mojo.adjustBy(0,-300);
 		
 	} else {
-		//Mojo.Log.info("Not adjusting sorting because hour is ",this.currentTimeObject.hour);
+		if(WebMyth.prefsCookieObject.debug){
+			Mojo.Log.info("Not adjusting sorting because hour is ",this.currentTimeObject.hour);
+		}
 	}
 	
 
@@ -560,7 +573,9 @@ GuideAssistant.prototype.filterListFunction = function(filterString, listWidget,
 
 GuideAssistant.prototype.updateSortMenu = function() {
 	
-	Mojo.Log.info("updating sort menu");
+	if(WebMyth.prefsCookieObject.debug){
+		Mojo.Log.info("Updating sort menu");
+	}
 	
 	//Reset default sorting
 	this.sortMenuModel.items = [ 
@@ -598,7 +613,9 @@ GuideAssistant.prototype.updateSortMenu = function() {
 
 GuideAssistant.prototype.updateViewMenu = function() {
 
-	Mojo.Log.info("Updating view menu with "+this.layoutStyle);
+	if(WebMyth.prefsCookieObject.debug){
+		Mojo.Log.info("Updating view menu with "+this.layoutStyle);
+	}
 	
 	//Reset default sorting
 	this.viewMenuModel.items = [ 
@@ -891,8 +908,9 @@ GuideAssistant.prototype.guideNext = function() {
 
 GuideAssistant.prototype.refreshData = function(event) {
 
-	Mojo.Log.info("Refreshing guide data");
-	
+	if(WebMyth.prefsCookieObject.debug){
+		Mojo.Log.info("Refreshing guide data");
+	}
 	
 	//Get system time
 	this.controller.serviceRequest('palm://com.palm.systemservice/time', {
@@ -976,8 +994,10 @@ GuideAssistant.prototype.selectedTime = function() {
 
 GuideAssistant.prototype.selectedNow = function() {
 
-	Mojo.Log.info("starting selectedNow.");
-
+	if(WebMyth.prefsCookieObject.debug){
+		Mojo.Log.info("Starting selectedNow.");
+	}
+	
 	this.layoutStyle = 'now';
 
 	//Update date values
@@ -1045,7 +1065,9 @@ GuideAssistant.prototype.guideDividerFunction = function(itemModel) {
 
 GuideAssistant.prototype.updateChannelListCookie = function() {
 
-	//Mojo.Log.error("Updateing channel list with cookie");
+	if(WebMyth.prefsCookieObject.debug){
+		Mojo.Log.error("Updateing channel list with cookie");
+	}
 	
 	//Guide channels cookie
 	if (WebMyth.guideChannelsCookieObject) {		//cookie exists
@@ -1073,7 +1095,9 @@ GuideAssistant.prototype.updateChannelListCookie = function() {
 		WebMyth.guideChannelsCookie.put(WebMyth.guideChannelsCookieObject);
 	}
 	
-	//Mojo.Log.info("Done with if-else in update cookie list");
+	if(WebMyth.prefsCookieObject.debug){
+		Mojo.Log.info("Done with if-else in update cookie list");
+	}
 	
 	//Object.extend(this.channelMenuModel.items,this.channelList);
 					
@@ -1083,7 +1107,9 @@ GuideAssistant.prototype.updateChannelListCookie = function() {
 
 GuideAssistant.prototype.setMyData = function(propertyValue, model) {
 	
-	//Mojo.Log.info("setting my data");
+	if(WebMyth.prefsCookieObject.debug){
+		Mojo.Log.info("setting my data");
+	}
 	
 	var guideDetailsText = '';
 	
@@ -1169,8 +1195,10 @@ GuideAssistant.prototype.getGuideData = function() {
 		requestUrl += "&StartChanId="+this.channid;
 	}
 	
-	Mojo.Log.info("Guide URL is: "+requestUrl);
 	
+	if(WebMyth.prefsCookieObject.debug){
+		Mojo.Log.info("Guide URL is: "+requestUrl);
+	}
 	
     try {
         var request = new Ajax.Request(requestUrl,{
@@ -1189,7 +1217,11 @@ GuideAssistant.prototype.getGuideData = function() {
 };
 
 GuideAssistant.prototype.readGuideFail = function() {
-	Mojo.Log.error("Failed to get guide information");	
+	
+	if(WebMyth.prefsCookieObject.debug){
+		Mojo.Log.error("Failed to get guide information");	
+	}
+	
 	Mojo.Controller.errorDialog("Failed to get guide information");
 
 };
@@ -1198,7 +1230,9 @@ GuideAssistant.prototype.readGuideSuccess = function(response) {
 	
 	var xmlstring = response.responseText.trim();
 	
-	//Mojo.Log.info("Got XML guide response from backend: "+xmlstring);
+	if(WebMyth.prefsCookieObject.debug){
+		Mojo.Log.info("Got XML guide response from backend: "+xmlstring);
+	}
 	
 	var xmlobject = (new DOMParser()).parseFromString(xmlstring, "text/xml");
 	
@@ -1217,11 +1251,13 @@ GuideAssistant.prototype.readGuideSuccess = function(response) {
 	var nowDateISO = dateJSToISO(nowDateJS);
 	
 	
-	
 	var s = {};
 	
 	
-	Mojo.Log.error("about to start parsing guide data");
+	if(WebMyth.prefsCookieObject.debug){
+		Mojo.Log.error("About to start parsing guide data");
+	}
+	
 	this.resultList.clear();
 	//this.channelList.clear();
 	
@@ -1259,7 +1295,10 @@ GuideAssistant.prototype.readGuideSuccess = function(response) {
 				WebMyth.prefsCookieObject.protoVer = topSingleNode.childNodes[0].nodeValue;
 				break;
 			case 'ProgramGuide':
-				//Mojo.Log.error('starting to parse ProgramGuide');
+				if(WebMyth.prefsCookieObject.debug){
+					Mojo.Log.error('starting to parse ProgramGuide node');
+				}
+				
 				programGuideNode = topSingleNode.childNodes[0];
 				for(var j = 0; j < programGuideNode.childNodes.length; j++) {
 					programGuideSingleNode = programGuideNode.childNodes[j];
@@ -1347,12 +1386,18 @@ GuideAssistant.prototype.readGuideSuccess = function(response) {
 								singleProgramJson.recStatusText = recStatusDecode(singleProgramJson.recStatus);
 								
 								this.resultList.push(singleProgramJson);
-								//Mojo.Log.error("program "+k+" json is %j", singleProgramJson);
+								
+								if(WebMyth.prefsCookieObject.debug){
+									Mojo.Log.info("program "+k+" json is %j", singleProgramJson);
+								}
 							}
 						}
 					}
 				}
-				Mojo.Log.info('Done parsing ProgramGuide');
+				
+				if(WebMyth.prefsCookieObject.debug){
+					Mojo.Log.info('Done parsing ProgramGuide');
+				}
 				//Mojo.Log.error("full json is %j", this.resultList);
 				//Mojo.Log.error("channels json is %j", this.channelList);
 				
@@ -1367,7 +1412,9 @@ GuideAssistant.prototype.readGuideSuccess = function(response) {
 					
 				} 
 				
-				Mojo.Log.info("Finished updating channels (if needed)");
+				if(WebMyth.prefsCookieObject.debug){
+					Mojo.Log.info("Finished updating channels (if needed)");
+				}
 				
 				this.sortChanged();
 				
@@ -1391,8 +1438,10 @@ GuideAssistant.prototype.sortChanged = function() {
 
 	var originalSortType = ''
 	
-	Mojo.Log.info("starting sort with "+this.layoutStyle);
-
+	if(WebMyth.prefsCookieObject.debug){
+		Mojo.Log.info("Starting sort with "+this.layoutStyle);
+	}
+	
 	//Sort list by layout first
 	switch(this.layoutStyle) {
 		case 'time':
@@ -1505,7 +1554,9 @@ GuideAssistant.prototype.checkLocation = function() {
 		
 	} else {
 	
-		Mojo.Log.info("Checking current location as prep for "+this.channid+" on "+WebMyth.prefsCookieObject.currentFrontend);
+		if(WebMyth.prefsCookieObject.debug){
+			Mojo.Log.info("Checking current location as prep for "+this.channid+" on "+WebMyth.prefsCookieObject.currentFrontend);
+		}
 		
 		var requestUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webmythPythonFile;
 		requestUrl += "?op=remote&type=query";
@@ -1564,6 +1615,7 @@ GuideAssistant.prototype.jumpLive = function() {
 };
 
 GuideAssistant.prototype.startChannelPlay = function() {
+	
 	//Attempting to play livetv - have to start livetv then change channel
 	Mojo.Log.info("Playing channel "+this.channid);
 	

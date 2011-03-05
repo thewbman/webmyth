@@ -30,6 +30,10 @@
 
 UpcomingAssistant.prototype.setup = function() {
 
+	if(WebMyth.prefsCookieObject.debug){
+		Mojo.Log.info("UpcomingAssitant setup");
+	}	
+		
 	//Show and start the animated spinner
 	this.spinnerAttr= {
 		spinnerSize: "large"
@@ -116,8 +120,10 @@ UpcomingAssistant.prototype.handleCommand = function(event) {
   } else if(event.type == Mojo.Event.command) {
 		myCommand = event.command.substring(0,10);
 		mySelection = event.command.substring(10);
-		//Mojo.Log.error("command: "+myCommand+" selection: "+mySelection);
-
+		if(WebMyth.prefsCookieObject.debug){
+			Mojo.Log.error("command: "+myCommand+" selection: "+mySelection);
+		}
+		
 		switch(myCommand) {
 			case 'go-refresh':		
 			  
@@ -142,7 +148,9 @@ UpcomingAssistant.prototype.handleCommand = function(event) {
 
 UpcomingAssistant.prototype.handleKey = function(event) {
 
-	Mojo.Log.info("handleKey %o, %o", event.originalEvent.metaKey, event.originalEvent.keyCode);
+	if(WebMyth.prefsCookieObject.debug){
+		Mojo.Log.info("handleKey %o, %o", event.originalEvent.metaKey, event.originalEvent.keyCode);
+	}
 	
 	if(event.originalEvent.metaKey) {
 		switch(event.originalEvent.keyCode) {
@@ -211,7 +219,9 @@ UpcomingAssistant.prototype.gestureEnd = function(event) {
 UpcomingAssistant.prototype.getUpcoming = function(event) {
 
 	//Update list from webmyth python script
-	Mojo.Log.info('Starting upcoming data gathering');
+	if(WebMyth.prefsCookieObject.debug){
+		Mojo.Log.info('Starting upcoming data gathering');
+	}
 	
 	this.controller.sceneScroller.mojo.revealTop();
 	
@@ -221,8 +231,10 @@ UpcomingAssistant.prototype.getUpcoming = function(event) {
 		this.controller.window.setTimeout(this.getUpcomingPlugin.bind(this), 100);
 		
 	} else if(WebMyth.useService){
-		Mojo.Log.info("Using protocol service to get upcoming");
-	
+		if(WebMyth.prefsCookieObject.debug){
+			Mojo.Log.info("Using protocol service to get upcoming");
+		}
+		
 		//adsf - Add back service command here
 		
 		//asdf
@@ -246,7 +258,9 @@ UpcomingAssistant.prototype.getUpcoming = function(event) {
 
 UpcomingAssistant.prototype.getUpcomingPlugin = function() {
 
-	//Mojo.Log.error("Using protocol plugin to get upcoming");
+	if(WebMyth.prefsCookieObject.debug){
+		Mojo.Log.error("Using protocol plugin to get upcoming");
+	}
 	
 	WebMyth.hasConflicts = 0;
 		
@@ -254,25 +268,26 @@ UpcomingAssistant.prototype.getUpcomingPlugin = function() {
 	
 		var response1 = $('webmyth_service_id').mythprotocolBackgroundCommand(WebMyth.prefsCookieObject.masterBackendIp, WebMyth.prefsCookieObject.masterBackendPort, WebMyth.prefsCookieObject.protoVer, "QUERY_GETALLPENDING");
 	
-		Mojo.Log.info("Got mythprotocolBackgroundCommand response: "+response1);
+		if(WebMyth.prefsCookieObject.debug){
+			Mojo.Log.info("Got mythprotocolBackgroundCommand response: "+response1);
+		}
 		$('webmyth_service_id').backgroundProtocolCommandResponse = this.backgroundProtocolCommandResponse.bind(this);    
    
 	
 		//var response1 = $('webmyth_service_id').mythprotocolCommand(WebMyth.prefsCookieObject.masterBackendIp, WebMyth.prefsCookieObject.masterBackendPort, WebMyth.prefsCookieObject.protoVer, "QUERY_GETALLPENDING");
 	
 		//$('debugText').innerText = response1;
-		//Mojo.Log.error("plugin response with length "+response1.length+" is "+response1);
+		if(WebMyth.prefsCookieObject.debug){
+			Mojo.Log.error("plugin response with length "+response1.length+" is "+response1);
+		}
 		
-		//var pluginResponseList = parseUpcomingPlugin(response1);
-		
-		//Mojo.Log.info('parseUpcomingPlugin: %j', pluginResponseList);
 		/*
 		this.fullResultList.clear();
 		//Object.extend(this.fullResultList,cleanUpcoming(pluginResponseList));
 		//Object.extend(this.fullResultList,cleanUpcoming(parseUpcomingPlugin(response1)));
 		Object.extend(this.fullResultList,parseUpcomingPlugin(response1));
 			
-		//Mojo.Log.error('Cleaned upcoming: %j', this.fullResultList);
+		Mojo.Log.error('Cleaned upcoming: %j', this.fullResultList);
 			
 		if(WebMyth.hasConflicts != 0){
 			Mojo.Controller.getAppController().showBanner("There are conflicting recordings", {source: 'notification'});
@@ -283,7 +298,9 @@ UpcomingAssistant.prototype.getUpcomingPlugin = function() {
 	
 	} catch(e) {
 	
-		Mojo.Log.error('Failed to get Upcoming plugin response: %s',e);
+		if(WebMyth.prefsCookieObject.debug){
+			Mojo.Log.error('Failed to get Upcoming plugin response: %s',e);
+		}
 		
 		Mojo.Controller.getAppController().showBanner("Plugin failed, trying script method", {source: 'notification'});
 		
@@ -308,8 +325,10 @@ UpcomingAssistant.prototype.backgroundProtocolCommandResponse = function(respons
 	this.fullResultList.clear();
 	Object.extend(this.fullResultList,parseUpcomingPlugin(response2));
 			
-	//Mojo.Log.error('Cleaned upcoming: %j', this.fullResultList);
-			
+	if(WebMyth.prefsCookieObject.debug){
+		Mojo.Log.error('Cleaned upcoming: %j', this.fullResultList);
+	}
+	
 	if(WebMyth.hasConflicts != 0){
 		Mojo.Controller.getAppController().showBanner("There are conflicting recordings", {source: 'notification'});
 	} 
@@ -320,12 +339,20 @@ UpcomingAssistant.prototype.backgroundProtocolCommandResponse = function(respons
 
 UpcomingAssistant.prototype.readUpcomingServiceSuccess = function(response) {
 	
-	//Mojo.Log.info('Got service response: %j', response.reply);
+	if(WebMyth.prefsCookieObject.debug){
+		Mojo.Log.info('Got service response: %j', response.reply);
+	}
 	
-	Mojo.Log.info('Got service response stats: %j', response.stats);
+	if(WebMyth.prefsCookieObject.debug){
+		Mojo.Log.info('Got service response stats: %j', response.stats);
+	}
 	
 	if(response.stats.expectedLength != response.stats.parsedPrograms){
-		Mojo.Log.error("Got response mismatch: %j",response.stats);
+		
+		if(WebMyth.prefsCookieObject.debug){
+			Mojo.Log.error("Got response mismatch: %j",response.stats);
+		}
+		
 		Mojo.Controller.getAppController().showBanner("ERROR - should have "+response.stats.expectedLength+" programs", {source: 'notification'});
 		
 	}
@@ -336,7 +363,9 @@ UpcomingAssistant.prototype.readUpcomingServiceSuccess = function(response) {
 	//var cleanedUpcomingResponse = cleanUpcoming(response.reply);
 	Object.extend(this.fullResultList,cleanUpcoming(response.reply));
 	
-	Mojo.Log.info('Cleaned upcoming: %j', this.fullResultList);
+	if(WebMyth.prefsCookieObject.debug){
+		Mojo.Log.info('Cleaned upcoming: %j', this.fullResultList);
+	}
 	
 	if(response.stats.conflicts != 0){
 		Mojo.Controller.getAppController().showBanner("There are conflicting recordings", {source: 'notification'});
@@ -347,8 +376,10 @@ UpcomingAssistant.prototype.readUpcomingServiceSuccess = function(response) {
 }
 
 UpcomingAssistant.prototype.remoteDbTableFail = function(response) {
-	Mojo.Log.error('Failed to get Upcoming response = %j',response);
 	
+	if(WebMyth.prefsCookieObject.debug){
+		Mojo.Log.error('Failed to get Upcoming response = %j',response);
+	}
 	
 	this.resultList = [{ 'title':'Accesing remote table has failed.', 'subTitle':'Please check your settings', 'startTime':'1900-01-01T00:00:00'}];
 	
@@ -366,7 +397,10 @@ UpcomingAssistant.prototype.remoteDbTableFail = function(response) {
 
 UpcomingAssistant.prototype.readRemoteDbTableSuccess = function(response) {
     
-	//Mojo.Log.info('Got Ajax response: ' + response.responseText);
+	if(WebMyth.prefsCookieObject.debug){
+		Mojo.Log.info('Got Ajax response: ' + response.responseText);
+	}
+	
 	var conflicts = 0, s = {};
 	
 		
@@ -376,18 +410,22 @@ UpcomingAssistant.prototype.readRemoteDbTableSuccess = function(response) {
 	//Object.extend(this.fullResultList,cleanedUpcomingResponse.fullUpcomingList);
 	Object.extend(this.fullResultList,cleanUpcoming(response.responseJSON));
 	
-	Mojo.Log.info('Cleaned upcoming: %j', this.fullResultList);
+	if(WebMyth.prefsCookieObject.debug){
+		Mojo.Log.info('Cleaned upcoming: %j', this.fullResultList);
+	}
 	
 	for(var i = 0; i < this.fullResultList.length; i++){
 		//s = this.fullResultList[i];
 		
-		//Mojo.Log.info("checking upcoming program %j",s);
+		Mojo.Log.info("checking upcoming program %j",s);
 		if(this.fullResultList[i].recStatus == 7){
 			conflicts++;
 		}
 	}
 	
-	Mojo.Log.info("Found "+conflicts+" conflicts");
+	if(WebMyth.prefsCookieObject.debug){
+		Mojo.Log.info("Found "+conflicts+" conflicts");
+	}
 	
 	if(conflicts > 0){
 		Mojo.Controller.getAppController().showBanner("There are conflicting recordings", {source: 'notification'});
@@ -401,14 +439,16 @@ UpcomingAssistant.prototype.groupChanged = function(newGroup) {
 
 	WebMyth.prefsCookieObject.currentUpcomingGroup = newGroup;
 	
-	Mojo.Log.info("The current upcoming group has changed to "+WebMyth.prefsCookieObject.currentUpcomingGroup);
+	if(WebMyth.prefsCookieObject.debug){
+		Mojo.Log.info("The current upcoming group has changed to "+WebMyth.prefsCookieObject.currentUpcomingGroup);
+	}
 	
 	//Update results list from filter
 	this.resultList.clear();
 	Object.extend(this.resultList, trimByUpcomingGroup(this.fullResultList, WebMyth.prefsCookieObject.currentUpcomingGroup));
 	//Object.extend(this.resultList, this.fullResultList);
 	
-	//Mojo.Log.info("grouped upcoming list is %j",this.resultList);
+	Mojo.Log.info("grouped upcoming list is %j",this.resultList);
 	
 	
 	$("scene-title").innerHTML = $L("Upcoming Recordings")+" ("+this.resultList.length+" items)";
@@ -474,7 +514,9 @@ UpcomingAssistant.prototype.updateGroupMenu = function() {
 UpcomingAssistant.prototype.filterListFunction = function(filterString, listWidget, offset, count) {
 	 
 	//Filtering function
-	//Mojo.Log.info("Started filtering with '%s'",filterString);
+	if(WebMyth.prefsCookieObject.debug){
+		Mojo.Log.info("Started filtering with '%s'",filterString);
+	}
 	
 	var totalSubsetSize = 0;
  
@@ -489,31 +531,33 @@ UpcomingAssistant.prototype.filterListFunction = function(filterString, listWidg
 		for (i = 0; i < len; i++) {
 			s = this.resultList[i];
 			if (s.title.toUpperCase().indexOf(filterString.toUpperCase()) >=0) {
-				//Mojo.Log.info("Found string in title", i);
+				Mojo.Log.info("Found string in title", i);
 				someList.push(s);
 			}
 			else if (s.subTitle.toUpperCase().indexOf(filterString.toUpperCase())>=0){
-				//Mojo.Log.info("Found string in subtitle", i);
+				Mojo.Log.info("Found string in subtitle", i);
 				someList.push(s);
 			}
 			else if (s.channame.toUpperCase().indexOf(filterString.toUpperCase())>=0){
-				//Mojo.Log.info("Found string in channel name", i);
+				Mojo.Log.info("Found string in channel name", i);
 				someList.push(s);
 			}
 			else if (s.category.toUpperCase().indexOf(filterString.toUpperCase())>=0){
-				//Mojo.Log.info("Found string in category", i);
+				Mojo.Log.info("Found string in category", i);
 				someList.push(s);
 			}
 			else if (s.recStatusText.toUpperCase().indexOf(filterString.toUpperCase())>=0){
-				//Mojo.Log.info("Found string in recStatusText", i);
+				Mojo.Log.info("Found string in recStatusText", i);
 				someList.push(s);
 			}
 		}
 	}
 	else {
 
-		//Mojo.Log.info("No filter string");
-
+		if(WebMyth.prefsCookieObject.debug){
+			Mojo.Log.info("No filter string");
+		}
+		
 		var len = this.resultList.length;
  
 		for (i = 0; i < len; i++) {
@@ -524,7 +568,9 @@ UpcomingAssistant.prototype.filterListFunction = function(filterString, listWidg
  
 	// pare down list results to the part requested by widget (starting at offset & thru count)
 	
-	//Mojo.Log.info("paring down '%j'",someList);
+	if(WebMyth.prefsCookieObject.debug){
+		Mojo.Log.info("paring down '%j'",someList);
+	}
 	
 	var cursor = 0;
 	var subset = [];
@@ -544,7 +590,9 @@ UpcomingAssistant.prototype.filterListFunction = function(filterString, listWidg
 	// then update the list length 
 	// and the FilterList widget's FilterField count (displayed in the upper right corner)
 	
-	//Mojo.Log.info("subset is %j",subset);
+	if(WebMyth.prefsCookieObject.debug){
+		Mojo.Log.info("subset is %j",subset);
+	}
 	
 	listWidget.mojo.noticeUpdatedItems(offset, subset);
 	listWidget.mojo.setLength(totalSubsetSize);
@@ -553,14 +601,19 @@ UpcomingAssistant.prototype.filterListFunction = function(filterString, listWidg
 };	
 
 UpcomingAssistant.prototype.goUpcomingDetails = function(event) {
+	
 	var upcoming_chanid = event.item.chanId;
 	var upcoming_starttime = event.item.startTime;
 	
-	Mojo.Log.info("Selected individual recording: '%s' + '%s'", upcoming_chanid, upcoming_starttime);
+	if(WebMyth.prefsCookieObject.debug){
+		Mojo.Log.info("Selected individual recording: '%s' + '%s'", upcoming_chanid, upcoming_starttime);
+	}
 	
 	detailsObject = trimByChanidStarttime(this.resultList, upcoming_chanid, upcoming_starttime)
 
-	//Mojo.Log.error("Selected object is: '%j'", detailsObject);
+	if(WebMyth.prefsCookieObject.debug){
+		Mojo.Log.error("Selected object is: '%j'", detailsObject);
+	}
 	
 	//Open upcomingDetails communication scene
 	//Mojo.Controller.stageController.pushScene("upcomingDetails", detailsObject);
@@ -588,8 +641,9 @@ UpcomingAssistant.prototype.setMyData = function(propertyValue, model) {
 	var channelIconUrl = "http://"+WebMyth.prefsCookieObject.masterBackendIp+":6544/Myth/GetChannelIcon?ChanId=";
 	channelIconUrl += model.chanId;
 	
-	//Mojo.Log.info("iconURL is "+channelIconUrl);
-	
+	if(WebMyth.prefsCookieObject.debug){
+		Mojo.Log.info("iconURL is "+channelIconUrl);
+	}
 	
 	
 	var upcomingDetailsText = '<div class="upcoming-list-item">';

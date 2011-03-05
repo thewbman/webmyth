@@ -488,6 +488,17 @@ PreferencesAssistant.prototype.setup = function() {
          this.metrixToggleModel
     ); 
 	
+	//Debug mode
+	this.debugToggleModel = {
+             value: true
+    };
+	this.controller.setupWidget("debugToggleId",
+        {
+            modelProperty: "value"
+         },
+         this.debugToggleModel
+    ); 
+	
 };
 
 PreferencesAssistant.prototype.activate = function(event) {
@@ -531,6 +542,7 @@ PreferencesAssistant.prototype.activate = function(event) {
 		$('flick-label').innerText = $L('Flick');
 		$('master-label').innerText = $L('Master');
 		$('numbers-label').innerText = $L('Numbers');
+	$('debug-label').innerText = $L('Debug Mode');
 
 	
 		if (WebMyth.prefsCookieObject) {
@@ -642,6 +654,10 @@ PreferencesAssistant.prototype.activate = function(event) {
 			this.controller.modelChanged(this.metrixToggleModel);
 			
 			
+			this.debugToggleModel.value = WebMyth.prefsCookieObject.debug;
+			this.controller.modelChanged(this.debugToggleModel);
+			
+			
 		} 
 		
 		//Active remote scenes
@@ -693,7 +709,7 @@ PreferencesAssistant.prototype.handleCommand = function(event) {
 
 PreferencesAssistant.prototype.manualMasterBackendChanged = function(event) {
 
-	Mojo.Log.info("manual backend settings changed to "+this.manualMasterBackendToggleModel.value);
+	Mojo.Log.info("Manual backend settings changed to "+this.manualMasterBackendToggleModel.value);
 	
 	this.masterBackendTextModel.disabled = !this.manualMasterBackendToggleModel.value;
 	
@@ -818,154 +834,157 @@ PreferencesAssistant.prototype.checkSettings = function() {
 		saveOK = false;
 	} else {
 
-	//Mojo.Log.error("now checking remote scene");
-	
-	switch(WebMyth.prefsCookieObject.currentRemoteScene) {
-		case 'navigation':
-			if(this.remoteNavigationToggleModel.value == false) remoteError = true;
-			currentRemoteScene = "Navigation";
-		break;
-		case 'playback':
-			if(this.remotePlaybackToggleModel.value == false) remoteError = true;
-			currentRemoteScene = "Playback";
-		break;
-		case 'music':
-			if(this.remoteMusicToggleModel.value == false) remoteError = true;
-			currentRemoteScene = "Music";
-		break;
-		case 'flick':
-			if(this.remoteFlickToggleModel.value == false) remoteError = true;
-			currentRemoteScene = "Flick";
-		break;
-		case 'masterRemote':
-			if(this.remoteMasterToggleModel.value == false) remoteError = true;
-			currentRemoteScene = "Master";
-		break;
-		case 'numberpad':
-			if(this.remoteNumberpadToggleModel.value == false) remoteError = true;
-			currentRemoteScene = "Numbers";
-		break;
+		//Mojo.Log.error("now checking remote scene");
 		
-		default:
-			Mojo.Log.error("current remote scene is: "+WebMyth.prefsCookieObject.currentRemoteScene);
-		break;
-	
-	}
-	
-	//Mojo.Log.error("remote error is "+remoteError+" and current remote scene is: "+WebMyth.prefsCookieObject.currentRemoteScene);
-	
-	if(remoteError) {
-		
-        this.controller.showAlertDialog({
-                onChoose: function(value) {},
-				title: "WebMyth - v" + Mojo.Controller.appInfo.version,
-                message: "You cannot disable the current remote scene ("+currentRemoteScene+").",
-                choices: [
-					{label: "OK", value: false}
-					],
-                allowHTMLMessage: true
-            });
+		switch(WebMyth.prefsCookieObject.currentRemoteScene) {
+			case 'navigation':
+				if(this.remoteNavigationToggleModel.value == false) remoteError = true;
+				currentRemoteScene = "Navigation";
+			break;
+			case 'playback':
+				if(this.remotePlaybackToggleModel.value == false) remoteError = true;
+				currentRemoteScene = "Playback";
+			break;
+			case 'music':
+				if(this.remoteMusicToggleModel.value == false) remoteError = true;
+				currentRemoteScene = "Music";
+			break;
+			case 'flick':
+				if(this.remoteFlickToggleModel.value == false) remoteError = true;
+				currentRemoteScene = "Flick";
+			break;
+			case 'masterRemote':
+				if(this.remoteMasterToggleModel.value == false) remoteError = true;
+				currentRemoteScene = "Master";
+			break;
+			case 'numberpad':
+				if(this.remoteNumberpadToggleModel.value == false) remoteError = true;
+				currentRemoteScene = "Numbers";
+			break;
 			
-		saveOK = false;
+			default:
+				Mojo.Log.error("current remote scene is: "+WebMyth.prefsCookieObject.currentRemoteScene);
+			break;
+		
+		}
+		
+		//Mojo.Log.error("remote error is "+remoteError+" and current remote scene is: "+WebMyth.prefsCookieObject.currentRemoteScene);
+		
+		if(remoteError) {
 			
-	} else {
-	
-	if(saveOK) {
-
-		//Mojo.Log.info("New webserverName is %s", this.webserverTextModel.value);
-		//Mojo.Log.info("New python file is %s", this.webmythPythonFileTextModel.value);
-		//Mojo.Log.info("Metrix value is %s", this.metrixToggleModel.value);
-		//Mojo.Log.info("Remote vibrate value is %s", this.vibrateToggleModel.value);
-		//Mojo.Log.info("Remote fullscreen value is %s", this.remoteFullscreenToggleModel.value);
-		//Mojo.Log.info("Theme value is %s", this.themeModel.value);
-
-		if (WebMyth.prefsCookieObject) {
-			//Nothing
+			this.controller.showAlertDialog({
+					onChoose: function(value) {},
+					title: "WebMyth - v" + Mojo.Controller.appInfo.version,
+					message: "You cannot disable the current remote scene ("+currentRemoteScene+").",
+					choices: [
+						{label: "OK", value: false}
+						],
+					allowHTMLMessage: true
+				});
+				
+			saveOK = false;
+				
 		} else {
-			//Create default cookie if doesnt exist
-			var newPrefsCookieObject = defaultCookie();
-			WebMyth.prefsCookieObject = newPrefsCookieObject;
-		}
-	
-		WebMyth.prefsCookieObject.usePlugin = this.usePluginSelectorModel.value;
-		WebMyth.prefsCookieObject.webserverName = this.webserverTextModel.value;
-		WebMyth.prefsCookieObject.webserverUsername = this.usernameTextModel.value;
-		WebMyth.prefsCookieObject.webserverPassword = this.passwordTextModel.value;
-		WebMyth.prefsCookieObject.allowRecordedDownloads = this.allowDownloadStreamToggleModel.value;
-		//WebMyth.prefsCookieObject.useWebmythScript = this.useWebmythScriptToggleModel.value;
-		WebMyth.prefsCookieObject.webmythPythonFile = this.webmythPythonFileTextModel.value;
-		WebMyth.prefsCookieObject.showUpcoming = this.showUpcomingToggleModel.value;
-		WebMyth.prefsCookieObject.showVideos = this.showVideosToggleModel.value;
-		WebMyth.prefsCookieObject.showMusic = this.showMusicToggleModel.value;
-		WebMyth.prefsCookieObject.showLog = this.showLogToggleModel.value;
 		
-		
-		WebMyth.prefsCookieObject.manualMasterBackend = this.manualMasterBackendToggleModel.value;
-		WebMyth.prefsCookieObject.masterBackendIp = this.masterBackendTextModel.value;
-		
-		
-		WebMyth.prefsCookieObject.manualDatabase = this.manualDatabaseToggleModel.value;
-		WebMyth.prefsCookieObject.databaseHost = this.databaseHostTextModel.value;
-		WebMyth.prefsCookieObject.databasePort = this.databasePortTextModel.value;
-		WebMyth.prefsCookieObject.databaseUsername = this.databaseUsernameTextModel.value;
-		WebMyth.prefsCookieObject.databasePassword = this.databasePasswordTextModel.value;
-		WebMyth.prefsCookieObject.databaseName = this.databaseNameTextModel.value;
-		
-		
-		//WebMyth.prefsCookieObject.theme = this.themeModel.value;
-		WebMyth.prefsCookieObject.showUpcomingChannelIcons = this.upcomingChannelIconsToggleModel.value;
-		WebMyth.prefsCookieObject.showVideoImages = this.videoImagesToggleModel.value;
-		WebMyth.prefsCookieObject.showVideoDetailsImage = this.showVideoDetailsImageToggleModel.value;
-		WebMyth.prefsCookieObject.forceScriptScreenshots = this.forceScriptScreenshotsToggleModel.value;
-		
-		
-		WebMyth.prefsCookieObject.remoteHeaderAction = this.remoteHeaderActionModel.value;
-		WebMyth.prefsCookieObject.remoteVibrate = this.vibrateToggleModel.value;
-		WebMyth.prefsCookieObject.remoteFullscreen = this.remoteFullscreenToggleModel.value;
-		WebMyth.prefsCookieObject.playJumpRemote = this.playJumpRemoteToggleModel.value;
-		WebMyth.prefsCookieObject.guideJumpRemote = this.guideJumpRemoteToggleModel.value;
-		WebMyth.prefsCookieObject.dashboardRemote = this.dashboardRemoteToggleModel.value;
-		
-		
-		WebMyth.prefsCookieObject.allowMetrix = this.metrixToggleModel.value;
-		
-		
-		WebMyth.prefsCookie.put(WebMyth.prefsCookieObject);
-		
-		
-		//Mojo.Log.info("Prefs cookie is %j",WebMyth.prefsCookieObject);
-	
-	
-		//Enabled remote scenes
-		WebMyth.remoteCookieObject[0].enabled = this.remoteNavigationToggleModel.value;
-		WebMyth.remoteCookieObject[1].enabled = this.remotePlaybackToggleModel.value;
-		WebMyth.remoteCookieObject[2].enabled = this.remoteMusicToggleModel.value;
-		WebMyth.remoteCookieObject[3].enabled = this.remoteFlickToggleModel.value;
-		WebMyth.remoteCookieObject[4].enabled = this.remoteMasterToggleModel.value;
-		WebMyth.remoteCookieObject[5].enabled = this.remoteNumberpadToggleModel.value;
-		
-	
-		WebMyth.remoteCookie.put(WebMyth.remoteCookieObject);
-		
-		//Mojo.Log.error("new cookie is %j", WebMyth.prefsCookieObject);
-		
-		//Set plugin values from setting
-		if(WebMyth.prefsCookieObject.usePlugin == 2) {
-			WebMyth.usePlugin = true;
-			WebMyth.usePluginFrontend = true;
-		} else if(WebMyth.prefsCookieObject.usePlugin == 1) {
-			WebMyth.usePlugin = false;
-			WebMyth.usePluginFrontend = true;
-		} else {
-			WebMyth.usePlugin = false;
-			WebMyth.usePluginFrontend = false;
-		}
+			if(saveOK) {
 
-		Mojo.Controller.stageController.popScene();
-	
-	}
-	
-	}
+				//Mojo.Log.info("New webserverName is %s", this.webserverTextModel.value);
+				//Mojo.Log.info("New python file is %s", this.webmythPythonFileTextModel.value);
+				//Mojo.Log.info("Metrix value is %s", this.metrixToggleModel.value);
+				//Mojo.Log.info("Remote vibrate value is %s", this.vibrateToggleModel.value);
+				//Mojo.Log.info("Remote fullscreen value is %s", this.remoteFullscreenToggleModel.value);
+				//Mojo.Log.info("Theme value is %s", this.themeModel.value);
+
+				if (WebMyth.prefsCookieObject) {
+					//Nothing
+				} else {
+					//Create default cookie if doesnt exist
+					var newPrefsCookieObject = defaultCookie();
+					WebMyth.prefsCookieObject = newPrefsCookieObject;
+				}
+			
+				WebMyth.prefsCookieObject.usePlugin = this.usePluginSelectorModel.value;
+				WebMyth.prefsCookieObject.webserverName = this.webserverTextModel.value;
+				WebMyth.prefsCookieObject.webserverUsername = this.usernameTextModel.value;
+				WebMyth.prefsCookieObject.webserverPassword = this.passwordTextModel.value;
+				WebMyth.prefsCookieObject.allowRecordedDownloads = this.allowDownloadStreamToggleModel.value;
+				//WebMyth.prefsCookieObject.useWebmythScript = this.useWebmythScriptToggleModel.value;
+				WebMyth.prefsCookieObject.webmythPythonFile = this.webmythPythonFileTextModel.value;
+				WebMyth.prefsCookieObject.showUpcoming = this.showUpcomingToggleModel.value;
+				WebMyth.prefsCookieObject.showVideos = this.showVideosToggleModel.value;
+				WebMyth.prefsCookieObject.showMusic = this.showMusicToggleModel.value;
+				WebMyth.prefsCookieObject.showLog = this.showLogToggleModel.value;
+				
+				
+				WebMyth.prefsCookieObject.manualMasterBackend = this.manualMasterBackendToggleModel.value;
+				WebMyth.prefsCookieObject.masterBackendIp = this.masterBackendTextModel.value;
+				
+				
+				WebMyth.prefsCookieObject.manualDatabase = this.manualDatabaseToggleModel.value;
+				WebMyth.prefsCookieObject.databaseHost = this.databaseHostTextModel.value;
+				WebMyth.prefsCookieObject.databasePort = this.databasePortTextModel.value;
+				WebMyth.prefsCookieObject.databaseUsername = this.databaseUsernameTextModel.value;
+				WebMyth.prefsCookieObject.databasePassword = this.databasePasswordTextModel.value;
+				WebMyth.prefsCookieObject.databaseName = this.databaseNameTextModel.value;
+				
+				
+				//WebMyth.prefsCookieObject.theme = this.themeModel.value;
+				WebMyth.prefsCookieObject.showUpcomingChannelIcons = this.upcomingChannelIconsToggleModel.value;
+				WebMyth.prefsCookieObject.showVideoImages = this.videoImagesToggleModel.value;
+				WebMyth.prefsCookieObject.showVideoDetailsImage = this.showVideoDetailsImageToggleModel.value;
+				WebMyth.prefsCookieObject.forceScriptScreenshots = this.forceScriptScreenshotsToggleModel.value;
+				
+				
+				WebMyth.prefsCookieObject.remoteHeaderAction = this.remoteHeaderActionModel.value;
+				WebMyth.prefsCookieObject.remoteVibrate = this.vibrateToggleModel.value;
+				WebMyth.prefsCookieObject.remoteFullscreen = this.remoteFullscreenToggleModel.value;
+				WebMyth.prefsCookieObject.playJumpRemote = this.playJumpRemoteToggleModel.value;
+				WebMyth.prefsCookieObject.guideJumpRemote = this.guideJumpRemoteToggleModel.value;
+				WebMyth.prefsCookieObject.dashboardRemote = this.dashboardRemoteToggleModel.value;
+				
+				
+				WebMyth.prefsCookieObject.allowMetrix = this.metrixToggleModel.value;
+				
+				
+				WebMyth.prefsCookieObject.debug = this.debugToggleModel.value;
+				
+				
+				WebMyth.prefsCookie.put(WebMyth.prefsCookieObject);
+				
+				
+				//Mojo.Log.info("Prefs cookie is %j",WebMyth.prefsCookieObject);
+			
+			
+				//Enabled remote scenes
+				WebMyth.remoteCookieObject[0].enabled = this.remoteNavigationToggleModel.value;
+				WebMyth.remoteCookieObject[1].enabled = this.remotePlaybackToggleModel.value;
+				WebMyth.remoteCookieObject[2].enabled = this.remoteMusicToggleModel.value;
+				WebMyth.remoteCookieObject[3].enabled = this.remoteFlickToggleModel.value;
+				WebMyth.remoteCookieObject[4].enabled = this.remoteMasterToggleModel.value;
+				WebMyth.remoteCookieObject[5].enabled = this.remoteNumberpadToggleModel.value;
+				
+			
+				WebMyth.remoteCookie.put(WebMyth.remoteCookieObject);
+				
+				//Mojo.Log.error("new cookie is %j", WebMyth.prefsCookieObject);
+				
+				//Set plugin values from setting
+				if(WebMyth.prefsCookieObject.usePlugin == 2) {
+					WebMyth.usePlugin = true;
+					WebMyth.usePluginFrontend = true;
+				} else if(WebMyth.prefsCookieObject.usePlugin == 1) {
+					WebMyth.usePlugin = false;
+					WebMyth.usePluginFrontend = true;
+				} else {
+					WebMyth.usePlugin = false;
+					WebMyth.usePluginFrontend = false;
+				}
+
+				Mojo.Controller.stageController.popScene();
+			
+			}
+		
+		}
 
 	}
 	

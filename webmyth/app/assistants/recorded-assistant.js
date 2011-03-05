@@ -36,6 +36,10 @@ f/*
 }
 
 RecordedAssistant.prototype.setup = function() {
+
+	if(WebMyth.prefsCookieObject.debug){
+		Mojo.Log.info("RecordedAssistant setup");
+	}
 	
 	//Show and start the animated spinner
 	this.spinnerAttr= {
@@ -100,7 +104,9 @@ RecordedAssistant.prototype.setup = function() {
 			method: 'getstatus',
 			parameters: {subscribe: false},
 			onSuccess: function(response) {
-				//Mojo.Log.info("Got connection status of %j", response);
+				if(WebMyth.prefsCookieObject.debug){
+					Mojo.Log.info("Got connection status of %j", response);
+				}
 				
 				if(response.wifi.state == "connected") {
 					this.onWan = false;
@@ -149,16 +155,23 @@ RecordedAssistant.prototype.handleCommand = function(event) {
   if(event.type == Mojo.Event.command) {
   	myCommand = event.command.substring(0,7);
 	mySelection = event.command.substring(8);
-	//Mojo.Log.error("command: "+myCommand+" host: "+mySelection);
-
+	
+	if(WebMyth.prefsCookieObject.debug){
+		Mojo.Log.error("command: "+myCommand+" host: "+mySelection);
+	}
+	
     switch(myCommand) {
       case 'go-sort':		//sort
-		//Mojo.Log.error("sorting ..."+mySelection);
+		if(WebMyth.prefsCookieObject.debug){
+			Mojo.Log.error("sorting ..."+mySelection);
+		}
 		this.controller.sceneScroller.mojo.revealTop();
 		this.sortChanged(mySelection);
        break;
       case 'go-grou':		//group
-		//Mojo.Log.error("group select ... "+mySelection);
+		if(WebMyth.prefsCookieObject.debug){
+			Mojo.Log.error("group select ... "+mySelection);
+		}
 		this.controller.sceneScroller.mojo.revealTop();
 		this.recgroupChanged(mySelection);
        break;
@@ -181,7 +194,9 @@ RecordedAssistant.prototype.handleCommand = function(event) {
 
 RecordedAssistant.prototype.handleKey = function(event) {
 
-	//Mojo.Log.info("handleKey %o, %o", event.originalEvent.metaKey, event.originalEvent.keyCode);
+	if(WebMyth.prefsCookieObject.debug){
+		Mojo.Log.info("handleKey %o, %o", event.originalEvent.metaKey, event.originalEvent.keyCode);
+	}
 	
 	if(event.originalEvent.metaKey) {
 		switch(event.originalEvent.keyCode) {
@@ -250,14 +265,18 @@ RecordedAssistant.prototype.gestureEnd = function(event) {
 RecordedAssistant.prototype.getRecorded = function() {
 
 		//Update list from XML backend
-		Mojo.Log.info('Starting recorded data gathering from XML backend');
+		if(WebMyth.prefsCookieObject.debug){
+			Mojo.Log.info('Starting recorded data gathering from XML backend');
+		}
 		
 		this.controller.sceneScroller.mojo.revealTop();
 		
 		var requestUrl = "http://"+WebMyth.prefsCookieObject.masterBackendIp+":6544/Myth/GetRecorded";
 
-		//Mojo.Log.info("XML Recorded URL is: "+requestUrl);
-			
+		if(WebMyth.prefsCookieObject.debug){
+			Mojo.Log.info("XML Recorded URL is: "+requestUrl);
+		}
+		
 		try {
 			var request = new Ajax.Request(requestUrl,{
 				method: 'get',
@@ -276,8 +295,9 @@ RecordedAssistant.prototype.sortChanged = function(newSort) {
 	//Save selection back to cookie
 	WebMyth.prefsCookieObject.currentRecSort = newSort;
 	
-	//Mojo.Log.info("The current sorting has changed to "+WebMyth.prefsCookieObject.currentRecSort);
-	
+	if(WebMyth.prefsCookieObject.debug){
+		Mojo.Log.info("The current sorting has changed to "+WebMyth.prefsCookieObject.currentRecSort);
+	}
 	
 	//Sort list by selection
 	switch(WebMyth.prefsCookieObject.currentRecSort) {
@@ -317,7 +337,9 @@ RecordedAssistant.prototype.recgroupChanged = function(newRecgroup) {
 	
 	this.updateGroupMenu();
 	
-	//Mojo.Log.info("The current recgroup has changed to "+WebMyth.prefsCookieObject.currentRecgroup);
+	if(WebMyth.prefsCookieObject.debug){
+		Mojo.Log.info("The current recgroup has changed to "+WebMyth.prefsCookieObject.currentRecgroup);
+	}
 	
 	//Update results list from filter
 	this.resultList.clear();
@@ -339,7 +361,9 @@ RecordedAssistant.prototype.recgroupChanged = function(newRecgroup) {
 RecordedAssistant.prototype.useLocalDataTable = function(event) {
 	//Fall back to local data if cannot connect to remote server
 	Mojo.Controller.getAppController().showBanner("Failed to get new data, using saved", {source: 'notification'});
-	Mojo.Log.error('Failed to get Ajax response - using previous saved data');
+	if(WebMyth.prefsCookieObject.debug){
+		Mojo.Log.error('Failed to get Ajax response - using previous saved data');
+	}
 	
 	// Query recorded table
 	var mytext = 'SELECT * FROM recordedXML ORDER BY startTime;'
@@ -359,8 +383,9 @@ RecordedAssistant.prototype.queryDataHandler = function(transaction, results) {
     // Handle the results 
     var string = ""; 
 	
-	//Mojo.Log.error("Inside queryData with '%s' rows", results.rows.length);
-	
+	if(WebMyth.prefsCookieObject.debug){
+		Mojo.Log.error("Inside queryData with '%s' rows", results.rows.length);
+	}
 	
     
 	try {
@@ -382,7 +407,9 @@ RecordedAssistant.prototype.queryDataHandler = function(transaction, results) {
 			 
 			list.push( string );
 			//this.hostListModel.items.push( string );
-			//Mojo.Log.error("Just added '%j' to list", string);
+			if(WebMyth.prefsCookieObject.debug){
+				Mojo.Log.error("Just added '%j' to list", string);
+			}
 		}
 		
 		//Update the list widget
@@ -414,7 +441,9 @@ RecordedAssistant.prototype.queryDataHandler = function(transaction, results) {
 		);
 		
 		
-		//Mojo.Log.info("Done with data query");
+		if(WebMyth.prefsCookieObject.debug){
+			Mojo.Log.info("Done with data query");
+		}
 		
 		//Stop spinner and hide
 		this.spinnerModel.spinning = false;
@@ -423,11 +452,15 @@ RecordedAssistant.prototype.queryDataHandler = function(transaction, results) {
 	}
 	catch (err)
 	{
-		Mojo.Log.error("Data query failed with " + err.message);	
+		if(WebMyth.prefsCookieObject.debug){
+			Mojo.Log.error("Data query failed with " + err.message);	
+		}
 	} 
 
-	//Mojo.Log.info("Done with data query function");
-
+	if(WebMyth.prefsCookieObject.debug){
+		Mojo.Log.info("Done with data query function");
+	}
+	
 };
 
 RecordedAssistant.prototype.queryErrorHandler = function(transaction, errors) { 
@@ -436,7 +469,9 @@ RecordedAssistant.prototype.queryErrorHandler = function(transaction, errors) {
 
 RecordedAssistant.prototype.finishedReadingRecorded = function(event) {	
 
-	Mojo.Log.info("Finished getting data, now saving");
+	if(WebMyth.prefsCookieObject.debug){
+		Mojo.Log.info("Finished getting data, now saving");
+	}
 	
 	this.sortChanged(WebMyth.prefsCookieObject.currentRecSort);
 	
@@ -449,7 +484,7 @@ RecordedAssistant.prototype.finishedReadingRecorded = function(event) {
 	WebMyth.db.transaction( function (transaction) {
 		transaction.executeSql("DELETE FROM 'recordedXML'; ",  [], 
 			function(transaction, results) {    // success handler
-				//Mojo.Log.info("Successfully truncated recorded");
+				Mojo.Log.info("Successfully truncated recorded");
 			},
 			function(transaction, error) {      // error handler
 				Mojo.Log.error("Could not truncate recorded because " + error.message);
@@ -459,7 +494,7 @@ RecordedAssistant.prototype.finishedReadingRecorded = function(event) {
 	WebMyth.db.transaction( function (transaction) {
 		transaction.executeSql("DELETE FROM 'recgroupXML'; ",  [], 
 			function(transaction, results) {    // success handler
-				//Mojo.Log.info("Successfully truncated recgroup");
+				Mojo.Log.info("Successfully truncated recgroup");
 			},
 			function(transaction, error) {      // error handler
 				Mojo.Log.error("Could not truncate recgroup because " + error.message);
@@ -484,8 +519,10 @@ RecordedAssistant.prototype.finishedReadingRecorded = function(event) {
 
 RecordedAssistant.prototype.saveResults = function(transaction, results) {
 
-	Mojo.Log.info("Saving results back to DB");
-
+	if(WebMyth.prefsCookieObject.debug){
+		Mojo.Log.info("Saving results back to DB");
+	}
+	
 	for(var i = 0; i < this.fullResultList.length; i++){
 		title = this.fullResultList[i].title;
 		subTitle = this.fullResultList[i].subTitle;
@@ -514,20 +551,27 @@ RecordedAssistant.prototype.saveResults = function(transaction, results) {
 
 RecordedAssistant.prototype.readRemoteScriptSuccess = function(response) {
 
-	Mojo.Log.info("Successfully gotten data from script %j",response.responseJSON);
-
+	if(WebMyth.prefsCookieObject.debug){
+		Mojo.Log.info("Successfully gotten data from script %j",response.responseJSON);
+	}
+	
 	//Update the list widget
 	this.fullResultList.clear();
 	Object.extend(this.fullResultList,response.responseJSON);
 	
 	this.finishedReadingRecorded();
 	
-	//Mojo.Log.info("After finished reading recorded");
+	if(WebMyth.prefsCookieObject.debug){
+		Mojo.Log.info("After finished reading recorded");
+	}
+	
 };
 
 RecordedAssistant.prototype.readRecordedXMLSuccess = function(response) {
 	
-	Mojo.Log.info("About to start parsing recorded from XML");
+	if(WebMyth.prefsCookieObject.debug){
+		Mojo.Log.info("About to start parsing recorded from XML: "+response.responseText.trim());
+	}
 	
 	var xmlstring = response.responseText.trim();
 	var xmlobject = (new DOMParser()).parseFromString(xmlstring, "text/xml");
@@ -594,7 +638,7 @@ RecordedAssistant.prototype.readRecordedXMLSuccess = function(response) {
 									singleProgramJson.stars = singleProgramNode.getAttributeNode("stars").nodeValue;
 									singleProgramJson.airdate = singleProgramNode.getAttributeNode("airdate").nodeValue;
 								} catch(e) {
-									//Mojo.Log.info("Error with getting airdate and stars");
+									Mojo.Log.info("Error with getting airdate and stars");
 									singleProgramJson.stars = "";
 									singleProgramJson.airdate = "";
 								}
@@ -650,17 +694,20 @@ RecordedAssistant.prototype.readRecordedXMLSuccess = function(response) {
 				}
 				
 				Mojo.Log.info('Done parsing Recorded');
-				//Mojo.Log.info("Recorded full json is %j", this.fullResultList);
+				Mojo.Log.info("Recorded full json is %j", this.fullResultList);
 	
 				
 				break;
 			default:
-				//Mojo.Log.info("node name is "+topSingleNode.nodeName);
+				Mojo.Log.info("node name is "+topSingleNode.nodeName);
 				break;
 		}
 	}
 	
-	//Mojo.Log.info("Exited XML parsing");
+	if(WebMyth.prefsCookieObject.debug){
+		Mojo.Log.info("Exited XML parsing");
+	}
+	
 	this.finishedReadingRecorded();
 
 };
@@ -688,7 +735,7 @@ function insertRecordedRow(newline){
 												newline.recEndTs, newline.recordId, newline.dupInType
 											], 
 			function(transaction, results) {    // success handler
-				//Mojo.Log.info('Entered Row - Title: ' + newline.title + ' subTitle: ' + newline.subTitle);
+				Mojo.Log.info('Entered Row - Title: ' + newline.title + ' subTitle: ' + newline.subTitle);
 			},
 			function(transaction, error) {      // error handler
 				Mojo.Log.error("Could not insert in recorded: " + error.message);
@@ -701,7 +748,7 @@ function insertRecordedRow(newline){
 	WebMyth.db.transaction( function (transaction) {
 		transaction.executeSql(recgroup_sql,  [newline.recGroup, linerecgroup], 
 			function(transaction, results) {    // success handler
-				//Mojo.Log.info('Entered new recgroup: ' + newline.recgroup);
+				Mojo.Log.info('Entered new recgroup: ' + newline.recgroup);
 			},
 			function(transaction, error) {      // error handler
 				Mojo.Log.error("Could not insert in recgroup: " + error.message + " ... ");
@@ -718,11 +765,15 @@ RecordedAssistant.prototype.goRecordedDetails = function(event) {
 	var recorded_startTime = event.item.startTime;
 	var recorded_recStartTs = event.item.recStartTs;
 	
-	Mojo.Log.info("Selected individual recording: '%s' + '%s'", recorded_chanid, recorded_recStartTs);
+	if(WebMyth.prefsCookieObject.debug){
+		Mojo.Log.info("Selected individual recording: '%s' + '%s'", recorded_chanid, recorded_recStartTs);
+	}
 	
 	//detailsObject = trimByChanidRecstartts(this.fullResultList, recorded_chanid, recorded_recStartTs)
 
-	//Mojo.Log.info("Selected object is: '%j'", detailsObject);
+	if(WebMyth.prefsCookieObject.debug){
+		Mojo.Log.info("Selected object is: '%j'", event.item);
+	}
 	
 	//Open recordedDetails communication scene
 	Mojo.Controller.stageController.pushScene("recordedDetails", event.item);
@@ -767,8 +818,10 @@ RecordedAssistant.prototype.filterListFunction = function(filterString, listWidg
 	}
 	else {
 
-		Mojo.Log.info("No filter string - length of "+this.resultList.length);
-
+		if(WebMyth.prefsCookieObject.debug){
+			Mojo.Log.info("No filter string - length of "+this.resultList.length);
+		}
+		
 		var len = this.resultList.length;
  
 		for (i = 0; i < len; i++) {
@@ -796,13 +849,17 @@ RecordedAssistant.prototype.filterListFunction = function(filterString, listWidg
 	// then update the list length 
 	// and the FilterList widget's FilterField count (displayed in the upper right corner)
 	
-	Mojo.Log.info("done filtering down - now displaying");
+	if(WebMyth.prefsCookieObject.debug){
+		Mojo.Log.info("done filtering down - now displaying");
+	}
 	
 	listWidget.mojo.noticeUpdatedItems(offset, this.subset);
 	listWidget.mojo.setLength(totalSubsetSize);
 	listWidget.mojo.setCount(totalSubsetSize);
 	
-	Mojo.Log.info("done displaying");
+	if(WebMyth.prefsCookieObject.debug){
+		Mojo.Log.info("done displaying");
+	}
 	
 	//this.addImages();
 
@@ -867,14 +924,18 @@ RecordedAssistant.prototype.updateRecgroupList = function(transaction, results) 
 		//Mojo.Log.error("Just added '%j' to list", string);
 	};
 						
-	//Mojo.Log.error("New recgroup list is '%j' with length %s", updatedList, updatedList.length);
+	if(WebMyth.prefsCookieObject.debug){
+		Mojo.Log.error("New recgroup list is '%j' with length %s", updatedList, updatedList.length);
+	}
 	
 	if (updatedList.length == 0) {
 		updatedList = [ {'label':$L('Default'), 'value':'Default' } ];
-		Mojo.Log.info("Updated initial recgroup list is '%j' ", updatedList);
+		//Mojo.Log.info("Updated initial recgroup list is '%j' ", updatedList);
 		WebMyth.prefsCookieObject.currentRecgroup = 'Default';
 	} else {
-		//Mojo.Log.info("New recgroup list is still '%j' ", updatedList);
+		if(WebMyth.prefsCookieObject.debug){
+			Mojo.Log.info("New recgroup list is still '%j' ", updatedList);
+		}
 	}
 				
 				
@@ -899,12 +960,16 @@ RecordedAssistant.prototype.updateRecgroupList = function(transaction, results) 
 
 RecordedAssistant.prototype.updateRecgroupListJSON = function()  { 
 	
-	Mojo.Log.info('Starting to update RecgroupList');
+	if(WebMyth.prefsCookieObject.debug){
+		Mojo.Log.info('Starting to update RecgroupList');
+	}
 	
 	this.groupsList.clear();
 	this.groupsList = cleanRecordedGroup(this.allGroupsList);
 					
-	Mojo.Log.error("Cleaned groupsList is %j",this.groupsList);
+	if(WebMyth.prefsCookieObject.debug){
+		Mojo.Log.error("Cleaned groupsList is %j",this.groupsList);
+	}
 	
 	this.updateGroupMenu();
 	
@@ -927,7 +992,9 @@ RecordedAssistant.prototype.setMyData = function(propertyValue, model)  {
 		screenshotUrl += model.chanId + "&StartTime=" + model.recStartTsSpace;
 	}
 	
-	//Mojo.Log.info("Screenshot URL is "+screenshotUrl);
+	if(WebMyth.prefsCookieObject.debug){
+		Mojo.Log.info("Screenshot URL is "+screenshotUrl);
+	}
 	
 	var recordedDetailsText = '<div class="recorded-list-item '+model.recGroup+'">';
 	recordedDetailsText += '<div class="title truncating-text left recorded-list-title">&nbsp;'+model.title+'</div>';
