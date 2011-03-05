@@ -298,6 +298,7 @@ StatusAssistant.prototype.getStatus = function() {
 	//Mojo.Log.info("Got master backend IP from settings: "+WebMyth.prefsCookieObject.masterBackendIp);
 	
 	var requestUrl = "http://"+WebMyth.prefsCookieObject.masterBackendIp+":6544/xml";
+	//var requestUrl = "http://192.168.1.105/dropbox/status.xml";
 	
 	//Mojo.Log.info("Status request URL is "+requestUrl);
 	
@@ -483,7 +484,7 @@ StatusAssistant.prototype.readStatusFail = function(response) {
 StatusAssistant.prototype.readStatusSuccess = function(response) {
 	
 	var xmlstring = response.responseText.trim();
-	//Mojo.Log.info("Got XML status response from backend: "+xmlstring);
+	Mojo.Log.info("Got XML status response from backend: "+xmlstring);
 	
 	var singleEncoderNode, singleEncoderChildNode, singleEncoderJson;
 	var singleScheduledNode, singleScheduledRecordingNode, singleScheduleJson;
@@ -527,7 +528,7 @@ StatusAssistant.prototype.readStatusSuccess = function(response) {
 			this.encodersList.push(singleEncoderJson);
 		}
 	} 
-	//Mojo.Log.info("Full encoder list is %j", this.encodersList);
+	//Mojo.Log.error("Full encoder list is %j", this.encodersList);
 	this.controller.modelChanged(this.encodersListModel);
 		
 	
@@ -557,7 +558,7 @@ StatusAssistant.prototype.readStatusSuccess = function(response) {
 			this.scheduledList.push(singleScheduledJson);
 		}
 	} 
-	//Mojo.Log.info("Full scheduled is %j", this.scheduledList);
+	//Mojo.Log.error("Full scheduled is %j", this.scheduledList);
 	this.controller.modelChanged(this.scheduledListModel);
 	
 	
@@ -595,7 +596,7 @@ StatusAssistant.prototype.readStatusSuccess = function(response) {
 		this.controller.modelChanged(this.jobqueueListModel);
 		
 	}
-	//Mojo.Log.info("Full jobqueue is %j", this.jobqueueList);
+	//Mojo.Log.error("Full jobqueue is %j", this.jobqueueList);
 	
 	
 	//Storage
@@ -624,56 +625,92 @@ StatusAssistant.prototype.readStatusSuccess = function(response) {
 			this.storageList.push(singleStorageJson);
 		}
 	} 
-	//Mojo.Log.info("Full storagelist is %j", this.storageList);
+	//Mojo.Log.error("Full storagelist is %j", this.storageList);
 	this.controller.modelChanged(this.storageListModel);
 	
 	
+	var guideStart = "";
+	var guideStatus = "";
+	var guideThru = "";
+	var guideDays = "";
+	var guideNext = "";
+	var guideComments = "";
+	
+	try {
+		var guideNode=xmlobject.getElementsByTagName("Guide")[0];
+	
+		guideStart = guideNode.getAttributeNode("start").nodeValue.replace("T", " ");
+		guideStatus = guideNode.getAttributeNode("status").nodeValue.replace("T", " ");
+		guideThru = guideNode.getAttributeNode("guideThru").nodeValue.replace("T", " ");
+		guideDays = guideNode.getAttributeNode("guideDays").nodeValue.replace("T", " ");
+		guideNext = guideNode.getAttributeNode("next").nodeValue.replace("T", " ");
+		
+		guideComments = guideNode.childNodes[0].nodeValue;
+	} catch (e) {
+		Mojo.Log.error(e);
+	}
+	
 	//Guide
-	var guideNode=xmlobject.getElementsByTagName("Guide")[0];
 	
 	var guideContent = '<div class="palm-row first">';
 	guideContent += '	<div class="palm-row-wrapper">';
     guideContent += '        <div class="label" id="guideStart-label">'+$L('Last Run')+'</div>';
-	guideContent += '		<div class="title" id="guideStart-title">'+guideNode.getAttributeNode("start").nodeValue.replace("T", " ")+'</div>';
+	guideContent += '		<div class="title" id="guideStart-title">'+guideStart+'</div>';
 	guideContent += '	</div>';
     guideContent += '</div>';
 	guideContent += '<div class="palm-row">';
 	guideContent += '	<div class="palm-row-wrapper">';
     guideContent += '        <div class="label" id="guideStatus-label">'+$L('Last Status')+'</div>';
-	guideContent += '		<div class="title" id="guideStatus-title">'+guideNode.getAttributeNode("status").nodeValue+'</div>';
+	guideContent += '		<div class="title" id="guideStatus-title">'+guideStatus+'</div>';
 	guideContent += '	</div>';
     guideContent += '</div>';
 	guideContent += '<div class="palm-row">';
 	guideContent += '	<div class="palm-row-wrapper">';
     guideContent += '        <div class="label" id="guideThru-label">'+$L('Data Until')+'</div>';
-	guideContent += '		<div class="title" id="guideThru-title">'+guideNode.getAttributeNode("guideThru").nodeValue.replace("T", " ")+'</div>';
+	guideContent += '		<div class="title" id="guideThru-title">'+guideThru+'</div>';
 	guideContent += '	</div>';
     guideContent += '</div>';
 	guideContent += '<div class="palm-row">';
 	guideContent += '	<div class="palm-row-wrapper">';
     guideContent += '        <div class="label" id="guideDays-label">'+$L('Days')+'</div>';
-	guideContent += '		<div class="title" id="guideDays-title">'+guideNode.getAttributeNode("guideDays").nodeValue+'</div>';
+	guideContent += '		<div class="title" id="guideDays-title">'+guideDays+'</div>';
 	guideContent += '	</div>';
     guideContent += '</div>';
 	guideContent += '<div class="palm-row">';
 	guideContent += '	<div class="palm-row-wrapper">';
     guideContent += '        <div class="label" id="guideNext-label">'+$L('Next Run')+'</div>';
-	guideContent += '		<div class="title" id="guideNext-title">'+guideNode.getAttributeNode("next").nodeValue.replace("T", " ")+'</div>';
+	guideContent += '		<div class="title" id="guideNext-title">'+guideNext+'</div>';
 	guideContent += '	</div>';
     guideContent += '</div>	';
 	guideContent += '<div class="palm-row last">';
 	guideContent += '	<div class="palm-row-wrapper">';
     guideContent += '        <div class="label" id="guideComments-label">'+$L('Comments')+'</div>';
-	guideContent += '		<div class="title" id="guideComments-title">'+guideNode.childNodes[0].nodeValue+'</div>';
+	guideContent += '		<div class="title" id="guideComments-title">'+guideComments+'</div>';
 	guideContent += '	</div>';
     guideContent += '</div>';
 	
 	$('guideContent').innerHTML = guideContent;
 	
 	
+	
 	//General drawer
-	var statusNode=xmlobject.getElementsByTagName("Status")[0];
-	var loadNode=xmlobject.getElementsByTagName("Load")[0];
+	var statusVersion = "";
+	var statusDate = "";
+	var statusTime = "";
+	var allLoads = "";
+	
+	try {
+		var statusNode=xmlobject.getElementsByTagName("Status")[0];
+		var loadNode=xmlobject.getElementsByTagName("Load")[0];
+	
+		statusVersion = statusNode.getAttributeNode("version").nodeValue;
+		statusDate = statusNode.getAttributeNode("date").nodeValue;
+		statusTime = statusNode.getAttributeNode("time").nodeValue;
+		allLoads = loadNode.getAttributeNode("avg1").nodeValue+", "+loadNode.getAttributeNode("avg2").nodeValue+", "+loadNode.getAttributeNode("avg3").nodeValue;
+		
+	} catch (e) {
+		Mojo.Log.error(e);
+	}
 	
 	WebMyth.prefsCookieObject.mythVer = statusNode.getAttributeNode("version").nodeValue;
 	
@@ -686,7 +723,7 @@ StatusAssistant.prototype.readStatusSuccess = function(response) {
 	generalStatusContent +=	'<div class="palm-row">';
 	generalStatusContent +=	'	<div class="palm-row-wrapper">';
     generalStatusContent +=	'        <div class="label" id="version-label">'+$L('Version')+'</div>';
-	generalStatusContent +=	'		<div class="title" id="version-title">'+statusNode.getAttributeNode("version").nodeValue+'</div>';
+	generalStatusContent +=	'		<div class="title" id="version-title">'+statusVersion+'</div>';
 	generalStatusContent +=	'	</div>';
     generalStatusContent +=	'</div>';
 	generalStatusContent +=	'<div class="palm-row">';
@@ -698,26 +735,23 @@ StatusAssistant.prototype.readStatusSuccess = function(response) {
 	generalStatusContent +=	'<div class="palm-row">';
 	generalStatusContent +=	'	<div class="palm-row-wrapper">';
     generalStatusContent +=	'        <div class="label" id="currentdate-label">'+$L('Current Date')+'</div>';
-	generalStatusContent +=	'		<div class="title" id="currentdate-title">'+statusNode.getAttributeNode("date").nodeValue+'</div>';
+	generalStatusContent +=	'		<div class="title" id="currentdate-title">'+statusDate+'</div>';
 	generalStatusContent +=	'	</div>';
     generalStatusContent +=	'</div>';
 	generalStatusContent +=	'<div class="palm-row">';
 	generalStatusContent +=	'	<div class="palm-row-wrapper">';
     generalStatusContent +=	'        <div class="label" id="currenttime-label">'+$L('Current Time')+'</div>';
-	generalStatusContent +=	'		<div class="title" id="currenttime-title">'+statusNode.getAttributeNode("time").nodeValue+'</div>';
+	generalStatusContent +=	'		<div class="title" id="currenttime-title">'+statusTime+'</div>';
 	generalStatusContent +=	'	</div>';
     generalStatusContent +=	'</div>';
 	generalStatusContent +=	'<div class="palm-row last">';
 	generalStatusContent +=	'	<div class="palm-row-wrapper">';
     generalStatusContent +=	'        <div class="label" id="avg3-label">'+$L('Load Avg')+'</div>';
-	generalStatusContent +=	'		<div class="title" id="all-avgs-title">';
-	generalStatusContent += loadNode.getAttributeNode("avg1").nodeValue+", "+loadNode.getAttributeNode("avg2").nodeValue+", "+loadNode.getAttributeNode("avg3").nodeValue;
-	generalStatusContent += '</div>';
+	generalStatusContent +=	'		<div class="title" id="all-avgs-title">'+allLoads+'</div>';
 	generalStatusContent +=	'	</div>';
 	generalStatusContent +=	' </div>';
 	
 	$('generalStatusContent').innerHTML = generalStatusContent;
-	
 	
 	
 	

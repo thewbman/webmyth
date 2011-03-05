@@ -617,7 +617,7 @@ void backgroundMysqlResponse(){
 	}
 	
 	count_fields =  mysql_num_fields(res);
-	syslog(LOG_INFO,"Total fields: %d",count_fields);
+	syslog(LOG_INFO,"Total columns: %d",count_fields);
 	
 	char * field_names[count_fields];
 	i = 0;
@@ -1220,10 +1220,16 @@ PDL_bool mysqlCommand(PDL_JSParameters *params){
 	if(activeMysql) {
 		//We are in the middle of some other MySQL query/command
 		
-        PDL_JSException(params, "ERROR: Another query is still active");       
+        PDL_JSException(params, "ERROR: Another query is still active");  
+		pluginErrorMessage("ERROR: Another query is still active.  Try again later.");   
+		
         return PDL_FALSE; 
 	
-	} 
+	} else {
+	
+		syslog(LOG_INFO, "Will try MySQL query to %s at port %d, db: %s, username: %s\0", my_mysql_host,my_mysql_port,my_mysql_db,my_mysql_username);
+	
+	}
 	
 	const char * query_1 = PDL_GetJSParamString(params, 6);
 	const char * query_2 = PDL_GetJSParamString(params, 7);
@@ -1272,7 +1278,9 @@ PDL_bool mysqlExecute(PDL_JSParameters *params){
 	if(activeMysql) {
 		//We are in the middle of some other MySQL query/command
 		
-        PDL_JSException(params, "ERROR: Another query is still active");       
+        PDL_JSException(params, "ERROR: Another query is still active");   
+		pluginErrorMessage("ERROR: Another query is still active.  Try again later.");   
+		    
         return PDL_FALSE; 
 	
 	} 

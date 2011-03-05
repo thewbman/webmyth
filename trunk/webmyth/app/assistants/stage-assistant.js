@@ -461,10 +461,12 @@ StageAssistant.prototype.onFocusHandler = function() {
 	
 	if(WebMyth.prefsCookieObject.dashboardRemote) {
 	
-		dashboardStage = Mojo.Controller.getAppController().getStageController("dashboard");
-		
-		dashboardStage.delegateToSceneAssistant("closeDashboard", {});
-		
+		try {
+			var dashboardStage = Mojo.Controller.getAppController().getStageController("dashboard");
+			dashboardStage.delegateToSceneAssistant("closeDashboard", {});
+		} catch(e) {
+			Mojo.Log.error(e);
+		}
 	}
 	
 };

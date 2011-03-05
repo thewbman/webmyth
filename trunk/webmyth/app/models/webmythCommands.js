@@ -125,7 +125,8 @@ function defaultCookie() {
 		usePlugin: 2,
 		protoVerSubmitted: false,
 		currentSearchPeopleSort: 'date-asc',
-		mythVer: 'TBD'
+		mythVer: 'TBD',
+		debug: false
 		
 	};
 	
@@ -1278,7 +1279,9 @@ var parseUpcomingPlugin = function(fullData) {
 	
 	//Mojo.Log.error("about to start parsing upcoming plugin "+fullData);
 	
-	if(WebMyth.prefsCookieObject.protoVer >= 57){
+	if(WebMyth.prefsCookieObject.protoVer == 23056){
+		finalList = parsePrograms41(fullData, type);
+	} else if(WebMyth.prefsCookieObject.protoVer >= 57){
 		finalList = parsePrograms57(fullData, type);
 	} else if(WebMyth.prefsCookieObject.protoVer >= 41){
 		finalList = parsePrograms41(fullData, type);
