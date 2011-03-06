@@ -392,13 +392,33 @@ UpcomingDetailsXMLAssistant.prototype.readDetailsXMLFailure = function(response)
 }
 
 UpcomingDetailsXMLAssistant.prototype.readDetailsXMLSuccess = function(response) {
+	
+	if(WebMyth.prefsCookieObject.debug){
+		Mojo.Log.info("About to start parsing upcomingDetails from XML");
+	}
+	
+	var xmlobject;
+	
+	if(response.responseXML) {
+	
+		xmlobject = response.responseXML;
+	
+		if(WebMyth.prefsCookieObject.debug){
+			Mojo.Log.info("Using XML upcomingDetails response as responseXML");
+		}
+		
+	} else {
+	
+		var xmlstring = response.responseText.trim();
+	
+		if(WebMyth.prefsCookieObject.debug){
+			Mojo.Log.info("Got XML upcomingDetails responseText from backend: "+xmlstring);
+		}
+		
+		xmlobject = (new DOMParser()).parseFromString(xmlstring, "text/xml");
+		
+	}
 
-	
-	Mojo.Log.info("About to start parsing recorded from XML");
-	
-	var xmlstring = response.responseText.trim();
-	var xmlobject = (new DOMParser()).parseFromString(xmlstring, "text/xml");
-	
 	
 	//Local variables
 	var topNode, topNodesCount, topSingleNode, programDetailsNode;

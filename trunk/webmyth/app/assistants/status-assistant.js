@@ -482,18 +482,38 @@ StatusAssistant.prototype.readStatusFail = function(response) {
 };
 
 StatusAssistant.prototype.readStatusSuccess = function(response) {
+		
+	if(WebMyth.prefsCookieObject.debug){
+		Mojo.Log.info("Starting readStatusSuccess");
+	}
 	
-	var xmlstring = response.responseText.trim();
-	Mojo.Log.info("Got XML status response from backend: "+xmlstring);
+	var xmlobject;
+	
+	if(response.responseXML) {
+	
+		xmlobject = response.responseXML;
+	
+		if(WebMyth.prefsCookieObject.debug){
+			Mojo.Log.info("Using XML status response as responseXML");
+		}
+		
+	} else {
+	
+		var xmlstring = response.responseText.trim();
+	
+		if(WebMyth.prefsCookieObject.debug){
+			Mojo.Log.fino("Got XML status responseText from backend: "+xmlstring);
+		}
+		
+		xmlobject = (new DOMParser()).parseFromString(xmlstring, "text/xml");
+		
+	}
 	
 	var singleEncoderNode, singleEncoderChildNode, singleEncoderJson;
 	var singleScheduledNode, singleScheduledRecordingNode, singleScheduleJson;
 	var singleJobqueueNode, singleJobqueueProgramNode, singleJobqueueJson;
 	var hasJobs = false, tempJobsList = [];
 	var singleStorageNode, singleStorageJson;
-	
-	var xmlobject = (new DOMParser()).parseFromString(xmlstring, "text/xml");
-	
 	
 	
 	//Encoders

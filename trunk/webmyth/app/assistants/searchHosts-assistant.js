@@ -104,15 +104,35 @@ SearchHostsAssistant.prototype.cleanup = function(event) {
 
 
 SearchHostsAssistant.prototype.getFrontendsXMLSuccess = function(response) {
+
+	if(WebMyth.prefsCookieObject.debug){
+		Mojo.Log.info("Starting SearchHostsAssistant");
+	}
 	
-	//Mojo.Log.info("Got frontends XML: '%j'", response.responseText);
+	var xmlobject;
+	
+	if(response.responseXML) {
+	
+		xmlobject = response.responseXML;
+	
+		if(WebMyth.prefsCookieObject.debug){
+			Mojo.Log.info("Using XML searchHosts response as responseXML");
+		}
+		
+	} else {
+	
+		var xmlstring = response.responseText.trim();
+	
+		if(WebMyth.prefsCookieObject.debug){
+			Mojo.Log.info("Got XML searchHosts responseText from backend: "+xmlstring);
+		}
+		
+		xmlobject = (new DOMParser()).parseFromString(xmlstring, "text/xml");
+		
+	}
 	
 	var hostsList = [];
 	
-	var xmlstring = response.responseText.trim();
-	var xmlobject = (new DOMParser()).parseFromString(xmlstring, "text/xml");
-	
-	//Mojo.Log.error("Hosts response is %s",xmlstring);
 	
 	//Local variables
 	var topNode, topNodesCount, topSingleNode, hostsNode, singleHostNode;

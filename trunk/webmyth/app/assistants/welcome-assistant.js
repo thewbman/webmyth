@@ -914,11 +914,33 @@ WelcomeAssistant.prototype.getConnectionInfo = function() {
 }
 
 WelcomeAssistant.prototype.readConnectionInfoSuccess = function(response) {
-
-	//Mojo.Log.info('Got connection info', response.responseText.trim());
 	
-	var xmlstring = response.responseText.trim();
-	var xmlobject = (new DOMParser()).parseFromString(xmlstring, "text/xml");
+	if(WebMyth.prefsCookieObject.debug){
+		Mojo.Log.info("Starting readConnectionInfoSuccess");
+	}
+	
+	var xmlobject;
+	
+	if(response.responseXML) {
+	
+		xmlobject = response.responseXML;
+	
+		if(WebMyth.prefsCookieObject.debug){
+			Mojo.Log.info("Using XML readConnectionInfoSuccess response as responseXML");
+		}
+		
+	} else {
+	
+		var xmlstring = response.responseText.trim();
+	
+		if(WebMyth.prefsCookieObject.debug){
+			Mojo.Log.info("Got XML readConnectionInfoSuccess responseText from backend: "+xmlstring);
+		}
+		
+		xmlobject = (new DOMParser()).parseFromString(xmlstring, "text/xml");
+		
+	}
+	
 	
 	
 	//Local variables
@@ -1391,8 +1413,33 @@ WelcomeAssistant.prototype.getHostsList = function() {
 
 WelcomeAssistant.prototype.readHostsSuccess = function(response) {
 	
-	var xmlstring = response.responseText.trim();
-	var xmlobject = (new DOMParser()).parseFromString(xmlstring, "text/xml");
+	if(WebMyth.prefsCookieObject.debug){
+		Mojo.Log.info("Starting readHostsSuccess");
+	}
+	
+	var xmlobject;
+	
+	if(response.responseXML) {
+	
+		xmlobject = response.responseXML;
+	
+		if(WebMyth.prefsCookieObject.debug){
+			Mojo.Log.info("Using XML readHostsSuccess response as responseXML");
+		}
+		
+	} else {
+	
+		var xmlstring = response.responseText.trim();
+	
+		if(WebMyth.prefsCookieObject.debug){
+			Mojo.Log.info("Got XML readHostsSuccess responseText from backend: "+xmlstring);
+		}
+		
+		xmlobject = (new DOMParser()).parseFromString(xmlstring, "text/xml");
+		
+	}
+	
+	
 	
 	//Mojo.Log.info("Hosts response is %s",xmlstring);
 	
@@ -1543,8 +1590,31 @@ WelcomeAssistant.prototype.getBackendIPs = function() {
 
 WelcomeAssistant.prototype.readBackendIPSuccess = function(response) {
 	
-	var xmlstring = response.responseText.trim();
-	var xmlobject = (new DOMParser()).parseFromString(xmlstring, "text/xml");
+	if(WebMyth.prefsCookieObject.debug){
+		Mojo.Log.info("Starting readHostsSuccess");
+	}
+	
+	var xmlobject;
+	
+	if(response.responseXML) {
+	
+		xmlobject = response.responseXML;
+	
+		if(WebMyth.prefsCookieObject.debug){
+			Mojo.Log.info("Using XML readHostsSuccess response as responseXML");
+		}
+		
+	} else {
+	
+		var xmlstring = response.responseText.trim();
+	
+		if(WebMyth.prefsCookieObject.debug){
+			Mojo.Log.info("Got XML readHostsSuccess responseText from backend: "+xmlstring);
+		}
+		
+		xmlobject = (new DOMParser()).parseFromString(xmlstring, "text/xml");
+		
+	}
 	
 	//Mojo.Log.info("Backend IP response is %s",xmlstring);
 	
@@ -1606,8 +1676,32 @@ WelcomeAssistant.prototype.readBackendIPSuccess = function(response) {
 
 WelcomeAssistant.prototype.readMasterBackendIPSuccess = function(response) {
 	
-	var xmlstring = response.responseText.trim();
-	var xmlobject = (new DOMParser()).parseFromString(xmlstring, "text/xml");
+	if(WebMyth.prefsCookieObject.debug){
+		Mojo.Log.info("Starting readMasterBackendIPSuccess");
+	}
+	
+	var xmlobject;
+	
+	if(response.responseXML) {
+	
+		xmlobject = response.responseXML;
+	
+		if(WebMyth.prefsCookieObject.debug){
+			Mojo.Log.info("Using XML readMasterBackendIPSuccess response as responseXML");
+		}
+		
+	} else {
+	
+		var xmlstring = response.responseText.trim();
+	
+		if(WebMyth.prefsCookieObject.debug){
+			Mojo.Log.info("Got XML readMasterBackendIPSuccess responseText from backend: "+xmlstring);
+		}
+		
+		xmlobject = (new DOMParser()).parseFromString(xmlstring, "text/xml");
+		
+	}
+	
 	
 	//Mojo.Log.info("Backend IP response is %s",xmlstring);
 	
