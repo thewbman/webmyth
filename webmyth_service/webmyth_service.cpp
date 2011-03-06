@@ -59,6 +59,9 @@ bool doBackgroundMysqlExecute;
 
 bool activeMysql;
 
+	
+char logBuffer[MAX_BUFFER_LEN]; 
+int logBufferSize;
 
 //Frontend control variables
 const char *frontend_host_name;
@@ -133,6 +136,26 @@ void pluginErrorMessage(char errorMessage){
     const char *params[1];
     params[0] = (const char *)(errorMessage);
     PDL_Err mjErr = PDL_CallJS("pluginErrorMessage", params, 1);
+    if ( mjErr != PDL_NOERROR )
+    {
+        syslog(LOG_INFO, "error: %s\0", PDL_GetError());
+    }
+}
+
+void pluginLogMessage(const char *errorMessage){
+    const char *params[1];
+    params[0] = errorMessage;
+    PDL_Err mjErr = PDL_CallJS("pluginLogMessage", params, 1);
+    if ( mjErr != PDL_NOERROR )
+    {
+        syslog(LOG_INFO, "error: %s\0", PDL_GetError());
+    }
+}
+
+void pluginLogMessage(char errorMessage){
+    const char *params[1];
+    params[0] = (const char *)(errorMessage);
+    PDL_Err mjErr = PDL_CallJS("pluginLogMessage", params, 1);
     if ( mjErr != PDL_NOERROR )
     {
         syslog(LOG_INFO, "error: %s\0", PDL_GetError());
@@ -369,6 +392,9 @@ void backgroundProtocolCommandResponse(){
     } else {
         syslog(LOG_INFO, "mp connect() success");
 	}
+	
+	sprintf(logBuffer, "Finished mp connect() success");
+	pluginLogMessage(logBuffer);
 
 	
 	//Send initial protocol information
@@ -571,7 +597,11 @@ void backgroundMysqlResponse(){
 		return;
 	}
     
-	//syslog(LOG_INFO,"mysql connecting");
+	syslog(LOG_INFO,"mysql connecting");
+	
+	sprintf(logBuffer, "MySQL query to %s at port %d, db: %s, username: %s\0", my_mysql_host,my_mysql_port,my_mysql_db,my_mysql_username);
+	pluginLogMessage(logBuffer);
+	
 	
 	//Should check for log times here for DNS problem   http://serverfault.com/questions/136954/4-7-second-delay-accessing-mysql-across-the-network
 		
@@ -586,7 +616,10 @@ void backgroundMysqlResponse(){
 	}
 	
 	
-	//syslog(LOG_INFO,"mysql query: %s",my_mysql_query_full);
+	syslog(LOG_INFO,"mysql query: %s",my_mysql_query_full);
+	
+	sprintf(logBuffer, "Full mysql query: %s",my_mysql_query_full);
+	pluginLogMessage(logBuffer);
   
 	if(mysql_real_query(&mysql,my_mysql_query_full,(unsigned int)(strlen(my_mysql_query_full))) != 0){
 		//char errorMessageText;
@@ -716,6 +749,9 @@ void backgroundMysqlExecute(){
     
 	syslog(LOG_INFO,"mysql connecting");
 	
+	sprintf(logBuffer, "MySQL query to %s at port %d, db: %s, username: %s\0", my_mysql_host,my_mysql_port,my_mysql_db,my_mysql_username);
+	pluginLogMessage(logBuffer);
+	
 	//Should check for log times here for DNS problem   http://serverfault.com/questions/136954/4-7-second-delay-accessing-mysql-across-the-network
 		
 	if(!mysql_real_connect(&mysql,my_mysql_host,my_mysql_username,my_mysql_password,my_mysql_db,my_mysql_port,NULL,0)) {
@@ -730,7 +766,10 @@ void backgroundMysqlExecute(){
 	
 	
 	syslog(LOG_INFO,"mysql query execute: %s",my_mysql_query_full);
-  
+	
+	sprintf(logBuffer, "mysql query: %s",my_mysql_query_full);
+	pluginLogMessage(logBuffer);
+
   
 	if(mysql_real_query(&mysql,my_mysql_query_full,(unsigned int)(strlen(my_mysql_query_full))) != 0){
 		//char errorMessageText;
@@ -1228,7 +1267,18 @@ PDL_bool mysqlCommand(PDL_JSParameters *params){
 	} else {
 	
 		syslog(LOG_INFO, "Will try MySQL query to %s at port %d, db: %s, username: %s\0", my_mysql_host,my_mysql_port,my_mysql_db,my_mysql_username);
-	
+		
+		/*
+		logMessage += "  mysqlCommand: ";
+		logMessage += ", DB Host: ";
+		logMessage += my_mysql_host;
+		logMessage += ", DB Port: ";
+		logMessage += my_mysql_port;
+		logMessage += ", DB Name: ";
+		logMessage += my_mysql_db;
+		logMessage += ", DB Username: ";
+		logMessage += my_mysql_username;
+		*/
 	}
 	
 	const char * query_1 = PDL_GetJSParamString(params, 6);
@@ -1283,7 +1333,23 @@ PDL_bool mysqlExecute(PDL_JSParameters *params){
 		    
         return PDL_FALSE; 
 	
-	} 
+	}  else {
+	
+		syslog(LOG_INFO, "Will try MySQL query to %s at port %d, db: %s, username: %s\0", my_mysql_host,my_mysql_port,my_mysql_db,my_mysql_username);
+		
+		/*
+		logMessage += "  mysqlExecute: ";
+		logMessage += ", DB Host: ";
+		logMessage += my_mysql_host;
+		logMessage += ", DB Port: ";
+		logMessage += my_mysql_port;
+		logMessage += ", DB Name: ";
+		logMessage += my_mysql_db;
+		logMessage += ", DB Username: ";
+		logMessage += my_mysql_username;
+		*/
+		
+	}
 
 	const char * query_1 = PDL_GetJSParamString(params, 6);
 	const char * query_2 = PDL_GetJSParamString(params, 7);
@@ -1354,6 +1420,8 @@ int main(int argc, char** argv) {
 	
 	activeMysql = false;
 	
+	//logMessage = "done initializing plugin";
+	
 	//PDL_SetFirewallPortStatus(1900, PDL_TRUE);
 
     // Event descriptor
@@ -1363,6 +1431,12 @@ int main(int argc, char** argv) {
        
             while (SDL_WaitEvent(&Event)) {
 			
+				/*
+				if(logMessage.length() > 0) {
+					pluginLogMessage();
+				}
+				*/
+				
 				//Start the frontend socket command
 				if(doBackgroundFrontendSocket) {
 					

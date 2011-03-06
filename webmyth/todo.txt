@@ -26,6 +26,7 @@ Todo - planned new features and updates:
  - allow option to use script if on WAN
  - check if mysql active before overtiing plugin values
  - popup error on mysql active 
+ - handle missing setup sechedule
  
  - daylight savings?
  
