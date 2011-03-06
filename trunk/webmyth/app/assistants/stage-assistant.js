@@ -636,7 +636,7 @@ StageAssistant.prototype.pluginErrorMessage = function(a) {
 StageAssistant.prototype.pluginLogMessage = function(a) {
 
 	if(WebMyth.prefsCookieObject.debug) {
-		Mojo.Log.info("Plugin Log of: "+a);
+		Mojo.Log.info("Plugin log message of: "+a);
 	}
 
 };
