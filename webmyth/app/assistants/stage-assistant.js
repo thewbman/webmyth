@@ -179,6 +179,7 @@ StageAssistant.prototype.setup = function() {
 		$('webmyth_service_id').backgroundFrontendSocketResponse = this.backgroundFrontendSocketResponse.bind(this);
 		$('webmyth_service_id').didReceiveData = this.didReceiveData.bind(this);
 		$('webmyth_service_id').pluginErrorMessage = this.pluginErrorMessage.bind(this);
+		$('webmyth_service_id').pluginLogMessage = this.pluginLogMessage.bind(this);
 		$('webmyth_service_id').didQueryLocation = this.didQueryLocation.bind(this);
 		$('webmyth_service_id').socketIsClosed = this.socketIsClosed.bind(this);	
 	}
@@ -629,6 +630,14 @@ StageAssistant.prototype.pluginErrorMessage = function(a) {
 
 	Mojo.Log.error("Plugin ERROR of '%s'", a);
 	Mojo.Controller.errorDialog(a);
+
+};
+
+StageAssistant.prototype.pluginLogMessage = function(a) {
+
+	if(WebMyth.prefsCookieObject.debug) {
+		Mojo.Log.info("Plugin Log of: "+a);
+	}
 
 };
 

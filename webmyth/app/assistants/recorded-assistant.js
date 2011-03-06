@@ -570,12 +570,31 @@ RecordedAssistant.prototype.readRemoteScriptSuccess = function(response) {
 RecordedAssistant.prototype.readRecordedXMLSuccess = function(response) {
 	
 	if(WebMyth.prefsCookieObject.debug){
-		Mojo.Log.info("About to start parsing recorded from XML: "+response.responseText.trim());
+		Mojo.Log.info("About to start parsing recorded from XML");
 	}
 	
-	var xmlstring = response.responseText.trim();
-	var xmlobject = (new DOMParser()).parseFromString(xmlstring, "text/xml");
+	var xmlobject;
 	
+	if(response.responseXML) {
+	
+		xmlobject = response.responseXML;
+	
+		if(WebMyth.prefsCookieObject.debug){
+			Mojo.Log.info("Using XML recorded response as responseXML");
+		}
+		
+	} else {
+	
+		var xmlstring = response.responseText.trim();
+	
+		if(WebMyth.prefsCookieObject.debug){
+			Mojo.Log.info("Got XML recorded responseText from backend: "+xmlstring);
+		}
+		
+		xmlobject = (new DOMParser()).parseFromString(xmlstring, "text/xml");
+		
+	}
+		
 	
 	//Local variables
 	var topNode, topNodesCount, topSingleNode, programsNode, programsNode;

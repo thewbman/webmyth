@@ -1228,13 +1228,32 @@ GuideAssistant.prototype.readGuideFail = function() {
 
 GuideAssistant.prototype.readGuideSuccess = function(response) {
 	
-	var xmlstring = response.responseText.trim();
-	
 	if(WebMyth.prefsCookieObject.debug){
-		Mojo.Log.info("Got XML guide response from backend: "+xmlstring);
+		Mojo.Log.info("About to start parsing guide from XML");
 	}
 	
-	var xmlobject = (new DOMParser()).parseFromString(xmlstring, "text/xml");
+	var xmlobject;
+	
+	if(response.responseXML) {
+	
+		xmlobject = response.responseXML;
+	
+		if(WebMyth.prefsCookieObject.debug){
+			Mojo.Log.info("Using XML guide response as responseXML");
+		}
+		
+	} else {
+	
+		var xmlstring = response.responseText.trim();
+	
+		if(WebMyth.prefsCookieObject.debug){
+			Mojo.Log.info("Got XML guide responseText from backend: "+xmlstring);
+		}
+		
+		xmlobject = (new DOMParser()).parseFromString(xmlstring, "text/xml");
+		
+	}
+	
 	
 	
 	//Local variables

@@ -27,6 +27,8 @@ Todo - planned new features and updates:
  - check if mysql active before overtiing plugin values
  - popup error on mysql active 
  
+ - daylight savings?
+ 
  
  
  
