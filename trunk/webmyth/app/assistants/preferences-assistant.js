@@ -979,6 +979,10 @@ PreferencesAssistant.prototype.checkSettings = function() {
 					WebMyth.usePlugin = false;
 					WebMyth.usePluginFrontend = false;
 				}
+				
+				if (WebMyth.prefsCookieObject.debug == true) {
+					Mojo.Log.info = Mojo.Log.error;
+				} 
 
 				Mojo.Controller.stageController.popScene();
 			

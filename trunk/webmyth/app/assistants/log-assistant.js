@@ -196,7 +196,7 @@ LogAssistant.prototype.handleKey = function(event) {
 LogAssistant.prototype.getLog = function(event) {
 
 	//Update list from webmyth python script
-	//Mojo.Log.error('Starting log data gathering');
+	Mojo.Log.info("Starting log data gathering");
 	
 	this.controller.sceneScroller.mojo.revealTop();
 	
@@ -255,7 +255,7 @@ LogAssistant.prototype.getLog = function(event) {
 
 LogAssistant.prototype.readRemoteLogFail = function(event) {
 
-	Mojo.Log.error('Failed to get log response');
+	Mojo.Log.error("Failed to get log response");
 	
 	this.resultList = [{ 'title':'Accesing remote table has failed.', 'subtitle':'Please check your server script.', 'starttime':''}];
 	
@@ -287,23 +287,30 @@ LogAssistant.prototype.readRemoteLogSuccess = function(response) {
 
 LogAssistant.prototype.mysqlLogResponse = function(response) {
 
-	//Mojo.Log.error("Got log plugin response: "+response);
+	try{
 	
-	var logJson = JSON.parse(response);
-	
-	//Mojo.Log.error("Plugin log JSON %j",logJson);
-	
+		Mojo.Log.info("Got log plugin response: "+response);
 		
-	//Update the list widget
-	this.fullResultList.clear();
-	Object.extend(this.fullResultList,logJson);
-
+		var logJson = JSON.parse(response);
+		
+		Mojo.Log.info("Plugin log JSON %j",logJson);
+		
+			
+		//Update the list widget
+		this.fullResultList.clear();
+		Object.extend(this.fullResultList,logJson);
+		
+	} catch(e){
+		Mojo.Log.error(e);
+	}
 	
 	this.finishedReadingLog();
 	
 };
 
 LogAssistant.prototype.finishedReadingLog = function() {
+
+	Mojo.Log.info("Doing finishedReadingLog");
 
 	this.updateGroupMenu();
 	

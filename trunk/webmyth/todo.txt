@@ -20,13 +20,11 @@ Todo - planned new features and updates:
  - update mythmusic remote
  - refresh button on now guide
  - setup rule fails with colon
- - upcoming details mythweb is wrong
  - allow update override
  - still have blank videos
  - allow option to use script if on WAN
- - check if mysql active before overtiing plugin values
  - popup error on mysql active 
- - handle missing setup sechedule
+ - back on videos goes to top directory
  
  - daylight savings?
  

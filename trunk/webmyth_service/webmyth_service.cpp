@@ -695,7 +695,7 @@ void backgroundMysqlResponse(){
 	
 	finalResponse += " ]";
 	
-	//syslog(LOG_INFO,"Full JSON: %s",(const char*)finalResponse.c_str());
+	syslog(LOG_INFO,"Full JSON: %s",(const char*)finalResponse.c_str());
 	
 	//syslog(LOG_INFO,"mysql after JSON");
 
@@ -703,6 +703,7 @@ void backgroundMysqlResponse(){
 	mysql_close(&mysql);
 	
 	
+	syslog(LOG_INFO,"Returning MySQL data to function: %s",my_mysql_response_function);
 	
 	
     const char *params[1];
@@ -817,6 +818,13 @@ void backgroundMysqlExecute(){
 }	
 
 
+
+PDL_bool isPluginAlive(PDL_JSParameters *params){
+	
+	PDL_JSReply(params, "true");
+	return PDL_TRUE;
+	
+}
 
 PDL_bool openBackgroundFrontendSocket(PDL_JSParameters *params) {
 	//function(frontend_host_name, port)
@@ -1249,12 +1257,6 @@ PDL_bool mythprotocolCommand(PDL_JSParameters *params){
 PDL_bool mysqlCommand(PDL_JSParameters *params){
 	//function(host, username, password, db, port, response_function, query[10])
 	
-	my_mysql_host = PDL_GetJSParamString(params, 0);
-    my_mysql_username = PDL_GetJSParamString(params, 1);
-	my_mysql_password = PDL_GetJSParamString(params, 2);
-	my_mysql_db = PDL_GetJSParamString(params, 3);
-    my_mysql_port = PDL_GetJSParamInt(params, 4);
-	my_mysql_response_function = PDL_GetJSParamString(params, 5);
 	
 	if(activeMysql) {
 		//We are in the middle of some other MySQL query/command
@@ -1265,6 +1267,13 @@ PDL_bool mysqlCommand(PDL_JSParameters *params){
         return PDL_FALSE; 
 	
 	} else {
+	
+		my_mysql_host = PDL_GetJSParamString(params, 0);
+		my_mysql_username = PDL_GetJSParamString(params, 1);
+		my_mysql_password = PDL_GetJSParamString(params, 2);
+		my_mysql_db = PDL_GetJSParamString(params, 3);
+		my_mysql_port = PDL_GetJSParamInt(params, 4);
+		my_mysql_response_function = PDL_GetJSParamString(params, 5);
 	
 		syslog(LOG_INFO, "Will try MySQL query to %s at port %d, db: %s, username: %s\0", my_mysql_host,my_mysql_port,my_mysql_db,my_mysql_username);
 		
@@ -1317,13 +1326,6 @@ PDL_bool mysqlCommand(PDL_JSParameters *params){
 PDL_bool mysqlExecute(PDL_JSParameters *params){
 	//function(host, username, password, db, port, response_function, query[10])
 	
-	my_mysql_host = PDL_GetJSParamString(params, 0);
-    my_mysql_username = PDL_GetJSParamString(params, 1);
-	my_mysql_password = PDL_GetJSParamString(params, 2);
-	my_mysql_db = PDL_GetJSParamString(params, 3);
-    my_mysql_port = PDL_GetJSParamInt(params, 4);
-	my_mysql_response_function = PDL_GetJSParamString(params, 5);
-	
 	
 	if(activeMysql) {
 		//We are in the middle of some other MySQL query/command
@@ -1334,6 +1336,13 @@ PDL_bool mysqlExecute(PDL_JSParameters *params){
         return PDL_FALSE; 
 	
 	}  else {
+	
+		my_mysql_host = PDL_GetJSParamString(params, 0);
+		my_mysql_username = PDL_GetJSParamString(params, 1);
+		my_mysql_password = PDL_GetJSParamString(params, 2);
+		my_mysql_db = PDL_GetJSParamString(params, 3);
+		my_mysql_port = PDL_GetJSParamInt(params, 4);
+		my_mysql_response_function = PDL_GetJSParamString(params, 5);
 	
 		syslog(LOG_INFO, "Will try MySQL query to %s at port %d, db: %s, username: %s\0", my_mysql_host,my_mysql_port,my_mysql_db,my_mysql_username);
 		
@@ -1398,6 +1407,8 @@ int main(int argc, char** argv) {
     PDL_Init(0);
 
     // register the JS callbacks
+    PDL_RegisterJSHandler("isPluginAlive", isPluginAlive);
+	
     PDL_RegisterJSHandler("openBackgroundFrontendSocket", openBackgroundFrontendSocket);
     PDL_RegisterJSHandler("openFrontendSocket", openFrontendSocket);
     PDL_RegisterJSHandler("sendData", sendData);
@@ -1411,8 +1422,6 @@ int main(int argc, char** argv) {
 
     PDL_JSRegistrationComplete();
 	
-    pluginStatus("Initialized");
-	
 	//Reset variables
 	doBackgroundFrontendSocket = false;
 	doBackgroundProtocolCommand = false;
@@ -1422,8 +1431,10 @@ int main(int argc, char** argv) {
 	
 	//logMessage = "done initializing plugin";
 	
-	//PDL_SetFirewallPortStatus(1900, PDL_TRUE);
 
+	
+    //pluginStatus("Initialized");
+	
     // Event descriptor
     SDL_Event Event;
 

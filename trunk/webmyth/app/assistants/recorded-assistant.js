@@ -37,9 +37,7 @@ f/*
 
 RecordedAssistant.prototype.setup = function() {
 
-	if(WebMyth.prefsCookieObject.debug){
-		Mojo.Log.info("RecordedAssistant setup");
-	}
+	Mojo.Log.info("RecordedAssistant setup");
 	
 	//Show and start the animated spinner
 	this.spinnerAttr= {
@@ -104,9 +102,9 @@ RecordedAssistant.prototype.setup = function() {
 			method: 'getstatus',
 			parameters: {subscribe: false},
 			onSuccess: function(response) {
-				if(WebMyth.prefsCookieObject.debug){
-					Mojo.Log.info("Got connection status of %j", response);
-				}
+				
+				Mojo.Log.info("Got connection status of %j", response);
+				
 				
 				if(response.wifi.state == "connected") {
 					this.onWan = false;
@@ -275,7 +273,19 @@ RecordedAssistant.prototype.getRecorded = function() {
 
 		if(WebMyth.prefsCookieObject.debug){
 			Mojo.Log.info("XML Recorded URL is: "+requestUrl);
+			
+			this.controller.serviceRequest("palm://com.palm.applicationManager", {
+				method: "open",
+				parameters:  {
+					id: 'com.palm.app.browser',
+					params: {
+						target: requestUrl
+					}
+				}
+			});
+			
 		}
+
 		
 		try {
 			var request = new Ajax.Request(requestUrl,{
@@ -361,9 +371,9 @@ RecordedAssistant.prototype.recgroupChanged = function(newRecgroup) {
 RecordedAssistant.prototype.useLocalDataTable = function(event) {
 	//Fall back to local data if cannot connect to remote server
 	Mojo.Controller.getAppController().showBanner("Failed to get new data, using saved", {source: 'notification'});
-	if(WebMyth.prefsCookieObject.debug){
-		Mojo.Log.error('Failed to get Ajax response - using previous saved data');
-	}
+	
+	Mojo.Log.error("Failed to get Ajax response - using previous saved data");
+	
 	
 	// Query recorded table
 	var mytext = 'SELECT * FROM recordedXML ORDER BY startTime;'
@@ -383,9 +393,8 @@ RecordedAssistant.prototype.queryDataHandler = function(transaction, results) {
     // Handle the results 
     var string = ""; 
 	
-	if(WebMyth.prefsCookieObject.debug){
-		Mojo.Log.error("Inside queryData with '%s' rows", results.rows.length);
-	}
+	Mojo.Log.info("Inside queryDataHandler with '%s' rows", results.rows.length);
+	
 	
     
 	try {
@@ -408,7 +417,7 @@ RecordedAssistant.prototype.queryDataHandler = function(transaction, results) {
 			list.push( string );
 			//this.hostListModel.items.push( string );
 			if(WebMyth.prefsCookieObject.debug){
-				Mojo.Log.error("Just added '%j' to list", string);
+				Mojo.Log.info("Just added '%j' to list", string);
 			}
 		}
 		
@@ -441,9 +450,8 @@ RecordedAssistant.prototype.queryDataHandler = function(transaction, results) {
 		);
 		
 		
-		if(WebMyth.prefsCookieObject.debug){
-			Mojo.Log.info("Done with data query");
-		}
+		Mojo.Log.info("Done with data query");
+		
 		
 		//Stop spinner and hide
 		this.spinnerModel.spinning = false;
@@ -464,7 +472,7 @@ RecordedAssistant.prototype.queryDataHandler = function(transaction, results) {
 };
 
 RecordedAssistant.prototype.queryErrorHandler = function(transaction, errors) { 
-    Mojo.Log.error('Error was '+error.message+' (Code '+error.code+')'); 
+    Mojo.Log.error("Error was "+error.message+" (Code "+error.code+")"); 
 };
 
 RecordedAssistant.prototype.finishedReadingRecorded = function(event) {	
@@ -569,163 +577,164 @@ RecordedAssistant.prototype.readRemoteScriptSuccess = function(response) {
 
 RecordedAssistant.prototype.readRecordedXMLSuccess = function(response) {
 	
-	if(WebMyth.prefsCookieObject.debug){
-		Mojo.Log.info("About to start parsing recorded from XML");
-	}
+	Mojo.Log.info("About to start parsing recorded from XML");
 	
-	var xmlobject;
+	try{
 	
-	if(response.responseXML) {
-	
-		xmlobject = response.responseXML;
-	
-		if(WebMyth.prefsCookieObject.debug){
+		var xmlobject;
+		
+		if(response.responseXML) {
+		
+			xmlobject = response.responseXML;
+		
 			Mojo.Log.info("Using XML recorded response as responseXML");
-		}
+			
+			
+		} else {
 		
-	} else {
-	
-		var xmlstring = response.responseText.trim();
-	
-		if(WebMyth.prefsCookieObject.debug){
+			var xmlstring = response.responseText.trim();
+		
 			Mojo.Log.info("Got XML recorded responseText from backend: "+xmlstring);
+			
+			xmlobject = (new DOMParser()).parseFromString(xmlstring, "text/xml");
+			
 		}
+			
 		
-		xmlobject = (new DOMParser()).parseFromString(xmlstring, "text/xml");
+		//Local variables
+		var topNode, topNodesCount, topSingleNode, programsNode, programsNode;
+		var singleProgramNode, singleProgramJson, singleRecordedGroupJson = {};
+		var singleProgramChildNode;
+		var protoVer;
 		
-	}
 		
-	
-	//Local variables
-	var topNode, topNodesCount, topSingleNode, programsNode, programsNode;
-	var singleProgramNode, singleProgramJson, singleRecordedGroupJson = {};
-	var singleProgramChildNode;
-	var protoVer;
-	
-	
-	
-	this.fullResultList.clear();
-	//this.channelList.clear();
-	
-	//Start parsing
-	topNode = xmlobject.getElementsByTagName("GetRecordedResponse")[0];
-	var topNodesCount = topNode.childNodes.length;
-	for(var i = 0; i < topNodesCount; i++) {
-		topSingleNode = topNode.childNodes[i];
-		switch(topSingleNode.nodeName) {
-			case 'ProtoVer':
-				protoVer = topSingleNode.childNodes[0].nodeValue;
-				
-				if(WebMyth.prefsCookieObject.protoVer != protoVer) WebMyth.prefsCookieObject.protoVerSumitted = false;
-				
-				WebMyth.prefsCookieObject.protoVer = protoVer;
-				
-				break;
-			case 'Recorded':
-				//Mojo.Log.info('Starting to parse Recorded');
-				programsNode = topSingleNode.childNodes[0];
-				for(var j = 0; j < programsNode.childNodes.length; j++) {
-					programsSingleNode = programsNode.childNodes[j];
-					//Mojo.Log.info("Node name is "+programsSingleNode.nodeName);
-					if(programsSingleNode.nodeName == 'Program') {
-						//Mojo.Log.info('Inside Program if');
-						singleProgramNode = programsSingleNode;
-						
-								singleProgramJson = {
-									"title": singleProgramNode.getAttributeNode("title").nodeValue, 
-									"subTitle": singleProgramNode.getAttributeNode("subTitle").nodeValue, 
-									"programFlags": singleProgramNode.getAttributeNode("programFlags").nodeValue, 
-									"category": singleProgramNode.getAttributeNode("category").nodeValue, 
-									"fileSize": singleProgramNode.getAttributeNode("fileSize").nodeValue, 
-									"seriesId": singleProgramNode.getAttributeNode("seriesId").nodeValue, 
-									"hostname": singleProgramNode.getAttributeNode("hostname").nodeValue, 
-									"catType": singleProgramNode.getAttributeNode("catType").nodeValue, 
-									"programId": singleProgramNode.getAttributeNode("programId").nodeValue, 
-									"repeat": singleProgramNode.getAttributeNode("repeat").nodeValue, 
-				//					"stars": singleProgramNode.getAttributeNode("stars").nodeValue, 
-									"endTime": singleProgramNode.getAttributeNode("endTime").nodeValue, 
-				//					"airdate": singleProgramNode.getAttributeNode("airdate").nodeValue, 
-									"startTime": singleProgramNode.getAttributeNode("startTime").nodeValue,
-									"lastModified": singleProgramNode.getAttributeNode("lastModified").nodeValue, 
-									"startTimeSpace": singleProgramNode.getAttributeNode("startTime").nodeValue.replace("T"," "),
-									"endTimeSpace": singleProgramNode.getAttributeNode("endTime").nodeValue.replace("T"," "),  
-									"startTimeHourMinute": singleProgramNode.getAttributeNode("startTime").nodeValue.substring(11,16),
-									"endTimeHourMinute": singleProgramNode.getAttributeNode("endTime").nodeValue.substring(11,16)
-								}
-								
-								try {
-									singleProgramJson.stars = singleProgramNode.getAttributeNode("stars").nodeValue;
-									singleProgramJson.airdate = singleProgramNode.getAttributeNode("airdate").nodeValue;
-								} catch(e) {
-									Mojo.Log.info("Error with getting airdate and stars");
-									singleProgramJson.stars = "";
-									singleProgramJson.airdate = "";
-								}
-								
-								for(var l = 0; l < singleProgramNode.childNodes.length; l++) {
-									singleProgramChildNode = singleProgramNode.childNodes[l];
+		
+		this.fullResultList.clear();
+		//this.channelList.clear();
+		
+		//Start parsing
+		topNode = xmlobject.getElementsByTagName("GetRecordedResponse")[0];
+		var topNodesCount = topNode.childNodes.length;
+		for(var i = 0; i < topNodesCount; i++) {
+			topSingleNode = topNode.childNodes[i];
+			switch(topSingleNode.nodeName) {
+				case 'ProtoVer':
+					protoVer = topSingleNode.childNodes[0].nodeValue;
+					
+					if(WebMyth.prefsCookieObject.protoVer != protoVer) WebMyth.prefsCookieObject.protoVerSumitted = false;
+					
+					WebMyth.prefsCookieObject.protoVer = protoVer;
+					
+					break;
+				case 'Recorded':
+					//Mojo.Log.info('Starting to parse Recorded');
+					programsNode = topSingleNode.childNodes[0];
+					for(var j = 0; j < programsNode.childNodes.length; j++) {
+						programsSingleNode = programsNode.childNodes[j];
+						//Mojo.Log.info("Node name is "+programsSingleNode.nodeName);
+						if(programsSingleNode.nodeName == 'Program') {
+							//Mojo.Log.info('Inside Program if');
+							singleProgramNode = programsSingleNode;
+							
+									singleProgramJson = {
+										"title": singleProgramNode.getAttributeNode("title").nodeValue, 
+										"subTitle": singleProgramNode.getAttributeNode("subTitle").nodeValue, 
+										"programFlags": singleProgramNode.getAttributeNode("programFlags").nodeValue, 
+										"category": singleProgramNode.getAttributeNode("category").nodeValue, 
+										"fileSize": singleProgramNode.getAttributeNode("fileSize").nodeValue, 
+										"seriesId": singleProgramNode.getAttributeNode("seriesId").nodeValue, 
+										"hostname": singleProgramNode.getAttributeNode("hostname").nodeValue, 
+										"catType": singleProgramNode.getAttributeNode("catType").nodeValue, 
+										"programId": singleProgramNode.getAttributeNode("programId").nodeValue, 
+										"repeat": singleProgramNode.getAttributeNode("repeat").nodeValue, 
+					//					"stars": singleProgramNode.getAttributeNode("stars").nodeValue, 
+										"endTime": singleProgramNode.getAttributeNode("endTime").nodeValue, 
+					//					"airdate": singleProgramNode.getAttributeNode("airdate").nodeValue, 
+										"startTime": singleProgramNode.getAttributeNode("startTime").nodeValue,
+										"lastModified": singleProgramNode.getAttributeNode("lastModified").nodeValue, 
+										"startTimeSpace": singleProgramNode.getAttributeNode("startTime").nodeValue.replace("T"," "),
+										"endTimeSpace": singleProgramNode.getAttributeNode("endTime").nodeValue.replace("T"," "),  
+										"startTimeHourMinute": singleProgramNode.getAttributeNode("startTime").nodeValue.substring(11,16),
+										"endTimeHourMinute": singleProgramNode.getAttributeNode("endTime").nodeValue.substring(11,16)
+									}
 									
-									if(l == 0) singleProgramJson.description = singleProgramChildNode.nodeValue;
+									try {
+										singleProgramJson.stars = singleProgramNode.getAttributeNode("stars").nodeValue;
+										singleProgramJson.airdate = singleProgramNode.getAttributeNode("airdate").nodeValue;
+									} catch(e) {
+										Mojo.Log.info("Error with getting airdate and stars");
+										singleProgramJson.stars = "";
+										singleProgramJson.airdate = "";
+									}
 									
-									
-									if(singleProgramChildNode.nodeName == "Channel") {
-				//						singleProgramJson.inputId = singleProgramChildNode.getAttributeNode("inputId").nodeValue;
-				//						singleProgramJson.chanFilters = singleProgramChildNode.getAttributeNode("chanFilters").nodeValue;
-				//						singleProgramJson.commFree = singleProgramChildNode.getAttributeNode("commFree").nodeValue;
-										singleProgramJson.channelName = singleProgramChildNode.getAttributeNode("channelName").nodeValue;
-				//						singleProgramJson.sourceId = singleProgramChildNode.getAttributeNode("sourceId").nodeValue;
-										singleProgramJson.chanId = singleProgramChildNode.getAttributeNode("chanId").nodeValue;
-										singleProgramJson.chanNum = singleProgramChildNode.getAttributeNode("chanNum").nodeValue;
-										singleProgramJson.callSign = singleProgramChildNode.getAttributeNode("callSign").nodeValue;
-									} 
-									
-									if(singleProgramChildNode.nodeName == "Recording") {
-				//						singleProgramJson.recPriority = singleProgramChildNode.getAttributeNode("recPriority").nodeValue;
-				//						singleProgramJson.playGroup = singleProgramChildNode.getAttributeNode("playGroup").nodeValue;
-										singleProgramJson.recStatus = singleProgramChildNode.getAttributeNode("recStatus").nodeValue;
-										singleProgramJson.recStartTs = singleProgramChildNode.getAttributeNode("recStartTs").nodeValue;
-										singleProgramJson.recStartTsSpace = singleProgramChildNode.getAttributeNode("recStartTs").nodeValue.replace("T"," ");
-										singleProgramJson.recGroup = singleProgramChildNode.getAttributeNode("recGroup").nodeValue;
-				//						singleProgramJson.dupMethod = singleProgramChildNode.getAttributeNode("dupMethod").nodeValue;
-										singleProgramJson.recType = singleProgramChildNode.getAttributeNode("recType").nodeValue;
-				//						singleProgramJson.encoderId = singleProgramChildNode.getAttributeNode("encoderId").nodeValue;
-				//						singleProgramJson.recProfile = singleProgramChildNode.getAttributeNode("recProfile").nodeValue;
-				//						singleProgramJson.recEndTs = singleProgramChildNode.getAttributeNode("recEndTs").nodeValue;
-										singleProgramJson.recordId = singleProgramChildNode.getAttributeNode("recordId").nodeValue;
-				//						singleProgramJson.dupInType = singleProgramChildNode.getAttributeNode("dupInType").nodeValue;
-				
-										singleRecordedGroupJson = {
-											"label": singleProgramChildNode.getAttributeNode("recGroup").nodeValue,
-											"recgroup": singleProgramChildNode.getAttributeNode("recGroup").nodeValue,
-											"command": "go-group"+singleProgramChildNode.getAttributeNode("recGroup").nodeValue
-										};
+									for(var l = 0; l < singleProgramNode.childNodes.length; l++) {
+										singleProgramChildNode = singleProgramNode.childNodes[l];
+										
+										if(l == 0) singleProgramJson.description = singleProgramChildNode.nodeValue;
+										
+										
+										if(singleProgramChildNode.nodeName == "Channel") {
+					//						singleProgramJson.inputId = singleProgramChildNode.getAttributeNode("inputId").nodeValue;
+					//						singleProgramJson.chanFilters = singleProgramChildNode.getAttributeNode("chanFilters").nodeValue;
+					//						singleProgramJson.commFree = singleProgramChildNode.getAttributeNode("commFree").nodeValue;
+											singleProgramJson.channelName = singleProgramChildNode.getAttributeNode("channelName").nodeValue;
+					//						singleProgramJson.sourceId = singleProgramChildNode.getAttributeNode("sourceId").nodeValue;
+											singleProgramJson.chanId = singleProgramChildNode.getAttributeNode("chanId").nodeValue;
+											singleProgramJson.chanNum = singleProgramChildNode.getAttributeNode("chanNum").nodeValue;
+											singleProgramJson.callSign = singleProgramChildNode.getAttributeNode("callSign").nodeValue;
+										} 
+										
+										if(singleProgramChildNode.nodeName == "Recording") {
+					//						singleProgramJson.recPriority = singleProgramChildNode.getAttributeNode("recPriority").nodeValue;
+					//						singleProgramJson.playGroup = singleProgramChildNode.getAttributeNode("playGroup").nodeValue;
+											singleProgramJson.recStatus = singleProgramChildNode.getAttributeNode("recStatus").nodeValue;
+											singleProgramJson.recStartTs = singleProgramChildNode.getAttributeNode("recStartTs").nodeValue;
+											singleProgramJson.recStartTsSpace = singleProgramChildNode.getAttributeNode("recStartTs").nodeValue.replace("T"," ");
+											singleProgramJson.recGroup = singleProgramChildNode.getAttributeNode("recGroup").nodeValue;
+					//						singleProgramJson.dupMethod = singleProgramChildNode.getAttributeNode("dupMethod").nodeValue;
+											singleProgramJson.recType = singleProgramChildNode.getAttributeNode("recType").nodeValue;
+					//						singleProgramJson.encoderId = singleProgramChildNode.getAttributeNode("encoderId").nodeValue;
+					//						singleProgramJson.recProfile = singleProgramChildNode.getAttributeNode("recProfile").nodeValue;
+					//						singleProgramJson.recEndTs = singleProgramChildNode.getAttributeNode("recEndTs").nodeValue;
+											singleProgramJson.recordId = singleProgramChildNode.getAttributeNode("recordId").nodeValue;
+					//						singleProgramJson.dupInType = singleProgramChildNode.getAttributeNode("dupInType").nodeValue;
+					
+											singleRecordedGroupJson = {
+												"label": singleProgramChildNode.getAttributeNode("recGroup").nodeValue,
+												"recgroup": singleProgramChildNode.getAttributeNode("recGroup").nodeValue,
+												"command": "go-group"+singleProgramChildNode.getAttributeNode("recGroup").nodeValue
+											};
+											
+										}
 										
 									}
 									
-								}
+									this.fullResultList.push(singleProgramJson);
+									this.allGroupsList.push(singleRecordedGroupJson);
+									//Mojo.Log.info("Program json is %j", singleProgramJson);
 								
-								this.fullResultList.push(singleProgramJson);
-								this.allGroupsList.push(singleRecordedGroupJson);
-								//Mojo.Log.info("Program json is %j", singleProgramJson);
 							
-						
+						}
 					}
-				}
-				
-				Mojo.Log.info('Done parsing Recorded');
-				Mojo.Log.info("Recorded full json is %j", this.fullResultList);
-	
-				
-				break;
-			default:
-				Mojo.Log.info("node name is "+topSingleNode.nodeName);
-				break;
+					
+					Mojo.Log.info('Done parsing Recorded');
+					Mojo.Log.info("Recorded full json is %j", this.fullResultList);
+		
+					
+					break;
+				default:
+					Mojo.Log.info("node name is "+topSingleNode.nodeName);
+					break;
+			}
 		}
+	
+	} catch(e) {
+	
+		Mojo.Log.error(e);
+	
 	}
 	
-	if(WebMyth.prefsCookieObject.debug){
-		Mojo.Log.info("Exited XML parsing");
-	}
+	Mojo.Log.info("Exited XML parsing");
 	
 	this.finishedReadingRecorded();
 
@@ -868,17 +877,15 @@ RecordedAssistant.prototype.filterListFunction = function(filterString, listWidg
 	// then update the list length 
 	// and the FilterList widget's FilterField count (displayed in the upper right corner)
 	
-	if(WebMyth.prefsCookieObject.debug){
-		Mojo.Log.info("done filtering down - now displaying");
-	}
+	Mojo.Log.info("done filtering down list - now displaying");
+	
 	
 	listWidget.mojo.noticeUpdatedItems(offset, this.subset);
 	listWidget.mojo.setLength(totalSubsetSize);
 	listWidget.mojo.setCount(totalSubsetSize);
 	
-	if(WebMyth.prefsCookieObject.debug){
-		Mojo.Log.info("done displaying");
-	}
+	Mojo.Log.info("Done displaying");
+	
 	
 	//this.addImages();
 
@@ -940,11 +947,11 @@ RecordedAssistant.prototype.updateRecgroupList = function(transaction, results) 
 		var row = results.rows.item(i);
 		string = { label:row.displayname, "command": "go-group"+row.groupname };
 		updatedList.push( string );
-		//Mojo.Log.error("Just added '%j' to list", string);
+		//Mojo.Log.info("Just added '%j' to list", string);
 	};
 						
 	if(WebMyth.prefsCookieObject.debug){
-		Mojo.Log.error("New recgroup list is '%j' with length %s", updatedList, updatedList.length);
+		Mojo.Log.info("New recgroup list is '%j' with length %s", updatedList, updatedList.length);
 	}
 	
 	if (updatedList.length == 0) {
@@ -987,7 +994,7 @@ RecordedAssistant.prototype.updateRecgroupListJSON = function()  {
 	this.groupsList = cleanRecordedGroup(this.allGroupsList);
 					
 	if(WebMyth.prefsCookieObject.debug){
-		Mojo.Log.error("Cleaned groupsList is %j",this.groupsList);
+		Mojo.Log.info("Cleaned groupsList is %j",this.groupsList);
 	}
 	
 	this.updateGroupMenu();
@@ -1012,7 +1019,7 @@ RecordedAssistant.prototype.setMyData = function(propertyValue, model)  {
 	}
 	
 	if(WebMyth.prefsCookieObject.debug){
-		Mojo.Log.info("Screenshot URL is "+screenshotUrl);
+		//Mojo.Log.info("Screenshot URL is "+screenshotUrl);
 	}
 	
 	var recordedDetailsText = '<div class="recorded-list-item '+model.recGroup+'">';

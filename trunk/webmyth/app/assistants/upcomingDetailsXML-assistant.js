@@ -236,7 +236,7 @@ UpcomingDetailsXMLAssistant.prototype.openGuide = function(guideType) {
 
 UpcomingDetailsXMLAssistant.prototype.openMythweb = function() {
 
-	var dateJS = new Date(isoSpaceToJS(this.starttime));
+	var dateJS = new Date(isoSpaceToJS(this.starttime.replace("T"," ")));
 	var dateUTC = dateJS.getTime()/1000;				//don't need 59 second offset?
 			
 	Mojo.Log.info("Selected time is: '%j'", dateUTC);

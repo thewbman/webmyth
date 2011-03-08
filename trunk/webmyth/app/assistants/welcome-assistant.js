@@ -25,6 +25,8 @@ function WelcomeAssistant() {
 }
 
 WelcomeAssistant.prototype.setup = function() {
+
+	Mojo.Log.info("WelcomeAssistant starting for WebMyth v"+Mojo.Controller.appInfo.version);
 		
 		
 	//App menu widget
@@ -201,8 +203,12 @@ WelcomeAssistant.prototype.setup = function() {
 		if (WebMyth.prefsCookieObject.currentSearchSort == null) WebMyth.prefsCookieObject.currentSearchSort = myDefaultCookie.currentSearchSort;
 		if (WebMyth.prefsCookieObject.currentSearchPeopleSort == null) WebMyth.prefsCookieObject.currentSearchPeopleSort = myDefaultCookie.currentSearchPeopleSort;
 		if (WebMyth.prefsCookieObject.mythVer == null) WebMyth.prefsCookieObject.mythVer = myDefaultCookie.mythVer;
-		if (WebMyth.prefsCookieObject.debug == null) WebMyth.prefsCookieObject.debug = myDefaultCookie.debug;
 		
+		if (WebMyth.prefsCookieObject.debug == null) {
+			WebMyth.prefsCookieObject.debug = myDefaultCookie.debug;
+		} else if (WebMyth.prefsCookieObject.debug == true) {
+			Mojo.Log.info = Mojo.Log.error;
+		}
 		
 		
 		
@@ -290,7 +296,15 @@ WelcomeAssistant.prototype.setup = function() {
 		WebMyth.remoteCookieObject = defaultRemoteCookie();
 		WebMyth.remoteCookie.put(WebMyth.remoteCookieObject);
 	}
-
+	
+	
+	//adsf - fake protover for testing purposes
+	if((WebMyth.prefsCookieObject.protoVer == null)&&(WebMyth.prefsCookieObject.debug)){
+		WebMyth.prefsCookieObject.protoVer = 23056;
+		Mojo.Controller.getAppController().showBanner("Setting protover to 23056", {source: 'notification'});
+	}
+	
+	
 	//Check for app updates
 	this.puchkDoUpdateCheck(24);
 	
@@ -655,7 +669,7 @@ WelcomeAssistant.prototype.alertScriptUpdate = function(oldversion) {
 		});
 	};
 	
-	//Mojo.Log.error("Leaving alert script update");
+	//Mojo.Log.info("Leaving alert script update");
 	
 	
 };
@@ -668,7 +682,7 @@ WelcomeAssistant.prototype.doWelcomeIcon = function(event) {
 	
 	//Mojo.Controller.stageController.pushScene("backendSearch");
 	
-	Mojo.Log.info("Starting plugin test - upnp")
+	Mojo.Log.info("doWelcomeIcon")
 	
 	try {
 	
@@ -696,12 +710,12 @@ WelcomeAssistant.prototype.backgroundUpnpResponse = function(response) {
 
 WelcomeAssistant.prototype.mysqlWelcomeResponse = function(response) {
 
-	Mojo.Log.error("Mysql text %s",response);
+	Mojo.Log.info("mysqlWelcomeResponse text %s",response);
 	$('debugText').innerText = response;
 	
 	var myObject = JSON.parse(response);
 	
-	Mojo.Log.error("Mysql JSON %j",myObject);
+	Mojo.Log.info("mysqlWelcomeResponse JSON %j",myObject);
 
 }
 	
@@ -841,7 +855,7 @@ WelcomeAssistant.prototype.readMasterBackendSuccess = function(response) {
 WelcomeAssistant.prototype.checkNetworkConnectionStatus = function() {
 	
 	//Update backends from XML
-	//Mojo.Log.error('Starting to get connection status');
+	//Mojo.Log.info("Starting to get connection status");
 	
 	
 	//Check we have a network before trying to get backends
@@ -883,12 +897,13 @@ WelcomeAssistant.prototype.checkNetworkConnectionStatus = function() {
 
 WelcomeAssistant.prototype.getConnectionInfo = function() {
 	
-	//Mojo.Log.error("Starting to get connection info");
+	Mojo.Log.info("Starting to get connection info");
 		
 	if(WebMyth.prefsCookieObject.manualDatabase){
 		//We have manual MySQL connection info, so we can get settings directly
-
+		
 		this.getSettings();
+
 		
 	} else {
 	
@@ -1097,9 +1112,19 @@ WelcomeAssistant.prototype.getSettings = function() {
 		
 		if(WebMyth.usePlugin){
 		
-			var response1 = $('webmyth_service_id').mysqlCommand(WebMyth.prefsCookieObject.databaseHost,WebMyth.prefsCookieObject.databaseUsername,WebMyth.prefsCookieObject.databasePassword,WebMyth.prefsCookieObject.databaseName,WebMyth.prefsCookieObject.databasePort,"mysqlWelcomeSettingsResponse",query.substring(0,250),query.substring(250,500),query.substring(500,750),query.substring(750,1000),query.substring(1000,1250),query.substring(1250,1500),query.substring(1500,1750),query.substring(1750,2000),query.substring(2000,2250),query.substring(2250,2500));
+			if(WebMyth.pluginInitialized) {
+		
+				var response1 = $('webmyth_service_id').mysqlCommand(WebMyth.prefsCookieObject.databaseHost,WebMyth.prefsCookieObject.databaseUsername,WebMyth.prefsCookieObject.databasePassword,WebMyth.prefsCookieObject.databaseName,WebMyth.prefsCookieObject.databasePort,"mysqlWelcomeSettingsResponse",query.substring(0,250),query.substring(250,500),query.substring(500,750),query.substring(750,1000),query.substring(1000,1250),query.substring(1250,1500),query.substring(1500,1750),query.substring(1750,2000),query.substring(2000,2250),query.substring(2250,2500));
+				
+				Mojo.Log.info("Welcome settings plugin response "+response1);
 			
-			//Mojo.Log.error("Welcome settings plugin response "+response1);
+			} else {
+			
+				Mojo.Log.info("Plugin is not yet initialized - see if it is ready");
+				
+				this.checkPluginAlive();
+			
+			}
 			
 		} else {
 		
@@ -1130,22 +1155,32 @@ WelcomeAssistant.prototype.getSettings = function() {
 
 WelcomeAssistant.prototype.mysqlWelcomeSettingsResponse = function(response) {
 
-	//Mojo.Log.error("Got welcome settings plugin response: "+response);
+	Mojo.Log.info("Doing mysqlWelcomeSettingsResponse");
+
+	try {
 	
-	var settingsJson = JSON.parse(response);
+		Mojo.Log.info("Got welcome settings plugin response: "+response);
+		
+		var settingsJson = JSON.parse(response);
+		
+		Mojo.Log.info("Plugin welcome settings JSON %j",settingsJson);
+		
+		this.settings = cleanSettings(settingsJson);
+		
+		//Mojo.Log.info("Cleaned settings is %j",this.settings);
+		
+		WebMyth.prefsCookieObject.masterBackendPort = this.settings.MasterServerPort;
+		
+		WebMyth.settings.clear();
+		Object.extend(WebMyth.settings,this.settings);
+		
+		this.backendsList = this.settings.hosts;
 	
-	Mojo.Log.info("Plugin welcome settings JSON %j",settingsJson);
+	} catch(e) {
 	
-	this.settings = cleanSettings(settingsJson);
-	
-	//Mojo.Log.info("Cleaned settings is %j",this.settings);
-	
-	WebMyth.prefsCookieObject.masterBackendPort = this.settings.MasterServerPort;
-	
-	WebMyth.settings.clear();
-	Object.extend(WebMyth.settings,this.settings);
-	
-	this.backendsList = this.settings.hosts;
+		Mojo.Log.error(e);
+		
+	}
 	
 	//Mojo.Log.info("Cleaned backends list is %j",this.backendsList);
 	
@@ -1184,6 +1219,18 @@ WelcomeAssistant.prototype.readSettingsSuccess = function(response) {
 	
 };
 
+WelcomeAssistant.prototype.checkPluginAlive = function() {
+	
+	Mojo.Log.info("Checking if plugin is alive");
+	
+	var response1 = $('webmyth_service_id').isPluginAlive();
+				
+	Mojo.Log.info("Got isPluginAlive response: "+response1);
+	
+	WebMyth.pluginInitialized = response1;
+	
+	this.getSettings();
+}
 
 
 //Check for app updates
@@ -1389,7 +1436,7 @@ WelcomeAssistant.prototype.getHostsList = function() {
 	
 	//This function has been depreciated and replaced with getSettings();
 	
-	//Mojo.Log.error("Starting to get hosts");
+	//Mojo.Log.info("Starting to get hosts");
 		
 	var requestUrl = "http://"+WebMyth.prefsCookieObject.masterBackendIp+":6544/Myth/GetHosts";
 
@@ -1413,9 +1460,7 @@ WelcomeAssistant.prototype.getHostsList = function() {
 
 WelcomeAssistant.prototype.readHostsSuccess = function(response) {
 	
-	if(WebMyth.prefsCookieObject.debug){
-		Mojo.Log.info("Starting readHostsSuccess");
-	}
+	Mojo.Log.info("Starting readHostsSuccess");
 	
 	var xmlobject;
 	
@@ -1484,7 +1529,7 @@ WelcomeAssistant.prototype.readHostsSuccess = function(response) {
 					}
 				}
 				//Mojo.Log.info('Done parsing Hosts');
-				//Mojo.Log.error("Hosts full json is %j", this.backendsList);
+				//Mojo.Log.info("Hosts full json is %j", this.backendsList);
 	
 				
 				break;
@@ -1501,7 +1546,7 @@ WelcomeAssistant.prototype.readHostsSuccess = function(response) {
 
 WelcomeAssistant.prototype.getScriptVersion = function() {
 	
-	//Mojo.Log.error("Starting to get script version");
+	//Mojo.Log.info("Starting to get script version");
 		
 	
 	var requestUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webmythPythonFile;
@@ -1590,9 +1635,7 @@ WelcomeAssistant.prototype.getBackendIPs = function() {
 
 WelcomeAssistant.prototype.readBackendIPSuccess = function(response) {
 	
-	if(WebMyth.prefsCookieObject.debug){
-		Mojo.Log.info("Starting readHostsSuccess");
-	}
+	Mojo.Log.info("Starting readBackendIPSuccess");
 	
 	var xmlobject;
 	
@@ -1601,7 +1644,7 @@ WelcomeAssistant.prototype.readBackendIPSuccess = function(response) {
 		xmlobject = response.responseXML;
 	
 		if(WebMyth.prefsCookieObject.debug){
-			Mojo.Log.info("Using XML readHostsSuccess response as responseXML");
+			Mojo.Log.info("Using XML readBackendIPSuccess response as responseXML");
 		}
 		
 	} else {
@@ -1609,7 +1652,7 @@ WelcomeAssistant.prototype.readBackendIPSuccess = function(response) {
 		var xmlstring = response.responseText.trim();
 	
 		if(WebMyth.prefsCookieObject.debug){
-			Mojo.Log.info("Got XML readHostsSuccess responseText from backend: "+xmlstring);
+			Mojo.Log.info("Got XML readBackendIPSuccess responseText from backend: "+xmlstring);
 		}
 		
 		xmlobject = (new DOMParser()).parseFromString(xmlstring, "text/xml");
@@ -1625,7 +1668,7 @@ WelcomeAssistant.prototype.readBackendIPSuccess = function(response) {
 	
 	
 	
-	//Mojo.Log.error("about to start parsing hosts");
+	//Mojo.Log.info("about to start parsing hosts");
 	
 	//Start parsing
 	topNode = xmlobject.getElementsByTagName("GetSettingResponse")[0];
@@ -1676,9 +1719,7 @@ WelcomeAssistant.prototype.readBackendIPSuccess = function(response) {
 
 WelcomeAssistant.prototype.readMasterBackendIPSuccess = function(response) {
 	
-	if(WebMyth.prefsCookieObject.debug){
-		Mojo.Log.info("Starting readMasterBackendIPSuccess");
-	}
+	Mojo.Log.info("Starting readMasterBackendIPSuccess");
 	
 	var xmlobject;
 	
@@ -1712,7 +1753,7 @@ WelcomeAssistant.prototype.readMasterBackendIPSuccess = function(response) {
 	
 	
 	
-	//Mojo.Log.error("about to start parsing hosts");
+	//Mojo.Log.info("About to start parsing hosts");
 	
 	//Start parsing
 	topNode = xmlobject.getElementsByTagName("GetSettingResponse")[0];
