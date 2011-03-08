@@ -787,16 +787,41 @@ SetupRecordingAssistant.prototype.readRecordingRuleFail = function(event) {
 
 SetupRecordingAssistant.prototype.readRecordingRuleSuccess = function(response) {
 
-    //Mojo.Log.info('Got Ajax responseText: ' + response.responseText);
+    Mojo.Log.info('Got Ajax responseText: ' + response.responseText);
 	
-	Mojo.Log.info('Got existing recording rule responseJSON: %j', response.responseJSON[0]);
+	if(response.responseJSON) {
 	
-	this.recordRule = response.responseJSON[0];
-	
-	if(this.recordRule.recordid){
-	
-		//If we got a valid rule back
-		this.displayRuleValues();
+		Mojo.Log.info('Got existing recording rule responseJSON: %j', response.responseJSON[0]);
+		
+		this.recordRule = response.responseJSON[0];
+		
+		if(this.recordRule.recordid){
+		
+			//If we got a valid rule back
+			this.displayRuleValues();
+		
+		} else {
+		
+			this.controller.showAlertDialog({
+				onChoose: function(value) {
+					switch(value) {
+						case 'ok':
+										
+							//Cancel and close
+							this.closeScene();
+										
+						break;
+						}
+					},
+				title: "WebMyth - v" + Mojo.Controller.appInfo.version,
+				message:  "Error - could not find recording schedule", 
+				choices: [
+						{label: $L("OK"), value: 'ok'}
+						],
+				allowHTMLMessage: true
+			});
+		
+		}
 		
 	} else {
 	

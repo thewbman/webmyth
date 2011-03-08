@@ -19,7 +19,7 @@
  */
 
  
- function StageAssistant() {
+function StageAssistant() {
  
 }
 
@@ -585,13 +585,10 @@ StageAssistant.prototype.startTelnetPlugin = function() {
 
 StageAssistant.prototype.pluginStatus = function(a) {
 
-	Mojo.Log.error("Plugin status of '%s'", a);
-	
+	Mojo.Log.info("Plugin status of '%s'", a);
 	
 	if(a == "Initialized") {
-		setTimeout(function() {
-			//WebMyth.newPluginSocket();
-		}, 250);
+		WebMyth.pluginInitialized = true;
 	}
 	
 
@@ -635,9 +632,7 @@ StageAssistant.prototype.pluginErrorMessage = function(a) {
 
 StageAssistant.prototype.pluginLogMessage = function(a) {
 
-	if(WebMyth.prefsCookieObject.debug) {
-		Mojo.Log.info("Plugin log message of: "+a);
-	}
+	Mojo.Log.info("Plugin log message of: "+a);
 
 };
 
@@ -833,7 +828,7 @@ WebMyth.sendQuery = function(value) {
 	
 	var response = $('webmyth_service_id').sendDataWithResponse("query "+value);
 	
-	Mojo.Log.error("Inside query response of "+response);
+	Mojo.Log.info("Inside query response of "+response);
 	
 	return response;
 	
