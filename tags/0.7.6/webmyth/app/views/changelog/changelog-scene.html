@@ -1,0 +1,439 @@
+<div id="header-menu" class="palm-header">
+	<div id="scene-title" class="truncating-text">Changelog</div>
+</div>
+<div class="palm-header-spacer"></div>
+
+<div class="changelog-body">
+
+<div class="title">Release 0.7.6:</div><ul>
+<li>Fix plugin issue for webOS 2.0.1 on Pre2 (finally!!!)</li>
+
+</ul><hr /><div class="title">Release 0.7.5:</div><ul>
+<li>Support for mythtv protocol version 65</li>
+<li>Debug mode support in plugin</li>
+
+</ul><hr /><div class="title">Release 0.7.4:</div><ul>
+<li>Fix MythWeb correct time on Upcoming details with plug-in</li>
+<li>Check if plugin is initialized before first MySQL query</li>
+<li>Better debug mode (logs all 'info' as 'error' so it gets saved in logs)</li>
+<li>Will open up XML request webpages in browser when in debug mode</li>
+
+</ul><hr /><div class="title">Release 0.7.2:</div><ul>
+<li>More logging updates</li>
+
+</ul><hr /><div class="title">Release 0.7.2:</div><ul>
+<li>Change how app handles XML data from backend</li>
+<li>Add some extra logging to plugin</li>
+
+</ul><hr /><div class="title">Release 0.7.1:</div><ul>
+<li>Fix showing status scene when there were no comments</li>
+<li>Fix beta app issues when MythTV protocol version is 23056</li>
+<li>Power scrolling to changelog</li>
+<li>New debug mode in settings will turn on logging</li>
+<li>App will set master backend and MySQL IP address to webserver address if localhost/127.0.0.1</li>
+
+</ul><hr /><div class="title">Release 0.7.0:</div><ul>
+<li>Don't allow script usage in preference for non-beta (non-hybrid)</li>
+
+</ul><hr /><div class="title">Release 0.6.9:</div><ul>
+<li>Retry app catalog submission, removing unused localization support</li>
+
+</ul><hr /><div class="title">Release 0.6.8:</div><ul>
+<li>Retry app catalog submission</li>
+
+</ul><hr /><div class="title">Release 0.6.7:</div><ul>
+<li>Added power scrolling to lists (two-finger scrolling)</li>
+
+</ul><hr /><div class="title">Release 0.6.6:</div><ul>
+<li>(Public release in app catalog, no plug-in, had to remove some issues for submitting to app catalog)</li>
+<li>Fix music showing wrong album art</li>
+<li>Warn on leaving music playlist without saving</li>
+<li>Added support for video cast when searching people</li>
+<li>Add back in check for updates</li>
+
+</ul><hr /><div class="title">Release 0.6.5:</div><ul>
+<li>(Public release in app catalog, no plug-in)</li>
+<li>Can now refresh recording details scene (updates jobqueue and recording status)</li>
+<li>Better submission of myth protocol version to Metrix</li>
+
+</ul><hr /><div class="title">Release 0.6.4:</div><ul>
+<li>(Limited beta release)</li>
+<li>Added ability to search by people (actors, producers, etc)</li>
+<li>Only show encoder names on status scene if names are set</li>
+<li>Error message when looking up missing recording rule (plug-in only)</li>
+<li>Updates to FAQs</li>
+<li>Remove check for updates (built into webOS 2.x)</li>
+
+</ul><hr /><div class="title">Release 0.6.3:</div><ul>
+<li>(Limited beta release)</li>
+<li>Fix setup schedule start early/end late when no default set (again)</li>
+<li>Display encoder names on status scheduled list</li>
+<li>Fix downloading videos with ":" (colon) in title/sub-title</li>
+<li>Popup if saving recording rule fails with plug-in</li>
+
+</ul><hr /><div class="title">Release 0.6.2:</div><ul>
+<li>(Limited beta release)</li>
+<li>Add MySQL support to plugin - no longer relies on script at all</li>
+<li>Add option to use script if desired</li>
+<li>Popup if master backend IP or MySQL server addresses are local 127.0.0.1</li>
+<li>Cleanup of edit host scene</li>
+<li>Add more global shortcuts</li>
+<li>Fix setup schedule start early/end late when no default set</li>
+<li>Download to /media/internal/video to support playback with homebrew mplayer</li>
+
+</ul><hr /><div class="title">Release 0.6.1:</div><ul>
+<li>(Limited beta release)</li>
+<li>Add encoder names to status scene</li>
+<li>Wikipedia now opens language-specific mobile site</li>
+<li>Speed up display of recorded list</li>
+<li>Added menu, info, delete keys to flick remote</li>
+
+</ul><hr /><div class="title">Release 0.6.0:</div><ul>
+<li>(Limited beta release)</li>
+<li>First release with new C++ plugin</li>
+<li>Plugin support for frontend remote control and mythprotocol communications</li>
+<li>Still require script for MySQL</li>
+<li>No UPnP support yet to autofind backends</li>
+
+</ul><hr /><div class="title">Release 0.5.9:</div><ul>
+<li>Added music playlists support</li>
+<li>Banner notification for conflicting upcoming recordings</li>
+<li>Message if no network connection</li>
+
+</ul><hr /><div class="title">Release 0.5.8:</div><ul>
+<li>Fix errors that caused rejection from app catalog submission</li>
+
+</ul><hr /><div class="title">Release 0.5.3:</div><ul>
+<li>Add support for localizations/translations - none in use yet</li>
+<li>Hides upcoming list until protocol version is known</li>
+<li>Post mythprotocol version to Metrix</li>
+<li>Fix issue on first install would not get settings from backend, causing some minor display bugs</li>
+
+</ul><hr /><div class="title">Release 0.5.2:</div><ul>
+<li>webOS 2.0 release only</li>
+<li>New JS service that replaces remote control and mythprotocol connections with MythTV</li>
+
+</ul><hr /><div class="title">Release 0.5.1:</div><ul>
+<li>Fix displaying music list that broke in 0.5.0</li>
+
+</ul><hr /><div class="title">Release 0.5.0:</div><ul>
+<li>Added backend log viewer</li>
+<li>Tap header on details scenes scrolls to top</li>
+<li>Update videos directory listing to always link to top directory</li>
+<li>Update status scene to support more encoder statuses</li>
+
+</ul><hr /><div class="title">Release 0.4.9:</div><ul>
+<li>Videos list is now sortable by directory structure</li>
+<li>Cleanup flick remote scene code</li>
+<li>Shows when currently recording on recorded scenes</li>
+
+</ul><hr /><div class="title">Release 0.4.8:</div><ul>
+<li>Loading status on guide details scene</li>
+<li>Bug fix for loading guide far in past with no matches</li>
+<li>Transparancy on flick remote scene</li>
+<li>Backspace on remote scenes sends 'escape' key</li>
+<li>Can edit frontend hosts</li>
+
+</ul><hr /><div class="title">Release 0.4.7:</div><ul>
+<li>Added ability to search full guide by title</li>
+<li>Add 'space' to available remote keyboard keys</li>
+<li>Download or stream music directly from list</li>
+<li>Cleanup of remote scenes code</li>
+
+</ul><hr /><div class="title">Release 0.4.6:</div><ul>
+<li>Added (optional) videos coverart</li>
+<li>Added link to setup recording from recorded program</li>
+<li>Bub fix for opening guide from upcoming/recorded</li>
+<li>Queue a new job refreshes jobqueue list for recording</li>
+<li>Status scene now shows user job names</li>
+<li>Remove duplicate settings lookup on setup recording scene</li>
+<li>Can play from upcoming details scene if currently recording</li>
+<li>New color gradient for background</li>
+<li>Added popup notification (part of Metrix system)</li>
+
+</ul><hr /><div class="title">Release 0.4.5:</div><ul>
+<li>Added 'upcoming' filter list option of override rules</li>
+<li>Change guide scene to better match other scenes, remove shake-to-refresh</li>
+<li>Add more features to upcoming details more menu</li>
+<li>Fix videos storagegroup gathering on Videos for 0.24 support</li>
+<li>Added ability to queue jobs on recorded programs</li>
+<li>Added recent jobqueue list to recorded details</li>
+
+</ul><hr /><div class="title">Release 0.4.4:</div><ul>
+<li>Added ability to steam or download videos to phone (unless videos are encoded for mobile devices, the phone probably won't be able to play them)</li>
+<li>Use SQL table for videos to fix issue with MythTV 0.24</li>
+<li>Can now delete and undelete recordings</li>
+<li>Updates to FAQs</li>
+<li>Tweaks to description text</li>
+<li>Fix sorting of recorded list for programs with multiple recordings for same show</li>
+
+</ul><hr /><div class="title">Release 0.4.3:</div><ul>
+<li>Removed shake-to-refresh from status scene</li>
+<li>Optimize settings gathering when app first opens</li>
+<li>Use mythweb as fallback if recording rule failed</li>
+<li>Add userjob names to setup recording scene</li>
+<li>Add option to use script for recorded screenshots (previous default functionality)</li>
+
+</ul><hr /><div class="title">Release 0.4.2:</div><ul>
+<li>(Limited beta release)</li>
+<li>Added music album art</li>
+<li>Upcoming list can now show all upcoming, including deactivated</li>
+<li>Add refresh button to status</li>
+<li>Changes to setup recording to better support single quotes (') in rule</li>
+<li>Add ability to change override type between force record/don't record</li>
+<li>Remove shake to refresh when there is a refresh button</li>
+<li>Group buttons on Pixi to better fit screen</li>
+<li>Use old screenshot method when not on WiFi</li>
+
+</ul><hr /><div class="title">Release 0.4.1:</div><ul>
+<li>(Limited beta release)</li>
+<li>Remove "check for updates" links</li>
+<li>Limit hostname lookup if not on wi-fi</li>
+<li>Add music (long load time if you have a lot of music)</li>
+<li>Add in-app recording schedule changes (only for currently scheduled items)</li>
+<li>Can force record/dontrecord, never record, forget old, cancel schedule</li>
+<li>Update script to version 7 for music and future recording capabilities</li>
+
+</ul><hr /><div class="title">Release 0.4.0:</div><ul>
+<li>Use hostname for video playback when possible</li>
+<li>Added FAQ question for video playback and possible 0.24 support</li>
+<li>Added link to guide from upcoming details scene</li>
+<li>Fix showing correct recorded details for duplicate starttime shows (if recording was restarted, etc)</li>
+<li>Fix bug in preferences not showing correct script file</li>
+<li>Fix bug in updating remote file setting from old app versions</li>
+
+</ul><hr /><div class="title">Release 0.3.9:</div><ul>
+<li>Added videos list</li>
+<li>Can sort and group videos</li>
+<li>Added video detail page with limits playback capabilities</li>
+<li>(Playback only works on files available locally or mounted via NFS as local)</li>
+<li>App will now prompt when updates are available going forward (http://www.jdf-software.com/blog/puchk/)</li>
+
+</ul><hr /><div class="title">Release 0.3.8:</div><ul>
+<li>Rewrite remote selector bottom menu to make more reliable</li>
+<li>Fixed showing 'undefined' on guide details scene</li>
+<li>Added original airdate to guide details</li>
+<li>Added (english) Wikipedia search</li>
+<li>Don't auto-capitalize preference fields</li>
+<li>Video app opens after download complete</li>
+<li>Rework preferences scene</li>
+<li>Removed alternate upcoming grabber</li>
+<li>Add help button to welcome page</li>
+<li>Removed theme selector - only have 'palm-dark' theme</li>
+<li>Added subtitle and host to jobqueue list on status</li>
+<li>Added refresh to guide details scene that aren't currently showing</li>
+<li>Recorded list screenshots now match recorded details screenshot</li>
+
+</ul><hr /><div class="title">Release 0.3.7:</div><ul>
+<li>(Limited beta release)</li>
+<li>Added in logging of screenshots and channel icons for debugging help</li>
+<li>Added new method for showing upcoming recording list using MythWeb website instead of script</li>
+<li>Added support for Basic webserver security for new upcoming list and downloading/streaming files (doesn't support Digest security)</li>
+
+</ul><hr /><div class="title">Release 0.3.6:</div><ul>
+<li>Add counts to upcoming and recorded lists</li>
+<li>Added filesize to recorded detail</li>
+<li>Fixed displaying of active groups on recorded list</li>
+<li>Have capability to save recorded list, but disabled due to performance</li>
+<li>Convert upcoming details to XML data source</li>
+<li>Setup recording now back to normal web browser to allow more control</li>
+<li>Can search upcoming list for category</li>
+
+</ul><hr /><div class="title">Release 0.3.5:</div><ul>
+<li>Setup recording now runs as card inside App</li>
+<li>Converted recorded to using XML backend</li>
+<li>Added lookup of IPs for backends (for use in getting preview images)</li>
+<li>Added ability to download or stream recordings to phone (experimental)</li>
+
+</ul><hr /><div class="title">Release 0.3.4:</div><ul>
+<li>Link to edit recording on upcoming recording detail</li>
+<li>Added channel number to upcoming list</li>
+<li>Added FAQ about using the non-mobile mythweb site for setup recording</li>
+<li>Shows more of remote title if too long</li>
+<li>Show category on upcoming detail scene</li>
+<li>Shows selected sorting on recorded list</li>
+<li>Center channel number on guide scene when selected no channel icon</li>
+<li>Refresh buttons on upcoming and recorded lists</li>
+<li>Filter list now clears when sort change on recorded and guide</li>
+<li>Guide channel showing does not offset incorrectly if in early morning</li>
+<li>Reformat recorded list</li>
+<li>Can now search recorded list for channel name and category</li>
+<li>Round corners of main icon (looks kinda pixelated)</li>
+
+</ul><hr /><div class="title">Release 0.3.3:</div><ul>
+<li>Check for updates under help menu</li>
+<li>Fix jump and pause buttons on master remote</li>
+<li>Cleanup volume up icon on remotes</li>
+<li>Added delete button to master remote</li>
+<li>Tweak size of some buttons on master remote</li>
+<li>Tweak guide URL to fix problem when was password protected</li>
+<li>Can now search upcoming list by channel name</li>
+<li>Can edit upcoming schedule on upcoming details</li>
+<li>Can sort recorded list by category</li>
+
+</ul><hr /><div class="title">Release 0.3.2:</div><ul>
+<li>Added more dashboard remote scenes</li>
+<li>Added icons to remote scenes in place of text</li>
+<li>Fix 30 min offset in guide when picking time</li>
+<li>Fix 'Loading...' text jumping on screen</li>
+
+</ul><hr />
+<div class="title">Release 0.3.1:</div><ul>
+<li>Dashboard remote now works on lock screen</li>
+<li>Minor tweaks to status scene</li>
+<li>Added more selections for help dropdown</li>
+<li>Added changelog, FAQs and tips scenes</li>
+
+</ul><hr />
+<div class="title">Release 0.3.0:</div><ul>
+<li>Added dashboard remote</li>
+<li>Added links to mythweb in guide for creating new recordings</li>
+<li>Guide now remembers last 10 channels touched</li>
+<li>Guide now shows arrows if program started earlier or goes later</li>
+ 
+</ul><hr />
+<div class="title">Release 0.2.9: </div><ul>
+<li>Fix MB label in status storage</li>
+<li>Added 1/2 hour scrolling for guide</li>
+<li>Seperate settings for jump to remote on Guide</li>
+<li>Update to guide list layout</li>
+<li>Able to sort guide by title and category</li>
+<li>Saves last guide sorting choice</li>
+<li>Added image to flick navigation</li>
+ 
+</ul><hr />
+<div class="title">Release 0.2.8:</div><ul>
+<li>Fix color scheme of time picker in guide</li>
+<li>Fix bug on google search for recorded details</li>
+<li>Removed intermediate hostSelector scene when launching remote from shortcut</li>
+<li>Added global shortcuts inside app</li>
+<li>Guide jumps to currently showing on channel list if today</li>
+<li>Reworked how host cookie is saved, hopefully made more robust</li>
+<li>Shake to reload on recorded, upcoming, guide, status list</li>
+<li>Added back key to flick scene</li>
+ 
+</ul><hr />
+<div class="title">Release 0.2.7:</div><ul>
+<li>Added channel icon to upcoming details scene</li>
+<li>Mobile versions of google and IMDB searches</li>
+<li>Improve guide navigation</li>
+<li>Added guide details scene</li>
+<li>Can jump to live tv from guide listings</li>
+<li>Added commas to sizes of storage locations on status scene</li>
+ 
+</ul><hr />
+<div class="title">Release 0.2.6:</div><ul>
+<li>Added Guide scene that can list by channel or time</li>
+<li>Add option to email developer directly under help</li>
+<li>Check for deselecting current remote scene in preferences</li>
+<li>Fixed bug that made 'numbers' remote scene always become enabled in the preferences scene</li>
+ 
+</ul><hr />
+<div class="title">Release 0.2.5:</div><ul>
+<li>Fix bug in not able to save preferences on first run</li>
+ 
+</ul><hr />
+<div class="title">Release 0.2.4:</div><ul>
+<li>Removed save button to save preferences (just swipe back)</li>
+<li>Some formatting change to status</li>
+<li>Can manually set master IP address</li>
+<li>Defaults to start remoet screne after starting recording, can disable</li>
+<li>Add 'master' and 'numbers' scene</li>
+<li>Added loading overlay scrim to status</li> 
+
+</ul><hr />
+<div class="title">Release 0.2.3:</div><ul>
+<li>Changed switching between remote screens to view menu (top) instead of commandmenu (bottom)</li>
+<li>Users can now turn off remote screnes they do not want</li>
+<li>Added channel icons to upcoming and cleaned up display text</li>
+<li>Cleaned up display on recorded list</li>
+<li>Now shows master backend IP on welcome page</li>
+<li>Fix bug of taps occuring after flick</li>
+<li>Warn against webserver name starting with http or Http</li>
+ 
+</ul><hr />
+<div class="title">Release 0.2.2:</div><ul>
+<li>Added backend status information (uses backend IP address from settings table)</li>
+<li>Added options for vibration and fullscreen on remote scenes</li>
+<li>Added gesture remote scene as proof of concept; having problems with look and registering touches and flicks together</li>
+ 
+</ul><hr />
+<div class="title">Release 0.2.1:</div><ul>
+<li>Removed python scripts that caused rejection from Palm</li>
+ 
+</ul><hr />
+<div class="title">Release 0.2.0:</div><ul>
+<li>Update webmyth.py script to version 4 to fix executable issue</li>
+<li>Script now IMPORTS.requires user to setup their DB settings</li>
+<li>Added support to palm-dark theme</li>
+ 
+</ul><hr />
+<div class="title">Release 0.1.9:</div><ul>
+<li>New webmyth.py script that uses mythtv python bindings; replaces old scripts </li>
+<li>Initial support for upcoming recordings w/detailed scene</li>
+<li>Conversion of frontends to JSON cookie instead of DB table</li>
+<li>Shows screenshots from recorded programs (kinda slow to load)</li>
+<li>Cleanup of recorded list</li>
+<li>Saving of remote scene for forward swipe shortcut</li>
+<li>Unfortunately no more feedback for remote</li>
+ 
+</ul><hr />
+<div class="title">Release 0.1.8:</div><ul>
+<li>Updates both scripts to version 2</li>
+<li>Can now search for frontends availible on backend via SQL</li>
+<li>Some bug fixes to playing recordings when not on list of recordings on frontend</li>
+<li>Some feedback given on remote errors</li>
+ 
+</ul><hr />
+<div class="title">Release 0.1.7:</div><ul>
+<li>Update to webmyth-mysql.php script for showing upcoming recordings</li>
+<li>Setup version in php script for future updates</li>
+<li>Optimize recorded detail scene</li>
+<li>Add help to menu that describes the need for server-side scripts</li>
+<li>Help screen shows on first run</li>
+ 
+</ul><hr />
+<div class="title">Relase 0.1.6:</div><ul>
+<li>Moved server setup checking to first scene</li>
+<li>Added filtering by recgroup to 'recorded' scene</li>
+<li>New details scene for recorded programs<li>can start playback directly from scene</li>
+ 
+</ul><hr />
+<div class="title">Release 0.1.5:</div><ul>
+<li>Fixed typo in About screen linking to homepage</li>
+ 
+</ul><hr />
+<div class="title">Release 0.1.4:</div><ul>
+<li>List of recorded now sorts by date and title, and deleted items have strikethrough</li>
+<li>Spinner widget on recorded list while waiting for data</li>
+<li>Full recorded table gets saved locally for future use</li>
+<li>Falls back to locally saved recorded data when cannot get remote data</li>
+<li>Fixed bug of upgrades from earlier verions not getting default server scripts in setting</li>
+<li>Script files now have basic information on where to install</li>
+ 
+</ul><hr />
+<div class="title">Release 0.1.3:</div><ul>
+<li>Can now list recorded shows on backend</li>
+<li>Recorded shows are alphabetized and searchable</li>
+<li>Recorded shows are stored to local DB, but views currently only come from AJAX request</li>
+<li>Displays all shows (included deleted ones)</li>
+<li>(Details of shows still work in progress) </li>
+<li>(Should add in more error checking)</li>
+ 
+</ul><hr />
+<div class="title">Release 0.1.2: </div><ul>
+<li>More function rewriting
+<li>Added new welcome screen to select remote or recorded shows</li>
+<li>Added ability to set server script locations</li>
+ 
+</ul><hr />
+<div class="title">Release 0.1.1: </div><ul>
+<li>Rewrite of several functions for better code reuse</li>
+
+</ul><hr />
+<div class="title">Release 0.1.0:  Intial Release</div><ul>
+<li>Requires use of server script to use telnet communications with frontend</li>
+</ul>
+
+
+</div>
