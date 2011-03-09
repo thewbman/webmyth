@@ -531,23 +531,23 @@ UpcomingAssistant.prototype.filterListFunction = function(filterString, listWidg
 		for (i = 0; i < len; i++) {
 			s = this.resultList[i];
 			if (s.title.toUpperCase().indexOf(filterString.toUpperCase()) >=0) {
-				Mojo.Log.info("Found string in title", i);
+				//Mojo.Log.info("Found string in title", i);
 				someList.push(s);
 			}
 			else if (s.subTitle.toUpperCase().indexOf(filterString.toUpperCase())>=0){
-				Mojo.Log.info("Found string in subtitle", i);
+				//Mojo.Log.info("Found string in subtitle", i);
 				someList.push(s);
 			}
 			else if (s.channame.toUpperCase().indexOf(filterString.toUpperCase())>=0){
-				Mojo.Log.info("Found string in channel name", i);
+				//Mojo.Log.info("Found string in channel name", i);
 				someList.push(s);
 			}
 			else if (s.category.toUpperCase().indexOf(filterString.toUpperCase())>=0){
-				Mojo.Log.info("Found string in category", i);
+				//Mojo.Log.info("Found string in category", i);
 				someList.push(s);
 			}
 			else if (s.recStatusText.toUpperCase().indexOf(filterString.toUpperCase())>=0){
-				Mojo.Log.info("Found string in recStatusText", i);
+				//Mojo.Log.info("Found string in recStatusText", i);
 				someList.push(s);
 			}
 		}

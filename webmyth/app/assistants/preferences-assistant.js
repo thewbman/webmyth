@@ -498,6 +498,8 @@ PreferencesAssistant.prototype.setup = function() {
          },
          this.debugToggleModel
     ); 
+	this.controller.listen("debugToggleId", Mojo.Event.propertyChange, this.debugMessagePopup.bindAsEventListener(this));
+	
 	
 };
 
@@ -779,6 +781,27 @@ PreferencesAssistant.prototype.usePluginSelectorChanged = function(event) {
 		choices: [
                   {label: "OK", value: "ok"},
                   {label: "Download Site", value: "download"}
+			],
+		allowHTMLMessage: true
+	});	
+	
+}
+
+PreferencesAssistant.prototype.debugMessagePopup = function(event) {
+			
+	var popupMessage = "You will need to close the preferences and restart the app after changing the debug mode setting for the change to take effect.";
+	
+	
+	this.controller.showAlertDialog({
+		onChoose: function(value) {
+			if (value=="ok") {
+				//do nothing
+			}
+		},
+		title: "Debug mode",
+		message:  popupMessage, 
+		choices: [
+                  {label: "OK", value: "ok"},
 			],
 		allowHTMLMessage: true
 	});	
