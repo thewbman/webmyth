@@ -93,12 +93,12 @@ int mpRecvMsgSize;
 int protocol_sock;
 
 //MySQL variables
-const char * my_mysql_host;
-const char * my_mysql_username;
-const char * my_mysql_password;
-const char * my_mysql_db;
+char * my_mysql_host;
+char * my_mysql_username;
+char * my_mysql_password;
+char * my_mysql_db;
 int my_mysql_port;
-const char *my_mysql_response_function;
+char *my_mysql_response_function;
 char my_mysql_query_full[1024];
 
 
@@ -734,6 +734,13 @@ void backgroundMysqlResponse(){
     }
 	
 	
+	free(my_mysql_host);
+	free(my_mysql_username);
+	free(my_mysql_password);
+	free(my_mysql_db);
+	free(my_mysql_response_function);
+	
+	
 	activeMysql = false;
 	
 	return;
@@ -829,6 +836,13 @@ void backgroundMysqlExecute(){
     }
 	
 	
+	free(my_mysql_host);
+	free(my_mysql_username);
+	free(my_mysql_password);
+	free(my_mysql_db);
+	free(my_mysql_response_function);
+	
+	
 	activeMysql = false;
 	
 	return;
@@ -858,7 +872,7 @@ PDL_bool setDebugMode(PDL_JSParameters *params){
 PDL_bool openBackgroundFrontendSocket(PDL_JSParameters *params) {
 	//function(frontend_host_name, port)
 
-	frontend_host_name = PDL_GetJSParamString(params, 0);
+	frontend_host_name = strdup(PDL_GetJSParamString(params, 0));
 	frontend_port = PDL_GetJSParamInt(params, 1);
 	
 	doBackgroundFrontendSocket = true;
@@ -879,7 +893,7 @@ PDL_bool openBackgroundFrontendSocket(PDL_JSParameters *params) {
 PDL_bool openFrontendSocket(PDL_JSParameters *params) {
 	//function(frontend_host_name, port)
 
-	frontend_host_name = PDL_GetJSParamString(params, 0);
+	frontend_host_name = strdup(PDL_GetJSParamString(params, 0));
 	frontend_port = PDL_GetJSParamInt(params, 1);
 	
     const char *frontend_host_name = PDL_GetJSParamString(params, 0);
@@ -977,7 +991,7 @@ PDL_bool openFrontendSocket(PDL_JSParameters *params) {
 PDL_bool sendData(PDL_JSParameters *params){
 	//function(dataToSend)
 	
-	const char * dataToSend = PDL_GetJSParamString(params, 0);
+	const char * dataToSend = strdup(PDL_GetJSParamString(params, 0));
 	
 	//if(debug) syslog(LOG_INFO, "Received sendData request: %s", dataToSend);
 	
@@ -1040,10 +1054,10 @@ PDL_bool closeSocket(PDL_JSParameters *params){
 PDL_bool mythprotocolBackgroundCommand(PDL_JSParameters *params){
 	//function(protocol_host_name, port, protocolVersion, command)
 	
-	protocol_host_name = PDL_GetJSParamString(params, 0);
+	protocol_host_name = strdup(PDL_GetJSParamString(params, 0));
     protocol_port = PDL_GetJSParamInt(params, 1);
     protocolVersion = PDL_GetJSParamInt(params, 2);
-	protocol_command = PDL_GetJSParamString(params, 3);
+	protocol_command = strdup(PDL_GetJSParamString(params, 3));
 	
 	if(debug) syslog(LOG_INFO, "Will try protocol command to %s at port %d with version %d and command %s\0", protocol_host_name,protocol_port,protocolVersion,protocol_command);
 	
@@ -1065,10 +1079,10 @@ PDL_bool mythprotocolBackgroundCommand(PDL_JSParameters *params){
 PDL_bool mythprotocolCommand(PDL_JSParameters *params){
 	//function(host_name, port, protocolVersion, command)
 	
-	const char *host_name = PDL_GetJSParamString(params, 0);
+	const char *host_name = strdup(PDL_GetJSParamString(params, 0));
     int port = PDL_GetJSParamInt(params, 1);
     int protocolVersion = PDL_GetJSParamInt(params, 2);
-	const char *command = PDL_GetJSParamString(params, 3);
+	const char *command = strdup(PDL_GetJSParamString(params, 3));
 		
 	struct sockaddr_in my_sockaddr; 
 	struct addrinfo hints, *servinfo, *p;
@@ -1285,75 +1299,6 @@ PDL_bool mythprotocolCommand(PDL_JSParameters *params){
 
 
 
-PDL_bool setMysqlSettings(PDL_JSParameters *params){
-	//function(host, username, password, db, port)
-	
-	char* mysqlSettingsInfo;
-	
-	my_mysql_host = PDL_GetJSParamString(params, 0);
-	my_mysql_username = PDL_GetJSParamString(params, 1);
-	my_mysql_password = PDL_GetJSParamString(params, 2);
-	my_mysql_db = PDL_GetJSParamString(params, 3);
-	my_mysql_port = PDL_GetJSParamInt(params, 4);
-	
-	if(debug) syslog(LOG_INFO, "Setting MySQL info to host: %s; port: %d; db: %s; username: %s\0", my_mysql_host,my_mysql_port,my_mysql_db,my_mysql_username);
-	
-	sprintf(mysqlSettingsInfo, "Setting MySQL info to host: %s; port: %d; db: %s; username: %s\0", my_mysql_host,my_mysql_port,my_mysql_db,my_mysql_username);
-	
-	PDL_JSReply(params, mysqlSettingsInfo);
-    return PDL_TRUE;
-	
-}
-
-PDL_bool mysqlCommand2(PDL_JSParameters *params){
-	//function(response_function, query[10])
-	
-	if(activeMysql) {
-		//We are in the middle of some other MySQL query/command
-		
-        PDL_JSException(params, "ERROR: Another query is still active");  
-		pluginErrorMessage("ERROR: Another query is still active.  Try again later.");   
-		
-        return PDL_FALSE; 
-	
-	} else {
-	
-		my_mysql_response_function = PDL_GetJSParamString(params, 0);
-		
-	
-		const char * query_1 = PDL_GetJSParamString(params, 1);
-		const char * query_2 = PDL_GetJSParamString(params, 2);
-		const char * query_3 = PDL_GetJSParamString(params, 3);
-		const char * query_4 = PDL_GetJSParamString(params, 4);
-		const char * query_5 = PDL_GetJSParamString(params, 5);
-		const char * query_6 = PDL_GetJSParamString(params, 6);
-		const char * query_7 = PDL_GetJSParamString(params, 7);
-		const char * query_8 = PDL_GetJSParamString(params, 8);
-		const char * query_9 = PDL_GetJSParamString(params, 9);
-		const char * query_10 = PDL_GetJSParamString(params, 10);
-		
-		sprintf(my_mysql_query_full, "%s%s%s%s%s%s%s%s%s%s",query_1,query_2,query_3,query_4,query_5,query_6,query_7,query_8,query_9,query_10);
-		
-		if(debug) syslog(LOG_INFO, "Will try MySQL query %s and return to %s\0", my_mysql_query_full,my_mysql_response_function);
-	
-		doBackgroundMysqlQuery = true;
-		
-		//Fake an event to trigger main loop
-		SDL_Event Event;
-		Event.active.type = SDL_ACTIVEEVENT;
-		Event.active.gain = 1;
-		Event.active.state = 0;  
-		SDL_PushEvent(&Event);
-		
-	}
-	
-	
-	//Return to JS, will do protocol connection in background
-	PDL_JSReply(params, "Started mysql command");
-    return PDL_TRUE;
-	
-}
-
 PDL_bool mysqlCommand(PDL_JSParameters *params){
 	//function(host, username, password, db, port, response_function, query[10])
 	
@@ -1368,31 +1313,42 @@ PDL_bool mysqlCommand(PDL_JSParameters *params){
 	
 	} else {
 	
-		my_mysql_host = PDL_GetJSParamString(params, 0);
-		my_mysql_username = PDL_GetJSParamString(params, 1);
-		my_mysql_password = PDL_GetJSParamString(params, 2);
-		my_mysql_db = PDL_GetJSParamString(params, 3);
+		my_mysql_host = strdup(PDL_GetJSParamString(params, 0));
+		my_mysql_username = strdup(PDL_GetJSParamString(params, 1));
+		my_mysql_password = strdup(PDL_GetJSParamString(params, 2));
+		my_mysql_db = strdup(PDL_GetJSParamString(params, 3));
 		my_mysql_port = PDL_GetJSParamInt(params, 4);
-		my_mysql_response_function = PDL_GetJSParamString(params, 5);
+		my_mysql_response_function = strdup(PDL_GetJSParamString(params, 5));
 	
 		if(debug) syslog(LOG_INFO, "Will try MySQL query to %s at port %d, db: %s, username: %s\0", my_mysql_host,my_mysql_port,my_mysql_db,my_mysql_username);
 		
 	
-		const char * query_1 = PDL_GetJSParamString(params, 6);
-		const char * query_2 = PDL_GetJSParamString(params, 7);
-		const char * query_3 = PDL_GetJSParamString(params, 8);
-		const char * query_4 = PDL_GetJSParamString(params, 9);
-		const char * query_5 = PDL_GetJSParamString(params, 10);
-		const char * query_6 = PDL_GetJSParamString(params, 11);
-		const char * query_7 = PDL_GetJSParamString(params, 12);
-		const char * query_8 = PDL_GetJSParamString(params, 13);
-		const char * query_9 = PDL_GetJSParamString(params, 14);
-		const char * query_10 = PDL_GetJSParamString(params, 15);
+		char * query_1 = strdup(PDL_GetJSParamString(params, 6));
+		char * query_2 = strdup(PDL_GetJSParamString(params, 7));
+		char * query_3 = strdup(PDL_GetJSParamString(params, 8));
+		char * query_4 = strdup(PDL_GetJSParamString(params, 9));
+		char * query_5 = strdup(PDL_GetJSParamString(params, 10));
+		char * query_6 = strdup(PDL_GetJSParamString(params, 11));
+		char * query_7 = strdup(PDL_GetJSParamString(params, 12));
+		char * query_8 = strdup(PDL_GetJSParamString(params, 13));
+		char * query_9 = strdup(PDL_GetJSParamString(params, 14));
+		char * query_10 = strdup(PDL_GetJSParamString(params, 15));
 		
 		sprintf(my_mysql_query_full, "%s%s%s%s%s%s%s%s%s%s",query_1,query_2,query_3,query_4,query_5,query_6,query_7,query_8,query_9,query_10);
 		
 		if(debug) syslog(LOG_INFO, "Will try MySQL query %s and return to %s\0", my_mysql_query_full,my_mysql_response_function);
 	
+		free(query_1);
+		free(query_2);
+		free(query_3);
+		free(query_4);
+		free(query_5);
+		free(query_6);
+		free(query_7);
+		free(query_8);
+		free(query_9);
+		free(query_10);
+		
 		doBackgroundMysqlQuery = true;
 		
 		
@@ -1427,52 +1383,52 @@ PDL_bool mysqlExecute(PDL_JSParameters *params){
 	
 	}  else {
 	
-		my_mysql_host = PDL_GetJSParamString(params, 0);
-		my_mysql_username = PDL_GetJSParamString(params, 1);
-		my_mysql_password = PDL_GetJSParamString(params, 2);
-		my_mysql_db = PDL_GetJSParamString(params, 3);
+		my_mysql_host = strdup(PDL_GetJSParamString(params, 0));
+		my_mysql_username = strdup(PDL_GetJSParamString(params, 1));
+		my_mysql_password = strdup(PDL_GetJSParamString(params, 2));
+		my_mysql_db = strdup(PDL_GetJSParamString(params, 3));
 		my_mysql_port = PDL_GetJSParamInt(params, 4);
-		my_mysql_response_function = PDL_GetJSParamString(params, 5);
+		my_mysql_response_function = strdup(PDL_GetJSParamString(params, 5));
 	
 		if(debug) syslog(LOG_INFO, "Will try MySQL query to %s at port %d, db: %s, username: %s\0", my_mysql_host,my_mysql_port,my_mysql_db,my_mysql_username);
 		
-		/*
-		logMessage += "  mysqlExecute: ";
-		logMessage += ", DB Host: ";
-		logMessage += my_mysql_host;
-		logMessage += ", DB Port: ";
-		logMessage += my_mysql_port;
-		logMessage += ", DB Name: ";
-		logMessage += my_mysql_db;
-		logMessage += ", DB Username: ";
-		logMessage += my_mysql_username;
-		*/
+
+		char * query_1 = strdup(PDL_GetJSParamString(params, 6));
+		char * query_2 = strdup(PDL_GetJSParamString(params, 7));
+		char * query_3 = strdup(PDL_GetJSParamString(params, 8));
+		char * query_4 = strdup(PDL_GetJSParamString(params, 9));
+		char * query_5 = strdup(PDL_GetJSParamString(params, 10));
+		char * query_6 = strdup(PDL_GetJSParamString(params, 11));
+		char * query_7 = strdup(PDL_GetJSParamString(params, 12));
+		char * query_8 = strdup(PDL_GetJSParamString(params, 13));
+		char * query_9 = strdup(PDL_GetJSParamString(params, 14));
+		char * query_10 = strdup(PDL_GetJSParamString(params, 15));
+	
+		sprintf(my_mysql_query_full, "%s%s%s%s%s%s%s%s%s%s",query_1,query_2,query_3,query_4,query_5,query_6,query_7,query_8,query_9,query_10);
 		
+		free(query_1);
+		free(query_2);
+		free(query_3);
+		free(query_4);
+		free(query_5);
+		free(query_6);
+		free(query_7);
+		free(query_8);
+		free(query_9);
+		free(query_10);
+		
+		doBackgroundMysqlExecute = true;
+
+		
+		
+		//Fake an event to trigger main loop
+		SDL_Event Event;
+		Event.active.type = SDL_ACTIVEEVENT;
+		Event.active.gain = 1;
+		Event.active.state = 0;  
+		SDL_PushEvent(&Event);
+	
 	}
-
-	const char * query_1 = PDL_GetJSParamString(params, 6);
-	const char * query_2 = PDL_GetJSParamString(params, 7);
-	const char * query_3 = PDL_GetJSParamString(params, 8);
-	const char * query_4 = PDL_GetJSParamString(params, 9);
-	const char * query_5 = PDL_GetJSParamString(params, 10);
-	const char * query_6 = PDL_GetJSParamString(params, 11);
-	const char * query_7 = PDL_GetJSParamString(params, 12);
-	const char * query_8 = PDL_GetJSParamString(params, 13);
-	const char * query_9 = PDL_GetJSParamString(params, 14);
-	const char * query_10 = PDL_GetJSParamString(params, 15);
-	
-	sprintf(my_mysql_query_full, "%s%s%s%s%s%s%s%s%s%s",query_1,query_2,query_3,query_4,query_5,query_6,query_7,query_8,query_9,query_10);
-	
-	doBackgroundMysqlExecute = true;
-
-	
-	
-	//Fake an event to trigger main loop
-	SDL_Event Event;
-	Event.active.type = SDL_ACTIVEEVENT;
-	Event.active.gain = 1;
-	Event.active.state = 0;  
-	SDL_PushEvent(&Event);
 	
 	//Return to JS, will do protocol connection in background
 	PDL_JSReply(params, "Started mysql command");
@@ -1508,8 +1464,6 @@ int main(int argc, char** argv) {
     PDL_RegisterJSHandler("mythprotocolCommand", mythprotocolCommand);
     PDL_RegisterJSHandler("mythprotocolBackgroundCommand", mythprotocolBackgroundCommand);
 	
-    PDL_RegisterJSHandler("setMysqlSettings", mysqlCommand);
-    PDL_RegisterJSHandler("mysqlCommand2", mysqlCommand);
     PDL_RegisterJSHandler("mysqlCommand", mysqlCommand);
     PDL_RegisterJSHandler("mysqlExecute", mysqlExecute);
 
