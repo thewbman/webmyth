@@ -1115,12 +1115,17 @@ WelcomeAssistant.prototype.getSettings = function() {
 			if(WebMyth.pluginInitialized) {
 		
 				var response1 = $('webmyth_service_id').mysqlCommand(WebMyth.prefsCookieObject.databaseHost,WebMyth.prefsCookieObject.databaseUsername,WebMyth.prefsCookieObject.databasePassword,WebMyth.prefsCookieObject.databaseName,WebMyth.prefsCookieObject.databasePort,"mysqlWelcomeSettingsResponse",query.substring(0,250),query.substring(250,500),query.substring(500,750),query.substring(750,1000),query.substring(1000,1250),query.substring(1250,1500),query.substring(1500,1750),query.substring(1750,2000),query.substring(2000,2250),query.substring(2250,2500));
+				//var response2 = $('webmyth_service_id').setMysqlSettings(WebMyth.prefsCookieObject.databaseHost,WebMyth.prefsCookieObject.databaseUsername,WebMyth.prefsCookieObject.databasePassword,WebMyth.prefsCookieObject.databaseName,WebMyth.prefsCookieObject.databasePort);
+				
+				//var response3 = $('webmyth_service_id').mysqlCommand2("mysqlWelcomeSettingsResponse",query.substring(0,250),query.substring(250,500),query.substring(500,750),query.substring(750,1000),query.substring(1000,1250),query.substring(1250,1500),query.substring(1500,1750),query.substring(1750,2000),query.substring(2000,2250),query.substring(2250,2500));
+				
 				
 				Mojo.Log.info("Welcome settings plugin response "+response1);
+				//Mojo.Log.info("Welcome settings plugin response "+response2+" and "+response3);
 			
 			} else {
 			
-				Mojo.Log.info("Plugin is not yet initialized - see if it is ready");
+				Mojo.Log.error("Plugin is not yet initialized - see if it is ready");
 				
 				this.checkPluginAlive();
 			
@@ -1223,11 +1228,23 @@ WelcomeAssistant.prototype.checkPluginAlive = function() {
 	
 	Mojo.Log.info("Checking if plugin is alive");
 	
-	var response1 = $('webmyth_service_id').isPluginAlive();
-				
-	Mojo.Log.info("Got isPluginAlive response: "+response1);
+	if(WebMyth.prefsCookieObject.debug) {
 	
-	WebMyth.pluginInitialized = response1;
+		var response1 = $('webmyth_service_id').setDebugMode();
+				
+		Mojo.Log.info("Got setDebugMode response: "+response1);
+	
+		WebMyth.pluginInitialized = response1;
+		
+	} else {
+	
+		var response1 = $('webmyth_service_id').isPluginAlive();
+				
+		Mojo.Log.info("Got isPluginAlive response: "+response1);
+	
+		WebMyth.pluginInitialized = response1;
+		
+	} 
 	
 	this.getSettings();
 }
