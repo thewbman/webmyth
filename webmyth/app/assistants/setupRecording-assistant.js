@@ -1799,7 +1799,7 @@ SetupRecordingAssistant.prototype.executeSqlSuccess = function(response) {
 
 SetupRecordingAssistant.prototype.openMythweb = function() {
 		
-	var dateJS = new Date(isoSpaceToJS($('starttime-title').innerHTML));
+	var dateJS = new Date(isoSpaceToJS($('starttime-title').innerHTML).replace("T", "));
 	var dateUTC = dateJS.getTime()/1000;				//don't need 59 second offset?
 			
 	Mojo.Log.info("Selected time is: '%j'", dateUTC);

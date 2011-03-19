@@ -2588,7 +2588,7 @@ var cleanSettings = function(fullList) {
 	var hosts = [];
 	var controlPorts = [];
 	var backendPorts = [];
-	var hostObject = {}, portObject = {}, backendObject;
+	var hostObject = {}, portObject = {}, backendObject = {};
 	
 	var i, j, k, l, s = {}, t = {};
 	
