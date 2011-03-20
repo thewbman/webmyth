@@ -25,6 +25,7 @@ Todo - planned new features and updates:
  - allow option to use script if on WAN
  - popup error on mysql active 
  - back on videos goes to top directory
+ - warn if new protover
  
  - daylight savings?
  

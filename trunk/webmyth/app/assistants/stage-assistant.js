@@ -26,8 +26,8 @@ function StageAssistant() {
 WebMyth = {};
 
 
-WebMyth.usePlugin = true;
-WebMyth.usePluginFrontend = true;
+WebMyth.usePlugin = false;
+WebMyth.usePluginFrontend = false;
 WebMyth.nextFrontendCommand = "";
 
 WebMyth.useService = false;
@@ -170,18 +170,22 @@ StageAssistant.prototype.setup = function() {
 	//WebMyth.db = createHostnameDb();
 	
 	
-	//Notice focus changes for doign dashbaord remote
-	window.document.addEventListener (Mojo.Event.deactivate, this.onBlurHandler.bind(this));
-	window.document.addEventListener (Mojo.Event.activate, this.onFocusHandler.bind(this));
+	//Notice focus changes for doing dashbaord remote
+	window.document.addEventListener(Mojo.Event.deactivate, this.onBlurHandler.bind(this));
+	window.document.addEventListener(Mojo.Event.activate, this.onFocusHandler.bind(this));
 	
 	if(WebMyth.usePlugin) {
-		$('webmyth_service_id').pluginStatus = this.pluginStatus.bind(this);
-		$('webmyth_service_id').backgroundFrontendSocketResponse = this.backgroundFrontendSocketResponse.bind(this);
-		$('webmyth_service_id').didReceiveData = this.didReceiveData.bind(this);
-		$('webmyth_service_id').pluginErrorMessage = this.pluginErrorMessage.bind(this);
-		$('webmyth_service_id').pluginLogMessage = this.pluginLogMessage.bind(this);
-		$('webmyth_service_id').didQueryLocation = this.didQueryLocation.bind(this);
-		$('webmyth_service_id').socketIsClosed = this.socketIsClosed.bind(this);	
+		try {
+			$('webmyth_service_id').pluginStatus = this.pluginStatus.bind(this);
+			$('webmyth_service_id').backgroundFrontendSocketResponse = this.backgroundFrontendSocketResponse.bind(this);
+			$('webmyth_service_id').didReceiveData = this.didReceiveData.bind(this);
+			$('webmyth_service_id').pluginErrorMessage = this.pluginErrorMessage.bind(this);
+			$('webmyth_service_id').pluginLogMessage = this.pluginLogMessage.bind(this);
+			$('webmyth_service_id').didQueryLocation = this.didQueryLocation.bind(this);
+			$('webmyth_service_id').socketIsClosed = this.socketIsClosed.bind(this);	
+		} catch(e) {
+			Mojo.Log.error(e);
+		}
 	}
 	
 	//Mojo.Log.info("About to start first scene - welcome");
