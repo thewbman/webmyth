@@ -122,7 +122,7 @@ function defaultCookie() {
 		currentLogGroup: 'all',
 		manualDatabase: false,
 		databaseHost: '',
-		usePlugin: 0,
+		usePlugin: 2,
 		protoVerSubmitted: false,
 		currentSearchPeopleSort: 'date-asc',
 		mythVer: 'TBD',
@@ -1089,9 +1089,9 @@ var cleanMusic = function(fullList) {
 		s.name = t[j - 1];
 		
 		//Break down filename 
-		u = s.filename.split("/");
-		k = u.length;
-		s.filenameEnd = u[k - 1];
+		//u = s.filename.split("/");
+		//k = u.length;
+		//s.filenameEnd = u[k - 1];
 			
 			
 		if(s.track < 10) {

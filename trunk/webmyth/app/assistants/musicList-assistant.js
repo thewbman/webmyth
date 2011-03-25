@@ -820,7 +820,11 @@ MusicListAssistant.prototype.handleDownload = function(downloadOrStream_in) {
 	
 	var myDirectory = "/media/internal/music/"+this.musicObject.artist_name+"/"+this.musicObject.album_name+"/";
 	
-	var myFilename = this.musicObject.filenameEnd;
+	//var myFilename = this.musicObject.filenameEnd;
+	
+	var u = this.musicObject.filename.split("/");
+	var k = u.length;
+	var myFilename = u[k - 1];
 	
 	Mojo.Log.info("Filename is "+myDirectory+myFilename);
  
