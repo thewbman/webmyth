@@ -1,10 +1,10 @@
 {
-	"id": "com.thewbman.webmyth-beta",
+	"id": "com.thewbman.webmyth",
 	"version": "0.7.9",
 	"vendor": "thewbman",
 	"type": "web",
 	"main": "index.html",
-	"title": "WebMyth Beta",
+	"title": "WebMyth",
 	"icon": "icon2.png",
 	"plug-ins": true
 }

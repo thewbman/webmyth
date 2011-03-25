@@ -26,8 +26,8 @@ function StageAssistant() {
 WebMyth = {};
 
 
-WebMyth.usePlugin = true;
-WebMyth.usePluginFrontend = true;
+WebMyth.usePlugin = false;
+WebMyth.usePluginFrontend = false;
 WebMyth.nextFrontendCommand = "";
 
 WebMyth.useService = false;
