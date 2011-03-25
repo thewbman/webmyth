@@ -304,7 +304,7 @@ SearchPeopleAssistant.prototype.newSearch = function() {
 	
 	this.controller.showDialog({
 		template: 'dialogs/searchDialog',
-		assistant: new SearchDialogAssistant(this, this.newSearchCallback.bind(this))
+		assistant: new SearchPeopleDialogAssistant(this, this.newSearchCallback.bind(this))
 	});
 
 };
@@ -1578,7 +1578,7 @@ SearchPeopleAssistant.prototype.openWeb = function(value) {
 	Small controller class used for the search.
 */
 
-var SearchDialogAssistant = Class.create({
+var SearchPeopleDialogAssistant = Class.create({
 	
 	initialize: function(sceneAssistant, callbackFunc) {
 		this.sceneAssistant = sceneAssistant;
