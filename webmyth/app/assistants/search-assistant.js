@@ -390,7 +390,7 @@ SearchAssistant.prototype.readSearchSuccess = function(response) {
 
 SearchAssistant.prototype.mysqlProgramSearchResponse = function(response) {
 
-	Mojo.Log.error("Got search plugin response: "+response);
+	if(WebMyth.prefsCookieObject.debug) Mojo.Log.info("Got search plugin response: "+response);
 	
 	var searchJson = JSON.parse(response);
 	
@@ -406,7 +406,7 @@ SearchAssistant.prototype.mysqlProgramSearchResponse = function(response) {
 		Object.extend(this.resultList,cleanSearchResults(searchJson, nowDateISO));
 		
 		
-		//Mojo.Log.error('Cleaned search results: %j',this.resultList);
+		if(WebMyth.prefsCookieObject.debug) Mojo.Log.info('Cleaned search results: %j',this.resultList);
 		
 		
 		$('scene-title').innerHTML += " ("+this.resultList.length+" "+$L("items")+")";
@@ -622,7 +622,7 @@ SearchAssistant.prototype.searchDividerFunction = function(itemModel) {
 	 
 	//Divider function for list
 	var divider = itemModel.title;				//as default
-	var date = new Date(isoSpaceToJS(itemModel.startTime));
+	var date = new Date(isoSpaceToJS(itemModel.startTimeSpace));
 	
 	switch(WebMyth.prefsCookieObject.currentSearchSort) {
       case 'date-asc':
@@ -669,14 +669,24 @@ SearchAssistant.prototype.setMyData = function(propertyValue, model) {
 	searchDetailsText += '<div id='+model.chanId+model.startTime+' class="palm-row multi-line search-list-item>';
 	searchDetailsText += '<div class="palm-row-wrapper search-list-item multi-line"><div class="search-list-item">';
 	 
-	
 	searchDetailsText += '<div class="search-left-list-image">';
 	
+	var iconUrl = "";
+	
 	if(WebMyth.prefsCookieObject.showUpcomingChannelIcons) {
-		searchDetailsText += '<img class="search-channelicon-small" src="';
-		searchDetailsText += 'http://'+WebMyth.prefsCookieObject.masterBackendIp+':6544/Myth/GetChannelIcon?ChanId='+model.chanId+'" />';
+		
+		if(WebMyth.prefsCookieObject.mythwebXml) {
+			iconUrl += "http://"+WebMyth.prefsCookieObject.webserverName+"/mythweb/mythxml/GetChannelIcon?ChanId=";
+			iconUrl += model.chanId;
+			iconUrl += "&MythXMLKey="+WebMyth.prefsCookieObject.MythXML_key;
+		} else {
+			iconUrl += "http://"+WebMyth.prefsCookieObject.masterBackendIp+":6544/Myth/GetChannelIcon?ChanId="+model.chanId;
+		}
+		
+		searchDetailsText += '<img class="search-channelicon-small" src="'+iconUrl+'" />';
 		searchDetailsText += '<div class="title truncating-text chanNum">'+model.chanNum+'</div>';
 		searchDetailsText += '</div>';
+		
 	} else {
 		searchDetailsText += '<div class="title chanNum chanNum-no-icon">'+model.chanNum+'</div>';
 		searchDetailsText += '</div>';

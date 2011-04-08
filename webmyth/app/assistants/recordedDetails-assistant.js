@@ -708,7 +708,7 @@ RecordedDetailsAssistant.prototype.getPeople = function(event) {
 	query += ' LEFT OUTER JOIN `people` ON `credits`.`person` = `people`.`person` ';
 	query += ' LEFT OUTER JOIN `videocast` ON `videocast`.`cast` = `people`.`name` ';
 	query += ' WHERE (`credits`.`chanid` = '+this.recordedObject.chanId+' AND `credits`.`starttime` = "'+this.recordedObject.startTime.replace("T"," ")+'" ) ';
-	query += ' ORDER BY `role` ';
+	query += ' ORDER BY `role`, `name` ';
 	
 	//Mojo.Log.error("Query is "+query);
 	
@@ -894,16 +894,29 @@ RecordedDetailsAssistant.prototype.getDetailsXML = function() {
 	//Update details from XML backend
 	Mojo.Log.info('Starting details data gathering from XML backend');
 	
+	
+	var requestUrl = "";
+	
+	if(WebMyth.prefsCookieObject.mythwebXml) {
+	
+		requestUrl += "http://"+WebMyth.prefsCookieObject.webserverName+"/mythweb/mythxml/GetProgramDetails?Details=1&MythXMLKey=";
+		requestUrl += WebMyth.prefsCookieObject.MythXML_key;
+		requestUrl += "&StartTime=";
+			
+	} else {
 		
-	this.requestUrl = "http://"+WebMyth.prefsCookieObject.masterBackendIp+":6544/Myth/GetProgramDetails?StartTime=";
-	this.requestUrl += this.recordedObject.startTime.replace(" ","T");
-	this.requestUrl += "&ChanId=";
-	this.requestUrl += this.recordedObject.chanId;
+		requestUrl += "http://"+WebMyth.prefsCookieObject.masterBackendIp+":6544/Myth/GetProgramDetails?StartTime=";
+		
+	}
+	
+	requestUrl += this.recordedObject.startTime.replace(" ","T");
+	requestUrl += "&ChanId=";
+	requestUrl += this.recordedObject.chanId;
 
-	Mojo.Log.info("XML details URL is: "+this.requestUrl);
+	Mojo.Log.info("XML details URL is: "+requestUrl);
 			
 	try {
-		var request = new Ajax.Request(this.requestUrl,{
+		var request = new Ajax.Request(requestUrl,{
 			method: 'get',
 			evalJSON: false,
 			onSuccess: this.readDetailsXMLSuccess.bind(this),

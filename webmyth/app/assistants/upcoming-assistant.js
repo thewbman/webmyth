@@ -636,13 +636,18 @@ UpcomingAssistant.prototype.recorderDividerFunction = function(itemModel) {
 
 UpcomingAssistant.prototype.setMyData = function(propertyValue, model) {
 	
+	var iconUrl = "";
 	
-	//And img source
-	var channelIconUrl = "http://"+WebMyth.prefsCookieObject.masterBackendIp+":6544/Myth/GetChannelIcon?ChanId=";
-	channelIconUrl += model.chanId;
+	if(WebMyth.prefsCookieObject.mythwebXml) {
+		iconUrl += "http://"+WebMyth.prefsCookieObject.webserverName+"/mythweb/mythxml/GetChannelIcon?ChanId=";
+		iconUrl += model.chanId;
+		iconUrl += "&MythXMLKey="+WebMyth.prefsCookieObject.MythXML_key;
+	} else {
+		iconUrl += "http://"+WebMyth.prefsCookieObject.masterBackendIp+":6544/Myth/GetChannelIcon?ChanId="+model.chanId;
+	}
 	
 	if(WebMyth.prefsCookieObject.debug){
-		Mojo.Log.info("iconURL is "+channelIconUrl);
+		Mojo.Log.info("iconURL is "+iconUrl);
 	}
 	
 	
@@ -671,7 +676,7 @@ UpcomingAssistant.prototype.setMyData = function(propertyValue, model) {
 		upcomingDetailsText += '</div>';
 		upcomingDetailsText += '<div class="right-list-image">';
 		upcomingDetailsText += '<img id="img-'+model.chanId+'T'+model.startTime+'" class="upcoming-channelicon-small" src="';
-		upcomingDetailsText += channelIconUrl+'" />';
+		upcomingDetailsText += iconUrl+'" />';
 		upcomingDetailsText += '</div>';
 	}
 	

@@ -762,7 +762,8 @@ SetupRecordingAssistant.prototype.mysqlScheduleRecordidResponse = function(respo
 					break;
 					}
 				},
-			title: "WebMyth - v" + Mojo.Controller.appInfo.version,
+			//title: "WebMyth - v" + Mojo.Controller.appInfo.version,
+			title: Mojo.Controller.appInfo.title+" - v" + Mojo.Controller.appInfo.version,
 			message:  "Error - could not find recording schedule", 
 			choices: [
                     {label: $L("OK"), value: 'ok'}
@@ -813,7 +814,8 @@ SetupRecordingAssistant.prototype.readRecordingRuleSuccess = function(response) 
 						break;
 						}
 					},
-				title: "WebMyth - v" + Mojo.Controller.appInfo.version,
+				//title: "WebMyth - v" + Mojo.Controller.appInfo.version,
+				title: Mojo.Controller.appInfo.title+" - v" + Mojo.Controller.appInfo.version,
 				message:  "Error - could not find recording schedule", 
 				choices: [
 						{label: $L("OK"), value: 'ok'}
@@ -836,7 +838,8 @@ SetupRecordingAssistant.prototype.readRecordingRuleSuccess = function(response) 
 					break;
 					}
 				},
-			title: "WebMyth - v" + Mojo.Controller.appInfo.version,
+			//title: "WebMyth - v" + Mojo.Controller.appInfo.version,
+			title: Mojo.Controller.appInfo.title+" - v" + Mojo.Controller.appInfo.version,
 			message:  "Error - could not find recording schedule", 
 			choices: [
                     {label: $L("OK"), value: 'ok'}
@@ -1359,7 +1362,8 @@ SetupRecordingAssistant.prototype.createRule = function() {
 	
 		this.controller.showAlertDialog({
 			onChoose: function(value) {},
-			title: "WebMyth - v" + Mojo.Controller.appInfo.version,
+			//title: "WebMyth - v" + Mojo.Controller.appInfo.version,
+			title: Mojo.Controller.appInfo.title+" - v" + Mojo.Controller.appInfo.version,
 			message:  "You must select a recording rule type in order to create a new recording rule", 
 			choices: [
                     {label: "OK", value: false}

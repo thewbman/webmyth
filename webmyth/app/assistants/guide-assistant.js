@@ -1128,17 +1128,29 @@ GuideAssistant.prototype.setMyData = function(propertyValue, model) {
 	
 	guideDetailsText += '</div><div class="guide-left-list-image-earlier">';
 	
+		
 	if(WebMyth.prefsCookieObject.showUpcomingChannelIcons) {
-		guideDetailsText += '<img class="guide-channelicon-small" src="';
-		guideDetailsText += 'http://'+WebMyth.prefsCookieObject.masterBackendIp+':6544/Myth/GetChannelIcon?ChanId='+model.chanId+'" />';
+	
+		var iconUrl = "";
+	
+		if(WebMyth.prefsCookieObject.mythwebXml) {
+			iconUrl += "http://"+WebMyth.prefsCookieObject.webserverName+"/mythweb/mythxml/GetChannelIcon?ChanId=";
+			iconUrl += model.chanId;
+			iconUrl += "&MythXMLKey="+WebMyth.prefsCookieObject.MythXML_key;
+		} else {
+			iconUrl += "http://"+WebMyth.prefsCookieObject.masterBackendIp+":6544/Myth/GetChannelIcon?ChanId="+model.chanId;
+		}
+	
+		guideDetailsText += '<img class="guide-channelicon-small" src="'+iconUrl+'" />';
 		guideDetailsText += '<div class="title truncating-text chanNum">'+model.chanNum+'</div>';
 		guideDetailsText += '</div>';
+		
+		//Mojo.Log.error("Guide channel icon URL is :"+iconUrl);
+		
 	} else {
 		guideDetailsText += '<div class="title chanNum chanNum-no-icon">'+model.chanNum+'</div>';
 		guideDetailsText += '</div>';
 	}
-	
-	//Mojo.Log.error("Guide channel icon URL is :"+'http://'+WebMyth.prefsCookieObject.masterBackendIp+':6544/Myth/GetChannelIcon?ChanId='+model.chanId);
 	
 	guideDetailsText += '<div class="guide-right-list-text-later">';
 	
@@ -1168,8 +1180,18 @@ GuideAssistant.prototype.getGuideData = function() {
 	
 	//Use XML to get guide data
 	
-	var requestUrl = "http://"+WebMyth.prefsCookieObject.masterBackendIp+":6544/Myth/GetProgramGuide?Details=1";
-
+	var requestUrl = "";
+		
+	if(WebMyth.prefsCookieObject.mythwebXml) {
+	
+		requestUrl += "http://"+WebMyth.prefsCookieObject.webserverName+"/mythweb/mythxml/GetProgramGuide?Details=1&MythXMLKey=";
+		requestUrl += WebMyth.prefsCookieObject.MythXML_key;
+			
+	} else {
+		
+		requestUrl += "http://"+WebMyth.prefsCookieObject.masterBackendIp+":6544/Myth/GetProgramGuide?Details=1";
+		
+	}
 	
 	if(this.layoutStyle == 'time') {
 		requestUrl += "&StartTime="+this.timeISO;

@@ -269,8 +269,19 @@ RecordedAssistant.prototype.getRecorded = function() {
 		
 		this.controller.sceneScroller.mojo.revealTop();
 		
-		var requestUrl = "http://"+WebMyth.prefsCookieObject.masterBackendIp+":6544/Myth/GetRecorded";
-
+		var requestUrl = "";
+			
+		if(WebMyth.prefsCookieObject.mythwebXml) {
+		
+			requestUrl += "http://"+WebMyth.prefsCookieObject.webserverName+"/mythweb/mythxml/GetRecorded?MythXMLKey=";
+			requestUrl += WebMyth.prefsCookieObject.MythXML_key;
+				
+		} else {
+			
+			requestUrl += "http://"+WebMyth.prefsCookieObject.masterBackendIp+":6544/Myth/GetRecorded";
+			
+		}
+	
 		if(WebMyth.prefsCookieObject.debug){
 			Mojo.Log.info("XML Recorded URL is: "+requestUrl);
 			
@@ -456,7 +467,7 @@ RecordedAssistant.prototype.queryDataHandler = function(transaction, results) {
 		//Stop spinner and hide
 		this.spinnerModel.spinning = false;
 		this.controller.modelChanged(this.spinnerModel, this);
-		$('myScrim').hide()
+		$('myScrim').hide();
 	}
 	catch (err)
 	{
@@ -1019,7 +1030,7 @@ RecordedAssistant.prototype.setMyData = function(propertyValue, model)  {
 	}
 	
 	if(WebMyth.prefsCookieObject.debug){
-		//Mojo.Log.info("Screenshot URL is "+screenshotUrl);
+		Mojo.Log.info("Screenshot URL is "+screenshotUrl);
 	}
 	
 	var recordedDetailsText = '<div class="recorded-list-item '+model.recGroup+'">';

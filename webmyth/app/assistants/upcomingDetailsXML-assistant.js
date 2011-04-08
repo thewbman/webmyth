@@ -357,16 +357,29 @@ UpcomingDetailsXMLAssistant.prototype.getDetailsXML = function() {
 	Mojo.Log.info('Starting details data gathering from XML backend');
 	
 	this.upcomingObject = {};
+	
+	var requestUrl = "";
+	
+	if(WebMyth.prefsCookieObject.mythwebXml) {
+	
+		requestUrl += "http://"+WebMyth.prefsCookieObject.webserverName+"/mythweb/mythxml/GetProgramDetails?Details=1&MythXMLKey=";
+		requestUrl += WebMyth.prefsCookieObject.MythXML_key;
+		requestUrl += "&StartTime=";
+			
+	} else {
 		
-	this.requestUrl = "http://"+WebMyth.prefsCookieObject.masterBackendIp+":6544/Myth/GetProgramDetails?StartTime=";
-	this.requestUrl += this.starttime.replace(" ","T");
-	this.requestUrl += "&ChanId=";
-	this.requestUrl += this.chanid;
+		requestUrl += "http://"+WebMyth.prefsCookieObject.masterBackendIp+":6544/Myth/GetProgramDetails?StartTime=";
+		
+	}
+	
+	requestUrl += this.starttime.replace(" ","T");
+	requestUrl += "&ChanId=";
+	requestUrl += this.chanid;
 
-	Mojo.Log.info("XML details URL is: "+this.requestUrl);
+	Mojo.Log.info("XML details URL is: "+requestUrl);
 			
 	try {
-		var request = new Ajax.Request(this.requestUrl,{
+		var request = new Ajax.Request(requestUrl,{
 			method: 'get',
 			evalJSON: false,
 			onSuccess: this.readDetailsXMLSuccess.bind(this),
@@ -550,11 +563,18 @@ UpcomingDetailsXMLAssistant.prototype.finishedReadingDetails = function() {
 	
 	Mojo.Log.info('Now showing programDetails %j', this.upcomingObject);
 	
-	var channelIconUrl = "http://"+WebMyth.prefsCookieObject.masterBackendIp+":6544/Myth/GetChannelIcon?ChanId=";
-	channelIconUrl += this.chanid;
+	var iconUrl = "";
+	
+	if(WebMyth.prefsCookieObject.mythwebXml) {
+		iconUrl += "http://"+WebMyth.prefsCookieObject.webserverName+"/mythweb/mythxml/GetChannelIcon?ChanId=";
+		iconUrl += this.chanid;
+		iconUrl += "&MythXMLKey="+WebMyth.prefsCookieObject.MythXML_key;
+	} else {
+		iconUrl += "http://"+WebMyth.prefsCookieObject.masterBackendIp+":6544/Myth/GetChannelIcon?ChanId="+this.chanid;
+	}
 	
 	if(WebMyth.prefsCookieObject.showUpcomingChannelIcons) {
-		$('upcomingDetails-channel-icon').innerHTML = '<img class="upcomingDetails-channel-img" src="'+channelIconUrl+'" />';
+		$('upcomingDetails-channel-icon').innerHTML = '<img class="upcomingDetails-channel-img" src="'+iconUrl+'" />';
 	}
 	
 	//Fill in data values
@@ -635,7 +655,7 @@ UpcomingDetailsXMLAssistant.prototype.getPeople = function(event) {
 	query += ' LEFT OUTER JOIN `people` ON `credits`.`person` = `people`.`person` ';
 	query += ' LEFT OUTER JOIN `videocast` ON `videocast`.`cast` = `people`.`name` ';
 	query += ' WHERE (`credits`.`chanid` = '+this.chanid+' AND `credits`.`starttime` = "'+this.starttime.replace("T"," ")+'" ) ';
-	query += ' ORDER BY `role` ';
+	query += ' ORDER BY `role`, `name` ';
 	
 	//Mojo.Log.error("Query is "+query);
 	

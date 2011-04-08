@@ -1488,11 +1488,23 @@ SearchPeopleAssistant.prototype.setMyData = function(propertyValue, model) {
 		
 		searchDetailsText += '<div class="searchPeople-left-list-image">';
 		
+			
 		if(WebMyth.prefsCookieObject.showUpcomingChannelIcons) {
-			searchDetailsText += '<img class="searchPeople-channelicon-small" src="';
-			searchDetailsText += 'http://'+WebMyth.prefsCookieObject.masterBackendIp+':6544/Myth/GetChannelIcon?ChanId='+model.chanid+'" />';
+		
+			var iconUrl = "";
+		
+			if(WebMyth.prefsCookieObject.mythwebXml) {
+				iconUrl += "http://"+WebMyth.prefsCookieObject.webserverName+"/mythweb/mythxml/GetChannelIcon?ChanId=";
+				iconUrl += model.chanid;
+				iconUrl += "&MythXMLKey="+WebMyth.prefsCookieObject.MythXML_key;
+			} else {
+				iconUrl += "http://"+WebMyth.prefsCookieObject.masterBackendIp+":6544/Myth/GetChannelIcon?ChanId="+model.chanid;
+			}
+			
+			searchDetailsText += '<img class="searchPeople-channelicon-small" src="'+iconUrl+'" />';
 			searchDetailsText += '<div class="title truncating-text channum">'+model.channum+'</div>';
 			searchDetailsText += '</div>';
+			
 		} else {
 			searchDetailsText += '<div class="title channum channum-no-icon">'+model.channum+'</div>';
 			searchDetailsText += '</div>';

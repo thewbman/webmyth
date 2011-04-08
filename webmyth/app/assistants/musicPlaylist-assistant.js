@@ -285,7 +285,8 @@ MusicPlaylistAssistant.prototype.askExit = function() {
 				  break;
 				}
 			},
-		title: "WebMyth - v" + Mojo.Controller.appInfo.version,
+		//title: "WebMyth - v" + Mojo.Controller.appInfo.version,
+		title: Mojo.Controller.appInfo.title+" - v" + Mojo.Controller.appInfo.version,
 		message:  "You have not saved any changes to the playlist.  Are you sure you want to exit now?", 
 		choices: [
 				{label: $L("Yes"), value: 'yes', type: 'affirmative'},
@@ -708,7 +709,8 @@ MusicPlaylistAssistant.prototype.doSave = function(mySelection) {
 						
 						}
 					},
-				title: "WebMyth - v" + Mojo.Controller.appInfo.version,
+				//title: "WebMyth - v" + Mojo.Controller.appInfo.version,
+				title: Mojo.Controller.appInfo.title+" - v" + Mojo.Controller.appInfo.version,
 				message:  "Are you sure you want to delete the playlist '"+this.currentPlaylist.playlist_name+"'?", 
 				choices: [
 						{label: $L("Yes"), value: 'yes', type: 'affirmative'},
@@ -736,7 +738,8 @@ MusicPlaylistAssistant.prototype.doSave = function(mySelection) {
 						
 						}
 					},
-				title: "WebMyth - v" + Mojo.Controller.appInfo.version,
+				//title: "WebMyth - v" + Mojo.Controller.appInfo.version,
+				title: Mojo.Controller.appInfo.title+" - v" + Mojo.Controller.appInfo.version,
 				message:  "If you are currently listening to music or have done so recently on this frontend your updates will not be saved.  <hr />You must close out of the MythTV frontend completely before your changes can be saved.", 
 				choices: [
 						{label: $L("Save Now"), value: 'save', type: 'affirmative'},
@@ -905,8 +908,27 @@ MusicPlaylistAssistant.prototype.setMyPlaylistData = function(propertyValue, mod
 
 MusicPlaylistAssistant.prototype.setMySongData = function(propertyValue, model) {
 
-	var albumArtUrl = "http://"+WebMyth.prefsCookieObject.masterBackendIp+":6544/Myth/GetAlbumArt?Id=";
-	albumArtUrl += model.albumart_id;
+	
+	var albumArtUrl = "";
+		
+	if(WebMyth.prefsCookieObject.mythwebXml) {
+	
+		//album art is not supported by mythweb XML module 
+		
+		//albumArtUrl += "http://"+WebMyth.prefsCookieObject.webserverName+"/mythweb/mythxml/GetAlbumArt?MythXMLKey=";
+		//albumArtUrl += WebMyth.prefsCookieObject.MythXML_key;
+		//albumArtUrl += "&Id=";
+		//albumArtUrl += model.albumart_id;
+		
+		albumArtUrl += "http://"+WebMyth.prefsCookieObject.masterBackendIp+":6544/Myth/GetAlbumArt?Id=";
+		albumArtUrl += model.albumart_id;
+			
+	} else {
+		
+		albumArtUrl += "http://"+WebMyth.prefsCookieObject.masterBackendIp+":6544/Myth/GetAlbumArt?Id=";
+		albumArtUrl += model.albumart_id;
+		
+	}
 	
 	var musicDetailsText = '<div class="musicPlaylist-list-item">';
 	musicDetailsText += '<div class="title truncating-text left music-list-title">&nbsp;';

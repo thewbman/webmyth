@@ -46,7 +46,7 @@ PreferencesAssistant.prototype.setup = function() {
 		},
 		this.usePluginSelectorModel
 	);
-	this.controller.listen("usePluginSelector", Mojo.Event.propertyChange, this.usePluginSelectorChanged.bindAsEventListener(this));
+	//this.controller.listen("usePluginSelector", Mojo.Event.propertyChange, this.usePluginSelectorChanged.bindAsEventListener(this));
 	//Server address
 	this.webserverTextModel = {
              value: "",
@@ -118,6 +118,33 @@ PreferencesAssistant.prototype.setup = function() {
 			textCase: Mojo.Widget.steModeLowerCase
          },
          this.webmythPythonFileTextModel
+    ); 						
+	//User mythweb for XML
+	this.mythwebXmlToggleModel = {
+             value: false
+    };
+	this.controller.setupWidget("mythwebXmlToggleId",
+        {
+			label: $L("Use MythWeb XML"),
+            modelProperty: "value"
+         },
+         this.mythwebXmlToggleModel
+    );	
+	this.controller.listen("mythwebXmlToggleId", Mojo.Event.propertyChange, this.mythwebXmlChanged.bindAsEventListener(this));
+	//Mythweb mythxml key
+	this.MythXML_keyTextModel = {
+             value: "DefaultKey",
+             disabled: false
+    };
+	this.controller.setupWidget("MythXML_keyFieldId",
+        {
+            hintText: $L("DefaultKey"),
+            multiline: false,
+            enterSubmits: false,
+            focus: false,
+			textCase: Mojo.Widget.steModeLowerCase
+         },
+         this.MythXML_keyTextModel
     ); 						
 	//Show upcoming recordings
 	this.showUpcomingToggleModel = {
@@ -573,6 +600,13 @@ PreferencesAssistant.prototype.activate = function(event) {
 			this.webmythPythonFileTextModel.value = WebMyth.prefsCookieObject.webmythPythonFile;
 			this.controller.modelChanged(this.webmythPythonFileTextModel);
 			
+			this.mythwebXmlToggleModel.value = WebMyth.prefsCookieObject.mythwebXml;
+			this.controller.modelChanged(this.mythwebXmlToggleModel);
+			
+			this.MythXML_keyTextModel.value = WebMyth.prefsCookieObject.MythXML_key;
+			this.MythXML_keyTextModel.disabled = !WebMyth.prefsCookieObject.mythwebXml;
+			this.controller.modelChanged(this.MythXML_keyTextModel);
+			
 			this.showUpcomingToggleModel.value = WebMyth.prefsCookieObject.showUpcoming;
 			this.controller.modelChanged(this.showUpcomingToggleModel);
 			
@@ -836,6 +870,34 @@ PreferencesAssistant.prototype.streamChanged = function(event) {
 	
 };
 
+PreferencesAssistant.prototype.mythwebXmlChanged = function(event) {
+
+	Mojo.Log.info("mythwebXmlChanged settings changed to "+this.mythwebXmlToggleModel.value);
+	
+	var xmlMessage = 'In order to avoid forwarding port 6544 for using the app remotely, you can download an addon module for MythWeb.  ';
+	xmlMessage += 'After setting up a key in the MythWeb settings, you can then access the XML data normally on port 6544 just through a normal http server (port 80).';
+	xmlMessage += 'Then you can stream the recording to your phone using the mythweb stream interface.<hr />';
+	xmlMessage += 'Instructions and the module can be found <a href="https://sites.google.com/a/thewhytehouse.org/mythtv/modification/mythxmlmoduleformythweb">here</a>.';
+	
+	if(this.mythwebXmlToggleModel.value) {
+		
+		this.controller.showAlertDialog({
+			onChoose: function(value) {},
+			title: "Use MythWeb XML module",
+			message:  xmlMessage, 
+			choices: [
+                   {label: "OK", value: "ok"}
+				],
+			allowHTMLMessage: true
+		});	
+			
+	};	
+	
+	this.MythXML_keyTextModel.disabled = !this.mythwebXmlToggleModel.value;
+	this.controller.modelChanged(this.MythXML_keyTextModel);
+	
+};
+
 PreferencesAssistant.prototype.checkSettings = function() {
 	
 	//Mojo.Log.error("starting check of settings");
@@ -846,7 +908,8 @@ PreferencesAssistant.prototype.checkSettings = function() {
 		
         this.controller.showAlertDialog({
                 onChoose: function(value) {},
-				title: "WebMyth - v" + Mojo.Controller.appInfo.version,
+				//title: "WebMyth - v" + Mojo.Controller.appInfo.version,
+				title: Mojo.Controller.appInfo.title+" - v" + Mojo.Controller.appInfo.version,
                 message: "Do not put the 'http' at the beginning or your webserver",
                 choices: [
 					{label: "OK", value: false}
@@ -897,7 +960,8 @@ PreferencesAssistant.prototype.checkSettings = function() {
 			
 			this.controller.showAlertDialog({
 					onChoose: function(value) {},
-					title: "WebMyth - v" + Mojo.Controller.appInfo.version,
+					//title: "WebMyth - v" + Mojo.Controller.appInfo.version,
+					title: Mojo.Controller.appInfo.title+" - v" + Mojo.Controller.appInfo.version,
 					message: "You cannot disable the current remote scene ("+currentRemoteScene+").",
 					choices: [
 						{label: "OK", value: false}
@@ -933,6 +997,8 @@ PreferencesAssistant.prototype.checkSettings = function() {
 				WebMyth.prefsCookieObject.allowRecordedDownloads = this.allowDownloadStreamToggleModel.value;
 				//WebMyth.prefsCookieObject.useWebmythScript = this.useWebmythScriptToggleModel.value;
 				WebMyth.prefsCookieObject.webmythPythonFile = this.webmythPythonFileTextModel.value;
+				WebMyth.prefsCookieObject.mythwebXml = this.mythwebXmlToggleModel.value;
+				WebMyth.prefsCookieObject.MythXML_key = this.MythXML_keyTextModel.value;
 				WebMyth.prefsCookieObject.showUpcoming = this.showUpcomingToggleModel.value;
 				WebMyth.prefsCookieObject.showVideos = this.showVideosToggleModel.value;
 				WebMyth.prefsCookieObject.showMusic = this.showMusicToggleModel.value;

@@ -813,8 +813,22 @@ MusicListAssistant.prototype.handleDownload = function(downloadOrStream_in) {
 	this.downloadOrStream = downloadOrStream_in;
 	
 	
-	var filenameRequestUrl = "http://"+WebMyth.prefsCookieObject.masterBackendIp+":6544/Myth/GetMusic?Id="
-	filenameRequestUrl += this.musicObject.song_id;
+	var filenameRequestUrl = "";
+		
+	if(WebMyth.prefsCookieObject.mythwebXml) {
+	
+		filenameRequestUrl += "http://"+WebMyth.prefsCookieObject.webserverName+"/mythweb/mythxml/GetMusic?MythXMLKey=";
+		filenameRequestUrl += WebMyth.prefsCookieObject.MythXML_key;
+		filenameRequestUrl += "&Id=";
+		filenameRequestUrl += this.musicObject.song_id;
+			
+	} else {
+		
+		filenameRequestUrl += "http://"+WebMyth.prefsCookieObject.masterBackendIp+":6544/Myth/GetMusic?Id=";
+		filenameRequestUrl += this.musicObject.song_id;
+		
+	}
+	
 	
 	Mojo.Log.info("Download/stream URL is "+filenameRequestUrl);
 	
@@ -944,8 +958,26 @@ MusicListAssistant.prototype.musicDividerFunction = function(itemModel) {
 
 MusicListAssistant.prototype.setMyData = function(propertyValue, model) {
 
-	var albumArtUrl = "http://"+WebMyth.prefsCookieObject.masterBackendIp+":6544/Myth/GetAlbumArt?Id=";
-	albumArtUrl += model.albumart_id;
+	var albumArtUrl = "";
+		
+	if(WebMyth.prefsCookieObject.mythwebXml) {
+	
+		//album art is not supported by mythweb XML module 
+		
+		//albumArtUrl += "http://"+WebMyth.prefsCookieObject.webserverName+"/mythweb/mythxml/GetAlbumArt?MythXMLKey=";
+		//albumArtUrl += WebMyth.prefsCookieObject.MythXML_key;
+		//albumArtUrl += "&Id=";
+		//albumArtUrl += model.albumart_id;
+		
+		albumArtUrl += "http://"+WebMyth.prefsCookieObject.masterBackendIp+":6544/Myth/GetAlbumArt?Id=";
+		albumArtUrl += model.albumart_id;
+			
+	} else {
+		
+		albumArtUrl += "http://"+WebMyth.prefsCookieObject.masterBackendIp+":6544/Myth/GetAlbumArt?Id=";
+		albumArtUrl += model.albumart_id;
+		
+	}
 	
 	var musicDetailsText = '<div class="music-list-item">';
 	musicDetailsText += '<div class="title truncating-text left  music-list-title">&nbsp;'+model.name+'</div>';
