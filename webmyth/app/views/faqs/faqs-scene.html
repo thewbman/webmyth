@@ -9,11 +9,12 @@
 MythTV is an open-source DVR program (somewhat like TiVo) that runs on Linux. <div class="help-bold">If you do not already have <a href="http://www.mythtv.org/">MythTV</a> setup this app is not for you.</div> If you do have a MythTV setup this app can be used a remote control and do some advanced features like showing your current and upcoming recordings.  
 </div><hr />
 
+<!-- 
 <div class="title">Q: What is the script file noted in the preferences?</div><div class="palm-info-text">
 Earlier versions of the app required a server script to access all of the MythTV functions.  The app is still compatable with the script and it can be used if desired by setting it in the preferences.  Using the script is a good way to avoid having to forward all the ports when using the app from a cell network.
 </div><hr />
+-->
 
-<!-- 
 <div class="title">Q: Do I really need to install the script file?</div><div class="palm-info-text">
 Yes. WebOS 1.4.5 and below does not allow for some of the connections that would be needed to not use the script.  You can install the beta version of the app on the development homepage and install it on a 1.4.5 device to avoid using the script, but that version will never be in the pfficial app catalog.
 </div><hr />
@@ -21,31 +22,28 @@ Yes. WebOS 1.4.5 and below does not allow for some of the connections that would
 <div class="title">Q: Why are there 0.23+/python/MythVideo requirements?</div><div class="palm-info-text">
 The server script that this app uses relies on the python bindings included with MythTV. By using the actual python bindings the script itself can be simpler and frankly easier for me to write. But unfortunately the python bindings for MythTV was drastically reworked for MythTV for 0.23, making the script not backwards compatible with MythTV 0.22. MythTV 0.24 seems to work OK, though a little bit slower for some reason.  The MythVideo requirement is somewhat arbitrary and you can comment out the two lines in the script that include the function call "MythVideo(...)" if you do not have MythVideo installed on your system.
 </div><hr />
--->
 
 <div class="title">Q: The upcoming list/frontend searches/remote connection are not working, especially after I just upgraded the script file</div><div class="palm-info-text">
 First double check you installed the script file is installed on a local web server. And that you changed the hardcoded database values to your specific system. You can get the variables you need by looking at /etc/mythtv/mysql.txt on a functioning frontend or backend. You can see if it is accessible by trying to view it from a web browser (i.e http://my-server/cgi-bin/webmyth.py?op=getHosts). If your browser tries to download a file then that much is working. If you get a 500 error from your browser you can try looking at the apache error log ("/var/log/apache2/error.log") for information. 
 </div><hr />
 
-<!-- 
 <div class="title">Q: WebMyth can't seem to talk to a remote frontend even though I know it is a valid frontend?</div><div class="palm-info-text">
 This might be an issue that the server where the script lives cannot resolve the frontend's system name. You probably need to add it manually to the server's /etc/hosts file. The webmyth.py script only uses the hostname - it does not use the actual IP addresses you may have configured.
 </div><hr />
--->
 
+<div class="title">Q: Can I use WebMyth remotely over the cell network or another WiFi network?</div><div class="palm-info-text">
+For the most part, yes. You will have to know the IP address assigned to you by your internet provider (or setup a domain name that resolves to your IP address). Then on your router you should forward ports 80 (webserver) and 6544 (MythTV backend XML) to the correct local IP address(es). You can also download a small addon module for MythWeb to avoid having to forward port 6544.  See the app homepage for details.
+</div><hr />
+
+<!-- 
 <div class="title">Q: WebMyth can't seem to talk to a remote frontend even though I know it is a valid frontend?</div><div class="palm-info-text">
 Make sure the IP address and port is correct.  The app does not use the hostname to connect to the fronted, only the IP address.
 </div><hr />
 
-<!-- 
-<div class="title">Q: Can I use WebMyth remotely over the cell network or another WiFi network?</div><div class="palm-info-text">
-For the most part, yes. You will have to know the IP address assigned to you by your internet provider (or setup a domain name that resolves to your IP address). Then on your router you should forward ports 80 (webserver) and 6544 (MythTV backend XML) to the correct local IP address(es). You can also download a small addon module for MythWeb to avoid having to forward port 6544.  See the app homepage for details.
-</div><hr />
--->
-
 <div class="title">Q: Can I use WebMyth remotely over the cell network or another WiFi network?</div><div class="palm-info-text">
 For the most part, yes. You will have to know the IP address assigned to you by your internet provider (or setup a domain name that resolves to your IP address). Then on your router you should forward ports 80 (webserver), 3306 (MySQL), 6543 (MythTV backend), 6544 (MythTV backend XML) and 6546 (frontend remote control) to the correct local IP address(es). You can also download a small addon module for MythWeb to avoid having to forward port 6544.  See the app homepage for details.  If these ports are blocked by your ISP or the network connection you are using you are out of luck.
 </div><hr />
+-->
 
 <!--
 <div class="title">Q: Some scenes in the app seem to take a longer time to load than they should?</div><div class="palm-info-text">

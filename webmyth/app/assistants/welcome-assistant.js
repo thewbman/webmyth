@@ -606,6 +606,15 @@ WelcomeAssistant.prototype.goWebview = function(event) {
 
 WelcomeAssistant.prototype.alertNeedScript = function() {
 	
+	var myChoices = [];
+	
+	if(Mojo.appInfo.id == "com.thewbman.webmyth-classic") {
+		myChoices.push({ label: $L("Manual Setup"), value: "setup" });
+	} else {
+		myChoices.push({ label: $L("Backend Search"), value: "search" });
+		myChoices.push({ label: $L("Manual Setup"), value: "setup" });
+	}
+	
 	this.controller.showAlertDialog({
         onChoose: function(value) {
 			switch(value) {
@@ -619,10 +628,7 @@ WelcomeAssistant.prototype.alertNeedScript = function() {
 		},
 		title: Mojo.Controller.appInfo.title+" - v" + Mojo.Controller.appInfo.version,
         message:  WebMyth.helpMessage, 
-		choices: [
-			{ label: $L("Backend Search"), value: "search" },
-			{ label: $L("Manual Setup"), value: "setup" },
-		],
+		choices: myChoices,
 		allowHTMLMessage: true
     });
 	
