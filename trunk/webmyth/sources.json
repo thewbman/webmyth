@@ -155,5 +155,9 @@
     {
         "scenes": "searchPeople",
         "source": "app/assistants/searchPeople-assistant.js"
+    },
+    {
+        "scenes": "searchBackends",
+        "source": "app/assistants/searchBackends-assistant.js"
     }
 ]

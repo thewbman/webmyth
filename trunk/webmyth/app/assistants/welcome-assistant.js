@@ -138,23 +138,8 @@ WelcomeAssistant.prototype.setup = function() {
 			
 		//Do Metrix submission if allowed
 		if (WebMyth.prefsCookieObject.allowMetrix == true) {
-			Mojo.Log.info("Submitting data to Metrix");
-			
-			//Metrix command
-			WebMyth.Metrix.postDeviceData();
-			
-			//Metrix bulletin
-			//0.4.6 - bulletin 10
-			WebMyth.Metrix.checkBulletinBoard(this.controller, 10);
-			
-			//Send proto version
-			if((WebMyth.prefsCookieObject.protoVer)&&(WebMyth.prefsCookieObject.protoVerSubmitted == false)) {
-				WebMyth.Metrix.customCounts("ProtoVer", WebMyth.prefsCookieObject.protoVer, 1);
-				WebMyth.prefsCookieObject.protoVerSubmitted = true;
-			}
-			
-			//Updates to own server instead of Metrix, TDB
-			//this.postAppData();
+		
+			setTimeout(this.doMetrix.bind(this), 2000);
 			
 		};
 		
@@ -203,6 +188,9 @@ WelcomeAssistant.prototype.setup = function() {
 		if (WebMyth.prefsCookieObject.currentSearchSort == null) WebMyth.prefsCookieObject.currentSearchSort = myDefaultCookie.currentSearchSort;
 		if (WebMyth.prefsCookieObject.currentSearchPeopleSort == null) WebMyth.prefsCookieObject.currentSearchPeopleSort = myDefaultCookie.currentSearchPeopleSort;
 		if (WebMyth.prefsCookieObject.mythVer == null) WebMyth.prefsCookieObject.mythVer = myDefaultCookie.mythVer;
+		if (WebMyth.prefsCookieObject.mythwebXml == null) WebMyth.prefsCookieObject.mythwebXml = myDefaultCookie.mythwebXml;
+		if (WebMyth.prefsCookieObject.MythXML_key == null) WebMyth.prefsCookieObject.MythXML_key = myDefaultCookie.MythXML_key;
+		
 		
 		if (WebMyth.prefsCookieObject.debug == null) {
 			WebMyth.prefsCookieObject.debug = myDefaultCookie.debug;
@@ -373,6 +361,7 @@ WelcomeAssistant.prototype.activate = function(event) {
 			try {
 				var request = new Ajax.Request(requestUrl,{
 					method: 'get',
+					requestHeaders: {Authorization: 'Basic ' + Base64.encode(WebMyth.prefsCookieObject.webserverUsername + ":" + WebMyth.prefsCookieObject.webserverPassword)},
 					onSuccess: this.readMasterBackendSuccess.bind(this),
 					onFailure: this.readMasterBackendFail.bind(this)  
 				});
@@ -618,13 +607,22 @@ WelcomeAssistant.prototype.goWebview = function(event) {
 WelcomeAssistant.prototype.alertNeedScript = function() {
 	
 	this.controller.showAlertDialog({
-        onChoose: function(value) {},
-        title: "WebMyth - v" + Mojo.Controller.appInfo.version,
+        onChoose: function(value) {
+			switch(value) {
+				case "search":
+					Mojo.Controller.stageController.pushScene("searchBackends");
+				  break;
+				case "setup":
+					Mojo.Controller.stageController.pushScene("preferences");
+				  break;
+			}	
+		},
+		title: Mojo.Controller.appInfo.title+" - v" + Mojo.Controller.appInfo.version,
         message:  WebMyth.helpMessage, 
-		choices: [{
-            label: $L("OK"),
-			value: ""
-		}],
+		choices: [
+			{ label: $L("Backend Search"), value: "search" },
+			{ label: $L("Manual Setup"), value: "setup" },
+		],
 		allowHTMLMessage: true
     });
 	
@@ -659,7 +657,8 @@ WelcomeAssistant.prototype.alertScriptUpdate = function(oldversion) {
 					);
 					}
 				},
-			title: "WebMyth - v" + Mojo.Controller.appInfo.version,
+			//title: "WebMyth - v" + Mojo.Controller.appInfo.version,
+			title: Mojo.Controller.appInfo.title+" - v" + Mojo.Controller.appInfo.version,
 			message:  script_message, 
 			choices: [
                     {label: $L("OK"), value: false},
@@ -680,9 +679,10 @@ WelcomeAssistant.prototype.doWelcomeIcon = function(event) {
 	
 	//Event.stop(event); 
 	
-	//Mojo.Controller.stageController.pushScene("backendSearch");
+	Mojo.Log.info("doWelcomeIcon");
 	
-	Mojo.Log.info("doWelcomeIcon")
+	this.alertNeedScript();
+	//Mojo.Controller.stageController.pushScene("searchBackends");
 	
 	try {
 	
@@ -753,7 +753,8 @@ WelcomeAssistant.prototype.doHelpButton = function(event) {
 								);
 								} 
 							},
-							title: "WebMyth - v" + Mojo.Controller.appInfo.version,
+							//title: "WebMyth - v" + Mojo.Controller.appInfo.version,
+							title: Mojo.Controller.appInfo.title+" - v" + Mojo.Controller.appInfo.version,
 							message:  WebMyth.helpMessage, 
 							choices: [
 								{label: $L("OK"), value: "ok"},
@@ -907,13 +908,24 @@ WelcomeAssistant.prototype.getConnectionInfo = function() {
 		
 	} else {
 	
-		var requestUrl = "http://"+WebMyth.prefsCookieObject.masterBackendIp+":6544/Myth/GetConnectionInfo";
+		var requestUrl = "";
 		
+		if(WebMyth.prefsCookieObject.mythwebXml) {
+		
+			requestUrl += "http://"+WebMyth.prefsCookieObject.webserverName+"/mythweb/mythxml/GetConnectionInfo?MythXMLKey=";
+			requestUrl += WebMyth.prefsCookieObject.MythXML_key;
+			
+		} else {
+		
+			requestUrl += "http://"+WebMyth.prefsCookieObject.masterBackendIp+":6544/Myth/GetConnectionInfo";
+		
+		}
 		
 		try {
 			var request = new Ajax.Request(requestUrl,{
 				method: 'get',
 				evalJSON: 'false',
+				requestHeaders: {Authorization: 'Basic ' + Base64.encode(WebMyth.prefsCookieObject.webserverUsername + ":" + WebMyth.prefsCookieObject.webserverPassword)},
 				onSuccess: this.readConnectionInfoSuccess.bind(this),
 				onFailure: function() {
 							Mojo.Log.info("failed to get connection info")	
@@ -1446,372 +1458,25 @@ WelcomeAssistant.prototype.postDeviceDataSuccess = function(response) {
 
 }
 
+WelcomeAssistant.prototype.doMetrix = function() {
 
-
-//Depreciated
-WelcomeAssistant.prototype.getHostsList = function() {
+	Mojo.Log.info("Submitting data to Metrix");
 	
-	//This function has been depreciated and replaced with getSettings();
+	//Metrix command
+	WebMyth.Metrix.postDeviceData();
 	
-	//Mojo.Log.info("Starting to get hosts");
+	//Metrix bulletin
+	//0.4.6 - bulletin 10
+	WebMyth.Metrix.checkBulletinBoard(this.controller, 10);
+	
+	//Send proto version
+	if((WebMyth.prefsCookieObject.protoVer)&&(WebMyth.prefsCookieObject.protoVerSubmitted == false)) {
+		WebMyth.Metrix.customCounts("ProtoVer", WebMyth.prefsCookieObject.protoVer, 1);
+		WebMyth.prefsCookieObject.protoVerSubmitted = true;
+	}
+	
+	//Updates to own server instead of Metrix, TDB
+	//this.postAppData();
 		
-	var requestUrl = "http://"+WebMyth.prefsCookieObject.masterBackendIp+":6544/Myth/GetHosts";
-
-	//Mojo.Log.info("XML hosts URL is: "+requestUrl);
-			
-		try {
-				var request = new Ajax.Request(requestUrl,{
-				method: 'get',
-				evalJSON: false,
-				onSuccess: this.readHostsSuccess.bind(this),
-				onFailure: function() {
-						Mojo.Log.info("failed to get hosts from backend")	
-					}  
-			});
-		}
-		catch(e) {
-			Mojo.Log.error(e);
-		}
-	
 }
-
-WelcomeAssistant.prototype.readHostsSuccess = function(response) {
-	
-	Mojo.Log.info("Starting readHostsSuccess");
-	
-	var xmlobject;
-	
-	if(response.responseXML) {
-	
-		xmlobject = response.responseXML;
-	
-		if(WebMyth.prefsCookieObject.debug){
-			Mojo.Log.info("Using XML readHostsSuccess response as responseXML");
-		}
-		
-	} else {
-	
-		var xmlstring = response.responseText.trim();
-	
-		if(WebMyth.prefsCookieObject.debug){
-			Mojo.Log.info("Got XML readHostsSuccess responseText from backend: "+xmlstring);
-		}
-		
-		xmlobject = (new DOMParser()).parseFromString(xmlstring, "text/xml");
-		
-	}
-	
-	
-	
-	//Mojo.Log.info("Hosts response is %s",xmlstring);
-	
-	//Local variables
-	var topNode, topNodesCount, topSingleNode, hostsNode, singleHostNode;
-	var singleHostJson = {};
-	var Count;
-	
-	var s = {};		//individual JSON for each program parsing
-	
-	
-	//Mojo.Log.error("about to start parsing hosts");
-	this.backendsList.clear();
-	
-	//Start parsing
-	topNode = xmlobject.getElementsByTagName("GetHostsResponse")[0];
-	var topNodesCount = topNode.childNodes.length;
-	for(var i = 0; i < topNodesCount; i++) {
-		topSingleNode = topNode.childNodes[i];
-		switch(topSingleNode.nodeName) {
-			case 'Count':
-				Count = topSingleNode.childNodes[0].nodeValue;
-				break;
-			case 'Hosts':
-				//Mojo.Log.info('Starting to parse Hosts');
-				hostsNode = topSingleNode;
-				for(var j = 0; j < hostsNode.childNodes.length; j++) {
-					singleHostNode = hostsNode.childNodes[j];
-					//Mojo.Log.info("Node name is "+singleHostNode.nodeName);
-					if(singleHostNode.nodeName == 'Host') {
-						//Mojo.Log.info('Inside Host if');
-						singleHostJson = {
-									"hostname": singleHostNode.childNodes[0].nodeValue, 
-									"ip": "", 
-									"master": false
-						}
-										
-						this.backendsList.push(singleHostJson);
-						//Mojo.Log.info("Single host json is %j", singleHostJson);
-							
-						
-					}
-				}
-				//Mojo.Log.info('Done parsing Hosts');
-				//Mojo.Log.info("Hosts full json is %j", this.backendsList);
-	
-				
-				break;
-			default:
-				break;
-		}
-	}
-	
-	//Mojo.Log.info("Exited XML host parsing");
-	
-	this.getBackendIPs();
-	
-};
-
-WelcomeAssistant.prototype.getScriptVersion = function() {
-	
-	//Mojo.Log.info("Starting to get script version");
-		
-	
-	var requestUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webmythPythonFile;
-	requestUrl += "?op=getScriptVersion";	
-	
-	
-    try {
-        var request = new Ajax.Request(requestUrl,{
-            method: 'get',
-            evalJSON: 'false',
-			requestHeaders: {Authorization: 'Basic ' + Base64.encode(WebMyth.prefsCookieObject.webserverUsername + ":" + WebMyth.prefsCookieObject.webserverPassword)},
-			onSuccess: this.readScriptVersionSuccess.bind(this),
-            onFailure: function() {
-						Mojo.Log.info("failed to get script version")	
-					}   
-        });
-    }
-    catch(e) {
-        Mojo.Log.error(e);
-    }
-	
-}
-
-WelcomeAssistant.prototype.readScriptVersionSuccess = function(response) {
-
-	Mojo.Log.info('Got script version', response.responseText.trim());
-	
-	WebMyth.prefsCookieObject.liveScriptVersion = response.responseText.trim();
-	WebMyth.prefsCookie.put(WebMyth.prefsCookieObject);
-	
-};
-
-WelcomeAssistant.prototype.getBackendIPs = function() {
-
-	//Update backend IPs from XML
-	//Mojo.Log.info('Starting backend IPs data gathering from XML backend');
-	
-	var i = 0, s = {};
-	
-	for(i = 0; i < this.backendsList.length; i++) {
-		s = this.backendsList[i];
-		
-		//Mojo.Log.info("Trying to get IP for %j", s);
-		
-		var requestUrl = "http://"+WebMyth.prefsCookieObject.masterBackendIp+":6544/Myth/GetSetting?Key=BackendServerIP&HostName="+s.hostname;
-		
-		//Mojo.Log.info("XML backend IP URL is: "+requestUrl);
-			
-		try {
-				var request = new Ajax.Request(requestUrl,{
-				method: 'get',
-				evalJSON: false,
-				onSuccess: this.readBackendIPSuccess.bind(this),
-				onFailure: function() {
-						Mojo.Log.info("failed to get backend IP for "+s.hostname)	
-					}  
-			});
-		}
-		catch(e) {
-			Mojo.Log.error(e);
-		}
-	
-	}
-	
-	//Mojo.Log.info("Getting master backend IP");
-		
-	var requestUrl2 = "http://"+WebMyth.prefsCookieObject.masterBackendIp+":6544/Myth/GetSetting?Key=MasterServerIP";
-		
-	//Mojo.Log.info("XML master backend IP URL is: "+requestUrl2);
-			
-	try {
-			var request = new Ajax.Request(requestUrl2,{
-			method: 'get',
-			evalJSON: false,
-			onSuccess: this.readMasterBackendIPSuccess.bind(this),
-			onFailure: function() {
-					Mojo.Log.info("failed to get master backend IP")	
-				}  
-		});
-	}
-	catch(e) {
-		Mojo.Log.error(e);
-	}
-	
-};
-
-WelcomeAssistant.prototype.readBackendIPSuccess = function(response) {
-	
-	Mojo.Log.info("Starting readBackendIPSuccess");
-	
-	var xmlobject;
-	
-	if(response.responseXML) {
-	
-		xmlobject = response.responseXML;
-	
-		if(WebMyth.prefsCookieObject.debug){
-			Mojo.Log.info("Using XML readBackendIPSuccess response as responseXML");
-		}
-		
-	} else {
-	
-		var xmlstring = response.responseText.trim();
-	
-		if(WebMyth.prefsCookieObject.debug){
-			Mojo.Log.info("Got XML readBackendIPSuccess responseText from backend: "+xmlstring);
-		}
-		
-		xmlobject = (new DOMParser()).parseFromString(xmlstring, "text/xml");
-		
-	}
-	
-	//Mojo.Log.info("Backend IP response is %s",xmlstring);
-	
-	//Local variables
-	var topNode, topNodesCount, topSingleNode, valuesNode, singleValueNode;
-	var singleHostJson = {};
-	var Count, Hostname;
-	
-	
-	
-	//Mojo.Log.info("about to start parsing hosts");
-	
-	//Start parsing
-	topNode = xmlobject.getElementsByTagName("GetSettingResponse")[0];
-	var topNodesCount = topNode.childNodes.length;
-	for(var i = 0; i < topNodesCount; i++) {
-		topSingleNode = topNode.childNodes[i];
-		switch(topSingleNode.nodeName) {
-			case 'Count':
-				Count = topSingleNode.childNodes[0].nodeValue;
-				break;
-			case 'HostName':
-				Hostname = topSingleNode.childNodes[0].nodeValue;
-				break;
-			case 'Values':
-				//Mojo.Log.info('Starting to parse settings values');
-				valuesNode = topSingleNode;
-				for(var j = 0; j < valuesNode.childNodes.length; j++) {
-					singleValueNode = valuesNode.childNodes[j];
-					//Mojo.Log.info("Node name is "+singleValueNode.nodeName);
-					if(singleValueNode.nodeName == 'Value') {
-						//Mojo.Log.info('Inside Value if');
-						singleHostJson = {
-									"hostname": Hostname, 
-									"ip": singleValueNode.childNodes[0].nodeValue, 
-									"master": false
-						}
-										
-						this.backendsList.push(singleHostJson);
-						//Mojo.Log.info("Single host json is %j", singleHostJson);
-							
-						
-					}
-				}
-				//Mojo.Log.info('Done parsing Hosts');
-				//Mojo.Log.error("Hosts full json is %j", this.backendsList);
-	
-				
-				break;
-			default:
-				break;
-		}
-	}
-	
-	//Mojo.Log.info("Exited XML Backend IP parsing for "+Hostname);
-	
-	
-};
-
-WelcomeAssistant.prototype.readMasterBackendIPSuccess = function(response) {
-	
-	Mojo.Log.info("Starting readMasterBackendIPSuccess");
-	
-	var xmlobject;
-	
-	if(response.responseXML) {
-	
-		xmlobject = response.responseXML;
-	
-		if(WebMyth.prefsCookieObject.debug){
-			Mojo.Log.info("Using XML readMasterBackendIPSuccess response as responseXML");
-		}
-		
-	} else {
-	
-		var xmlstring = response.responseText.trim();
-	
-		if(WebMyth.prefsCookieObject.debug){
-			Mojo.Log.info("Got XML readMasterBackendIPSuccess responseText from backend: "+xmlstring);
-		}
-		
-		xmlobject = (new DOMParser()).parseFromString(xmlstring, "text/xml");
-		
-	}
-	
-	
-	//Mojo.Log.info("Backend IP response is %s",xmlstring);
-	
-	//Local variables
-	var topNode, topNodesCount, topSingleNode, valuesNode, singleValueNode;
-	var singleHostJson = {};
-	var Count, masterServerIP;
-	
-	
-	
-	//Mojo.Log.info("About to start parsing hosts");
-	
-	//Start parsing
-	topNode = xmlobject.getElementsByTagName("GetSettingResponse")[0];
-	var topNodesCount = topNode.childNodes.length;
-	for(var i = 0; i < topNodesCount; i++) {
-		topSingleNode = topNode.childNodes[i];
-		switch(topSingleNode.nodeName) {
-			case 'Count':
-				Count = topSingleNode.childNodes[0].nodeValue;
-				break;
-			case 'Values':
-				//Mojo.Log.info('Starting to parse settings values');
-				valuesNode = topSingleNode;
-				for(var j = 0; j < valuesNode.childNodes.length; j++) {
-					singleValueNode = valuesNode.childNodes[j];
-					//Mojo.Log.info("Node name is "+singleValueNode.nodeName);
-					if(singleValueNode.nodeName == 'Value') {
-						//Mojo.Log.info('Inside Value if');
-						masterServerIP = singleValueNode.childNodes[0].nodeValue; 
-					}
-				}
-				//Mojo.Log.info('Done parsing master backend IP');
-	
-				
-				break;
-			default:
-				break;
-		}
-	}
-	
-	//Mojo.Log.info("Finished XML Backend IP parsing for master backend - "+masterServerIP);
-	
-	this.backendsList = cleanupBackendsList(this.backendsList, masterServerIP);
-	
-	Mojo.Log.info("Cleaned backends list is %j",this.backendsList);
-	
-	WebMyth.backendsCookieObject.clear();
-	Object.extend(WebMyth.backendsCookieObject,this.backendsList);
-	WebMyth.backendsCookie.put(WebMyth.backendsCookieObject);
-	
-	
-};
-
 

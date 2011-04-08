@@ -26,8 +26,8 @@ function StageAssistant() {
 WebMyth = {};
 
 
-WebMyth.usePlugin = false;
-WebMyth.usePluginFrontend = false;
+WebMyth.usePlugin = true;
+WebMyth.usePluginFrontend = true;
 WebMyth.nextFrontendCommand = "";
 
 WebMyth.useService = false;
@@ -142,12 +142,13 @@ WebMyth.channelObject = {};
 WebMyth.settings = [];
 
 //Help and first-run message
-WebMyth.helpMessage = "This app requires the installation of 1 script on a local webserver on your network.  ";
-WebMyth.helpMessage += "You can get the file <a href='http://code.google.com/p/webmyth/downloads/list'>here</a><hr/>";
-WebMyth.helpMessage += "If you have installed previous verions of the script files please upgrade them to the latest versions.";
-//WebMyth.helpMessage += "The remote script (<a href='http://code.google.com/p/webmyth/source/browse/trunk/remote.py'>remote.py</a>) ";
-//WebMyth.helpMessage += "needs to be in executable as cgi-bin while the mysql script (<a href='http://code.google.com/p/webmyth/source/browse/trunk/webmyth-mysql.php'>webmyth-mysql.php</a>) can be in any standard directory.  ";
-//WebMyth.helpMessage += "Both files needs to be accesible to this device without any authentication.<hr/>";
+WebMyth.classicHelpMessage = "This app will only work if you already have a MythTV system setup and running.  ";
+WebMyth.classicHelpMessage += "MythTV is an open source, Linux-based DVR system and you can get more information about it <a href='http://www.mythtv.org/'>here</a><hr/>";
+WebMyth.classicHelpMessage = "This app requires the installation of 1 script on a local webserver on your network.  ";
+WebMyth.classicHelpMessage += "You can get the file <a href='http://code.google.com/p/webmyth/downloads/list'>here</a>";
+
+WebMyth.publicHelpMessage = "This app will only work if you already have a MythTV system setup and running.<hr/>";
+WebMyth.publicHelpMessage += "MythTV is an open source, Linux-based DVR system and you can get more information about it <a href='http://www.mythtv.org/'>here</a>.";
 
 
 WebMyth.helpEmailText = "This app requires the installation of 1 script on a local webserver on your network.  ";
@@ -190,6 +191,12 @@ StageAssistant.prototype.setup = function() {
 	
 	//Mojo.Log.info("About to start first scene - welcome");
 	
+	if(Mojo.appInfo.id == "com.thewbman.webmyth-classic") {
+		WebMyth.helpMessage = WebMyth.classicHelpMessage;
+	} else {
+		WebMyth.helpMessage = WebMyth.publicHelpMessage;
+	}
+	
 	//Start first scene
 	this.controller.pushScene("welcome");
 	this.controller.setWindowOrientation("up");
@@ -226,7 +233,8 @@ StageAssistant.prototype.handleCommand = function(event) {
 					);
 					}
 				},
-				title: "WebMyth - v" + Mojo.Controller.appInfo.version,
+				//title: "WebMyth - v" + Mojo.Controller.appInfo.version,
+				title: Mojo.Controller.appInfo.title+" - v" + Mojo.Controller.appInfo.version,
                 message: "Copyright 2010, Wes Brown <br>" + aboutinfo,
                 choices: [
 					{label: $L("OK"), value: false},
@@ -298,7 +306,8 @@ StageAssistant.prototype.handleCommand = function(event) {
 					);
 					} 
 				},
-				title: "WebMyth - v" + Mojo.Controller.appInfo.version,
+				//title: "WebMyth - v" + Mojo.Controller.appInfo.version,
+				title: Mojo.Controller.appInfo.title+" - v" + Mojo.Controller.appInfo.version,
 				message:  WebMyth.helpMessage, 
 				choices: [
                     {label: $L("OK"), value: "ok"},
@@ -361,7 +370,7 @@ StageAssistant.prototype.handleCommand = function(event) {
                     parameters: {
 						id: "com.palm.app.email",
                         params: {
-							summary: "Help with WebMyth v"+ Mojo.Controller.appInfo.version,
+							summary: "Help with "+Mojo.Controller.appInfo.title+" v"+ Mojo.Controller.appInfo.version,
                             recipients: [{
 								type:"email",
                                 value:"webmyth.help@gmail.com",

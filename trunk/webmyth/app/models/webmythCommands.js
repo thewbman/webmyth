@@ -121,12 +121,15 @@ function defaultCookie() {
 		showLog: true,
 		currentLogGroup: 'all',
 		manualDatabase: false,
-		databaseHost: '',
-		usePlugin: 0,
+		databaseHost: '-',
+		usePlugin: 2,
 		protoVerSubmitted: false,
 		currentSearchPeopleSort: 'date-asc',
 		mythVer: 'TBD',
-		debug: false
+		debug: false,
+		mythwebXml: false,
+		MythXML_key: "DefaultKey",
+		
 		
 	};
 	

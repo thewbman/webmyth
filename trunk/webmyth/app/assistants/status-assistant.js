@@ -287,7 +287,9 @@ StatusAssistant.prototype.handleKey = function(event) {
 				break;
 		}
 	}
+	
 	Event.stop(event); 
+	
 };
 
 
@@ -297,7 +299,21 @@ StatusAssistant.prototype.getStatus = function() {
 	//Getting settings information
 	//Mojo.Log.info("Got master backend IP from settings: "+WebMyth.prefsCookieObject.masterBackendIp);
 	
-	var requestUrl = "http://"+WebMyth.prefsCookieObject.masterBackendIp+":6544/xml";
+	var requestUrl = "";
+		
+	if(WebMyth.prefsCookieObject.mythwebXml) {
+	
+		//Stop spinner and hide
+		this.spinnerModel.spinning = false;
+		this.controller.modelChanged(this.spinnerModel, this);
+		$('myScrim').hide();
+		
+		setTimeout(function() {Mojo.Controller.errorDialog("The Status scene does not support the MythWeb XML module.");}, 500);
+			
+	} else {
+		
+		requestUrl += "http://"+WebMyth.prefsCookieObject.masterBackendIp+":6544/xml";
+		
 	
 		if(WebMyth.prefsCookieObject.debug){
 			Mojo.Log.info("XML status URL is: "+requestUrl);
@@ -313,18 +329,20 @@ StatusAssistant.prototype.getStatus = function() {
 			});
 			
 		}
+		
+		try {
+			var request = new Ajax.Request(requestUrl,{
+				method: 'get',
+				evalJSON: false,
+				onSuccess: this.readStatusSuccess.bind(this),
+				onFailure: this.readStatusFail.bind(this)  
+			});
+		}
+		catch(e) {
+			Mojo.Log.error(e);
+		}
 	
-    try {
-        var request = new Ajax.Request(requestUrl,{
-            method: 'get',
-			evalJSON: false,
-            onSuccess: this.readStatusSuccess.bind(this),
-            onFailure: this.readStatusFail.bind(this)  
-        });
-    }
-    catch(e) {
-        Mojo.Log.error(e);
-    }
+	}
 	
 };
 
@@ -800,7 +818,7 @@ StatusAssistant.prototype.readStatusSuccess = function(response) {
 	//Stop spinner and hide
 	this.spinnerModel.spinning = false;
 	this.controller.modelChanged(this.spinnerModel, this);
-	$('myScrim').hide()	
+	$('myScrim').hide();
 	
 };
 

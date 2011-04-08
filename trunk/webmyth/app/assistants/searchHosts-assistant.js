@@ -70,8 +70,20 @@ SearchHostsAssistant.prototype.activate = function(event) {
 	   
 	Mojo.Log.info("Searching for hosts...");
 	
+	
+		var requestUrl = "";
+			
+		if(WebMyth.prefsCookieObject.mythwebXml) {
+		
+			requestUrl += "http://"+WebMyth.prefsCookieObject.webserverName+"/mythweb/mythxml/GetHosts?MythXMLKey=";
+			requestUrl += WebMyth.prefsCookieObject.MythXML_key;
+				
+		} else {
+			
+			requestUrl += "http://"+WebMyth.prefsCookieObject.masterBackendIp+":6544/Myth/GetHosts";
+			
+		}
 
-		var requestUrl = "http://"+WebMyth.prefsCookieObject.masterBackendIp+":6544/Myth/GetHosts";
 		
 		try {
 			var request = new Ajax.Request(requestUrl,{

@@ -99,13 +99,19 @@ GuideDetailsAssistant.prototype.setup = function() {
 	Mojo.Event.listen(this.controller.get( "header-menu" ), Mojo.Event.tap, function(){this.controller.sceneScroller.mojo.revealTop();}.bind(this));
 	
 	
+	var iconUrl = "";
 	
+	if(WebMyth.prefsCookieObject.mythwebXml) {
+		iconUrl += "http://"+WebMyth.prefsCookieObject.webserverName+"/mythweb/mythxml/GetChannelIcon?ChanId=";
+		iconUrl += this.guideObject.chanId;
+		iconUrl += "&MythXMLKey="+WebMyth.prefsCookieObject.MythXML_key;
+	} else {
+		iconUrl += "http://"+WebMyth.prefsCookieObject.masterBackendIp+":6544/Myth/GetChannelIcon?ChanId="+this.guideObject.chanId;
+	}
 	
-	var channelIconUrl = "http://"+WebMyth.prefsCookieObject.masterBackendIp+":6544/Myth/GetChannelIcon?ChanId=";
-	channelIconUrl += this.guideObject.chanId;
 	
 	if(WebMyth.prefsCookieObject.showUpcomingChannelIcons) {
-		$('guideDetails-channel-icon').innerHTML = '<img class="guideDetails-channel-img" src="'+channelIconUrl+'" />';
+		$('guideDetails-channel-icon').innerHTML = '<img class="guideDetails-channel-img" src="'+iconUrl+'" />';
 	}
 	
 	//Fill in data values
@@ -517,15 +523,28 @@ GuideDetailsAssistant.prototype.refreshData = function() {
 	//Update details from XML backend
 	Mojo.Log.info('Starting details data gathering from XML backend');
 		
-	this.requestUrl = "http://"+WebMyth.prefsCookieObject.masterBackendIp+":6544/Myth/GetProgramDetails?StartTime=";
-	this.requestUrl += this.guideObject.startTime;
-	this.requestUrl += "&ChanId=";
-	this.requestUrl += this.guideObject.chanId;
+	var requestUrl = "";
+	
+	if(WebMyth.prefsCookieObject.mythwebXml) {
+	
+		requestUrl += "http://"+WebMyth.prefsCookieObject.webserverName+"/mythweb/mythxml/GetProgramDetails?Details=1&MythXMLKey=";
+		requestUrl += WebMyth.prefsCookieObject.MythXML_key;
+		requestUrl += "&StartTime=";
+			
+	} else {
+		
+		requestUrl += "http://"+WebMyth.prefsCookieObject.masterBackendIp+":6544/Myth/GetProgramDetails?StartTime=";
+		
+	}
+	
+	requestUrl += this.guideObject.startTime;
+	requestUrl += "&ChanId=";
+	requestUrl += this.guideObject.chanId;
 
-	Mojo.Log.info("XML details URL is: "+this.requestUrl);
+	Mojo.Log.info("XML details URL is: "+requestUrl);
 			
 	try {
-		var request = new Ajax.Request(this.requestUrl,{
+		var request = new Ajax.Request(requestUrl,{
 			method: 'get',
 			evalJSON: false,
 			onSuccess: this.readDetailsXMLSuccess.bind(this),
@@ -747,7 +766,7 @@ GuideDetailsAssistant.prototype.getPeople = function(event) {
 	query += ' LEFT OUTER JOIN `people` ON `credits`.`person` = `people`.`person` ';
 	query += ' LEFT OUTER JOIN `videocast` ON `videocast`.`cast` = `people`.`name` ';
 	query += ' WHERE (`credits`.`chanid` = '+this.guideObject.chanId+' AND `credits`.`starttime` = "'+this.guideObject.startTime.replace("T"," ")+'" ) ';
-	query += ' ORDER BY `role` ';
+	query += ' ORDER BY `role`, `name` ';
 	
 	Mojo.Log.error("Query is "+query);
 	

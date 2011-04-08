@@ -809,18 +809,6 @@ VideosAssistant.prototype.videosDividerFunction = function(itemModel) {
 
 VideosAssistant.prototype.setMyData = function(propertyValue, model) {
 	
-	/*
-	//And img source
-	var channelIconUrl = "http://"+WebMyth.prefsCookieObject.masterBackendIp+":6544/Myth/GetChannelIcon?ChanId=";
-	channelIconUrl += model.chanid;
-	
-	//Mojo.Log.error("iconURL is "+channelIconUrl);
-	
-	//Mojo.Log.error('url is ' +screenshotUrl);
-	model.myImgSrc = channelIconUrl;
-	
-	
-	*/
 	var videosDetailsText = "";
 	
 	if(WebMyth.prefsCookieObject.showVideoImages) {

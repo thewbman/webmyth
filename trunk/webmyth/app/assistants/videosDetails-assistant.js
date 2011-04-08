@@ -301,8 +301,25 @@ VideosDetailsAssistant.prototype.handleDownload = function(downloadOrStream_in) 
 	this.downloadOrStream = downloadOrStream_in;
 	
 	
-	var filenameRequestUrl = "http://"+WebMyth.prefsCookieObject.masterBackendIp+":6544/Myth/GetVideo/Id"
-	filenameRequestUrl += this.upnpId;
+	var filenameRequestUrl = "";
+		
+	if(WebMyth.prefsCookieObject.mythwebXml) {
+	
+		//videos are not supported by mythweb XMl module
+		//filenameRequestUrl += "http://"+WebMyth.prefsCookieObject.webserverName+"/mythweb/mythxml/GetVideo/Id";
+		//filenameRequestUrl += this.upnpId;
+		//filenameRequestUrl += "&MythXMLKey=";
+		//filenameRequestUrl += WebMyth.prefsCookieObject.MythXML_key;
+		
+		filenameRequestUrl += "http://"+WebMyth.prefsCookieObject.masterBackendIp+":6544/Myth/GetVideo/Id";
+		filenameRequestUrl += this.upnpId;
+			
+	} else {
+		
+		filenameRequestUrl += "http://"+WebMyth.prefsCookieObject.masterBackendIp+":6544/Myth/GetVideo/Id";
+		filenameRequestUrl += this.upnpId;
+		
+	}
 	
 	
 	Mojo.Log.info("Download/stream URL is "+filenameRequestUrl);
