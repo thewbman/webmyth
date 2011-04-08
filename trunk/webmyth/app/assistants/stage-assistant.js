@@ -26,8 +26,8 @@ function StageAssistant() {
 WebMyth = {};
 
 
-WebMyth.usePlugin = true;
-WebMyth.usePluginFrontend = true;
+WebMyth.usePlugin = false;
+WebMyth.usePluginFrontend = false;
 WebMyth.nextFrontendCommand = "";
 
 WebMyth.useService = false;
@@ -144,7 +144,7 @@ WebMyth.settings = [];
 //Help and first-run message
 WebMyth.classicHelpMessage = "This app will only work if you already have a MythTV system setup and running.  ";
 WebMyth.classicHelpMessage += "MythTV is an open source, Linux-based DVR system and you can get more information about it <a href='http://www.mythtv.org/'>here</a><hr/>";
-WebMyth.classicHelpMessage = "This app requires the installation of 1 script on a local webserver on your network.  ";
+WebMyth.classicHelpMessage += "This app requires the installation of 1 script on a local webserver on your network.  ";
 WebMyth.classicHelpMessage += "You can get the file <a href='http://code.google.com/p/webmyth/downloads/list'>here</a>";
 
 WebMyth.publicHelpMessage = "This app will only work if you already have a MythTV system setup and running.<hr/>";
