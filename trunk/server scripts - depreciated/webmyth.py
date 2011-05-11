@@ -27,12 +27,14 @@ myDBPassword = 'mythtv'
 # end of configuration
 #
 
-version = 9
+version = 10
 
 import cgi
 import cgitb
 import time
-import json
+import datetime
+#import json
+from simplejson import dumps
 import string
 import os
 import sys
@@ -67,6 +69,16 @@ def loadConfig():
                 f.close()
 
 loadConfig()
+
+def repackDicts(datadict):
+        d={}
+        for key, value in datadict.items():
+                if type(value) == datetime.datetime:
+                        value = value.strftime('%Y-%m-%dT%H:%M:%S')
+                if type(value) == str or type(value) == unicode:
+                        value = value.encode('utf-8', 'replace')
+                d[key]=value
+        return d
 
 
 
@@ -501,8 +513,17 @@ else :
 
 
 
+
 	
 if createJson == 1:
+        l=[repackDicts(data) for data in alldata]
+        result = dumps(l)
+	
+elif createJson == 2:
+        d=repackDicts(alldata)
+        result = dumps(d)
+		
+if createJson == 10:
 	count = 0
 	result = '[ '
 	while (count < len(alldata)) :
@@ -528,7 +549,7 @@ if createJson == 1:
 	result = result[:-3]
 	result += ' ]'
 
-elif createJson == 2:
+elif createJson == 20:
 	count = 0
 	singledata = alldata
 	result = '[ { "'
@@ -545,7 +566,6 @@ elif createJson == 2:
 		result += '", "'
 	result = result[:-3]
 	result += " } ]"
-
 #
 
 
