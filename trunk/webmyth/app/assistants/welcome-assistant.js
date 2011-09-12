@@ -708,7 +708,7 @@ WelcomeAssistant.prototype.doWelcomeIcon = function(event) {
 
 WelcomeAssistant.prototype.backgroundUpnpResponse = function(response) {	
 
-	Mojo.Log.error("backgroundUpnpResponse: "+response);
+	//Mojo.Log.error("backgroundUpnpResponse: "+response);
 	
 	$('debugText').innerText += response;
 
@@ -1106,7 +1106,7 @@ WelcomeAssistant.prototype.getSettings = function() {
 		//Mojo.Log.error("Starting to get settingss");
 			
 		//var query = "SELECT * FROM `settings`  WHERE `value` != 'MythWelcomeDateFormat' ;";
-		var query = "SELECT * FROM `settings`  WHERE ";
+		var query = "SELECT `data`, `value`, `hostname` FROM `settings`  WHERE ";
 		query += " `value` = 'AutoCommercialFlag'";
 		query += " OR `value` = 'AutoTranscode' ";
 		query += " OR `value` = 'AutoRunUserJob1' ";
@@ -1124,6 +1124,7 @@ WelcomeAssistant.prototype.getSettings = function() {
 		query += " OR `value` = 'BackendServerIP' ";
 		query += " OR `value` = 'NetworkControlPort' ";
 		query += " OR `value` = 'BackendServerPort' ";
+		query += " UNION SELECT COUNT(*) AS `data`, 'music_songs' as `value`, 'all' AS `hostname` FROM `music_songs`";
 		query += " ;";
 		
 		
@@ -1186,11 +1187,11 @@ WelcomeAssistant.prototype.mysqlWelcomeSettingsResponse = function(response) {
 		
 		var settingsJson = JSON.parse(response);
 		
-		Mojo.Log.info("Plugin welcome settings JSON %j",settingsJson);
+		//Mojo.Log.info("Plugin welcome settings JSON %j",settingsJson);
 		
 		this.settings = cleanSettings(settingsJson);
 		
-		//Mojo.Log.info("Cleaned settings is %j",this.settings);
+		//Mojo.Log.error("Cleaned settings is %j",this.settings);
 		
 		WebMyth.prefsCookieObject.masterBackendPort = this.settings.MasterServerPort;
 		

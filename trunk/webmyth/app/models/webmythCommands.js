@@ -122,14 +122,13 @@ function defaultCookie() {
 		currentLogGroup: 'all',
 		manualDatabase: false,
 		databaseHost: '-',
-		usePlugin: 0,
+		usePlugin: 2,
 		protoVerSubmitted: false,
 		currentSearchPeopleSort: 'date-asc',
 		mythVer: 'TBD',
 		debug: false,
 		mythwebXml: false,
 		MythXML_key: "DefaultKey",
-		
 		
 	};
 	
@@ -2608,6 +2607,7 @@ var cleanSettings = function(fullList) {
 	settingsObject.UserJobDesc2 = "User Job 2";
 	settingsObject.UserJobDesc3 = "User Job 3";
 	settingsObject.UserJobDesc4 = "User Job 4";
+	settingsObject.music_songs = 1000;
 	
 	
 	for(i = 0; i < fullList.length; i++) {
@@ -2652,6 +2652,8 @@ var cleanSettings = function(fullList) {
 		} else if(s.value == "BackendServerPort") {
 			backendObject = { "hostname": s.hostname, "BackendServerPort": s.data };
 			backendPorts.push(backendObject);
+		} else if(s.value == "music_songs") {
+			settingsObject.music_songs = parseInt(s.data);
 		}
 		
 	}

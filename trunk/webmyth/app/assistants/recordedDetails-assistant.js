@@ -164,6 +164,10 @@ RecordedDetailsAssistant.prototype.setup = function() {
 		$('currently-recording-title').innerText = "";
 	}
 	
+	this.controller.listen(this.controller.get( "recorded-screenshot" ), Mojo.Event.tap, function(){ 
+		Mojo.Controller.stageController.pushScene("imageview", this.screenshotUrl) ;
+	}.bind(this));
+	
 	this.controller.listen(this.controller.get( "header-menu" ), Mojo.Event.tap, function(){this.controller.sceneScroller.mojo.revealTop();}.bind(this));
 	
 
@@ -698,7 +702,7 @@ RecordedDetailsAssistant.prototype.mysqlRecordedUndeleteResponse = function(resp
 
 RecordedDetailsAssistant.prototype.getPeople = function(event) {
 
-	Mojo.Log.error("Searching for people for program");
+	//Mojo.Log.error("Searching for people for program");
 	
 	
 	var query = 'SELECT UPPER(`credits`.`role`) AS `role`, ';
@@ -757,7 +761,7 @@ RecordedDetailsAssistant.prototype.peopleSearchFail = function(response) {
 
 RecordedDetailsAssistant.prototype.peopleSearchSuccess = function(response) {
     
-	Mojo.Log.error('Got Ajax response: %j', response.responseJSON);
+	//Mojo.Log.error('Got Ajax response: %j', response.responseJSON);
 		
 	//Update the list widget only if had data
 	if(response.responseJSON) {
