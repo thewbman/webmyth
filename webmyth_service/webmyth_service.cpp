@@ -273,6 +273,18 @@ void backgroundFrontendSocketResponse(){
 void cleanProtocolVersion(int protoVer){
 	
 	switch(protoVer) {
+		case 69:
+			mpSendMsgSize = sprintf(mpSendBuffer, "%s", "MYTH_PROTO_VERSION 69 63835135");
+		  break;
+		case 68:
+			mpSendMsgSize = sprintf(mpSendBuffer, "%s", "MYTH_PROTO_VERSION 68 90094EAD");
+		  break;
+		case 67:
+			mpSendMsgSize = sprintf(mpSendBuffer, "%s", "MYTH_PROTO_VERSION 67 0G0G0G0");
+		  break;
+		case 66:
+			mpSendMsgSize = sprintf(mpSendBuffer, "%s", "MYTH_PROTO_VERSION 66 0C0FFEE0");
+		  break;
 		case 65:
 			mpSendMsgSize = sprintf(mpSendBuffer, "%s", "MYTH_PROTO_VERSION 65 D2BB94C2");
 		  break;
@@ -724,6 +736,12 @@ void backgroundMysqlResponse(){
 	if(debug) syslog(LOG_INFO,"Returning MySQL data to function: %s",my_mysql_response_function);
 	
 	
+	free(my_mysql_host);
+	free(my_mysql_username);
+	free(my_mysql_password);
+	free(my_mysql_db);
+	activeMysql = false;
+	
     const char *params[1];
     params[0] = (const char*)finalResponse.c_str();
     //PDL_Err mjErr = PDL_CallJS("backgroundMysqlResponse", params, 1);
@@ -734,14 +752,9 @@ void backgroundMysqlResponse(){
     }
 	
 	
-	free(my_mysql_host);
-	free(my_mysql_username);
-	free(my_mysql_password);
-	free(my_mysql_db);
 	free(my_mysql_response_function);
 	
 	
-	activeMysql = false;
 	
 	return;
 
@@ -757,7 +770,7 @@ void backgroundMysqlExecute(){
 	MYSQL_FIELD *field;
 	
 	char output[1024];
-	int count_rows, i, j;
+	int count_rows, insert_id, i, j;
 	string tmpValue;
 	
 	string finalResponse;
@@ -816,7 +829,11 @@ void backgroundMysqlExecute(){
 	
 	if(debug) syslog(LOG_INFO,"Total rows affected: %d",count_rows);
 	
+	insert_id = mysql_insert_id(&mysql);
+	char insert_id_char[64]; 
+	sprintf(insert_id_char, "%d", insert_id);
 	
+	if(debug) syslog(LOG_INFO,"new insert_id: %d",insert_id);
 	
 	
 	if(debug) syslog(LOG_INFO,"mysql after JSON");
@@ -826,24 +843,24 @@ void backgroundMysqlExecute(){
 	
 	
 	
-    const char *params[1];
+	free(my_mysql_host);
+	free(my_mysql_username);
+	free(my_mysql_password);
+	free(my_mysql_db);
+	activeMysql = false;
+	
+    const char *params[2];
     params[0] = "Done executing";
+	//sprintf(params[1], "%d",  insert_id);
+	params[1] = (const char*)insert_id_char;
     //PDL_Err mjErr = PDL_CallJS("backgroundMysqlResponse", params, 1);
-    PDL_Err mjErr = PDL_CallJS(my_mysql_response_function, params, 1);
+    PDL_Err mjErr = PDL_CallJS(my_mysql_response_function, params, 2);
 	
     if ( mjErr != PDL_NOERROR ) {
         if(debug) syslog(LOG_INFO, "error: %s\0", PDL_GetError());
     }
 	
-	
-	free(my_mysql_host);
-	free(my_mysql_username);
-	free(my_mysql_password);
-	free(my_mysql_db);
 	free(my_mysql_response_function);
-	
-	
-	activeMysql = false;
 	
 	return;
 
@@ -1441,6 +1458,8 @@ PDL_bool mysqlExecute(PDL_JSParameters *params){
 int main(int argc, char** argv) {
     // open if(debug) syslog in case we want to print out some debugging
     openlog(PACKAGEID, 0, LOG_USER);
+	
+	debug = true;
 
     // Initialize the SDL library
     int result = SDL_Init(SDL_INIT_VIDEO);

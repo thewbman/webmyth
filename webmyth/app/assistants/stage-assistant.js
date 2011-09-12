@@ -61,7 +61,8 @@ WebMyth.appMenuModel = {
 			{label: $L("Tips"), command: 'do-helpTips'},
 			{label: $L("FAQs"), command: 'do-helpFAQs'},
 			{label: $L("Changelog"), command: 'do-helpChangelog'},
-			{label: $L("Bulletin"), command: 'do-helpBulletin'},
+			//{label: $L("Bulletin"), command: 'do-helpBulletin'},
+			{label: $L("Leave Review"), command: 'do-leaveReview'},
 			{label: $L("Email Developer"), command: 'do-helpEmail'}
 			]
 		}
@@ -361,6 +362,11 @@ StageAssistant.prototype.handleCommand = function(event) {
 			
        break;
 	   
+	  case 'do-leaveReview':
+			window.open("http://developer.palm.com/appredirect/?packageid="+Mojo.Controller.appInfo.id);
+			
+		break;
+		
 	  case 'do-helpEmail':
 			//Email
 			

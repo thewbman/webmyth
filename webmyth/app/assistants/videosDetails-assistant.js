@@ -100,14 +100,18 @@ VideosDetailsAssistant.prototype.setup = function() {
 	
 	if(WebMyth.prefsCookieObject.showVideoDetailsImage) {
 	
-		var imageBase = "http://"+WebMyth.prefsCookieObject.webserverUsername + ":" + WebMyth.prefsCookieObject.webserverPassword+"@";
-		imageBase += WebMyth.prefsCookieObject.webserverName+"/mythweb/pl/";
+		this.imageUrl = "http://"+WebMyth.prefsCookieObject.webserverUsername + ":" + WebMyth.prefsCookieObject.webserverPassword+"@";
+		this.imageUrl += WebMyth.prefsCookieObject.webserverName+"/mythweb/pl/";
+		this.imageUrl += "/coverart/"+this.videosObject.coverfile;
 	
-		$('videos-coverfile').innerHTML = '<img id="coverfile-img" class="videos-coverfile" src="'+imageBase+'/coverart/'+this.videosObject.coverfile+'" />';
+		$('videos-coverfile').innerHTML = '<img id="coverfile-img" class="videos-coverfile" src="'+this.imageUrl+'" />';
 	
 	}
 	
 	
+	this.controller.listen(this.controller.get( "videos-coverfile" ), Mojo.Event.tap, function(){
+		Mojo.Controller.stageController.pushScene("imageview", this.imageUrl) ;
+	}.bind(this));
 	
 	this.controller.listen(this.controller.get( "header-menu" ), Mojo.Event.tap, function(){this.controller.sceneScroller.mojo.revealTop();}.bind(this));
 	

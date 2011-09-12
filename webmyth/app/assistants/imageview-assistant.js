@@ -42,7 +42,7 @@ ImageviewAssistant.prototype.setup = function() {
 ImageviewAssistant.prototype.activate = function(event) {
 
 	$('myScreenshot').mojo.centerUrlProvided(this.imageUrl);
-	$('myScreenshot').mojo.manualsize('500','320');
+	//$('myScreenshot').mojo.manualsize('500','320');
 
 };
 

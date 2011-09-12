@@ -169,7 +169,7 @@ MusicListAssistant.prototype.handleCommand = function(event) {
 	 if(event.type == Mojo.Event.command) {
 		myCommand = event.command.substring(0,7);
 		mySelection = event.command.substring(8);
-		Mojo.Log.error("command: "+myCommand+" host: "+mySelection);
+		//Mojo.Log.error("command: "+myCommand+" host: "+mySelection);
 
 		switch(myCommand) {
 		  case 'go-sort':		//sort
@@ -286,9 +286,20 @@ MusicListAssistant.prototype.togglePlaylistsDrawer = function() {
 MusicListAssistant.prototype.getMusic = function(event) {
 
 	//Update list from webmyth python script
-	Mojo.Log.error('Starting music data gathering');
+	//Mojo.Log.error('Starting music data gathering');
 	
 	this.controller.sceneScroller.mojo.revealTop();
+	
+	this.resultList.clear();
+	this.fullResultList.clear();
+	
+	this.getSomeMusic();
+	
+}
+
+
+MusicListAssistant.prototype.getSomeMusic = function(event) {
+
 	
 	//var requestUrl = "http://"+WebMyth.prefsCookieObject.webserverName+"/"+WebMyth.prefsCookieObject.webmythPythonFile;
 	//requestUrl += "?op=getMusic";	
@@ -304,6 +315,9 @@ MusicListAssistant.prototype.getMusic = function(event) {
 	query += " LEFT JOIN music_artists ON music_songs.artist_id = music_artists.artist_id "
 	query += " LEFT JOIN music_albums ON music_songs.album_id = music_albums.album_id ";
 	query += " LEFT JOIN music_albumart ON music_songs.directory_id = music_albumart.directory_id ";
+	query += " GROUP BY song_id ";
+	query += " LIMIT "+this.fullResultList.length+",2000 ";
+	query += " ; ";
 	
 	
 	
@@ -313,7 +327,7 @@ MusicListAssistant.prototype.getMusic = function(event) {
 	
 		var response1 = $('webmyth_service_id').mysqlCommand(WebMyth.prefsCookieObject.databaseHost,WebMyth.prefsCookieObject.databaseUsername,WebMyth.prefsCookieObject.databasePassword,WebMyth.prefsCookieObject.databaseName,WebMyth.prefsCookieObject.databasePort,"mysqlMusicListResponse",query.substring(0,250),query.substring(250,500),query.substring(500,750),query.substring(750,1000),query.substring(1000,1250),query.substring(1250,1500),query.substring(1500,1750),query.substring(1750,2000),query.substring(2000,2250),query.substring(2250,2500));
 		
-		Mojo.Log.error("MusicList plugin response "+response1);
+		//Mojo.Log.error("MusicList plugin response "+response1);
 		
 	} else {
 	
@@ -365,25 +379,33 @@ MusicListAssistant.prototype.readMusicSuccess = function(response) {
 	
 		
 	//Update the list widget
-	this.fullResultList.clear();
-	Object.extend(this.fullResultList,cleanMusic(response.responseJSON));
+	//Object.extend(this.fullResultList,cleanMusic(response.responseJSON));
+	this.fullResultList = this.fullResultList.concat(cleanMusic(response.responseJSON));
 
-	
-	this.finishedReadingMusic();
+	if(this.fullResultList.length < WebMyth.settings.music_songs) {
+		$('spinner-text').innerHTML = $L("Loading")+"...<br />("+$L("Loaded "+this.fullResultList.length+" of "+WebMyth.settings.music_songs+" songs")+")";
+		this.controller.window.setTimeout(this.getSomeMusic.bind(this), 50);
+	} else {
+		this.finishedReadingMusic();
+	}
 	
 };
 
 MusicListAssistant.prototype.mysqlMusicListResponse = function(response) {
 
-	Mojo.Log.error("Got musicList plugin response: "+response);
+	//Mojo.Log.error("Got musicList plugin response: "+response);
 	
 		
 	//Update the list widget
-	this.fullResultList.clear();
-	Object.extend(this.fullResultList,cleanMusic(JSON.parse(response)));
+	//Object.extend(this.fullResultList,cleanMusic(response.responseJSON));
+	this.fullResultList = this.fullResultList.concat(cleanMusic(JSON.parse(response)));
 
-	
-	this.finishedReadingMusic();
+	if(this.fullResultList.length < WebMyth.settings.music_songs) {
+		$('spinner-text').innerHTML = $L("Loading")+"...<br />("+$L("Loaded "+this.fullResultList.length+" of "+WebMyth.settings.music_songs+" songs")+")";
+		this.controller.window.setTimeout(this.getSomeMusic.bind(this), 50);
+	} else {
+		this.finishedReadingMusic();
+	}
 	
 };
 
@@ -417,7 +439,7 @@ MusicListAssistant.prototype.getMusicPlaylists = function(event) {
 	
 		var response1 = $('webmyth_service_id').mysqlCommand(WebMyth.prefsCookieObject.databaseHost,WebMyth.prefsCookieObject.databaseUsername,WebMyth.prefsCookieObject.databasePassword,WebMyth.prefsCookieObject.databaseName,WebMyth.prefsCookieObject.databasePort,"mysqlMusicPlaylistResponse",query.substring(0,250),query.substring(250,500),query.substring(500,750),query.substring(750,1000),query.substring(1000,1250),query.substring(1250,1500),query.substring(1500,1750),query.substring(1750,2000),query.substring(2000,2250),query.substring(2250,2500));
 		
-		Mojo.Log.error("MusicList playlists plugin response "+response1);
+		//Mojo.Log.error("MusicList playlists plugin response "+response1);
 		
 	} else {
 	
@@ -466,7 +488,7 @@ MusicListAssistant.prototype.readMusicPlaylistsSuccess = function(response) {
 
 MusicListAssistant.prototype.mysqlMusicPlaylistResponse = function(response) {
     
-	Mojo.Log.error("Got musicList playlists plugin response: "+response);
+	//Mojo.Log.error("Got musicList playlists plugin response: "+response);
 	
 	
 	this.playlistsList.clear();

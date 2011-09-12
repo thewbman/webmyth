@@ -687,8 +687,18 @@ body.palm-dark {
 }
 
 .imageview-scene .myImage {
-	-webkit-transform: rotate(90deg);
-	
+	height: 400px;
+	width: 320px;
+	background: black;
+	border-bottom: solid 80px black;
+}
+
+.height-480 .imageview-scene .myImage {
+	border-top-asdf: solid 150px black;
+	height: 480px;
+	width: 320px;
+	background: black;
+	border-bottom: solid 80px black;
 }
 
 
