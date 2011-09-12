@@ -1,0 +1,2 @@
+See changelog scene in App or in the app/views/changelog folder.
+
