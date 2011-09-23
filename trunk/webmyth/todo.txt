@@ -29,7 +29,7 @@ Todo - planned new features and updates:
  
  - daylight savings?
  
- - new XML - https://github.com/MythTV/mythtv/commit/856b61b5378c4b6d8bd60638f86606e7603654ef
+ - new XML - https://github.com/MythTV/mythtv/commit/856b61b5378c4b6d8bd60638f86606e7603654ef  use DBschemever >1269
  
  
  
