@@ -1,0 +1,37 @@
+### Q: Do I really need to install the script file? ###
+
+A: Yes.  Currently the SDK provided by Palm does not allow for the direct telnet, MySQL and zeroconf services needed for this program.  WebOS 2.0 should fill that gap, but for now the script must be installed for WebMyth to operate correctly
+
+### Q: Why are there 0.23/python/MythVideo requirements? ###
+
+A: The server script that this app uses relies on the python bindings included with MythTV.  By using the actual python bindings the script itself can be simpler and frankly easier for me to write.  But unfortunately the python bindings for MythTV was drastically reworked for MythTV for 0.23, making the script not backwards compatible with MythTV 0.22.  The MythVideo requirement is somewhat arbitrary and you can comment out the two lines in the script that include the function call "MythVideo(...)" if you do not have MythVideo installed on your system.
+
+### Q: Does this app work with MythTV 0.24? ###
+A: Hopefully.  I don't have a 0.24 system to test it on.  If someone does have a 0.24 setup please let me know if the app works for you.
+
+### Q: The recordings and frontend searches are not working ###
+
+A: First double check you installed the script file is installed on a local web server.  And that you changed the hardcoded to yoru specific system.  You can get the variables you need by looking at /etc/mythtv/mysql.txt on a functioning frontend or backend.  You can see if it is accessible by trying to view it from a web browser (i.e http://my-server/cgi-bin/webmyth.py?op=getHosts).  If your browser tries to download a file then that much is working.  If you get a 500 error from your browser you can try looking at the apache error log ("/var/log/apache2/error.log") for information.
+
+### Q: WebMyth can't seem to talk to a remote frontend even though I know it is a valid frontend ###
+
+A: This might be an issue that the server where the script lives cannot resolve the frontend's system name.  You probably need to add it manually to the server's /etc/hosts file.  The webmyth.py script does not seem to be able to use IP addresses instead of system names.
+
+### Q: Can I use WebMyth remotely over the cell network or another WiFi network? ###
+
+A: For the most part, yes.  You will have to know the IP address assigned to you by your internet provider (or setup a domain name that resolves to your IP address).  Then on your router you should forward ports 80 (webserver) and 6544 (MythTV backend XML) to the correct local IP address(es).  If these ports are blocked by your ISP or the netowrk connection you are using you are out of luck.  _Note: Manual entry of the master backend is only supported in release 0.2.4 and higher, so some functions may not work correctly if you have an older version.  Future app versions will be able to remote control frontends directly and then the remote control port (6546) would also need to be forwarded._
+
+### Q: When I try to setup a recording, why do I just get directed to the mobile Mythweb site where I can't setup or edit a recording? ###
+
+A: You will need to reset the template in mythweb to the default template in order to create or edit a recording.  You can find the link at the bottom of the main mythweb mobile page.  (e.g http://my-server/mythweb/ )
+
+### Q: I don't like the way the app looks, will it get better? ###
+
+A: Hopefully.  I am not much of a programmer and even less of a designer to for the most part stuff just has to be good enough for me be OK with it.  If you have any design experience or even just some random idea feel free to email me or add a comment to this page.
+
+### Q: Why doesn't video playback work for all videos? ###
+A: I haven't found a way to reliably play back video files from remote storage directories.  Hopefully playback of video files that are not in sub-directories of your Videos storage group will work remotely, but if the video is in a sub-directory the app gets the frontend to try and play the file locally.  For now I recommend mounting the remote Videos storage group locally via NFS for playback.  (And I know having MythTV show video information during playback is not working.)
+
+### Q: What if I have some other question and/or suggestion? ###
+
+A.  Email the developer at [webmyth.help@gmail.com](mailto:webmyth.help@gmail.com).
